@@ -14,6 +14,10 @@ namespace Monetizr.Campaigns
         public float delayTime = 5f;
         public float moveTime = 1f;
         public RectTransform rectTransform;
+        public Animator scaleAnimator;
+        public Text earnText;
+        public Image rewardImage;
+        public Text rewardText;
 
         private int state = 0;
         private float progress = 0f;
@@ -21,9 +25,14 @@ namespace Monetizr.Campaigns
         private float delayTimeEnd = 0f;
         private float speed = 1f;
         private Rect uvRect = new Rect(0, 0.5f, 1.0f, 0.5f);
+        private bool hasTextureAnimation = true;
+        private bool hasAnimation = true;
 
         void Update()
         {
+            if (!hasTextureAnimation)
+                return;
+
             switch (state)
             {
                 case 0:
@@ -69,10 +78,54 @@ namespace Monetizr.Campaigns
 
             m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
+            var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
+
+            if (campaign.GetParam("teaser_no_texture_animation") == "true")
+            {
+                hasTextureAnimation = false;
+            }
+
+            if(campaign.GetParam("teaser_no_animation") == "true")
+            {
+                hasAnimation = false;
+            }
+
+            bool showReward = false;
+
+            if(campaign.GetParam("show_reward_on_teaser") == "true")
+            {
+                hasTextureAnimation = false;
+                showReward = true;
+            }
+
+            if (!hasTextureAnimation)
+            {
+                teaserImage.uvRect = new Rect(0, 0, 1, 1);
+            }
+
+            if (!hasAnimation)
+            {
+                scaleAnimator.speed = 0;
+                scaleAnimator.enabled = false;
+            }
+
+            earnText.gameObject.SetActive(showReward);
+            rewardImage.gameObject.SetActive(showReward);
+            rewardText.gameObject.SetActive(showReward);
+
+            if (!showReward)
+            {
+                teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(challengeId, AssetsType.TinyTeaserTexture);
+            }
+            else
+            {
+                rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+                rewardText.text = $"+{m.reward}";
+            }
+
             Log.PrintWarning($"{challengeId} {m}");
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
 
-            teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(challengeId, AssetsType.TinyTeaserTexture);
         }
 
         internal override void FinalizePanel(PanelId id)

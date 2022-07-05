@@ -37,6 +37,15 @@ namespace Monetizr.Campaigns
         public string dar_tag;
         public List<Reward> rewards = new List<Reward>();
         public List<Asset> assets = new List<Asset>();
+        [System.NonSerialized] public Dictionary<string, string> additional_params;
+
+        public string GetParam(string p)
+        {
+            if (!additional_params.ContainsKey(p))
+                return "";
+
+            return additional_params[p];
+        }
 
         [System.Serializable]
         public class Reward

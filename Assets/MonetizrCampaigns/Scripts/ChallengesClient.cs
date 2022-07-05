@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -80,6 +81,14 @@ namespace Monetizr.Campaigns
 
                 //analytics.Update(new List<Challenge>(challenges.challenges));
 
+                foreach (var ch in challenges.challenges)
+                {
+                    ch.additional_params = ParseContentString(ch.content);
+
+                    foreach(var v in ch.additional_params)
+                        Debug.Log($"!!!! {v.Key}={v.Value}");
+                }
+                
                 return new List<Challenge>(challenges.challenges);
             }
             else
@@ -87,6 +96,25 @@ namespace Monetizr.Campaigns
                 return null;
             }
 
+        }
+
+        private Dictionary<string, string> ParseContentString(string content)
+        {
+            content.Replace(@"\", string.Empty);
+            content.Replace(@" ", string.Empty);
+
+            //if (content.Contains('{'))
+            //{
+            //    return JsonUtility.FromJson<Dictionary<string, string>>(content);
+            //}
+
+            string[] eq = new[] { "=",":"};
+            string[] seps = new[] { "<p>", "</p>", "\r\n", "&nbsp;","{","}",","};
+
+            //<p>show_teaser_button=false</p>\r\n\r\n<p>teaser_type=button</p>\r\n\r\n<p>show_campaigns_notification=true</p>\r\n\r\n<p>&nbsp;</p>
+            return content.Split(seps, StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => v.Split(eq, StringSplitOptions.RemoveEmptyEntries))
+                .ToDictionary(v => v.First().Trim('"'), v => v.Last().Trim('"'));
         }
 
         /// <summary>
