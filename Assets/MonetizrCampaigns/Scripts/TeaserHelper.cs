@@ -7,11 +7,13 @@ public class TeaserHelper : MonoBehaviour
 {
     void OnEnable()
     {
-        MonetizrManager.ShowTinyMenuTeaser();
+        MonetizrManager.OnMainMenuShow();
+        //MonetizrManager.ShowTinyMenuTeaser();
     }
 
     void OnDisable()
     {
-        MonetizrManager.HideTinyMenuTeaser();
+        MonetizrManager.OnMainMenuHide();
+        //MonetizrManager.HideTinyMenuTeaser();
     }
 }

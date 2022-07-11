@@ -274,7 +274,7 @@ namespace Monetizr.Campaigns
                     new MissionDescription{ missionType = MissionType.MutiplyReward, reward = 500, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.MutiplyReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.TwitterReward, reward = 1000, rewardCurrency = RewardType.Coins },
-                    new MissionDescription{ missionType = MissionType.GiveawayWithMail, reward = 20, rewardCurrency = RewardType.Coins },
+                    new MissionDescription{ missionType = MissionType.VideoWithEmailGiveaway, reward = 20, rewardCurrency = RewardType.Coins },
                 };
             }
 
@@ -366,7 +366,8 @@ namespace Monetizr.Campaigns
                 gameOnInitSuccess?.Invoke();
 
                 if (tinyTeaserCanBeVisible)
-                    ShowTinyMenuTeaser(null);
+                    //ShowTinyMenuTeaser(null);
+                    OnMainMenuShow();
 
             };
 
@@ -574,6 +575,16 @@ namespace Monetizr.Campaigns
 
         public static void ShowStartupNotification(Action<bool> onComplete)
         {
+            Debug.LogWarning("!!!!");
+
+            if (instance == null || !instance.HasChallengesAndActive())
+            {
+                onComplete?.Invoke(false);
+                return;
+            }
+
+            Debug.LogWarning("ShowStartupNotification");
+
             Mission sponsoredMsns = instance.missionsManager.missions.Find((Mission item) => { return item.isSponsored; });
 
             if (sponsoredMsns == null)
@@ -581,6 +592,15 @@ namespace Monetizr.Campaigns
                 onComplete?.Invoke(false);
                 return;
             }
+
+            var campaign = MonetizrManager.Instance.GetCampaign(sponsoredMsns.campaignId);
+
+            if (campaign.GetParam("no_campaigns_notification") == "true")
+            {
+                onComplete?.Invoke(false);
+                return;
+            }
+
 
             FillInfo(sponsoredMsns);
 
@@ -658,6 +678,13 @@ namespace Monetizr.Campaigns
                 //m.AddNormalCurrencyAction.Invoke(m.reward);
 
                 //gameRewards[m.rewardType].AddCurrencyAction(m.reward);
+            }
+            if (m.type == MissionType.VideoWithEmailGiveaway)
+            {
+                //ShowRewardCenter(null);
+                //m.AddPremiumCurrencyAction.Invoke(m.reward);
+
+                gameRewards[m.rewardType].AddCurrencyAction(m.reward);
             }
             else if (m.type == MissionType.SurveyReward)
             {
@@ -918,9 +945,21 @@ namespace Monetizr.Campaigns
             TryShowSurveyNotification(onComplete);
         }
 
+        public static void OnMainMenuShow()
+        {
+             ShowStartupNotification((bool _) => { ShowTinyMenuTeaser(); });
+        }
+
+        public static void OnMainMenuHide()
+        {
+            HideTinyMenuTeaser();
+
+            //ShowStartupNotification((bool _) => {  });
+        }
+
         public static void ShowTinyMenuTeaser(Action UpdateGameUI = null)
         {
-            Log.Print("zzz");
+            Log.Print("ShowTinyMenuTeaser");
 
             //Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
             if (instance == null)
@@ -945,7 +984,12 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI);
+            var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
+
+            if (campaign.GetParam("hide_teaser_button") != "true")
+            {
+                instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI);
+            }
         }
 
         public static void HideTinyMenuTeaser()
@@ -1043,7 +1087,7 @@ namespace Monetizr.Campaigns
             string fname = Path.GetFileName(asset.url);
             string fpath = path + "/" + fname;
 
-            //Log.Print(fname);
+            Debug.Log(fpath);
 
             byte[] data = null;
 

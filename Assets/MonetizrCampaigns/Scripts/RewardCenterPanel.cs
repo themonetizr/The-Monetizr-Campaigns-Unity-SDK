@@ -158,10 +158,16 @@ namespace Monetizr.Campaigns
             //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
             m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
-            m.claimButtonText = "Watch video";           
+            m.claimButtonText = "Watch video";
+
+            Action<bool> onVideoComplete = (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped, AddNewUIMissions); };
 
             //show video, then claim rewards if it's completed
-            m.onClaimButtonPress = () => { OnVideoPlayPress(campaignId, m); };
+            m.onClaimButtonPress = () =>
+            {
+                OnVideoPlayPress(campaignId, m, onVideoComplete);
+
+            };
 
             //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
 
@@ -421,6 +427,115 @@ namespace Monetizr.Campaigns
                 MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
+        private void AddVideoGiveawayChallenge(MonetizrRewardedItem item, Mission m, int missionId)
+        {
+            string campaignId = m.campaignId;
+
+            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
+
+            string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
+
+
+            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
+            {
+                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
+            }
+
+            var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
+
+            var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
+
+            bool needToPlayVideo = !(campaign.GetParam("videomail_giveaway_mission_without_video") == "true");
+
+
+            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
+            m.missionTitle = $"{brandName} giveaway";
+
+            if(needToPlayVideo)
+                m.missionDescription = $"Watch video and get {m.reward} {rewardTitle} from {brandName}";
+            else
+                m.missionDescription = $"Get {m.reward} {rewardTitle} from {brandName}";
+
+            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
+
+            m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
+
+            m.brandName = brandName;
+            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
+            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
+            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
+
+
+            m.claimButtonText = needToPlayVideo ? "Watch video!" : "Claim reward!";
+
+
+            Action<bool> onComplete = (bool isSkipped) =>
+            {
+                OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
+            };
+
+            Action<bool> onVideoComplete = (bool isVideoSkipped) => {
+                /*OnClaimRewardComplete(m, false);*/
+
+                if (MonetizrManager.claimForSkippedCampaigns)
+                    isVideoSkipped = false;
+
+                if (isVideoSkipped)
+                    return;
+
+                MonetizrManager.ShowEnterEmailPanel(
+                    (bool isMailSkipped) =>
+                    {
+                        if (isMailSkipped)
+                            return;
+                        
+                        MonetizrManager.WaitForEndRequestAndNotify(onComplete, m);
+
+                    },
+                    m,
+                    PanelId.GiveawayEmailEnterNotification);
+
+            };
+
+            //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
+
+            //bool needToPlayVideo = !(campaign.GetParam("videomail_giveaway_mission_without_video") == "true");
+
+                //Action<bool> onVideoComplete = (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped, AddNewUIMissions); };
+
+                //show video, then claim rewards if it's completed
+            m.onClaimButtonPress = () =>
+            {
+                if (needToPlayVideo)
+                {
+                    OnVideoPlayPress(campaignId, m, onVideoComplete);
+                }
+                else
+                {
+                    onVideoComplete(false);
+                }
+
+            };
+
+            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
+
+            //var item = go.GetComponent<MonetizrRewardedItem>();
+
+            if (missionId != 0)
+                m.brandBanner = null;
+
+            Log.Print(m.missionTitle);
+
+            item.showGift = true;
+            item.currectProgress = getCurrencyFunc() - m.startMoney;
+            item.maxProgress = m.reward;
+
+            item.UpdateWithDescription(this, m);
+
+            if (m.brandBanner != null)
+                MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
+        }
+
 
         private void AddSponsoredChallenge(Mission m, int missionId)
         {
@@ -436,6 +551,7 @@ namespace Monetizr.Campaigns
                 case MissionType.SurveyReward: AddSurveyChallenge(item, m, missionId); break;
                 case MissionType.TwitterReward: AddTwitterChallenge(item, m, missionId); break;
                 case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
+                case MissionType.VideoWithEmailGiveaway: AddVideoGiveawayChallenge(item, m, missionId); break;
             }
 
         }
@@ -494,7 +610,7 @@ namespace Monetizr.Campaigns
             }
         }
 
-        public void OnVideoPlayPress(string campaignId, Mission m)
+        public void OnVideoPlayPress(string campaignId, Mission m, Action<bool> onComplete)
         {
             MonetizrManager.Analytics.TrackEvent("Claim button press",m);
 
@@ -502,7 +618,7 @@ namespace Monetizr.Campaigns
 
             if (htmlPath != null)
             {
-                MonetizrManager.ShowHTML5((bool isSkipped) => { OnClaimRewardComplete(m, isSkipped, AddNewUIMissions); }, m);
+                MonetizrManager.ShowHTML5((bool isSkipped) => { onComplete(isSkipped); }, m);
             }
             else
             {
@@ -510,7 +626,7 @@ namespace Monetizr.Campaigns
 
                 //MonetizrManager._PlayVideo(videoPath, (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped); });
 
-                MonetizrManager.ShowWebVideo((bool isSkipped) => { OnClaimRewardComplete(m, isSkipped, AddNewUIMissions); }, m);
+                MonetizrManager.ShowWebVideo((bool isSkipped) => { onComplete(isSkipped); }, m);
             }
         }
 

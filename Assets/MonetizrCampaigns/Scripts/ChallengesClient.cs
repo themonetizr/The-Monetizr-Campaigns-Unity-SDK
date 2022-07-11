@@ -98,23 +98,38 @@ namespace Monetizr.Campaigns
 
         }
 
+        //Unity FromJson doesn't support Dictionaries
         private Dictionary<string, string> ParseContentString(string content)
         {
-            content.Replace(@"\", string.Empty);
-            content.Replace(@" ", string.Empty);
+            /*content = content.Replace(@"\", string.Empty);
+            //content.Replace(@" ", string.Empty);
 
+            content = content.Replace("{", string.Empty);
+            content = content.Replace("}", string.Empty);
+            content = content.Replace(" ", string.Empty);
+            content = content.Replace("\"", string.Empty);*/
+
+            var replacements = new[] { @"\","{", "}"," ", "\"" }; // "\\{} \"";
+            var output = new StringBuilder(content);
+            foreach (var r in replacements)
+                output.Replace(r, String.Empty);
+
+            content = output.ToString();
+
+            Debug.LogWarning("!!!!: " + content);
             //if (content.Contains('{'))
             //{
-            //    return JsonUtility.FromJson<Dictionary<string, string>>(content);
+
+             //   return JsonConvert.JsonUtility.FromJson<Dictionary<string, string>>(content);
             //}
 
             string[] eq = new[] { "=",":"};
-            string[] seps = new[] { "<p>", "</p>", "\r\n", "&nbsp;","{","}",","};
+            string[] seps = new[] { ","};
 
             //<p>show_teaser_button=false</p>\r\n\r\n<p>teaser_type=button</p>\r\n\r\n<p>show_campaigns_notification=true</p>\r\n\r\n<p>&nbsp;</p>
             return content.Split(seps, StringSplitOptions.RemoveEmptyEntries)
                 .Select(v => v.Split(eq, StringSplitOptions.RemoveEmptyEntries))
-                .ToDictionary(v => v.First().Trim('"'), v => v.Last().Trim('"'));
+                .ToDictionary(v => v.First(), v => v.Last());
         }
 
         /// <summary>

@@ -221,6 +221,37 @@ namespace Monetizr.Campaigns
             };
         }
 
+        Mission prepareVideoGiveawayMission(MissionType mt, string campaign, int reward)
+        {
+            bool hasHtml = MonetizrManager.Instance.HasAsset(campaign, AssetsType.Html5PathString);
+            bool hasVideo = MonetizrManager.Instance.HasAsset(campaign, AssetsType.VideoFilePathString);
+
+            if (!hasHtml && !hasVideo)
+            {
+                return null;
+            }
+
+            //if no claimable reward in campaign - no give away missions
+            var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((Challenge.Reward obj) => { return obj.claimable == true; });
+
+            if (claimableReward == null)
+                return null;
+
+            RewardType rt = RewardType.Coins;
+
+            return new Mission()
+            {
+                rewardType = rt,
+                startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
+                type = mt,
+                reward = reward,
+                progress = 1.0f,
+                isDisabled = false,
+                activateTime = DateTime.Now,
+                deactivateTime = DateTime.MaxValue,
+            };
+        }
+
         //TODO: make separate classes for each mission type
         Mission prepareNewMission(int id, MissionType mt, string campaign, int reward)
         {
@@ -233,6 +264,7 @@ namespace Monetizr.Campaigns
                 case MissionType.SurveyReward: m = prepareSurveyMission(mt, campaign, reward); break;
                 case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign, reward); break;
                 case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
+                case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign, reward); break;
             }
 
             if (m == null)

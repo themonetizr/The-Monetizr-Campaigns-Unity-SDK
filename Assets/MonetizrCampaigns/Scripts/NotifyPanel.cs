@@ -37,7 +37,7 @@ namespace Monetizr.Campaigns
             switch (id)
             {
                 case PanelId.CongratsNotification:
-                    if (m.type == MissionType.GiveawayWithMail)
+                    if (m.type == MissionType.GiveawayWithMail || m.type == MissionType.VideoWithEmailGiveaway)
                         PrepareGiveawayCongratsPanel(m);
                     else
                         PrepareCongratsPanel(m);
@@ -103,6 +103,10 @@ namespace Monetizr.Campaigns
                 rewardIcon = customCoin;
             }
 
+            if (m.brandLogo != null)
+                logo.sprite = m.brandLogo;
+            else
+                logo.gameObject.SetActive(false);
 
             title.text = $"{brandTitle} video";
             text.text = $"<color=#F05627>Watch video</color> by {brandTitle} to earn <color=#F05627>{m.reward} {rewardTitle}</color>";

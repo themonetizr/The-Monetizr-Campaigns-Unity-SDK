@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define UNI_WEB_VIEW
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,13 +8,15 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
+//using UniWebView;
+
 namespace Monetizr.Campaigns
 {
     internal class WebViewPanel : PanelController
     {
         public TextAsset closeButtonImageAsset;
         public Button closeButton;
-#if UniWebView
+#if UNI_WEB_VIEW
         private UniWebView webView;
 #endif
         private string webUrl;
@@ -24,7 +28,7 @@ namespace Monetizr.Campaigns
 
 
         //private Action onComplete;
-#if UniWebView
+#if UNI_WEB_VIEW
         internal void PrepareWebViewComponent(bool fullScreen)
         {
             UniWebView.SetAllowAutoPlay(true);
@@ -326,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-#if UniWebView
+#if UNI_WEB_VIEW
             this.onComplete = onComplete;
             panelId = id;
             currentMissionDesc = m;
@@ -357,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function(){{
         }
 
 
-#if UniWebView
+#if UNI_WEB_VIEW
         void OnMessageReceived(UniWebView webView, UniWebViewMessage message)
         {
             Debug.Log($"OnMessageReceived: {message.RawMessage} {message.Args.ToString()}");
