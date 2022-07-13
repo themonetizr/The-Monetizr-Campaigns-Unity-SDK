@@ -119,6 +119,10 @@ namespace Monetizr.Campaigns
                 return;
             }
 
+            Log.Print($"Adding asset {asset} into {t}");
+
+            MonetizrManager.HoldResource(asset);
+
             assets.Add(t, asset);
         }
 
@@ -196,6 +200,8 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
+        public static readonly string SDKVersion = "0.0.3";
+
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
         internal static bool claimForSkippedCampaigns;
@@ -227,7 +233,24 @@ namespace Monetizr.Campaigns
 
         internal MissionsManager missionsManager = null;
 
-        internal class GameReward
+        //Hold resources to prevent automatic unload
+        public static void HoldResource(object o)
+        {
+            //if(o.GetType().IsSubclassOf(typeof(UnityEngine.Object)))
+            if (o is UnityEngine.Object)
+            {
+                UnityEngine.Object uo = (UnityEngine.Object)o;
+
+                if (!Instance.holdResources.Contains(uo))
+                {
+                    Instance.holdResources.Add(uo);
+                }
+            }
+        }
+
+        public List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
+
+        internal class GameReward   
         {
             internal Sprite icon;
             internal string title;
@@ -988,7 +1011,9 @@ namespace Monetizr.Campaigns
 
             if (campaign.GetParam("hide_teaser_button") != "true")
             {
-                instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI);
+                int uiVersion = campaign.GetIntParam("design_version");
+
+                instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion);
             }
         }
 
@@ -1133,16 +1158,20 @@ namespace Monetizr.Campaigns
             if (texture != AssetsType.Unknown)
                 ech.SetAsset<Texture2D>(texture, tex);
 
+            Sprite s = null;
             if (sprite != AssetsType.Unknown)
             {
-                Sprite s = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+                s = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
 
                 ech.SetAsset<Sprite>(sprite, s);
             }
 
             ech.SetAssetUrl(sprite,asset.url);
 
-            Debug.Log($"{texture} {sprite} okay");
+            bool texStatus = tex != null;
+            bool spriteStatus = s != null;
+
+            Debug.Log($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.challenge.id}");
         }
 
         private async Task PreloadAssetToCache(ChallengeExtention ech, Challenge.Asset asset, /*AssetsType urlString,*/ AssetsType fileString, bool required = true)

@@ -58,6 +58,8 @@ namespace Monetizr.Campaigns
                     //{"age", playerInfo.age.ToString()},
                     //{"game-type", playerInfo.gameType},
                     {"player-id", analytics.GetUserId()},
+                    { "app-bundle-id", Application.identifier },
+                    { "sdk-version", MonetizrManager.SDKVersion }
                 }
             };
 
@@ -148,6 +150,9 @@ namespace Monetizr.Campaigns
                     //{"game-type", playerInfo.gameType},
                     {"player-id", analytics.GetUserId()},
                     //{"duration", analytics.GetElapsedTime(challenge).ToString()}
+
+                    { "app-bundle-id", Application.identifier },
+                    { "sdk-version", MonetizrManager.SDKVersion }
                 }
             };
 

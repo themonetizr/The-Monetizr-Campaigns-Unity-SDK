@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 //"id" vs "campaign_id"?
 //application_id should be bundle id? but maybe not
@@ -45,6 +46,22 @@ namespace Monetizr.Campaigns
                 return "";
 
             return additional_params[p];
+        }
+
+        public int GetIntParam(string p)
+        {
+            if (!additional_params.ContainsKey(p))
+                return 0;
+
+            int result = 0;
+            string val = additional_params[p];
+
+            if (!Int32.TryParse(val, out result))
+            {
+                return 0;
+            }
+
+            return result;
         }
 
         [System.Serializable]

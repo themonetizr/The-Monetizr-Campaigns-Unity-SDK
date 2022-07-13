@@ -23,6 +23,7 @@ namespace Monetizr.Campaigns
         private State state;
         public UIController uiController;
         protected bool isSkipped = false;
+        public int uiVersion = 0;
 
         
 

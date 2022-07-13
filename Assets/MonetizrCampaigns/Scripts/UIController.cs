@@ -135,20 +135,31 @@ namespace Monetizr.Campaigns
             panels.Remove(PanelId.TinyMenuTeaser);
         }
 
-        public void ShowTinyMenuTeaser(Vector2 screenPos, Action UpdateGameUI)
+        public void ShowTinyMenuTeaser(Vector2 screenPos, Action UpdateGameUI, int designVersion)
         {
-             MonetizrMenuTeaser teaser;
+             MonetizrMenuTeaser teaser;     
 
             if (!panels.ContainsKey(PanelId.TinyMenuTeaser))
             {
-                var obj = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrMenuTeaser") as GameObject, mainCanvas.transform);
+                string teaserPrefab = "MonetizrMenuTeaser";
+
+                if (designVersion == 2)
+                {
+                    teaserPrefab = "MonetizrMenuTeaser2";
+                    screenPos = Vector2.zero;
+                }
+
+
+                var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject, mainCanvas.transform);
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
+
+                teaser.uiVersion = designVersion;
                 panels.Add(PanelId.TinyMenuTeaser, teaser);
                 teaser.button.onClick.AddListener(() => {
                        MonetizrManager.ShowRewardCenter(UpdateGameUI);
                 });
 
-                if (screenPos != null)
+                if (screenPos != Vector2.zero)
                 {
                     teaser.rectTransform.anchoredPosition = screenPos;
                 }

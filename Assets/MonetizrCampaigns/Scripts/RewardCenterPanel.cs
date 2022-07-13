@@ -94,6 +94,8 @@ namespace Monetizr.Campaigns
 
             mainBanner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 
+            Debug.Log($">>>>>>>mainBanner.sprite={mainBanner.sprite}");
+
             amountOfItems = 0;
 
             foreach (var m in MonetizrManager.Instance.missionsManager.missions)
