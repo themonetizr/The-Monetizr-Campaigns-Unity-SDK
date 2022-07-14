@@ -105,10 +105,25 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                panel = GameObject.Instantiate<GameObject>(Resources.Load(prefab) as GameObject, mainCanvas.transform);
+                var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
+
+                int uiVersion = campaign.GetIntParam("design_version");
+
+                if (prefab == "MonetizrDebugPanel")
+                    uiVersion = 0;
+
+                if(uiVersion == 2)
+                {
+                    prefab += "2";
+                }
+
+                GameObject asset = Resources.Load(prefab) as GameObject;
+
+                panel = GameObject.Instantiate<GameObject>(asset, mainCanvas.transform);
                 ctrlPanel = panel.GetComponent<PanelController>();
 
                 ctrlPanel.uiController = this;
+                ctrlPanel.uiVersion = uiVersion;
 
                 ctrlPanel.PreparePanel(id, complete, m);
 

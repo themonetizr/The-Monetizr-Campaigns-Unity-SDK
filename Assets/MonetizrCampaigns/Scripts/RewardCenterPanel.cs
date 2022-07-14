@@ -46,6 +46,14 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            string uiItemPrefab = "MonetizrRewardedItem";
+
+            if (uiVersion == 2)
+                uiItemPrefab = "MonetizrRewardedItem2";
+
+            itemUI = (Resources.Load(uiItemPrefab) as GameObject).GetComponent<MonetizrRewardedItem>();
+            
+
             hasSponsoredChallenges = false;
 
             //this.missionsDescriptions = missionsDescriptions;

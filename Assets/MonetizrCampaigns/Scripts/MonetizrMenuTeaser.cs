@@ -74,6 +74,73 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            switch(uiVersion)
+            {
+                case 2: PreparePanelVersion2(id, onComplete, m); break;
+                default:
+                    PreparePanelDefaultVersion(id, onComplete, m); break;
+            }
+        }
+
+        internal void PreparePanelVersion2(PanelId id, Action<bool> onComplete, Mission m)
+        {
+            var challengeId = MonetizrManager.Instance.GetActiveChallenge();
+
+            m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+
+            var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
+
+            if (campaign.GetParam("teaser_no_texture_animation") == "true")
+            {
+                hasTextureAnimation = false;
+            }
+
+            if (campaign.GetParam("teaser_no_animation") == "true")
+            {
+                hasAnimation = false;
+            }
+
+            bool showReward = false;
+
+            if (campaign.GetParam("show_reward_on_teaser") == "true")
+            {
+                hasTextureAnimation = false;
+                showReward = true;
+            }
+
+            if (!hasTextureAnimation)
+            {
+                teaserImage.uvRect = new Rect(0, 0, 1, 1);
+            }
+
+            if (!hasAnimation)
+            {
+                scaleAnimator.speed = 0;
+                scaleAnimator.enabled = false;
+            }
+
+            earnText.gameObject.SetActive(true);
+            rewardImage.gameObject.SetActive(false);
+            rewardText.gameObject.SetActive(true);
+
+            //if (!showReward)
+            //{
+            //    teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(challengeId, AssetsType.TinyTeaserTexture);
+            //}
+            //else
+            //{
+
+            //rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+            rewardText.text = $"Watch {m.brandName} video &\nget $3 coupon!";
+            //}
+
+            Log.PrintWarning($"{challengeId} {m}");
+            MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
+
+        }
+
+        internal void PreparePanelDefaultVersion(PanelId id, Action<bool> onComplete, Mission m)
+        {
             var challengeId = MonetizrManager.Instance.GetActiveChallenge();
 
             m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);

@@ -863,7 +863,9 @@ namespace Monetizr.Campaigns
 
             Log.Print($"ShowRewardCenter with {m?.campaignId}");
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrRewardCenterPanel", PanelId.RewardCenter, onComplete, true, m);
+            string uiItemPrefab = "MonetizrRewardCenterPanel";
+
+            instance.uiController.ShowPanelFromPrefab(uiItemPrefab, PanelId.RewardCenter, onComplete, true, m);
         }
 
         internal static void HideRewardCenter()
