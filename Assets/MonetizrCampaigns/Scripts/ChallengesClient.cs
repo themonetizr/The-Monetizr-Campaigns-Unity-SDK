@@ -40,13 +40,13 @@ namespace Monetizr.Campaigns
         [Serializable]
         private class Challenges
         {
-            public Challenge[] challenges;
+            public ServerCampaign[] challenges;
         }
 
         /// <summary>
         /// Returns a list of challenges available to the player.
         /// </summary>
-        public async Task<List<Challenge>> GetList()
+        public async Task<List<ServerCampaign>> GetList()
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage
             {
@@ -76,7 +76,7 @@ namespace Monetizr.Campaigns
             {
                 if(challengesString.Length == 0)
                 {
-                    return new List<Challenge>();
+                    return new List<ServerCampaign>();
                 }
 
                 var challenges = JsonUtility.FromJson<Challenges>("{\"challenges\":" + challengesString + "}");
@@ -91,7 +91,7 @@ namespace Monetizr.Campaigns
                         Debug.Log($"!!!! {v.Key}={v.Value}");
                 }
                 
-                return new List<Challenge>(challenges.challenges);
+                return new List<ServerCampaign>(challenges.challenges);
             }
             else
             {
@@ -137,7 +137,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Marks the challenge as claimed by the player.
         /// </summary>
-        public async Task Claim(Challenge challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        public async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage
             {

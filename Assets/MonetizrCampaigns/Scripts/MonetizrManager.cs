@@ -68,11 +68,7 @@ namespace Monetizr.Campaigns
         LoadingScreenSprite,
     }
 
-    /// <summary>
-    /// ChallengeExtention for easier access to Challenge assets
-    /// TODO: merge with Challenge?
-    /// </summary>
-    internal class ChallengeExtention
+    internal class ServerCampaignWithAssets
     {
         private static readonly Dictionary<AssetsType, System.Type> AssetsSystemTypes = new Dictionary<AssetsType, System.Type>()
         {
@@ -99,15 +95,15 @@ namespace Monetizr.Campaigns
         };
 
 
-        public Challenge challenge { get; private set; }
+        public ServerCampaign campaign { get; private set; }
         private Dictionary<AssetsType, object> assets = new Dictionary<AssetsType, object>();
         private Dictionary<AssetsType, string> assetsUrl = new Dictionary<AssetsType, string>();
 
         public bool isChallengeLoaded;
 
-        public ChallengeExtention(Challenge challenge)
+        public ServerCampaignWithAssets(ServerCampaign challenge)
         {
-            this.challenge = challenge;
+            this.campaign = challenge;
             this.isChallengeLoaded = true;
         }
 
@@ -115,7 +111,7 @@ namespace Monetizr.Campaigns
         {
             if(assets.ContainsKey(t))
             {
-                Log.PrintWarning($"An item {t} already exist in the campaign {challenge.id}");
+                Log.PrintWarning($"An item {t} already exist in the campaign {campaign.id}");
                 return;
             }
 
@@ -228,7 +224,7 @@ namespace Monetizr.Campaigns
 
         //Storing ids in separate list to get faster access (the same as Keys in challenges dictionary below)
         private List<string> challengesId = new List<string>();
-        private Dictionary<String, ChallengeExtention> challenges = new Dictionary<String, ChallengeExtention>();
+        private Dictionary<String, ServerCampaignWithAssets> challenges = new Dictionary<String, ServerCampaignWithAssets>();
         internal static bool tinyTeaserCanBeVisible;
 
         internal MissionsManager missionsManager = null;
@@ -608,26 +604,27 @@ namespace Monetizr.Campaigns
 
             Debug.LogWarning("ShowStartupNotification");
 
-            Mission sponsoredMsns = instance.missionsManager.missions.Find((Mission item) => { return item.isSponsored; });
+            //Mission sponsoredMsns = instance.missionsManager.missions.Find((Mission item) => { return item.isSponsored; });
+            Mission mission = instance.missionsManager.FindMissionForStartNotify();
 
-            if (sponsoredMsns == null)
+            if (mission == null)
             {
                 onComplete?.Invoke(false);
                 return;
             }
 
-            var campaign = MonetizrManager.Instance.GetCampaign(sponsoredMsns.campaignId);
+            //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
 
-            if (campaign.GetParam("no_campaigns_notification") == "true")
+            if (mission.additionalParams.GetParam("no_campaigns_notification") == "true")
             {
                 onComplete?.Invoke(false);
                 return;
             }
 
 
-            FillInfo(sponsoredMsns);
+            FillInfo(mission);
 
-            ShowNotification(onComplete, sponsoredMsns, PanelId.StartNotification);
+            ShowNotification(onComplete, mission, PanelId.StartNotification);
         }
 
         internal static void ShowCongratsNotification(Action<bool> onComplete, Mission m)
@@ -1104,9 +1101,9 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Helper function to download and assign graphics assets
         /// </summary>
-        private async Task AssignAssetTextures(ChallengeExtention ech, Challenge.Asset asset, AssetsType texture, AssetsType sprite, bool isOptional = false)
+        private async Task AssignAssetTextures(ServerCampaignWithAssets ech, ServerCampaign.Asset asset, AssetsType texture, AssetsType sprite, bool isOptional = false)
         {
-            string path = Application.persistentDataPath + "/" + ech.challenge.id;
+            string path = Application.persistentDataPath + "/" + ech.campaign.id;
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -1173,18 +1170,18 @@ namespace Monetizr.Campaigns
             bool texStatus = tex != null;
             bool spriteStatus = s != null;
 
-            Debug.Log($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.challenge.id}");
+            Debug.Log($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
         }
 
-        private async Task PreloadAssetToCache(ChallengeExtention ech, Challenge.Asset asset, /*AssetsType urlString,*/ AssetsType fileString, bool required = true)
+        private async Task PreloadAssetToCache(ServerCampaignWithAssets ech, ServerCampaign.Asset asset, /*AssetsType urlString,*/ AssetsType fileString, bool required = true)
         {
             if (asset.url == null || asset.url.Length == 0)
             {
-                Debug.LogWarning($"Malformed URL for {fileString} {ech.challenge.id}");
+                Debug.LogWarning($"Malformed URL for {fileString} {ech.campaign.id}");
                 return;
             }
 
-            string path = Application.persistentDataPath + "/" + ech.challenge.id;
+            string path = Application.persistentDataPath + "/" + ech.campaign.id;
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -1272,7 +1269,7 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async void RequestChallenges(Action<bool> onRequestComplete)
         {
-            List<Challenge> _challenges = new List<Challenge>();
+            List<ServerCampaign> _challenges = new List<ServerCampaign>();
 
             try
             {
@@ -1301,7 +1298,7 @@ namespace Monetizr.Campaigns
 
             foreach (var ch in _challenges)
             {
-                var ech = new ChallengeExtention(ch);
+                var ech = new ServerCampaignWithAssets(ch);
                             
                 if (this.challenges.ContainsKey(ch.id))
                     continue;
@@ -1445,9 +1442,15 @@ namespace Monetizr.Campaigns
         /// TODO: Don't give access to challenge itself, update progress internally
         /// </summary>
         /// <returns></returns>
-        internal Challenge GetCampaign(String chId)
+        internal ServerCampaign GetCampaign(String chId)
         {
-            return challenges[chId].challenge;
+            if(!challenges.ContainsKey(chId))
+            {
+                Debug.LogWarning($"You're trying to get campaign {chId} which is not exist!");
+                return null;
+            }
+
+            return challenges[chId].campaign;
         }
 
         /// <summary>
@@ -1525,7 +1528,7 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async Task ClaimReward(String challengeId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            var challenge = challenges[challengeId].challenge;
+            var challenge = challenges[challengeId].campaign;
 
             try
             {

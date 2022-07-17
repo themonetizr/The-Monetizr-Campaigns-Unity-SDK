@@ -88,11 +88,11 @@ namespace Monetizr.Campaigns
             return claimed;
         }
 
-        internal Mission FindMissionByTypeAndCampaign(int id, MissionType mt, string ch)
+        internal Mission FindMissionInCache(int id, MissionType mt, string ch)
         {
             foreach (var m in missions)
             {
-                if (m.type == mt && m.campaignId == ch && m.id == id)
+                if (m.type == mt && m.campaignId == ch && m.id == id && m.apiKey == MonetizrManager.Instance.GetCurrentAPIkey())
                     return m;
             }
 
@@ -140,7 +140,7 @@ namespace Monetizr.Campaigns
                 reward = reward,
                 progress = 1.0f,
                 isDisabled = false,
-                activateTime = DateTime.Now,
+                activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
             };
         }
@@ -154,7 +154,7 @@ namespace Monetizr.Campaigns
                 reward = reward,
                 progress = 1.0f,
                 isDisabled = false,
-                activateTime = DateTime.Now,
+                activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                
         };
@@ -172,7 +172,7 @@ namespace Monetizr.Campaigns
                 reward = reward,
                 progress = 0.0f,
                 isDisabled = false,
-                activateTime = DateTime.Now,
+                activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
             };
         }
@@ -193,7 +193,7 @@ namespace Monetizr.Campaigns
                 surveyUrl = url,
                 delaySurveyTimeSec = 30,//86400,
                 progress = 1.0f,
-                activateTime = DateTime.Now,
+                activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
             };
         }
@@ -201,7 +201,7 @@ namespace Monetizr.Campaigns
         Mission prepareGiveawayMission(MissionType mt, string campaign, int reward)
         {
             //if no claimable reward in campaign - no give away missions
-            var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((Challenge.Reward obj) => { return obj.claimable == true; });
+            var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
 
             if (claimableReward == null)
                 return null;
@@ -216,7 +216,7 @@ namespace Monetizr.Campaigns
                 reward = reward,
                 progress = 0.0f,
                 isDisabled = false,
-                activateTime = DateTime.Now,
+                activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
             };
         }
@@ -232,7 +232,7 @@ namespace Monetizr.Campaigns
             }
 
             //if no claimable reward in campaign - no give away missions
-            var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((Challenge.Reward obj) => { return obj.claimable == true; });
+            var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
 
             if (claimableReward == null)
                 return null;
@@ -247,7 +247,7 @@ namespace Monetizr.Campaigns
                 reward = reward,
                 progress = 1.0f,
                 isDisabled = false,
-                activateTime = DateTime.Now,
+                activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
             };
         }
@@ -275,6 +275,8 @@ namespace Monetizr.Campaigns
             m.isSponsored = true;
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign;
+            m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
+            m.isServerCampaignActive = true;
 
             return m;
         }
@@ -297,8 +299,13 @@ namespace Monetizr.Campaigns
               
             serializedMissions.Load();
 
-            //TODO: check in serialized missions that 
+            //check if campaign is alive for current mission
+            foreach(var m in missions)
+            {
+                m.isServerCampaignActive = MonetizrManager.Instance.HasCampaign(m.campaignId);
+            }
 
+            
             //search unbinded campaign
             foreach (string ch in campaigns)
             {
@@ -307,7 +314,7 @@ namespace Monetizr.Campaigns
 
                 for (int i = 0; i < miss.Count; i++)
                 {
-                    Mission m = FindMissionByTypeAndCampaign(i, miss[i].missionType, ch);
+                    Mission m = FindMissionInCache(i, miss[i].missionType, ch);
 
                     if (m == null)
                     {
@@ -333,6 +340,8 @@ namespace Monetizr.Campaigns
                     m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
                     //if (m != null)
                     //    missions.Add(m);
+
+                    m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
 
                     InitializeNonSerializedFields(m);
                 }
@@ -426,7 +435,8 @@ namespace Monetizr.Campaigns
 
         internal bool IsActiveByTime(Mission m)
         {
-            return DateTime.Now >= m.activateTime && DateTime.Now <= m.deactivateTime;
+            bool r = DateTime.Now >= m.activateTime && DateTime.Now <= m.deactivateTime;
+            return r;
         }
 
         internal Mission FindActiveSurveyMission()
@@ -434,10 +444,32 @@ namespace Monetizr.Campaigns
             return missions.Find((Mission m) =>
             {
                 return m.type == MissionType.SurveyReward && m.isClaimed == ClaimState.NotClaimed && !m.isDisabled && IsActiveByTime(m);
+            });      
+        }
+
+        internal Mission FindMissionForStartNotify()
+        {
+            return missions.Find((Mission m) =>
+            {
+                return m.type != MissionType.SurveyReward &&
+                        m.isClaimed == ClaimState.NotClaimed &&
+                        !m.isDisabled &&
+                        IsActiveByTime(m) &&
+                        m.isServerCampaignActive;
             });
+        }
 
+        internal List<Mission> GetMissionsForRewardCenter()
+        {
+            return missions.FindAll((Mission m) => {
 
-            
+                return m.isSponsored &&
+                        m.isClaimed != ClaimState.Claimed &&
+                        !m.isDisabled &&
+                        IsActiveByTime(m) &&
+                        m.isServerCampaignActive;
+                   
+            });
         }
     }
 }

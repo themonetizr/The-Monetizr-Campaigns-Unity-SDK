@@ -88,7 +88,7 @@ namespace Monetizr.Campaigns
         private void AddSponsoredChallenges()
         {
             //var challenges = MonetizrManager.Instance.GetAvailableChallenges();
-            var activeChallenge = MonetizrManager.Instance.GetActiveChallenge();
+            //var activeChallenge = MonetizrManager.Instance.GetActiveChallenge();
             //int curChallenge = 0;
 
             //if (challenges.Count == 0)
@@ -98,31 +98,26 @@ namespace Monetizr.Campaigns
             //challenges.Remove(activeChallenge);
             //challenges.Insert(0, activeChallenge);
 
-            var campId = MonetizrManager.Instance.missionsManager.missions[0].campaignId;
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+
+            if(missions.Count == 0)
+            {
+                Debug.LogWarning("No sponsored challenges for RC!");
+                return;
+            }
+
+            var campId = missions[0].campaignId;
 
             mainBanner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 
-            Debug.Log($">>>>>>>mainBanner.sprite={mainBanner.sprite}");
-
             amountOfItems = 0;
 
-            foreach (var m in MonetizrManager.Instance.missionsManager.missions)
+            foreach (var m in missions)
             {
-                if (!m.isSponsored)
-                    continue;
-
-                if (m.isClaimed == ClaimState.Claimed)
-                    continue;
-
-                if (m.isDisabled)
-                    continue;
-
-                if (!m.isDisabled && DateTime.Now > m.deactivateTime)
-                    continue;
-
                 var ch = m.campaignId;
 
-                if (ch == activeChallenge)
+                if (ch == missions[0].campaignId)
+                //if (ch == activeChallenge)
                 {
                     var color = MonetizrManager.Instance.GetAsset<Color>(ch, AssetsType.HeaderTextColor);
 
@@ -453,9 +448,9 @@ namespace Monetizr.Campaigns
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
-            var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
+            //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
 
-            bool needToPlayVideo = !(campaign.GetParam("videomail_giveaway_mission_without_video") == "true");
+            bool needToPlayVideo = !(m.additionalParams.GetParam("videomail_giveaway_mission_without_video") == "true");
 
 
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);

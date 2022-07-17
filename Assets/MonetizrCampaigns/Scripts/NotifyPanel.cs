@@ -306,7 +306,7 @@ namespace Monetizr.Campaigns
                 logo.gameObject.SetActive(false);
 
            
-            var r = MonetizrManager.Instance.GetCampaign(m.campaignId).rewards.Find((Challenge.Reward obj) => { return obj.claimable == true; });
+            var r = MonetizrManager.Instance.GetCampaign(m.campaignId).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
 
 
             title.text = $"Congrats!";

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 namespace Monetizr.Campaigns
 {
     [System.Serializable]
-    internal class Challenge
+    internal class ServerCampaign
     {
         public string id;
         public string brand_id;

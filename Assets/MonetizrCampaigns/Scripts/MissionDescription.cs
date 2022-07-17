@@ -42,8 +42,81 @@ namespace Monetizr.Campaigns
     }
 
     [Serializable]
+    public class SerializableDictionary<TKey, TValue> : ISerializationCallbackReceiver
+    {
+        [NonSerialized]
+        private Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
+
+        [SerializeField]
+        private List<TKey> keys = new List<TKey>();
+
+        [SerializeField]
+        private List<TValue> values = new List<TValue>();
+
+        public SerializableDictionary()
+        {
+
+        }
+
+        public SerializableDictionary(Dictionary<TKey,TValue> d)
+        {
+            dictionary = d;
+        }
+
+        // save the dictionary to lists
+        public void OnBeforeSerialize()
+        {
+            keys.Clear();
+            values.Clear();
+            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+            {
+                keys.Add(pair.Key);
+                values.Add(pair.Value);
+            }
+        }
+
+        // load dictionary from lists
+        public void OnAfterDeserialize()
+        {
+            dictionary.Clear();
+
+            if (keys.Count != values.Count)
+                throw new System.Exception(string.Format("there are {0} keys and {1} values after deserialization. Make sure that both key and value types are serializable."));
+
+            for (int i = 0; i < keys.Count; i++)
+                dictionary.Add(keys[i], values[i]);
+        }
+
+        public TValue GetParam(TKey p)
+        {
+            if (!dictionary.ContainsKey(p))
+                return default(TValue);
+
+            return dictionary[p];
+        }
+
+        public int GetIntParam(TKey p)
+        {
+            if (!dictionary.ContainsKey(p))
+                return 0;
+
+            int result = 0;
+            string val = dictionary[p].ToString();
+
+            if (!Int32.TryParse(val, out result))
+            {
+                return 0;
+            }
+
+            return result;
+        }
+    }
+
+    [Serializable]
     public class Mission
     {
+        [SerializeField] internal string apiKey;
+
         [SerializeField] internal MissionType type;
         [SerializeField] internal int startMoney;
    
@@ -102,6 +175,13 @@ namespace Monetizr.Campaigns
 
         [NonSerialized] internal MissionUIState state;
 
+        //Do we have this campaign active on the server now or it's just in a local cache
+        [NonSerialized] internal bool isServerCampaignActive;
+
+        //Field for campaign 
+        [SerializeField] internal SerializableDictionary<string, string> additionalParams;
+
+        
     }
 
     /*internal class  SurveyMission : Mission

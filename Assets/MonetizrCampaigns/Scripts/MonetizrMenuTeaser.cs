@@ -88,21 +88,21 @@ namespace Monetizr.Campaigns
 
             m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
-            var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
+            //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
-            if (campaign.GetParam("teaser_no_texture_animation") == "true")
+            if (m.additionalParams.GetParam("teaser_no_texture_animation") == "true")
             {
                 hasTextureAnimation = false;
             }
 
-            if (campaign.GetParam("teaser_no_animation") == "true")
+            if (m.additionalParams.GetParam("teaser_no_animation") == "true")
             {
                 hasAnimation = false;
             }
 
             bool showReward = false;
 
-            if (campaign.GetParam("show_reward_on_teaser") == "true")
+            if (m.additionalParams.GetParam("show_reward_on_teaser") == "true")
             {
                 hasTextureAnimation = false;
                 showReward = true;
@@ -145,21 +145,21 @@ namespace Monetizr.Campaigns
 
             m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
-            var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
+            //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
-            if (campaign.GetParam("teaser_no_texture_animation") == "true")
+            if (m.additionalParams.GetParam("teaser_no_texture_animation") == "true")
             {
                 hasTextureAnimation = false;
             }
 
-            if(campaign.GetParam("teaser_no_animation") == "true")
+            if(m.additionalParams.GetParam("teaser_no_animation") == "true")
             {
                 hasAnimation = false;
             }
 
             bool showReward = false;
 
-            if(campaign.GetParam("show_reward_on_teaser") == "true")
+            if(m.additionalParams.GetParam("show_reward_on_teaser") == "true")
             {
                 hasTextureAnimation = false;
                 showReward = true;

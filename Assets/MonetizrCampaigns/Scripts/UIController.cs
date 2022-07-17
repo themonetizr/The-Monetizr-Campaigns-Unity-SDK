@@ -105,16 +105,18 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
+                int uiVersion = 0;
 
-                int uiVersion = campaign.GetIntParam("design_version");
-
-                if (prefab == "MonetizrDebugPanel")
-                    uiVersion = 0;
-
-                if(uiVersion == 2)
+                if (m != null)
                 {
-                    prefab += "2";
+                    //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
+
+                    uiVersion = m.additionalParams.GetIntParam("design_version");
+
+                    if (uiVersion == 2)
+                    {
+                        prefab += "2";
+                    }
                 }
 
                 GameObject asset = Resources.Load(prefab) as GameObject;
