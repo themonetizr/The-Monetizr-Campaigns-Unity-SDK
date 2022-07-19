@@ -594,7 +594,7 @@ namespace Monetizr.Campaigns
 
         public static void ShowStartupNotification(Action<bool> onComplete)
         {
-            Debug.LogWarning("!!!!");
+            Debug.LogWarning("!!!!-------");
 
             if (instance == null || !instance.HasChallengesAndActive())
             {
@@ -969,7 +969,7 @@ namespace Monetizr.Campaigns
 
         public static void OnMainMenuShow()
         {
-             ShowStartupNotification((bool _) => { ShowTinyMenuTeaser(); });
+            ShowStartupNotification((bool _) => { ShowTinyMenuTeaser(); });
         }
 
         public static void OnMainMenuHide()

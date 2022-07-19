@@ -11,7 +11,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Downloads a 2D asset and returns it as a Sprite in <paramref name="onAssetDownloaded"/>.
         /// </summary>
-        public static IEnumerator Download2DAsset(Challenge.Asset asset, Action<Challenge.Asset, Sprite> onAssetDownloaded, Action onDownloadFailed = null)
+        public static IEnumerator Download2DAsset(ServerCampaign.Asset asset, Action<ServerCampaign.Asset, Sprite> onAssetDownloaded, Action onDownloadFailed = null)
         {
             UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(asset.url);
 
@@ -31,7 +31,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Downloads any type of asset and returns its data as an array of bytes in <paramref name="onAssetDownloaded"/>
         /// </summary>
-        public static IEnumerator DownloadAssetData(Challenge.Asset asset, Action<Challenge.Asset, byte[]> onAssetDownloaded, Action onDownloadFailed = null)
+        public static IEnumerator DownloadAssetData(ServerCampaign.Asset asset, Action<ServerCampaign.Asset, byte[]> onAssetDownloaded, Action onDownloadFailed = null)
         {
             UnityWebRequest uwr = UnityWebRequest.Get(asset.url);
 

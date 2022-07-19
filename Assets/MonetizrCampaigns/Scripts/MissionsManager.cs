@@ -276,7 +276,7 @@ namespace Monetizr.Campaigns
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
-            m.isServerCampaignActive = true;
+            
 
             return m;
         }
@@ -337,6 +337,7 @@ namespace Monetizr.Campaigns
                     if (m == null)
                         continue;
 
+                    m.isServerCampaignActive = true;
                     m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
                     //if (m != null)
                     //    missions.Add(m);
@@ -454,8 +455,9 @@ namespace Monetizr.Campaigns
                 return m.type != MissionType.SurveyReward &&
                         m.isClaimed == ClaimState.NotClaimed &&
                         !m.isDisabled &&
-                        IsActiveByTime(m) &&
-                        m.isServerCampaignActive;
+                        IsActiveByTime(m)
+                        && m.isServerCampaignActive;
+                        
             });
         }
 

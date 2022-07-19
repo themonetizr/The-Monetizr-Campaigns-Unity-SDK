@@ -99,7 +99,7 @@ namespace Monetizr.Campaigns
 
             string brandTitle = m.brandName;
 
-            var r = MonetizrManager.Instance.GetCampaign(m.campaignId).rewards.Find((Challenge.Reward obj) => { return obj.claimable == true;  });
+            var r = MonetizrManager.Instance.GetCampaign(m.campaignId).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true;  });
 
             string giveawayTitle = "";
 
