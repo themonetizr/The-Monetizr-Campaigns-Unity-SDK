@@ -35,7 +35,7 @@ namespace Monetizr.Campaigns
 
             CleanListView();
 
-            if (MonetizrManager.Instance.HasChallengesAndActive())
+            if (MonetizrManager.Instance.HasCampaignsAndActive())
             {
                 hasSponsoredChallenges = true;
                 AddSponsoredChallenges();

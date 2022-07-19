@@ -84,7 +84,7 @@ namespace Monetizr.Campaigns
 
         internal void PreparePanelVersion2(PanelId id, Action<bool> onComplete, Mission m)
         {
-            var challengeId = MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
             m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
@@ -141,7 +141,7 @@ namespace Monetizr.Campaigns
 
         internal void PreparePanelDefaultVersion(PanelId id, Action<bool> onComplete, Mission m)
         {
-            var challengeId = MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
             m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 

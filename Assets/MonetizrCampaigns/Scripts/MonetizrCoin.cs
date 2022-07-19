@@ -14,10 +14,10 @@ public class MonetizrCoin : MonoBehaviour
     {
         //Log.Print($"------UpdateCoinToCustom-------- {uiCoin}");
 
-        if (!MonetizrManager.Instance.HasChallengesAndActive())
+        if (MonetizrManager.Instance == null || !MonetizrManager.Instance.HasCampaignsAndActive())
             return false;
 
-        var currentCampaign = MonetizrManager.Instance.GetActiveChallenge();
+        var currentCampaign = MonetizrManager.Instance.GetActiveCampaign();
 
         if (MonetizrManager.Instance.HasAsset(currentCampaign, AssetsType.CustomCoinSprite))
         {

@@ -223,7 +223,7 @@ namespace Monetizr.Campaigns
         private bool isMissionsIsOudated = true;
 
         //Storing ids in separate list to get faster access (the same as Keys in challenges dictionary below)
-        private List<string> challengesId = new List<string>();
+        private List<string> campaignIds = new List<string>();
         private Dictionary<String, ServerCampaignWithAssets> challenges = new Dictionary<String, ServerCampaignWithAssets>();
         internal static bool tinyTeaserCanBeVisible;
 
@@ -385,8 +385,11 @@ namespace Monetizr.Campaigns
                 gameOnInitSuccess?.Invoke();
 
                 if (tinyTeaserCanBeVisible)
+                {
+                    //isMissionsIsOudated = true;
                     //ShowTinyMenuTeaser(null);
                     OnMainMenuShow();
+                }
 
             };
 
@@ -452,7 +455,7 @@ namespace Monetizr.Campaigns
             missionsManager.CleanUp();
 
             challenges.Clear();
-            challengesId.Clear();
+            campaignIds.Clear();
 
             RequestChallenges(onRequestComplete);
         }
@@ -594,9 +597,9 @@ namespace Monetizr.Campaigns
 
         public static void ShowStartupNotification(Action<bool> onComplete)
         {
-            Debug.LogWarning("!!!!-------");
+           
 
-            if (instance == null || !instance.HasChallengesAndActive())
+            if (instance == null || !instance.HasCampaignsAndActive())
             {
                 onComplete?.Invoke(false);
                 return;
@@ -622,6 +625,8 @@ namespace Monetizr.Campaigns
             }
 
 
+            Debug.LogWarning("!!!!-------");
+
             FillInfo(mission);
 
             ShowNotification(onComplete, mission, PanelId.StartNotification);
@@ -632,7 +637,7 @@ namespace Monetizr.Campaigns
             ShowNotification(onComplete, m, PanelId.CongratsNotification);
         }
 
-        internal static void TryShowSurveyNotification(Action onComplete)
+        internal static bool TryShowSurveyNotification(Action onComplete)
         {
             //MissionUIDescription sponsoredMsns = instance.missionsManager.getCampaignReadyForSurvey();
 
@@ -641,7 +646,7 @@ namespace Monetizr.Campaigns
             if (sponsoredMsns == null)
             {
                 onComplete?.Invoke();
-                return;
+                return false;
             }
                         
             FillInfo(sponsoredMsns);
@@ -672,6 +677,8 @@ namespace Monetizr.Campaigns
             ShowNotification((bool _) => { ShowSurvey(onSurveyComplete, sponsoredMsns); }, 
                 sponsoredMsns, 
                 PanelId.SurveyNotification);
+
+            return true;
         }
 
         internal void ClaimMissionData(Mission m)
@@ -843,7 +850,7 @@ namespace Monetizr.Campaigns
 
             UpdateGameUI?.Invoke();
 
-            var challengeId = MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
             var m = instance.missionsManager.GetMission(challengeId);
 
@@ -964,12 +971,46 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            TryShowSurveyNotification(onComplete);
+            if(!TryShowSurveyNotification(onComplete))
+            {
+                //if no survey, show notification
+
+                ShowStartupNotification((bool isSkipped) => 
+                    {
+                        if (isSkipped)
+                            onComplete?.Invoke();
+                        else
+                            ShowRewardCenter(null, (bool b) => { onComplete?.Invoke();   });
+
+                    });
+            }
+        }
+
+        public static void OnNextLevel(Action<bool> onComplete)
+        {
+            //ShowStartupNotification((bool _) => { ShowRewardCenter(null, onComplete); });
         }
 
         public static void OnMainMenuShow()
         {
-            ShowStartupNotification((bool _) => { ShowTinyMenuTeaser(); });
+            if (instance == null)
+                return;
+
+            tinyTeaserCanBeVisible = true;
+
+            if (!Instance.HasCampaignsAndActive())
+                return;
+
+            instance.initializeBuiltinMissions();
+
+            
+            ShowStartupNotification((bool isSkipped) =>
+                {
+                    if(isSkipped)
+                        ShowTinyMenuTeaser();
+                    else
+                        ShowRewardCenter(null, (bool _) => { ShowTinyMenuTeaser(); });
+                });
         }
 
         public static void OnMainMenuHide()
@@ -988,18 +1029,16 @@ namespace Monetizr.Campaigns
                 return;
 
             tinyTeaserCanBeVisible = true;
-
-            instance.initializeBuiltinMissions();
-
+            
             //has some challanges
-            if (!instance.HasChallengesAndActive())
+            if (!instance.HasCampaignsAndActive())
                 return;
 
             //has some active missions
             if (instance.missionsManager.missions.Find((Mission m) => { return m.isClaimed != ClaimState.Claimed; }) == null)
                 return;
 
-            var challengeId = MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
             if(!instance.HasAsset(challengeId,AssetsType.TinyTeaserTexture))
             {
                 Log.Print("No texture for tiny teaser!");
@@ -1288,7 +1327,7 @@ namespace Monetizr.Campaigns
                 onRequestComplete?.Invoke(false);
             }
 
-            challengesId.Clear();
+            campaignIds.Clear();
 
 #if TEST_SLOW_LATENCY
             await Task.Delay(10000);
@@ -1419,11 +1458,11 @@ namespace Monetizr.Campaigns
                 {
                     
                     this.challenges.Add(ch.id, ech);
-                    challengesId.Add(ch.id);
+                    campaignIds.Add(ch.id);
                 }
             }
 
-            activeChallengeId = challengesId.Count > 0 ? challengesId[0] : null;
+            activeChallengeId = campaignIds.Count > 0 ? campaignIds[0] : null;
 
             isMissionsIsOudated = true;
 
@@ -1431,7 +1470,7 @@ namespace Monetizr.Campaigns
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
 
-            Log.Print($"RequestChallenges completed with count: {_challenges.Count} {challengesId.Count} active: {activeChallengeId}");
+            Log.Print($"RequestChallenges completed with count: {_challenges.Count} {campaignIds.Count} active: {activeChallengeId}");
 
             //Ok, even if response empty
             onRequestComplete?.Invoke(/*challengesId.Count > 0*/true);
@@ -1457,22 +1496,30 @@ namespace Monetizr.Campaigns
         /// Get list of the available challenges
         /// </summary>
         /// <returns></returns>
-        public List<string> GetAvailableChallenges()
+        public List<string> GetAvailableCampaigns()
         {
-            return challengesId;
+            return campaignIds;
         }
 
-        public bool HasChallengesAndActive()
+        public bool HasCampaignsAndActive()
         {
-            return isActive && challengesId.Count > 0;
+            return isActive && campaignIds.Count > 0;
         }
 
-        public string GetActiveChallenge()
+        public static bool IsActiveAndEnabled()
+        {
+            if (instance == null)
+                return false;
+
+            return instance.HasCampaignsAndActive();
+        }
+
+        public string GetActiveCampaign()
         {
             return activeChallengeId;
         }
             
-        public void SetActiveChallengeId(string id)
+        public void SetActiveCampaignId(string id)
         {
             activeChallengeId = id;
         }

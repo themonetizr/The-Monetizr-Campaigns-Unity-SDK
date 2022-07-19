@@ -284,7 +284,7 @@ namespace Monetizr.Campaigns
         internal void AddMissionsToCampaigns()
         {
             //bind to server campagns
-            var campaigns = MonetizrManager.Instance.GetAvailableChallenges();
+            var campaigns = MonetizrManager.Instance.GetAvailableCampaigns();
 
             //List<Tuple<int, MissionType, int>> tupleMiss = new List<Tuple<int, MissionType, int>>();
 
@@ -366,7 +366,7 @@ namespace Monetizr.Campaigns
         internal void AddMissionAndBindToCampaign(Mission sponsoredMission)
         {
             //bind to server campagns
-            var challenges = MonetizrManager.Instance.GetAvailableChallenges();
+            var challenges = MonetizrManager.Instance.GetAvailableCampaigns();
 
             if (challenges.Count == 0)
                 return;
@@ -375,7 +375,7 @@ namespace Monetizr.Campaigns
             HashSet<string> bindedCampaigns = new HashSet<string>();
             missions.ForEach((Mission _m) => { if (_m.campaignId != null) bindedCampaigns.Add(_m.campaignId); });
 
-            var activeChallenge = MonetizrManager.Instance.GetActiveChallenge();
+            var activeChallenge = MonetizrManager.Instance.GetActiveCampaign();
 
             //bind to active challenge first
             challenges.Remove(activeChallenge);

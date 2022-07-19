@@ -117,7 +117,7 @@ namespace Monetizr.Campaigns
             rewardImage.gameObject.SetActive(false);
             rewardAmount.gameObject.SetActive(false);
             rewardImageBackgroud.gameObject.SetActive(false);
-            noThanksButton?.gameObject.SetActive(false);
+            noThanksButton?.gameObject.SetActive(true);
 
             rewardImage.sprite = rewardIcon;
 
@@ -213,7 +213,7 @@ namespace Monetizr.Campaigns
             rewardImage.gameObject.SetActive(true);
             rewardImageBackgroud.gameObject.SetActive(true);
             rewardAmount.gameObject.SetActive(true);
-            noThanksButton?.gameObject.SetActive(false);
+            noThanksButton?.gameObject.SetActive(true);
 
             Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
 

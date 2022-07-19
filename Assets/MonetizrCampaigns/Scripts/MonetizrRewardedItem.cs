@@ -74,7 +74,7 @@ namespace Monetizr.Campaigns
             rewardDescription.text = md.missionDescription;
 
             //custom colors
-            var ch = MonetizrManager.Instance.GetActiveChallenge();
+            var ch = MonetizrManager.Instance.GetActiveCampaign();
 
             if (ch != null)
             {
