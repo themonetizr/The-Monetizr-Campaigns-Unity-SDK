@@ -45,7 +45,7 @@ namespace Monetizr.Campaigns
     public class SerializableDictionary<TKey, TValue> : ISerializationCallbackReceiver
     {
         [NonSerialized]
-        private Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
+        public Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
 
         [SerializeField]
         private List<TKey> keys = new List<TKey>();

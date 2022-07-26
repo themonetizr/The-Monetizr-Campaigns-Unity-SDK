@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
@@ -113,6 +114,8 @@ namespace Monetizr.Campaigns
 
                     uiVersion = m.additionalParams.GetIntParam("design_version");
 
+                    Debug.Log($"-------------{uiVersion}");
+
                     if (uiVersion == 2)
                     {
                         prefab += "2";
@@ -123,6 +126,12 @@ namespace Monetizr.Campaigns
 
                 panel = GameObject.Instantiate<GameObject>(asset, mainCanvas.transform);
                 ctrlPanel = panel.GetComponent<PanelController>();
+
+
+
+                PrepareCustomColors(ctrlPanel, m.additionalParams.dictionary, id);
+
+
 
                 ctrlPanel.uiController = this;
                 ctrlPanel.uiVersion = uiVersion;
@@ -140,6 +149,27 @@ namespace Monetizr.Campaigns
             
         }
 
+        private void SetColorForElement(Image i, Dictionary<string, string> additionalParams, string param)
+        {
+            Color c;
+            if (additionalParams.ContainsKey(param) && ColorUtility.TryParseHtmlString(additionalParams[param], out c))
+            {
+                if (i != null)
+                    i.color = c;
+            }
+        }
+
+        internal void PrepareCustomColors(PanelController ctrlPanel, Dictionary<string,string> additionalParams, PanelId id)
+        {
+            Debug.Log($"--------{id.ToString()}");
+
+            SetColorForElement(ctrlPanel.backgroundImage, additionalParams, "bg_color");
+            SetColorForElement(ctrlPanel.backgroundBorderImage, additionalParams, "bg_border_color");
+
+            SetColorForElement(ctrlPanel.backgroundImage, additionalParams, $"{id.ToString()}.bg_color");
+            SetColorForElement(ctrlPanel.backgroundBorderImage, additionalParams, $"{id.ToString()}.bg_border_color");
+        }
+
         public void DestroyTinyMenuTeaser()
         {
             if (!panels.ContainsKey(PanelId.TinyMenuTeaser))
@@ -152,7 +182,7 @@ namespace Monetizr.Campaigns
             panels.Remove(PanelId.TinyMenuTeaser);
         }
 
-        public void ShowTinyMenuTeaser(Vector2 screenPos, Action UpdateGameUI, int designVersion)
+        public void ShowTinyMenuTeaser(Vector2 screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
         {
              MonetizrMenuTeaser teaser;     
 
@@ -169,6 +199,8 @@ namespace Monetizr.Campaigns
 
                 var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject, mainCanvas.transform);
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
+
+                PrepareCustomColors(teaser, campaign.additional_params, PanelId.TinyMenuTeaser);
 
                 teaser.uiVersion = designVersion;
                 panels.Add(PanelId.TinyMenuTeaser, teaser);

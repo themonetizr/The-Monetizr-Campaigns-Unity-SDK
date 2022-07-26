@@ -111,7 +111,7 @@ namespace Monetizr.Campaigns
             content = content.Replace(" ", string.Empty);
             content = content.Replace("\"", string.Empty);*/
 
-            var replacements = new[] { @"\","{", "}"," ", "\"" }; // "\\{} \"";
+            var replacements = new[] { @"\","{", "}"," ", "\"","'" }; // "\\{} \"";
             var output = new StringBuilder(content);
             foreach (var r in replacements)
                 output.Replace(r, String.Empty);

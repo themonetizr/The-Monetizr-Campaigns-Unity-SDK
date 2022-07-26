@@ -58,7 +58,7 @@ namespace Monetizr.Campaigns
 
                 rect.sizeDelta = new Vector2(1010, 410);
             }
-
+                    
             if(!md.isSponsored)
             { 
                 buttonText.text = "Claim reward";

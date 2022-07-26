@@ -316,6 +316,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0cabfa2e43024b189fff65a62ad83eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiVersion: 0
   nextPanelId: -1
   banner: {fileID: 67837266811523669}
   rewardImageBackgroud: {fileID: 5460336906616306820}
@@ -326,7 +327,9 @@ MonoBehaviour:
   logo: {fileID: 1576714959345372953}
   closeButton: {fileID: 4344017537882115212}
   buttonText: {fileID: 7234977449560703399}
+  noThanksButton: {fileID: 0}
   currentMission:
+    apiKey: 
     type: 0
     startMoney: 0
     isSponsored: 0
@@ -336,9 +339,9 @@ MonoBehaviour:
     surveyUrl: 
     claimedTime: 
     deactivateTime:
-      _dateTime: 01/01/0001 00:00:00
+      _dateTime: 1/1/0001 12:00:00 AM
     activateTime:
-      _dateTime: 01/01/0001 00:00:00
+      _dateTime: 1/1/0001 12:00:00 AM
     delaySurveyTimeSec: 0
     surveyAlreadyShown: 0
     brandId: 
@@ -350,6 +353,9 @@ MonoBehaviour:
     id: 0
     isClaimed: 0
     isDisabled: 0
+    additionalParams:
+      keys: []
+      values: []
 --- !u!1 &3876935952929317554
 GameObject:
   m_ObjectHideFlags: 0

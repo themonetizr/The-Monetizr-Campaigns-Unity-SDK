@@ -595,10 +595,11 @@ namespace Monetizr.Campaigns
             instance.uiController.ShowPanelFromPrefab("MonetizrDebugPanel");
         }
 
-        public static void ShowStartupNotification(Action<bool> onComplete)
+        public static void ShowStartupNotification(int placement, Action<bool> onComplete)
         {
-           
+            bool forceSkip = false;
 
+           
             if (instance == null || !instance.HasCampaignsAndActive())
             {
                 onComplete?.Invoke(false);
@@ -613,6 +614,21 @@ namespace Monetizr.Campaigns
             if (mission == null)
             {
                 onComplete?.Invoke(false);
+                return;
+            }
+
+            if (placement == 0)
+            {
+                forceSkip = mission.additionalParams.GetParam("no_start_level_notifications") == "true";
+            }
+            else if (placement == 1)
+            {
+                forceSkip = mission.additionalParams.GetParam("no_main_menu_notifications") == "true";
+            }
+
+            if (forceSkip)
+            {
+                onComplete?.Invoke(true);
                 return;
             }
 
@@ -975,14 +991,17 @@ namespace Monetizr.Campaigns
             {
                 //if no survey, show notification
 
-                ShowStartupNotification((bool isSkipped) => 
-                    {
-                        if (isSkipped)
-                            onComplete?.Invoke();
-                        else
-                            ShowRewardCenter(null, (bool b) => { onComplete?.Invoke();   });
+               
 
-                    });
+                ShowStartupNotification(0, (bool isSkipped) =>
+                        {
+                            if (isSkipped)
+                                onComplete?.Invoke();
+                            else
+                                ShowRewardCenter(null, (bool b) => { onComplete?.Invoke(); });
+
+                        });
+                
             }
         }
 
@@ -1004,13 +1023,14 @@ namespace Monetizr.Campaigns
             instance.initializeBuiltinMissions();
 
             
-            ShowStartupNotification((bool isSkipped) =>
+                ShowStartupNotification(1, (bool isSkipped) =>
                 {
-                    if(isSkipped)
+                    if (isSkipped)
                         ShowTinyMenuTeaser();
                     else
                         ShowRewardCenter(null, (bool _) => { ShowTinyMenuTeaser(); });
                 });
+           
         }
 
         public static void OnMainMenuHide()
@@ -1051,7 +1071,7 @@ namespace Monetizr.Campaigns
             {
                 int uiVersion = campaign.GetIntParam("design_version");
 
-                instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion);
+                instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }
         }
 

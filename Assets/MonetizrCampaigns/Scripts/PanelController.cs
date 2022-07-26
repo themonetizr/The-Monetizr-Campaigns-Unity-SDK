@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
@@ -24,6 +25,8 @@ namespace Monetizr.Campaigns
         public UIController uiController;
         protected bool isSkipped = false;
         public int uiVersion = 0;
+        public Image backgroundImage;
+        public Image backgroundBorderImage;
 
         
 
