@@ -46,12 +46,16 @@ namespace Monetizr.Campaigns
             Assert.IsNotNull(animator);
             Assert.IsNotNull(canvasGroup);
 
+          
+
+
             state = State.Unknown;
         }
 
         internal void EnableInput(bool enable)
         {
-            canvasGroup.blocksRaycasts = enable;
+            if(canvasGroup != null)
+                canvasGroup.blocksRaycasts = enable;
         }
 
         internal void SetActive(bool active, bool immediately = false)

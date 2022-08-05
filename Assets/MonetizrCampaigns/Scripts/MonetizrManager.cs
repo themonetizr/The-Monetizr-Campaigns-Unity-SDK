@@ -66,6 +66,7 @@ namespace Monetizr.Campaigns
         CustomCoinSprite,
         CustomCoinString,
         LoadingScreenSprite,
+        TeaserGifPathString,
     }
 
     internal class ServerCampaignWithAssets
@@ -91,6 +92,7 @@ namespace Monetizr.Campaigns
             { AssetsType.CustomCoinSprite, typeof(Sprite) },
             { AssetsType.CustomCoinString, typeof(String) },
             { AssetsType.LoadingScreenSprite, typeof(Sprite) },
+            { AssetsType.TeaserGifPathString, typeof(String) },
 
         };
 
@@ -1298,7 +1300,7 @@ namespace Monetizr.Campaigns
             if (zipFolder != null)
                 fpath = fileToCheck;
 
-            Log.Print("resource: " + fpath);
+            Log.Print($"resource {fileString} {fpath}");
 
             //ech.SetAsset<string>(urlString, asset.url);
             ech.SetAsset<string>(fileString, fpath);
@@ -1403,6 +1405,11 @@ namespace Monetizr.Campaigns
 
                         case "html":
                             await PreloadAssetToCache(ech, asset, AssetsType.Html5PathString, false);
+
+                            break;
+
+                        case "tiny_teaser_gif":
+                            await PreloadAssetToCache(ech, asset, AssetsType.TeaserGifPathString, false);
 
                             break;
 

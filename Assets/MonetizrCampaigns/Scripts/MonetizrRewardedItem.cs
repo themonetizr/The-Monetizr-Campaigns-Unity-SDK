@@ -21,6 +21,9 @@ namespace Monetizr.Campaigns
         public Image rewardLine;
         public Text rewardPercent;
         public Text buttonText;
+        //public Image backgoundImage;
+        public Image backgroundImage2;
+        public Image borderImage;
 
         public Sprite defaultBoosterIcon;
 
@@ -40,41 +43,41 @@ namespace Monetizr.Campaigns
 
         public RectTransform rect;
 
-        internal void UpdateWithDescription(RewardCenterPanel panel, Mission md)
+        internal void UpdateWithDescription(RewardCenterPanel panel, Mission m)
         {
             rewardCenterPanel = panel;
-            mission = md;
+            mission = m;
 
-            md.brandBanner = null;
+            m.brandBanner = null;
 
-            banner.gameObject.SetActive(md.brandBanner != null);
-            banner.sprite = md.brandBanner;
+            banner.gameObject.SetActive(m.brandBanner != null);
+            banner.sprite = m.brandBanner;
 
             
 
-            if (md.brandBanner == null)
+            if (m.brandBanner == null)
             {
                 var rect = GetComponent<RectTransform>();
 
                 rect.sizeDelta = new Vector2(1010, 410);
             }
                     
-            if(!md.isSponsored)
+            if(!m.isSponsored)
             { 
                 buttonText.text = "Claim reward";
             }
             else
             {                
-                buttonText.text = md.claimButtonText;
+                buttonText.text = m.claimButtonText;
             }
 
 
-            brandIcon.sprite = md.missionIcon;
-            rewardTitle.text = md.missionTitle;
-            rewardDescription.text = md.missionDescription;
+            brandIcon.sprite = m.missionIcon;
+            rewardTitle.text = m.missionTitle;
+            rewardDescription.text = m.missionDescription;
 
             //custom colors
-            var ch = MonetizrManager.Instance.GetActiveCampaign();
+            /*var ch = MonetizrManager.Instance.GetActiveCampaign();
 
             if (ch != null)
             {
@@ -97,10 +100,19 @@ namespace Monetizr.Campaigns
                 if (color != default(Color))
                     backgroundImage.color = color;
 
-            }
+            }*/
+
+            UIController.PrepareCustomColors(backgroundImage, borderImage, m.additionalParams.dictionary, PanelId.RewardCenter);
+
+
+            UIController.PrepareCustomColors(null, backgroundImage2, m.additionalParams.dictionary, PanelId.RewardCenter);
+
+
+            foreach (var t in gameObject.GetComponents<PanelTextItem>())
+                t.InitializeByParent(PanelId.RewardCenter, m);
 
             //active-deactive
-            if (md.type == MissionType.SurveyReward)
+            if (m.type == MissionType.SurveyReward)
             {
                 updateWithTimer = true;
                 lastUpdateTime = DateTime.Now.AddSeconds(1);
@@ -118,13 +130,13 @@ namespace Monetizr.Campaigns
 
             //actionButton.onClick.AddListener( ()=> { md.onClaimButtonPress.Invoke(); });
 
-            boosterNumber.text = $"+{md.reward}";
+            boosterNumber.text = $"+{m.reward}";
 
-            Sprite rewardIcon = MonetizrManager.gameRewards[md.rewardType].icon;
+            Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
 
-            Sprite customCoin = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.CustomCoinSprite);
+            Sprite customCoin = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.CustomCoinSprite);
 
-            if (md.rewardType == RewardType.Coins && customCoin != null)
+            if (m.rewardType == RewardType.Coins && customCoin != null)
                 rewardIcon = customCoin;
 
             boosterIcon.sprite = rewardIcon == null ? defaultBoosterIcon : rewardIcon;
@@ -133,13 +145,13 @@ namespace Monetizr.Campaigns
 
             giftIcon.gameObject.SetActive(showGift);
 
-            rewardLine.fillAmount = md.progress;
+            rewardLine.fillAmount = m.progress;
 
             //rewardPercent.text = $"{md.progress*100.0f:F1}%";
 
             rewardPercent.text = $"{currectProgress}/{maxProgress}";
 
-            if (md.progress < 1.0f) //reward isn't completed
+            if (m.progress < 1.0f) //reward isn't completed
             {
                 progressBar.SetActive(true);
                 actionButton.gameObject.SetActive(false);

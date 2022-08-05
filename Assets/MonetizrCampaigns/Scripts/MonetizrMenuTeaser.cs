@@ -9,6 +9,8 @@ namespace Monetizr.Campaigns
 
     internal class MonetizrMenuTeaser : PanelController
     {
+        public UniGifImage uniGifImage;
+
         public Button button;
         public RawImage teaserImage;
         public float delayTime = 5f;
@@ -84,9 +86,14 @@ namespace Monetizr.Campaigns
 
         internal void PreparePanelVersion2(PanelId id, Action<bool> onComplete, Mission m)
         {
-            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
-            m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.TeaserGifPathString))
+            {
+                string url = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.TeaserGifPathString);
+
+                uniGifImage.SetGifFromUrl(url);
+            }
+
 
             //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
@@ -119,6 +126,8 @@ namespace Monetizr.Campaigns
                 scaleAnimator.enabled = false;
             }
 
+
+
             earnText.gameObject.SetActive(true);
             rewardImage.gameObject.SetActive(false);
             rewardText.gameObject.SetActive(true);
@@ -130,21 +139,25 @@ namespace Monetizr.Campaigns
             //else
             //{
 
+            string header = m.additionalParams.GetParam("TinyMenuTeaser.header");
+
+            if(header.Length > 0)
+            {
+                earnText.text = header;
+            }
+
             //rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
             rewardText.text = $"Watch {m.brandName} video &\nget $3 coupon!";
             //}
 
-            Log.PrintWarning($"{challengeId} {m}");
+            Log.PrintWarning($"{m.campaignId} {m}");
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
 
         }
 
         internal void PreparePanelDefaultVersion(PanelId id, Action<bool> onComplete, Mission m)
         {
-            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
-
-            m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
-
+            
             //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
             if (m.additionalParams.GetParam("teaser_no_texture_animation") == "true")
@@ -182,7 +195,7 @@ namespace Monetizr.Campaigns
 
             if (!showReward)
             {
-                teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(challengeId, AssetsType.TinyTeaserTexture);
+                teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(m.campaignId, AssetsType.TinyTeaserTexture);
             }
             else
             {
@@ -190,7 +203,7 @@ namespace Monetizr.Campaigns
                 rewardText.text = $"+{m.reward}";
             }
 
-            Log.PrintWarning($"{challengeId} {m}");
+            Log.PrintWarning($"{m.campaignId} {m}");
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
 
         }

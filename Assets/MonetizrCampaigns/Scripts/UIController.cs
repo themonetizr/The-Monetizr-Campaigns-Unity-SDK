@@ -128,8 +128,10 @@ namespace Monetizr.Campaigns
                 ctrlPanel = panel.GetComponent<PanelController>();
 
 
-
-                PrepareCustomColors(ctrlPanel, m.additionalParams.dictionary, id);
+                PrepareCustomColors(ctrlPanel.backgroundImage,
+                    ctrlPanel.backgroundBorderImage,
+                    m.additionalParams.dictionary,
+                    id);
 
 
 
@@ -137,6 +139,9 @@ namespace Monetizr.Campaigns
                 ctrlPanel.uiVersion = uiVersion;
 
                 ctrlPanel.PreparePanel(id, complete, m);
+
+                foreach (var t in ctrlPanel.gameObject.GetComponents<PanelTextItem>())
+                    t.InitializeByParent(id, m);
 
                 panels.Add(id, ctrlPanel);
             }
@@ -149,7 +154,7 @@ namespace Monetizr.Campaigns
             
         }
 
-        private void SetColorForElement(Image i, Dictionary<string, string> additionalParams, string param)
+        internal static void SetColorForElement(Graphic i, Dictionary<string, string> additionalParams, string param)
         {
             Color c;
             if (additionalParams.ContainsKey(param) && ColorUtility.TryParseHtmlString(additionalParams[param], out c))
@@ -159,15 +164,19 @@ namespace Monetizr.Campaigns
             }
         }
 
-        internal void PrepareCustomColors(PanelController ctrlPanel, Dictionary<string,string> additionalParams, PanelId id)
+        internal static void PrepareCustomColors(
+            Image background,
+            Image border,
+            Dictionary<string,string> additionalParams,
+            PanelId id)
         {
-            Debug.Log($"--------{id.ToString()}");
+            //Debug.Log($"--------{id.ToString()}");
 
-            SetColorForElement(ctrlPanel.backgroundImage, additionalParams, "bg_color");
-            SetColorForElement(ctrlPanel.backgroundBorderImage, additionalParams, "bg_border_color");
+            SetColorForElement(background, additionalParams, "bg_color");
+            SetColorForElement(border, additionalParams, "bg_border_color");
 
-            SetColorForElement(ctrlPanel.backgroundImage, additionalParams, $"{id.ToString()}.bg_color");
-            SetColorForElement(ctrlPanel.backgroundBorderImage, additionalParams, $"{id.ToString()}.bg_border_color");
+            SetColorForElement(background, additionalParams, $"{id.ToString()}.bg_color");
+            SetColorForElement(border, additionalParams, $"{id.ToString()}.bg_border_color");
         }
 
         public void DestroyTinyMenuTeaser()
@@ -200,7 +209,7 @@ namespace Monetizr.Campaigns
                 var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject, mainCanvas.transform);
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
 
-                PrepareCustomColors(teaser, campaign.additional_params, PanelId.TinyMenuTeaser);
+                PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.additional_params, PanelId.TinyMenuTeaser);
 
                 teaser.uiVersion = designVersion;
                 panels.Add(PanelId.TinyMenuTeaser, teaser);
@@ -221,7 +230,14 @@ namespace Monetizr.Campaigns
             if (teaser.IsVisible())
                 return;
 
-            teaser.PreparePanel(PanelId.TinyMenuTeaser, null, null);
+            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+
+            Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+
+            teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
+
+            foreach (var t in teaser.gameObject.GetComponents<PanelTextItem>())
+                t.InitializeByParent(PanelId.TinyMenuTeaser, m);
 
             //previousPanel = PanelId.TinyMenuTeaser;
 

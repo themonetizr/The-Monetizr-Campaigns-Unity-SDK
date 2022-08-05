@@ -83,6 +83,7 @@ namespace Monetizr.Campaigns
 
                 //analytics.Update(new List<Challenge>(challenges.challenges));
 
+
                 foreach (var ch in challenges.challenges)
                 {
                     ch.additional_params = ParseContentString(ch.content);
@@ -90,8 +91,16 @@ namespace Monetizr.Campaigns
                     foreach(var v in ch.additional_params)
                         Debug.Log($"!!!! {v.Key}={v.Value}");
                 }
-                
-                return new List<ServerCampaign>(challenges.challenges);
+
+                var result = new List<ServerCampaign>(challenges.challenges);
+
+                //remove all campaigns without assets
+                result.RemoveAll(e =>
+                {
+                    return e.assets.Count == 0;
+                });
+
+                return result;
             }
             else
             {
@@ -111,10 +120,13 @@ namespace Monetizr.Campaigns
             content = content.Replace(" ", string.Empty);
             content = content.Replace("\"", string.Empty);*/
 
-            var replacements = new[] { @"\","{", "}"," ", "\"","'" }; // "\\{} \"";
+            var replacements = new[] { @"\","{", "}", "\"","'" }; // "\\{} \"";
             var output = new StringBuilder(content);
             foreach (var r in replacements)
                 output.Replace(r, String.Empty);
+
+            output.Replace('[', '<');
+            output.Replace(']', '>');
 
             content = output.ToString();
 
@@ -125,13 +137,49 @@ namespace Monetizr.Campaigns
              //   return JsonConvert.JsonUtility.FromJson<Dictionary<string, string>>(content);
             //}
 
-            string[] eq = new[] { "=",":"};
+            string[] eq = new[] { ":"};
             string[] seps = new[] { ","};
 
             //<p>show_teaser_button=false</p>\r\n\r\n<p>teaser_type=button</p>\r\n\r\n<p>show_campaigns_notification=true</p>\r\n\r\n<p>&nbsp;</p>
-            return content.Split(seps, StringSplitOptions.RemoveEmptyEntries)
-                .Select(v => v.Split(eq, StringSplitOptions.RemoveEmptyEntries))
-                .ToDictionary(v => v.First(), v => v.Last());
+            Dictionary<string, string> res = content.Split(seps, StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(v => v.Split(eq, StringSplitOptions.RemoveEmptyEntries))
+                                        .ToDictionary(v => v.First().Trim(' '), v => v.Last().Trim(' '));
+
+            Dictionary<string, string> res2 = new Dictionary<string, string>();
+
+            foreach (var p in res)
+            {
+                string value = p.Value;
+                string key = p.Key;
+
+                for(int i = 0; i < 5; i++)
+                {
+                    int startId = value.IndexOf('%');
+
+                    if (startId == -1)
+                        break;
+
+                    int endId = value.IndexOf('%', startId + 1);
+
+                    if (endId == -1)
+                        break;
+
+                    string result = value.Substring(startId + 1, endId - startId - 1);
+
+                    Debug.Log($"-----{startId} {endId} {result}");
+
+                    if (res.ContainsKey(result))
+                    {
+                        value = value.Replace($"%{result}%", res[result]);
+                        Debug.Log($"-----replace {result} {res[result]}");
+                    }
+                    
+                }
+
+                res2.Add(key,value);         
+            }
+
+            return res2;
         }
 
         /// <summary>

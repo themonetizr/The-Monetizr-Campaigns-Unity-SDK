@@ -130,6 +130,11 @@ namespace Monetizr.Campaigns
             bool hasHtml = MonetizrManager.Instance.HasAsset(campaign, AssetsType.Html5PathString);
             bool hasVideo = MonetizrManager.Instance.HasAsset(campaign, AssetsType.VideoFilePathString);
 
+            if(!hasVideo)
+            {
+                Debug.LogWarning($"campaign {campaign} has no video asset!");
+            }
+
             if (!hasHtml && !hasVideo)
                 return null;
 
