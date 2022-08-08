@@ -829,11 +829,11 @@ MonoBehaviour:
     m_MaxSize: 129
     m_Alignment: 3
     m_AlignByGeometry: 0
-    m_RichText: 0
+    m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Watch video by Charmin and get 2 Energy Boosters '
+  m_Text: 'Watch <a>video</a> by Charmin and get 2 Energy Boosters '
 --- !u!1 &6361301575923265969
 GameObject:
   m_ObjectHideFlags: 0

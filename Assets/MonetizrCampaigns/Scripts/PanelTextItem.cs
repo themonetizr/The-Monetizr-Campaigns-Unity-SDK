@@ -18,6 +18,11 @@ namespace Monetizr.Campaigns
         {
             UIController.SetColorForElement(textElement, m.additionalParams.dictionary, "text_color");
             UIController.SetColorForElement(textElement, m.additionalParams.dictionary, $"{parentId.ToString()}.{textContent}_color");
+
+            var param = $"{parentId.ToString()}.{textContent}";
+
+            if (m.additionalParams.dictionary.ContainsKey(param))
+                textElement.text = m.additionalParams.GetParam(param);
         }
 
         

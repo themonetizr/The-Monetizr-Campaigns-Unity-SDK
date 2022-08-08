@@ -326,6 +326,7 @@ GameObject:
   - component: {fileID: 5172000109784537317}
   - component: {fileID: 7016635983246889318}
   - component: {fileID: 825438785428921310}
+  - component: {fileID: 7197426363524158102}
   m_Layer: 5
   m_Name: MonetizrEnterEmailPanel2
   m_TagString: Untagged
@@ -496,6 +497,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 463066320327903587}
   textContent: terms_text
+--- !u!114 &7197426363524158102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2387942495659895709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97dda59c8fbda4321b7504c8efa2e515, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textElement: {fileID: 4954255537914366396}
+  textContent: placeholder_text
 --- !u!1 &3006630695858517114
 GameObject:
   m_ObjectHideFlags: 0

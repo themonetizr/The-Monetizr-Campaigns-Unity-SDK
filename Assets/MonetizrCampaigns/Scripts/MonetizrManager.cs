@@ -877,6 +877,8 @@ namespace Monetizr.Campaigns
 
             if (Instance.missionsManager.missions.Count == 1)
             {
+                Debug.Log($"---_PressSingleMission");
+
                 Instance._PressSingleMission(m);
                 return;
             }
@@ -898,13 +900,15 @@ namespace Monetizr.Campaigns
         internal void _PressSingleMission(Mission m)
         {
             //if notification is alredy visible - do nothing
-            if (uiController.panels.ContainsKey(PanelId.TwitterNotification))
-                return;
+            //if (uiController.panels.ContainsKey(PanelId.TwitterNotification))
+            //    return;
 
             if (m.isClaimed == ClaimState.Claimed)
                 return;
 
-            Action<bool> onTaskComplete = (bool isSkipped) =>
+            MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, null).Invoke();
+
+           /* Action<bool> onTaskComplete = (bool isSkipped) =>
             {
                 MonetizrManager.Analytics.TrackEvent("Campaign rewarded", m);
 
@@ -940,8 +944,8 @@ namespace Monetizr.Campaigns
             else
             {
                 onTaskComplete.Invoke(false);
-            }
-            
+            }*/
+
 
         }
 

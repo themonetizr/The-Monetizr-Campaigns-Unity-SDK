@@ -139,12 +139,12 @@ namespace Monetizr.Campaigns
             //else
             //{
 
-            string header = m.additionalParams.GetParam("TinyMenuTeaser.header");
+            //string header = m.additionalParams.GetParam("TinyMenuTeaser.header");
 
-            if(header.Length > 0)
-            {
-                earnText.text = header;
-            }
+            //if(header.Length > 0)
+            //{
+            //    earnText.text = header;
+            //}
 
             //rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
             rewardText.text = $"Watch {m.brandName} video &\nget $3 coupon!";

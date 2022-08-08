@@ -170,7 +170,7 @@ namespace Monetizr.Campaigns
             //show video, then claim rewards if it's completed
             m.onClaimButtonPress = () =>
             {
-                OnVideoPlayPress(campaignId, m, onVideoComplete);
+                OnVideoPlayPress(m, onVideoComplete);
 
             };
 
@@ -450,13 +450,12 @@ namespace Monetizr.Campaigns
 
             //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
 
-            bool needToPlayVideo = !(m.additionalParams.GetParam("videomail_giveaway_mission_without_video") == "true");
-
-
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} giveaway";
 
-            if(needToPlayVideo)
+            bool needToPlayVideo = !(m.additionalParams.GetParam("mail_giveaway_mission_without_video") == "true");
+
+            if (needToPlayVideo)
                 m.missionDescription = $"Watch video and get {m.reward} {rewardTitle} from {brandName}";
             else
                 m.missionDescription = $"Get {m.reward} {rewardTitle} from {brandName}";
@@ -474,53 +473,9 @@ namespace Monetizr.Campaigns
             m.claimButtonText = needToPlayVideo ? "Watch video!" : "Claim reward!";
 
 
-            Action<bool> onComplete = (bool isSkipped) =>
-            {
-                OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
-            };
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m,AddNewUIMissions);
 
-            Action<bool> onVideoComplete = (bool isVideoSkipped) => {
-                /*OnClaimRewardComplete(m, false);*/
-
-                if (MonetizrManager.claimForSkippedCampaigns)
-                    isVideoSkipped = false;
-
-                if (isVideoSkipped)
-                    return;
-
-                MonetizrManager.ShowEnterEmailPanel(
-                    (bool isMailSkipped) =>
-                    {
-                        if (isMailSkipped)
-                            return;
-                        
-                        MonetizrManager.WaitForEndRequestAndNotify(onComplete, m);
-
-                    },
-                    m,
-                    PanelId.GiveawayEmailEnterNotification);
-
-            };
-
-            //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
-
-            //bool needToPlayVideo = !(campaign.GetParam("videomail_giveaway_mission_without_video") == "true");
-
-                //Action<bool> onVideoComplete = (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped, AddNewUIMissions); };
-
-                //show video, then claim rewards if it's completed
-            m.onClaimButtonPress = () =>
-            {
-                if (needToPlayVideo)
-                {
-                    OnVideoPlayPress(campaignId, m, onVideoComplete);
-                }
-                else
-                {
-                    onVideoComplete(false);
-                }
-
-            };
+           
 
             //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
 
@@ -615,24 +570,9 @@ namespace Monetizr.Campaigns
             }
         }
 
-        public void OnVideoPlayPress(string campaignId, Mission m, Action<bool> onComplete)
+        public void OnVideoPlayPress(Mission m, Action<bool> onComplete)
         {
-            MonetizrManager.Analytics.TrackEvent("Claim button press",m);
-
-            var htmlPath = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.Html5PathString);
-
-            if (htmlPath != null)
-            {
-                MonetizrManager.ShowHTML5((bool isSkipped) => { onComplete(isSkipped); }, m);
-            }
-            else
-            {
-                var videoPath = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.VideoFilePathString);
-
-                //MonetizrManager._PlayVideo(videoPath, (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped); });
-
-                MonetizrManager.ShowWebVideo((bool isSkipped) => { onComplete(isSkipped); }, m);
-            }
+            MonetizrManager.Instance.missionsManager.OnVideoPlayPress(m, onComplete);
         }
 
         //TODO: not sure if everything correct here

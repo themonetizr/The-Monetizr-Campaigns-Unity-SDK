@@ -286,6 +286,80 @@ namespace Monetizr.Campaigns
             return m;
         }
 
+        internal Action GetEmailGiveawayClaimAction(Mission m, Action updateUIDelegate)
+        {
+            bool needToPlayVideo = !(m.additionalParams.GetParam("mail_giveaway_mission_without_video") == "true");
+
+
+            Action<bool> onComplete = (bool isSkipped) =>
+            {
+                //OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
+                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
+            };
+
+            Action<bool> onVideoComplete = (bool isVideoSkipped) =>
+            {
+                /*OnClaimRewardComplete(m, false);*/
+
+                if (MonetizrManager.claimForSkippedCampaigns)
+                    isVideoSkipped = false;
+
+                if (isVideoSkipped)
+                    return;
+
+                MonetizrManager.ShowEnterEmailPanel(
+                    (bool isMailSkipped) =>
+                    {
+                        if (isMailSkipped)
+                            return;
+
+                        MonetizrManager.WaitForEndRequestAndNotify(onComplete, m);
+
+                    },
+                    m,
+                    PanelId.GiveawayEmailEnterNotification);
+
+            };
+
+            //show video, then claim rewards if it's completed
+            return () =>
+            {
+                Debug.Log($"----- {needToPlayVideo}");
+
+                if (needToPlayVideo)
+                {
+                    OnVideoPlayPress(m, onVideoComplete);
+                }
+                else
+                {
+                    onVideoComplete(false);
+                }
+
+            };
+
+
+        }
+
+        internal void OnVideoPlayPress(Mission m, Action<bool> onComplete)
+        {
+            MonetizrManager.Analytics.TrackEvent("Claim button press", m);
+
+            var htmlPath = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.Html5PathString);
+
+            if (htmlPath != null)
+            {
+                MonetizrManager.ShowHTML5((bool isSkipped) => { onComplete(isSkipped); }, m);
+            }
+            else
+            {
+                var videoPath = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.VideoFilePathString);
+
+                //MonetizrManager._PlayVideo(videoPath, (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped); });
+
+                MonetizrManager.ShowWebVideo((bool isSkipped) => { onComplete(isSkipped); }, m);
+            }
+        }
+
         internal void AddMissionsToCampaigns()
         {
             //bind to server campagns

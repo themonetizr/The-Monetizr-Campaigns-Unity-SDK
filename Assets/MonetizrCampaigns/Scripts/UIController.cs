@@ -237,7 +237,10 @@ namespace Monetizr.Campaigns
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
 
             foreach (var t in teaser.gameObject.GetComponents<PanelTextItem>())
+            {
+                Debug.Log("*************");
                 t.InitializeByParent(PanelId.TinyMenuTeaser, m);
+            }
 
             //previousPanel = PanelId.TinyMenuTeaser;
 

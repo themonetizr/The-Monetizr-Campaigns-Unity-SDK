@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 namespace Monetizr.Campaigns
 {
@@ -109,41 +110,26 @@ namespace Monetizr.Campaigns
 
         }
 
+        private Dictionary<string, string> ParseJson(string content)
+        {
+            content = content.Trim(new[] { '{', '}' }).Replace('\'', '\"');
+
+            var trimmedChars = new[] { ' ', '\"' };
+
+            //regex to split only unquoted separators
+            Regex regxComma = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+            Regex regxColon = new Regex(":(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+            string[] commaSplit = regxComma.Split(content);
+
+            return regxComma.Split(content)
+                            .Select(v => regxColon.Split(v))
+                            .ToDictionary(v => v.First().Trim(trimmedChars), v => v.Last().Trim(trimmedChars));
+        }
+
         //Unity FromJson doesn't support Dictionaries
         private Dictionary<string, string> ParseContentString(string content)
         {
-            /*content = content.Replace(@"\", string.Empty);
-            //content.Replace(@" ", string.Empty);
-
-            content = content.Replace("{", string.Empty);
-            content = content.Replace("}", string.Empty);
-            content = content.Replace(" ", string.Empty);
-            content = content.Replace("\"", string.Empty);*/
-
-            var replacements = new[] { @"\","{", "}", "\"","'" }; // "\\{} \"";
-            var output = new StringBuilder(content);
-            foreach (var r in replacements)
-                output.Replace(r, String.Empty);
-
-            output.Replace('[', '<');
-            output.Replace(']', '>');
-
-            content = output.ToString();
-
-            Debug.LogWarning("!!!!: " + content);
-            //if (content.Contains('{'))
-            //{
-
-             //   return JsonConvert.JsonUtility.FromJson<Dictionary<string, string>>(content);
-            //}
-
-            string[] eq = new[] { ":"};
-            string[] seps = new[] { ","};
-
-            //<p>show_teaser_button=false</p>\r\n\r\n<p>teaser_type=button</p>\r\n\r\n<p>show_campaigns_notification=true</p>\r\n\r\n<p>&nbsp;</p>
-            Dictionary<string, string> res = content.Split(seps, StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(v => v.Split(eq, StringSplitOptions.RemoveEmptyEntries))
-                                        .ToDictionary(v => v.First().Trim(' '), v => v.Last().Trim(' '));
+            Dictionary<string, string> res = ParseJson(content);
 
             Dictionary<string, string> res2 = new Dictionary<string, string>();
 
