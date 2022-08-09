@@ -8,6 +8,12 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
+    internal enum EnterEmailType
+    {
+        ProductReward,
+        IngameReward,
+        SelectionReward
+    }
 
     internal class EnterEmailPanel : PanelController
     {
@@ -23,10 +29,20 @@ namespace Monetizr.Campaigns
         public Button noThanksButton;
         public InputField inputField;
 
+        public GameObject singleRewardRoot;
+        public GameObject selectRewardRoot;
+
+        public Image selection1Icon;
+        public Image selection2Icon;
+
         [HideInInspector]
         public Mission currentMission;
         private Regex validateEmailRegex;
         private string result;
+
+        private EnterEmailType enterEmailType;
+
+        private MonetizrManager.RewardSelectionType selection;
 
         //private Action onComplete;
 
@@ -81,13 +97,39 @@ namespace Monetizr.Campaigns
         internal override void FinalizePanel(PanelId id)
         {
             MonetizrManager.temporaryEmail = result;
+            MonetizrManager.temporaryRewardTypeSelection = selection;
             MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner, currentMission);
         }
 
+        private EnterEmailType GetPanelType(Mission m)
+        {
+            var s = m.additionalParams.GetParam("email_giveaway_type");
 
+            switch(s)
+            {
+                case "product_reward": return EnterEmailType.ProductReward;
+                case "ingame_reward": return EnterEmailType.IngameReward;
+                case "selection_reward": return EnterEmailType.SelectionReward;
+            }
+
+            return EnterEmailType.ProductReward;
+        }
+
+        public void OnFirstToggle(bool v)
+        {
+            if(v) selection = MonetizrManager.RewardSelectionType.Ingame;
+        }
+        
+        public void OnSecondToggle(bool v)
+        {
+            if(v) selection = MonetizrManager.RewardSelectionType.Product;
+        }
 
         private void PreparePanel(Mission m)
         {
+            EnterEmailType type = GetPanelType(m);
+
+
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
             banner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
@@ -124,18 +166,45 @@ namespace Monetizr.Campaigns
             }
 
 
-            title.text = $"Get {giveawayTitle}!";
-            text.text = $"<color=#F05627>Enter your e-mail</color> to get giveaway from {brandTitle}.\nDon't miss out!";
+            //title.text = $"Get {giveawayTitle}!";
+            //text.text = $"<color=#F05627>Enter your e-mail</color> to get giveaway from {brandTitle}.\nDon't miss out!";
 
             //buttonText.text = "Learn More";
-            buttonText.text = "Claim!";
+            //buttonText.text = "Claim!";
 
-            rewardImage.gameObject.SetActive(false);
+            
+
+            text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
+
+            if (type == EnterEmailType.ProductReward)
+            {
+                singleRewardRoot.SetActive(true);
+                selectRewardRoot.SetActive(false);
+
+                rewardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+            }
+
+            if (type == EnterEmailType.IngameReward)
+            {
+                rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+                
+            }
+
+            if(type == EnterEmailType.SelectionReward)
+            {
+                singleRewardRoot.SetActive(false);
+                selectRewardRoot.SetActive(true);
+                
+                selection1Icon.sprite = rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+                selection2Icon.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+            }
+
+            //rewardImage.gameObject.SetActive(false);
             rewardAmount.gameObject.SetActive(false);
             rewardImageBackgroud.gameObject.SetActive(false);
             noThanksButton?.gameObject.SetActive(true);
 
-            rewardImage.sprite = rewardIcon;
+            //rewardImage.sprite = rewardIcon;
 
 
             MonetizrManager.Analytics.TrackEvent("Enter email shown", m);

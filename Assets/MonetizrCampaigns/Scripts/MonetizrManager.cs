@@ -67,6 +67,7 @@ namespace Monetizr.Campaigns
         CustomCoinString,
         LoadingScreenSprite,
         TeaserGifPathString,
+        RewardSprite,
     }
 
     internal class ServerCampaignWithAssets
@@ -93,6 +94,7 @@ namespace Monetizr.Campaigns
             { AssetsType.CustomCoinString, typeof(String) },
             { AssetsType.LoadingScreenSprite, typeof(Sprite) },
             { AssetsType.TeaserGifPathString, typeof(String) },
+            { AssetsType.RewardSprite, typeof(Sprite) },
 
         };
 
@@ -257,6 +259,14 @@ namespace Monetizr.Campaigns
         }
 
         public static string temporaryEmail = "";
+
+        internal enum RewardSelectionType
+        {
+            Ingame,
+            Product
+        }
+
+        internal static RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
 
         public static int defaultRewardAmount = 1000;
         public static string defaultTwitterLink = "";
@@ -1463,6 +1473,12 @@ namespace Monetizr.Campaigns
                         case "loading_screen":
                             
                             await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.LoadingScreenSprite, true);
+
+                            break;
+
+                        case "reward_image":
+
+                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.RewardSprite, true);
 
                             break;
 

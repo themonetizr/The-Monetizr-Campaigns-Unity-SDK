@@ -453,7 +453,7 @@ namespace Monetizr.Campaigns
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} giveaway";
 
-            bool needToPlayVideo = !(m.additionalParams.GetParam("mail_giveaway_mission_without_video") == "true");
+            bool needToPlayVideo = !(m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true");
 
             if (needToPlayVideo)
                 m.missionDescription = $"Watch video and get {m.reward} {rewardTitle} from {brandName}";

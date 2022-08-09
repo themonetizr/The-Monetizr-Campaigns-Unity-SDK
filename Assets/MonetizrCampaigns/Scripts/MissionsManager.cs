@@ -288,7 +288,7 @@ namespace Monetizr.Campaigns
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action updateUIDelegate)
         {
-            bool needToPlayVideo = !(m.additionalParams.GetParam("mail_giveaway_mission_without_video") == "true");
+            bool needToPlayVideo = !(m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true");
 
 
             Action<bool> onComplete = (bool isSkipped) =>

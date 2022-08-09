@@ -19,6 +19,7 @@ namespace Monetizr.Campaigns
         public Button closeButton;
         public Text buttonText;
         public Button noThanksButton;
+        public Image gift;
 
         [HideInInspector]
         public Mission currentMission;
@@ -38,9 +39,16 @@ namespace Monetizr.Campaigns
             {
                 case PanelId.CongratsNotification:
                     if (m.type == MissionType.GiveawayWithMail || m.type == MissionType.VideoWithEmailGiveaway)
-                        PrepareGiveawayCongratsPanel(m);
+                    {
+                        if(MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product)
+                            PrepareGiveawayCongratsPanel(m);
+                        else
+                            PrepareCongratsPanel(m);
+                    }
                     else
+                    {
                         PrepareCongratsPanel(m);
+                    }
                     break;
 
                 case PanelId.StartNotification: PrepareNotificationPanel(m); break;
@@ -83,7 +91,9 @@ namespace Monetizr.Campaigns
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
             banner.sprite = m.brandBanner;
-            logo.sprite = m.brandLogo;
+            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.gameObject.SetActive(logo.sprite != null);
+
             rewardAmount.text = m.reward.ToString();
 
             string brandTitle = m.brandName;
@@ -103,16 +113,13 @@ namespace Monetizr.Campaigns
                 rewardIcon = customCoin;
             }
 
-            if (m.brandLogo != null)
-                logo.sprite = m.brandLogo;
-            else
-                logo.gameObject.SetActive(false);
+            
 
-            title.text = $"{brandTitle} video";
-            text.text = $"<color=#F05627>Watch video</color> by {brandTitle} to earn <color=#F05627>{m.reward} {rewardTitle}</color>";
+            //title.text = $"{brandTitle} video";
+            //text.text = $"<color=#F05627>Watch video</color> by {brandTitle} to earn <color=#F05627>{m.reward} {rewardTitle}</color>";
 
             //buttonText.text = "Learn More";
-            buttonText.text = "Got it!";
+            //buttonText.text = "Got it!";
 
             rewardImage.gameObject.SetActive(false);
             rewardAmount.gameObject.SetActive(false);
@@ -165,11 +172,11 @@ namespace Monetizr.Campaigns
             if (m.reward == 1)
                 rewardNumber = "";
 
-            title.text = $"Congrats!";
-            text.text = $"You earn <color=#F05627>{rewardNumber}{rewardTitle}</color> from {m.brandName}";
+            //title.text = $"Congrats!";
+            //text.text = $"You earn <color=#F05627>{rewardNumber}{rewardTitle}</color> from {m.brandName}";
 
             //buttonText.text = "Learn More";
-            buttonText.text = "Awesome!";
+            //buttonText.text = "Awesome!";
 
             rewardImage.gameObject.SetActive(true);
 
@@ -205,10 +212,10 @@ namespace Monetizr.Campaigns
                 rewardTitle = MonetizrManager.Instance.GetAsset<string>(challengeId, AssetsType.CustomCoinString);
             }
 
-            text.text = $"<color=#F05627>Complete the survey</color>\nby {m.brandName} to earn\n<color=#F05627>{m.reward} {rewardTitle}</color>";
+            //text.text = $"<color=#F05627>Complete the survey</color>\nby {m.brandName} to earn\n<color=#F05627>{m.reward} {rewardTitle}</color>";
 
             //buttonText.text = "Learn More";
-            buttonText.text = "Awesome!";
+            //buttonText.text = "Awesome!";
 
             rewardImage.gameObject.SetActive(true);
             rewardImageBackgroud.gameObject.SetActive(true);
@@ -245,7 +252,7 @@ namespace Monetizr.Campaigns
 
             rewardAmount.text = m.reward.ToString();
 
-            title.text = $"Follow us!";
+            //title.text = $"Follow us!";
             //text.text = $"Please spend some time and  <color=#F05627>{m.reward} {m.rewardTitle}</color> from {m.brandName}";
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
@@ -260,11 +267,11 @@ namespace Monetizr.Campaigns
             if (m.reward == 1)
                 rewardNumber = "";
 
-            text.text = $"Follow <color=#F05627>{m.brandName} Twitter</color>\nto earn <color=#F05627>{rewardNumber}{rewardTitle}</color>";
+            //text.text = $"Follow <color=#F05627>{m.brandName} Twitter</color>\nto earn <color=#F05627>{rewardNumber}{rewardTitle}</color>";
             
 
             //buttonText.text = "Learn More";
-            buttonText.text = "Go to Twitter";
+            //buttonText.text = "Go to Twitter";
 
 
             rewardImage.gameObject.SetActive(true);
@@ -309,13 +316,14 @@ namespace Monetizr.Campaigns
             var r = MonetizrManager.Instance.GetCampaign(m.campaignId).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
 
 
-            title.text = $"Congrats!";
-            text.text = $"You earned <color=#F05627>{r.title}</color> from {m.brandName}";
+            //title.text = $"Congrats!";
+            //text.text = $"You earned <color=#F05627>{r.title}</color> from {m.brandName}";
 
             //buttonText.text = "Learn More";
-            buttonText.text = "Awesome!";
+            //buttonText.text = "Awesome!";
 
-            rewardImage.gameObject.SetActive(false);
+            rewardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+            rewardImage.gameObject.SetActive(rewardImage.sprite != null);
 
             rewardImageBackgroud.gameObject.SetActive(false);
             rewardAmount.gameObject.SetActive(false);
@@ -324,6 +332,10 @@ namespace Monetizr.Campaigns
 
             //rewardImage.sprite = rewardIcon;
 
+            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.gameObject.SetActive(logo.sprite != null);
+
+            gift?.gameObject.SetActive(false);
 
             MonetizrManager.Analytics.TrackEvent("Reward notification shown", m);
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);

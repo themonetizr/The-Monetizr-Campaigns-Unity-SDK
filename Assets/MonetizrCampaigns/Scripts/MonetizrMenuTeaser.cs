@@ -126,7 +126,15 @@ namespace Monetizr.Campaigns
                 scaleAnimator.enabled = false;
             }
 
-
+            if (!showReward)
+            {
+                teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(m.campaignId, AssetsType.TinyTeaserTexture);
+            }
+            else
+            {
+                rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+                //rewardText.text = $"+{m.reward}";
+            }
 
             earnText.gameObject.SetActive(true);
             rewardImage.gameObject.SetActive(false);
@@ -147,7 +155,7 @@ namespace Monetizr.Campaigns
             //}
 
             //rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
-            rewardText.text = $"Watch {m.brandName} video &\nget $3 coupon!";
+            //rewardText.text = $"Watch {m.brandName} video &\nget $3 coupon!";
             //}
 
             Log.PrintWarning($"{m.campaignId} {m}");

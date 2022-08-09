@@ -105,12 +105,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3120377805127941726}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -361}
-  m_SizeDelta: {x: 1020, y: 411.77792}
+  m_AnchoredPosition: {x: 0, y: 274}
+  m_SizeDelta: {x: 827.7, y: 132.58}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5398235617683018933
 CanvasRenderer:
@@ -142,18 +142,18 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 6f381fc39e3fddb4c95a55b371966f18, type: 3}
-    m_FontSize: 66
+    m_FontSize: 44
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 97
-    m_Alignment: 1
+    m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: You got <color=#FFCCCC>2 Energy Boosters</color> from Charmin
+  m_Text: You got 2 Energy Boosters from Charmin
 --- !u!1 &2193823692905062487
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,6 +408,7 @@ MonoBehaviour:
   closeButton: {fileID: 4344017537882115212}
   buttonText: {fileID: 7234977449560703399}
   noThanksButton: {fileID: 3046868277876281524}
+  gift: {fileID: 3611454950221394275}
   currentMission:
     apiKey: 
     type: 0
@@ -419,9 +420,9 @@ MonoBehaviour:
     surveyUrl: 
     claimedTime: 
     deactivateTime:
-      _dateTime: 1/1/0001 12:00:00 AM
+      _dateTime: 01/01/0001 00:00:00
     activateTime:
-      _dateTime: 1/1/0001 12:00:00 AM
+      _dateTime: 01/01/0001 00:00:00
     delaySurveyTimeSec: 0
     surveyAlreadyShown: 0
     brandId: 
@@ -508,7 +509,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3120377805127941726}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -587,12 +588,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3120377805127941726}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 479}
-  m_SizeDelta: {x: 1020, y: 209.1611}
+  m_AnchoredPosition: {x: 0, y: 464}
+  m_SizeDelta: {x: 950, y: 189.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6409513380632392627
 CanvasRenderer:
@@ -624,7 +625,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 12f325cf461099f468a62d947a99b582, type: 3}
-    m_FontSize: 99
+    m_FontSize: 64
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -635,7 +636,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Congrats!
+  m_Text: You Tide coupon is waiting...
 --- !u!1 &5623353844154648438
 GameObject:
   m_ObjectHideFlags: 0
@@ -666,11 +667,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3120377805127941726}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 284, y: 696}
+  m_AnchoredPosition: {x: 315.79, y: 696}
   m_SizeDelta: {x: 290, y: 290}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2335905777049995736
@@ -728,7 +729,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3915807972473643170
 RectTransform:
   m_ObjectHideFlags: 0
@@ -736,17 +737,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5661350992270227491}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: -0.056605674, w: 0.99839664}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.04167, y: 1.04167, z: 1.04167}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 3120377805127941726}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 1361552605941199526}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -6.49}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -95, y: 105.72925}
-  m_SizeDelta: {x: 90, y: 90}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 400, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6988478402152345416
 CanvasRenderer:
@@ -1118,7 +1119,6 @@ RectTransform:
   - {fileID: 1361552605941199526}
   - {fileID: 867545312389802040}
   - {fileID: 860469569558628907}
-  - {fileID: 3915807972473643170}
   - {fileID: 9180046616946791375}
   - {fileID: 4915836517811398500}
   - {fileID: 8992927847034401607}
@@ -1164,7 +1164,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3120377805127941726}
-  m_RootOrder: 11
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1359,12 +1359,13 @@ RectTransform:
   m_LocalScale: {x: 1.05392, y: 1.05392, z: 1.05392}
   m_Children:
   - {fileID: 6468195464171943851}
+  - {fileID: 3915807972473643170}
   m_Father: {fileID: 3120377805127941726}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.9589844, y: 126}
+  m_AnchoredPosition: {x: -0.9589844, y: -83}
   m_SizeDelta: {x: 1010, y: 1010}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9074825126127874019
@@ -1437,12 +1438,12 @@ RectTransform:
   m_Children:
   - {fileID: 5812090091289563816}
   m_Father: {fileID: 3120377805127941726}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -481}
-  m_SizeDelta: {x: 469, y: 135}
+  m_SizeDelta: {x: 640.02, y: 135}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1176866223263041332
 CanvasRenderer:

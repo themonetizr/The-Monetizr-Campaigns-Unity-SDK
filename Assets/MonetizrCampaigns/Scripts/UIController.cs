@@ -138,10 +138,11 @@ namespace Monetizr.Campaigns
                 ctrlPanel.uiController = this;
                 ctrlPanel.uiVersion = uiVersion;
 
-                ctrlPanel.PreparePanel(id, complete, m);
-
                 foreach (var t in ctrlPanel.gameObject.GetComponents<PanelTextItem>())
                     t.InitializeByParent(id, m);
+
+                ctrlPanel.PreparePanel(id, complete, m);
+                               
 
                 panels.Add(id, ctrlPanel);
             }
@@ -234,13 +235,11 @@ namespace Monetizr.Campaigns
 
             Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
+            foreach (var t in teaser.gameObject.GetComponents<PanelTextItem>())
+                t.InitializeByParent(PanelId.TinyMenuTeaser, m);
+            
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
 
-            foreach (var t in teaser.gameObject.GetComponents<PanelTextItem>())
-            {
-                Debug.Log("*************");
-                t.InitializeByParent(PanelId.TinyMenuTeaser, m);
-            }
 
             //previousPanel = PanelId.TinyMenuTeaser;
 
