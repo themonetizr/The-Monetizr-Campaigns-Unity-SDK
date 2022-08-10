@@ -569,6 +569,7 @@ namespace Monetizr.Campaigns
 
             string eventName = $"[UNITY_SDK] [AD] {adTypeNames[adAsset.Key]}";
 
+            Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);
 
 #if !UNITY_EDITOR
@@ -649,6 +650,7 @@ namespace Monetizr.Campaigns
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
 
+            Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);
 
 #if USING_AMPLITUDE

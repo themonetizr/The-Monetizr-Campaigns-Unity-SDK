@@ -116,7 +116,7 @@ namespace Monetizr.Campaigns
 
                     Debug.Log($"-------------{uiVersion}");
 
-                    if (uiVersion == 2)
+                    if (uiVersion == 2 && id != PanelId.DebugPanel)
                     {
                         prefab += "2";
                     }
@@ -128,6 +128,7 @@ namespace Monetizr.Campaigns
                 ctrlPanel = panel.GetComponent<PanelController>();
 
 
+                if(id != PanelId.DebugPanel)
                 PrepareCustomColors(ctrlPanel.backgroundImage,
                     ctrlPanel.backgroundBorderImage,
                     m.additionalParams.dictionary,

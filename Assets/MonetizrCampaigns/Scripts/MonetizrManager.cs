@@ -262,8 +262,8 @@ namespace Monetizr.Campaigns
 
         internal enum RewardSelectionType
         {
+            Product,
             Ingame,
-            Product
         }
 
         internal static RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
@@ -597,14 +597,14 @@ namespace Monetizr.Campaigns
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
-            debugAttempt++;
+            //debugAttempt++;
 
-            if (debugAttempt != 10)
-                return;
+            //if (debugAttempt != 10)
+            //    return;
 
             debugAttempt = 0;            
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrDebugPanel");
+            instance.uiController.ShowPanelFromPrefab("MonetizrDebugPanel",PanelId.DebugPanel);
         }
 
         public static void ShowStartupNotification(int placement, Action<bool> onComplete)
@@ -1178,6 +1178,13 @@ namespace Monetizr.Campaigns
         /// </summary>
         private async Task AssignAssetTextures(ServerCampaignWithAssets ech, ServerCampaign.Asset asset, AssetsType texture, AssetsType sprite, bool isOptional = false)
         {
+            if (asset.url == null || asset.url.Length == 0)
+            {
+                Debug.LogWarning($"Resource {texture} {sprite} has no url in path!");
+                ech.isChallengeLoaded = false;
+                return;
+            }
+
             string path = Application.persistentDataPath + "/" + ech.campaign.id;
 
             if (!Directory.Exists(path))
@@ -1280,7 +1287,7 @@ namespace Monetizr.Campaigns
 
             if (!File.Exists(fileToCheck))
             {
-                data = await DownloadHelper.DownloadAssetData(asset.url);
+                 data = await DownloadHelper.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {

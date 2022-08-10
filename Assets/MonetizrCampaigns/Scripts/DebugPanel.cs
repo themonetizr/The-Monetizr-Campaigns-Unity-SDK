@@ -22,12 +22,13 @@ namespace Monetizr.Campaigns
       
         static public readonly List<string> keys = new List<string>()
         {
-            "4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU",
+            "4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU", //design@monetizr.io ?
             "9-JosxHvT8ds9H0A3SOcOSSQl25yab5vSBItAlY6ags", //andris
-            "PUHzF8UQLXJUuaW0vX0D0lTAFlWU2G0J2NaN2SHk6AA",
-            "oRE6-DIXqfHgoU5TEohXycVkthRv2Tt3pG8hG8q8O9U",
-            "XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta?
-            "e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo"
+            //"PUHzF8UQLXJUuaW0vX0D0lTAFlWU2G0J2NaN2SHk6AA", //martins.jansevskis@themonetizr.com 
+            //"oRE6-DIXqfHgoU5TEohXycVkthRv2Tt3pG8hG8q8O9U", 
+            "XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta@themonetizr.com
+            "e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo",  //martins.jansevskis@gmail.com 
+            //"mnfie-kWEAzhor9sUeOk5ohlnSCDKTefer2IarKd7zs"   //artem
         };
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -88,6 +89,8 @@ namespace Monetizr.Campaigns
         {
             PlayerPrefs.SetString("api_key", keys[apiKeysList.value]);
             PlayerPrefs.Save();
+
+            MonetizrManager.Instance.CleanRewardsClaims();
 
             MonetizrManager.Instance.ChangeAPIKey(keys[apiKeysList.value]);
         }

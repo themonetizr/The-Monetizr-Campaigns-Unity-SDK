@@ -237,10 +237,10 @@ namespace Monetizr.Campaigns
             }
 
             //if no claimable reward in campaign - no give away missions
-            var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
+            //var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
 
-            if (claimableReward == null)
-                return null;
+            //if (claimableReward == null)
+            //    return null;
 
             RewardType rt = RewardType.Coins;
 
@@ -268,7 +268,7 @@ namespace Monetizr.Campaigns
                 case MissionType.VideoReward: m = prepareVideoMission(mt, campaign, reward); break;
                 case MissionType.SurveyReward: m = prepareSurveyMission(mt, campaign, reward); break;
                 case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign, reward); break;
-                case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
+               // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
                 case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign, reward); break;
             }
 
@@ -288,6 +288,8 @@ namespace Monetizr.Campaigns
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action updateUIDelegate)
         {
+            MonetizrManager.temporaryRewardTypeSelection = MonetizrManager.RewardSelectionType.Product;
+
             bool needToPlayVideo = !(m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true");
 
 

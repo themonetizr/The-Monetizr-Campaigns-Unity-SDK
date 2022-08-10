@@ -107,8 +107,13 @@ namespace Monetizr.Campaigns
 
             switch(s)
             {
-                case "product_reward": return EnterEmailType.ProductReward;
-                case "ingame_reward": return EnterEmailType.IngameReward;
+                case "product_reward":
+                    selection = MonetizrManager.RewardSelectionType.Product;
+                    return EnterEmailType.ProductReward;
+                case "ingame_reward":
+                    selection = MonetizrManager.RewardSelectionType.Ingame;
+                    return EnterEmailType.IngameReward;
+
                 case "selection_reward": return EnterEmailType.SelectionReward;
             }
 

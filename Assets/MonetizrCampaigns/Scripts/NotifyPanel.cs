@@ -187,6 +187,16 @@ namespace Monetizr.Campaigns
 
             rewardImage.sprite = rewardIcon;
 
+            //v2 updates
+
+            text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
+
+            gift?.gameObject.SetActive(false);
+            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.gameObject.SetActive(logo.sprite != null);
+            rewardImageBackgroud.gameObject.SetActive(false);
+            rewardAmount.gameObject.SetActive(false);
+
 
             MonetizrManager.Analytics.TrackEvent("Reward notification shown", m);
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
@@ -321,6 +331,11 @@ namespace Monetizr.Campaigns
 
             //buttonText.text = "Learn More";
             //buttonText.text = "Awesome!";
+
+            //v2 updates
+            string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
+
+            text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
 
             rewardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             rewardImage.gameObject.SetActive(rewardImage.sprite != null);
