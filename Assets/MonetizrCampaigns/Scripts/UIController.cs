@@ -238,13 +238,15 @@ namespace Monetizr.Campaigns
 
             foreach (var t in teaser.gameObject.GetComponents<PanelTextItem>())
                 t.InitializeByParent(PanelId.TinyMenuTeaser, m);
-            
+
+            teaser.SetActive(true);
+
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
 
 
             //previousPanel = PanelId.TinyMenuTeaser;
 
-            teaser.SetActive(true);
+            
         }
         
         public void HidePanel(PanelId id = PanelId.Unknown)

@@ -293,11 +293,11 @@ namespace Monetizr.Campaigns
             bool needToPlayVideo = !(m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true");
 
 
-            Action<bool> onComplete = (bool isSkipped) =>
+            /*Action<bool> onComplete = (bool isSkipped) =>
             {
                 //OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
-                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
-            };
+                //MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
+            };*/
 
             Action<bool> onVideoComplete = (bool isVideoSkipped) =>
             {
@@ -315,7 +315,7 @@ namespace Monetizr.Campaigns
                         if (isMailSkipped)
                             return;
 
-                        MonetizrManager.WaitForEndRequestAndNotify(onComplete, m);
+                        MonetizrManager.WaitForEndRequestAndNotify(null, m);
 
                     },
                     m,

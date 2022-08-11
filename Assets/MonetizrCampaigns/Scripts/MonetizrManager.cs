@@ -547,6 +547,11 @@ namespace Monetizr.Campaigns
 
                     instance.missionsManager.TryToActivateSurvey(m);
 
+                    //TODO: check if 
+
+                    MonetizrManager.HideTinyMenuTeaser();
+
+                    
                 },
                 m);
             };

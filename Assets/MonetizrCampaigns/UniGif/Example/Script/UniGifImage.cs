@@ -193,6 +193,13 @@ public class UniGifImage : MonoBehaviour
             yield break;
         }
 
+        if(nowState == State.Playing)
+        {
+            nowState = State.Ready;
+            Play();
+            yield break;
+        }
+
         if (nowState == State.Loading)
         {
             Debug.LogWarning("Already loading.");
@@ -201,60 +208,7 @@ public class UniGifImage : MonoBehaviour
         nowState = State.Loading;
 
         string path;
-        if (url.StartsWith("http"))
-        {
-            // from WEB
-            path = url;
-
-            // Load file
-            using (WWW www = new WWW(path))
-            {
-                yield return www;
-
-                if (string.IsNullOrEmpty(www.error) == false)
-                {
-                    Debug.LogError("File load error.\n" + www.error);
-                    nowState = State.None;
-                    yield break;
-                }
-
-                Clear();
-                nowState = State.Loading;
-
-                // Get GIF textures
-                yield return StartCoroutine(UniGif.GetTextureListCoroutine(www.bytes, (gifTexList, loopCount, width, height) =>
-                {
-                    if (gifTexList != null)
-                    {
-                        m_gifTextureList = gifTexList;
-                        this.loopCount = loopCount;
-                        this.width = width;
-                        this.height = height;
-                        nowState = State.Ready;
-
-                        //m_imgAspectCtrl.FixAspectRatio(width, height);
-
-                        if (m_rotateOnLoading)
-                        {
-                            transform.localEulerAngles = Vector3.zero;
-                        }
-
-                        if (autoPlay)
-                        {
-                            Play();
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError("Gif texture get error.");
-                        nowState = State.None;
-                    }
-                },
-                m_filterMode, m_wrapMode, m_outputDebugLog));
-            }
-        }
-        else
-        {
+       
             // from StreamingAssets
             path = url;
 
@@ -301,7 +255,7 @@ public class UniGifImage : MonoBehaviour
                 },
                 m_filterMode, m_wrapMode, m_outputDebugLog));
             
-        }
+        
 
        
     }

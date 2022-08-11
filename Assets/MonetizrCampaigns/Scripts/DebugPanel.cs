@@ -90,7 +90,7 @@ namespace Monetizr.Campaigns
             PlayerPrefs.SetString("api_key", keys[apiKeysList.value]);
             PlayerPrefs.Save();
 
-            MonetizrManager.Instance.CleanRewardsClaims();
+            //MonetizrManager.Instance.CleanRewardsClaims();
 
             MonetizrManager.Instance.ChangeAPIKey(keys[apiKeysList.value]);
         }
