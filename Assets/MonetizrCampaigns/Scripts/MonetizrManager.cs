@@ -522,6 +522,46 @@ namespace Monetizr.Campaigns
                 m);
         }
 
+        internal static async void ResetCampaign()
+        {
+            Mission m = instance.missionsManager.GetFirstUnactiveMission();
+
+            if(m == null)
+            {
+                Debug.Log($"Nothing to reset in ResetCampaign");
+                return;
+            }
+
+            string campaignId = m.campaignId;
+
+            //show screen to block
+            var lscreen = instance.uiController.ShowLoadingScreen();
+
+            lscreen.onComplete = (bool _) => { GameObject.Destroy(lscreen); };
+
+            CancellationTokenSource s_cts = new CancellationTokenSource();
+
+            try
+            {
+                s_cts.CancelAfter(10000);
+
+                await instance._challengesClient.Reset(campaignId, s_cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("\nTasks cancelled: timed out.\n");
+
+                //onFail.Invoke();
+            }
+            finally
+            {
+                s_cts.Dispose();
+            }
+        
+        
+            lscreen.SetActive(false);
+        }
+
         internal static async void WaitForEndRequestAndNotify(Action<bool> onComplete, Mission m)
         {
             //show screen to block
@@ -537,7 +577,7 @@ namespace Monetizr.Campaigns
                 {
                     //lscreen.SetActive(false);
 
-                    onComplete.Invoke(false);
+                    
 
                     m.state = MissionUIState.ToBeHidden;
 
@@ -547,20 +587,20 @@ namespace Monetizr.Campaigns
 
                     instance.missionsManager.TryToActivateSurvey(m);
 
-                    //TODO: check if 
-
+                 
                     MonetizrManager.HideTinyMenuTeaser();
 
-                    
+
+                    onComplete?.Invoke(false);
                 },
                 m);
             };
 
             Action onFail = () =>
             {
-                onComplete.Invoke(false);
-
                 Debug.Log("FAIL!");
+
+                onComplete?.Invoke(false);
             };
 
 

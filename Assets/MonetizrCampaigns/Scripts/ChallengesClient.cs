@@ -169,6 +169,39 @@ namespace Monetizr.Campaigns
         }
 
         /// <summary>
+        /// Reset the challenge as claimed by the player.
+        /// </summary>
+        public async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        {
+            HttpRequestMessage requestMessage = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(k_BaseUri + "api/campaigns/" + campaignId + "/reset"),
+                Headers =
+                {
+                    {"player-id", analytics.GetUserId()},
+                    {"app-bundle-id", Application.identifier },
+                    {"sdk-version", MonetizrManager.SDKVersion }
+                }
+            };
+                        
+            HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
+
+            string s = await response.Content.ReadAsStringAsync();
+
+            Debug.Log($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                onSuccess?.Invoke();
+            }
+            else
+            {
+                onFailure?.Invoke();
+            }
+        }
+
+        /// <summary>
         /// Marks the challenge as claimed by the player.
         /// </summary>
         public async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)

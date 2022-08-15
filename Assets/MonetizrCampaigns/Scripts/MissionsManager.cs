@@ -368,6 +368,17 @@ namespace Monetizr.Campaigns
             }
         }
 
+        internal Mission GetFirstUnactiveMission()
+        {
+            foreach (var m in missions)
+            {
+                if (!m.isServerCampaignActive)
+                    return m;
+            }
+
+            return null;
+        }
+
         internal void AddMissionsToCampaigns()
         {
             //bind to server campagns
@@ -435,6 +446,9 @@ namespace Monetizr.Campaigns
                 }
 
             }
+
+            //TODO: remove outdated missions from local cache
+            //???
 
             serializedMissions.SaveAll();
         }

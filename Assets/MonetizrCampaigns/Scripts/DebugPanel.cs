@@ -45,9 +45,15 @@ namespace Monetizr.Campaigns
             claimIfSkipped.onValueChanged.AddListener(OnToggleChanged);
 
             apiKeysList.ClearOptions();
+
+            //List<string> k2 = new List<string>();
+
+            //for (int i = 0; i < keys.Count; i++)
+            //    k2.Add($"{(i+1).ToString()}. {keys[i]}");
+
             apiKeysList.AddOptions(keys);
 
-            versionText.text = $"App version: {Application.version} OS: {MonetizrAnalytics.osVersion}\nADID: {MonetizrAnalytics.advertisingID}\nLimit ad tracking: {MonetizrAnalytics.limitAdvertising}";
+            versionText.text = $"App version: {Application.version} OS: {MonetizrAnalytics.osVersion}\nADID: {MonetizrAnalytics.advertisingID}\nLimit ad tracking: {MonetizrAnalytics.limitAdvertising}\nActive campaign: {MonetizrManager.Instance.GetActiveCampaign()}";
 
             apiKeysList.value = keys.FindIndex(0, (string v)=> { return v == MonetizrManager.Instance.GetCurrentAPIkey();  });
         }
@@ -68,6 +74,11 @@ namespace Monetizr.Campaigns
         public void ResetLocalClaimData()
         {
             MonetizrManager.Instance.CleanRewardsClaims();
+        }
+
+        public void ResetCampaigns()
+        {
+            MonetizrManager.ResetCampaign();
         }
 
         private void ClosePanel()

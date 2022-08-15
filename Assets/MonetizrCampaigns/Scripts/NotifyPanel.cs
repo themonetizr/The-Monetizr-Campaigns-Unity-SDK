@@ -128,6 +128,7 @@ namespace Monetizr.Campaigns
 
             rewardImage.sprite = rewardIcon;
 
+            text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
 
             MonetizrManager.Analytics.TrackEvent("Notification shown", m);
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, currentMission);

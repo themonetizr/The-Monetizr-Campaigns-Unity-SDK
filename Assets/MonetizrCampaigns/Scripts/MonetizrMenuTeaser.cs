@@ -140,6 +140,9 @@ namespace Monetizr.Campaigns
             rewardImage.gameObject.SetActive(false);
             rewardText.gameObject.SetActive(true);
 
+            string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
+
+            rewardText.text = rewardText.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
             //if (!showReward)
             //{
             //    teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(challengeId, AssetsType.TinyTeaserTexture);
