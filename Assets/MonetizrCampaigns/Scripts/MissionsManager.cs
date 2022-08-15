@@ -286,7 +286,7 @@ namespace Monetizr.Campaigns
             return m;
         }
 
-        internal Action GetEmailGiveawayClaimAction(Mission m, Action updateUIDelegate)
+        internal Action GetEmailGiveawayClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
         {
             MonetizrManager.temporaryRewardTypeSelection = MonetizrManager.RewardSelectionType.Product;
 
@@ -307,15 +307,21 @@ namespace Monetizr.Campaigns
                     isVideoSkipped = false;
 
                 if (isVideoSkipped)
+                {
+                    onComplete?.Invoke(isVideoSkipped);
                     return;
+                }
 
                 MonetizrManager.ShowEnterEmailPanel(
                     (bool isMailSkipped) =>
                     {
                         if (isMailSkipped)
+                        {
+                            onComplete?.Invoke(isMailSkipped);
                             return;
+                        }
 
-                        MonetizrManager.WaitForEndRequestAndNotify(null, m);
+                        MonetizrManager.WaitForEndRequestAndNotify(onComplete, m);
 
                     },
                     m,

@@ -537,7 +537,7 @@ namespace Monetizr.Campaigns
                 {
                     //lscreen.SetActive(false);
 
-                    //onComplete(false);
+                    onComplete.Invoke(false);
 
                     m.state = MissionUIState.ToBeHidden;
 
@@ -558,6 +558,8 @@ namespace Monetizr.Campaigns
 
             Action onFail = () =>
             {
+                onComplete.Invoke(false);
+
                 Debug.Log("FAIL!");
             };
 
@@ -894,7 +896,7 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log($"---_PressSingleMission");
 
-                Instance._PressSingleMission(m);
+                Instance._PressSingleMission(onComplete,m);
                 return;
             }
             
@@ -912,7 +914,7 @@ namespace Monetizr.Campaigns
             instance.uiController.HidePanel(PanelId.RewardCenter);
         }
 
-        internal void _PressSingleMission(Mission m)
+        internal void _PressSingleMission(Action<bool> onComplete, Mission m)
         {
             //if notification is alredy visible - do nothing
             //if (uiController.panels.ContainsKey(PanelId.TwitterNotification))
@@ -921,7 +923,7 @@ namespace Monetizr.Campaigns
             if (m.isClaimed == ClaimState.Claimed)
                 return;
 
-            MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, null).Invoke();
+            MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, onComplete, null).Invoke();
 
            /* Action<bool> onTaskComplete = (bool isSkipped) =>
             {

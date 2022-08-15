@@ -473,7 +473,7 @@ namespace Monetizr.Campaigns
             m.claimButtonText = needToPlayVideo ? "Watch video!" : "Claim reward!";
 
 
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m,AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m,null,AddNewUIMissions);
 
            
 
