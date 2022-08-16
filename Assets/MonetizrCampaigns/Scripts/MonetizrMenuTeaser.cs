@@ -88,14 +88,14 @@ namespace Monetizr.Campaigns
         {
 
 //TODO: update gif loader
-#if !UNITY_EDITOR
+//#if !UNITY_EDITOR
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.TeaserGifPathString))
             {
                 string url = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.TeaserGifPathString);
 
                 uniGifImage.SetGifFromUrl(url);
             }
-#endif
+//#endif
 
 
             //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);

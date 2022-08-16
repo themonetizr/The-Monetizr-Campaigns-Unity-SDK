@@ -8,6 +8,7 @@ http://opensource.org/licenses/mit-license.php
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using ThreeDISevenZeroR.UnityGifDecoder;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -205,12 +206,73 @@ public class UniGifImage : MonoBehaviour
             Debug.LogWarning("Already loading.");
             yield break;
         }
+        
+        byte[] bytes = File.ReadAllBytes(url);
+
+        if (bytes == null)
+        {
+            Debug.LogError("File load error.\n");
+            nowState = State.None;
+            yield break;
+        }
+
+        Clear();
         nowState = State.Loading;
+
+        m_gifTextureList = new List<UniGif.GifTexture>();
+
+        using (var gifStream = new GifStream(bytes))
+         {
+         while (gifStream.HasMoreData)
+         {
+             switch (gifStream.CurrentToken)
+             {
+                 case GifStream.Token.Image:
+                     var image = gifStream.ReadImage();
+                        // do something with image
+
+                        var frame = new Texture2D(
+                            gifStream.Header.width,
+                            gifStream.Header.height,
+                            TextureFormat.ARGB32, false);
+
+                        frame.SetPixels32(image.colors);
+                        frame.Apply();
+
+                        m_gifTextureList.Add(new UniGif.GifTexture(frame, image.DelaySeconds));
+
+                        break;
+                         
+                 case GifStream.Token.Comment:
+                     var comment = gifStream.ReadComment();
+                     // log this comment
+                     break;
+     
+                 default:
+                     gifStream.SkipToken();
+                     // this token has no use for you, skip it
+                     break;
+             }
+         }
+     }
+
+        loopCount = -1;
+        nowState = State.Ready;
+
+        if (autoPlay)
+        {
+            Play();
+        }
+
+        yield break;
+
+////----------------------------
+///
 
         string path;
        
             // from StreamingAssets
-            path = url;
+            /*path = url;
 
             byte[] bytes = File.ReadAllBytes(url);
 
@@ -219,7 +281,7 @@ public class UniGifImage : MonoBehaviour
                     Debug.LogError("File load error.\n");
                     nowState = State.None;
                     yield break;
-                }
+                }*/
 
                 Clear();
                 nowState = State.Loading;
