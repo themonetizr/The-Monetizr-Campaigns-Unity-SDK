@@ -21,8 +21,27 @@ namespace Monetizr.Campaigns
 
             var param = $"{parentId.ToString()}.{textContent}";
 
+            if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
+            {
+                var param2 = $"{parentId.ToString()}.{textContent}2";
+
+                if (m.additionalParams.dictionary.ContainsKey(param2))
+                {
+                    param = param2;
+                }
+            }
+
             if (m.additionalParams.dictionary.ContainsKey(param))
-                textElement.text = m.additionalParams.GetParam(param);
+            {
+                string t = m.additionalParams.GetParam(param);
+
+                string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
+
+                t = t.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
+                t = t.Replace("<br/>", "\n");
+
+                textElement.text = t;
+            }
         }
 
         

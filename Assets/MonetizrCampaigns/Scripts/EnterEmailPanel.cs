@@ -67,16 +67,18 @@ namespace Monetizr.Campaigns
 
         internal void OnInputFieldChanged(string s)
         {
+            string lowerCaseMail = s.ToLower();
+
             //check email with regex
-            var isValid = validateEmailRegex.IsMatch(s);
+            var isValid = validateEmailRegex.IsMatch(lowerCaseMail);
 
             //double check with MailAddress
             if (isValid)
             {
                 try
                 {
-                    MailAddress address = new MailAddress(s);
-                    isValid = (address.Address == s);
+                    MailAddress address = new MailAddress(lowerCaseMail);
+                    isValid = (address.Address == lowerCaseMail);
                 }
                 catch (FormatException)
                 {
@@ -86,7 +88,7 @@ namespace Monetizr.Campaigns
             }
 
             //email valid, but country code is too short
-            if (s.Length - s.LastIndexOf('.') <= 2)
+            if (lowerCaseMail.Length - lowerCaseMail.LastIndexOf('.') <= 2)
                 isValid = false;
 
             closeButton.interactable = isValid;

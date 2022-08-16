@@ -292,6 +292,9 @@ namespace Monetizr.Campaigns
 
             bool needToPlayVideo = !(m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true");
 
+#if UNITY_EDITOR_WIN
+            needToPlayVideo = false;
+#endif
 
             /*Action<bool> onComplete = (bool isSkipped) =>
             {

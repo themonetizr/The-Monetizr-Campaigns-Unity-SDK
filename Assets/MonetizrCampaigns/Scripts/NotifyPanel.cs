@@ -190,6 +190,14 @@ namespace Monetizr.Campaigns
 
             //v2 updates
 
+            if(MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
+            {
+                if (m.additionalParams.dictionary.ContainsKey("CongratsNotification.content_text2"))
+                {
+                    text.text = m.additionalParams.GetParam("CongratsNotification.content_text2");
+                }
+            }
+
             text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
 
             gift?.gameObject.SetActive(false);

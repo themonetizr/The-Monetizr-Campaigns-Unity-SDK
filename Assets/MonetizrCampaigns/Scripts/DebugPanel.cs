@@ -53,7 +53,11 @@ namespace Monetizr.Campaigns
 
             apiKeysList.AddOptions(keys);
 
-            versionText.text = $"App version: {Application.version} OS: {MonetizrAnalytics.osVersion}\nADID: {MonetizrAnalytics.advertisingID}\nLimit ad tracking: {MonetizrAnalytics.limitAdvertising}\nActive campaign: {MonetizrManager.Instance.GetActiveCampaign()}";
+            versionText.text = $"App version: {Application.version} " +
+                $"OS: {MonetizrAnalytics.osVersion}\n" +
+                $"ADID: {MonetizrAnalytics.advertisingID}\n" +
+                $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +
+                $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()}";
 
             apiKeysList.value = keys.FindIndex(0, (string v)=> { return v == MonetizrManager.Instance.GetCurrentAPIkey();  });
         }
