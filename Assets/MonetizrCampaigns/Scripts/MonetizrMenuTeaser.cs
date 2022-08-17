@@ -9,7 +9,7 @@ namespace Monetizr.Campaigns
 
     internal class MonetizrMenuTeaser : PanelController
     {
-        public UniGifImage uniGifImage;
+        public GifImage gifImage;
 
         public Button button;
         public RawImage teaserImage;
@@ -93,7 +93,7 @@ namespace Monetizr.Campaigns
             {
                 string url = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.TeaserGifPathString);
 
-                uniGifImage.SetGifFromUrl(url);
+                gifImage.SetGifFromUrl(url);
             }
 //#endif
 
