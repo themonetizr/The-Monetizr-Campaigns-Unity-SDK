@@ -1540,7 +1540,7 @@ namespace Monetizr.Campaigns
 
                         case "ingame_reward_image":
 
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.RewardSprite, true);
+                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.IngameRewardSprite, true);
 
                             break;
 
