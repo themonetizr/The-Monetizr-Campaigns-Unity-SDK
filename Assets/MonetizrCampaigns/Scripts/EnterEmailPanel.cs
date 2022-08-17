@@ -103,17 +103,17 @@ namespace Monetizr.Campaigns
             MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner, currentMission);
         }
 
-        private EnterEmailType GetPanelType(Mission m)
+        static internal EnterEmailType GetPanelType(Mission m)
         {
             var s = m.additionalParams.GetParam("email_giveaway_type");
 
             switch(s)
             {
                 case "product_reward":
-                    selection = MonetizrManager.RewardSelectionType.Product;
+                    //selection = MonetizrManager.RewardSelectionType.Product;
                     return EnterEmailType.ProductReward;
                 case "ingame_reward":
-                    selection = MonetizrManager.RewardSelectionType.Ingame;
+                    //selection = MonetizrManager.RewardSelectionType.Ingame;
                     return EnterEmailType.IngameReward;
 
                 case "selection_reward": return EnterEmailType.SelectionReward;
@@ -136,6 +136,10 @@ namespace Monetizr.Campaigns
         {
             EnterEmailType type = GetPanelType(m);
 
+            if(type == EnterEmailType.ProductReward)
+                selection = MonetizrManager.RewardSelectionType.Product;
+            else if (type == EnterEmailType.IngameReward)
+                selection = MonetizrManager.RewardSelectionType.Ingame;
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 

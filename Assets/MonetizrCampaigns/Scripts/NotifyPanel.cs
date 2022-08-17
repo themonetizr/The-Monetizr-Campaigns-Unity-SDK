@@ -113,13 +113,20 @@ namespace Monetizr.Campaigns
                 rewardIcon = customCoin;
             }
 
-            
+
 
             //title.text = $"{brandTitle} video";
             //text.text = $"<color=#F05627>Watch video</color> by {brandTitle} to earn <color=#F05627>{m.reward} {rewardTitle}</color>";
 
             //buttonText.text = "Learn More";
             //buttonText.text = "Got it!";
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) &&
+                EnterEmailPanel.GetPanelType(m) == EnterEmailType.IngameReward)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+            }
+
 
             rewardImage.gameObject.SetActive(false);
             rewardAmount.gameObject.SetActive(false);

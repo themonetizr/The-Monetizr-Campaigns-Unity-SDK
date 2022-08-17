@@ -68,6 +68,7 @@ namespace Monetizr.Campaigns
         LoadingScreenSprite,
         TeaserGifPathString,
         RewardSprite,
+        IngameRewardSprite,
     }
 
     internal class ServerCampaignWithAssets
@@ -95,6 +96,7 @@ namespace Monetizr.Campaigns
             { AssetsType.LoadingScreenSprite, typeof(Sprite) },
             { AssetsType.TeaserGifPathString, typeof(String) },
             { AssetsType.RewardSprite, typeof(Sprite) },
+            { AssetsType.IngameRewardSprite, typeof(Sprite) },
 
         };
 
@@ -301,8 +303,8 @@ namespace Monetizr.Campaigns
             {
                 sponsoredMissions = new List<MissionDescription>()
                 {
-                    new MissionDescription{ missionType = MissionType.VideoReward, reward = 1000, rewardCurrency = RewardType.Coins },
-                    new MissionDescription{ missionType = MissionType.MutiplyReward, reward = 500, rewardCurrency = RewardType.Coins },
+                    //new MissionDescription{ missionType = MissionType.VideoReward, reward = 1000, rewardCurrency = RewardType.Coins },
+                    //new MissionDescription{ missionType = MissionType.MutiplyReward, reward = 500, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.MutiplyReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.TwitterReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     new MissionDescription{ missionType = MissionType.VideoWithEmailGiveaway, reward = 20, rewardCurrency = RewardType.Coins },
@@ -1531,6 +1533,12 @@ namespace Monetizr.Campaigns
                             break;
 
                         case "reward_image":
+
+                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.RewardSprite, true);
+
+                            break;
+
+                        case "ingame_reward_image":
 
                             await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.RewardSprite, true);
 
