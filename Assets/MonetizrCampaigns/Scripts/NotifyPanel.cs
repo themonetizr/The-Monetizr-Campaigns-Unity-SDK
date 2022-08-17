@@ -124,7 +124,13 @@ namespace Monetizr.Campaigns
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) &&
                 EnterEmailPanel.GetPanelType(m) == EnterEmailType.IngameReward)
             {
-                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+                gift.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+            }
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite) &&
+               EnterEmailPanel.GetPanelType(m) == EnterEmailType.ProductReward)
+            {
+                gift.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             }
 
 
