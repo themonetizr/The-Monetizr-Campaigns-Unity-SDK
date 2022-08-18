@@ -83,7 +83,7 @@ namespace Monetizr.Campaigns
 
         public void ShowPanelFromPrefab(String prefab, PanelId id = PanelId.Unknown, Action<bool> onComplete = null, bool rememberPrevious = false, Mission m = null)
         {
-            Debug.LogWarning($"ShowPanel: {id} Mission: {m==null}");
+            //Debug.LogWarning($"ShowPanel: {id} Mission: {m==null}");
 
             //if (panels.ContainsKey(previousPanel) && previousPanel != PanelId.Unknown)
             //    panels[previousPanel].SetActive(false);
@@ -114,7 +114,7 @@ namespace Monetizr.Campaigns
 
                     uiVersion = m.additionalParams.GetIntParam("design_version");
 
-                    Debug.Log($"-------------{uiVersion}");
+                    //Debug.Log($"-------------{uiVersion}");
 
                     if (uiVersion == 2 && id != PanelId.DebugPanel)
                     {

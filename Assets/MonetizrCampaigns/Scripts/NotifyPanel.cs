@@ -113,7 +113,7 @@ namespace Monetizr.Campaigns
                 rewardIcon = customCoin;
             }
 
-
+            gift?.gameObject.SetActive(false);
 
             //title.text = $"{brandTitle} video";
             //text.text = $"<color=#F05627>Watch video</color> by {brandTitle} to earn <color=#F05627>{m.reward} {rewardTitle}</color>";
@@ -124,20 +124,26 @@ namespace Monetizr.Campaigns
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) &&
                 EnterEmailPanel.GetPanelType(m) == EnterEmailType.IngameReward)
             {
-                gift.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
             }
 
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite) &&
                EnterEmailPanel.GetPanelType(m) == EnterEmailType.ProductReward)
             {
-                gift.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             }
 
-
-            rewardImage.gameObject.SetActive(false);
+            
+            rewardImage.gameObject.SetActive(true);
             rewardAmount.gameObject.SetActive(false);
             rewardImageBackgroud.gameObject.SetActive(false);
             noThanksButton?.gameObject.SetActive(true);
+
+            if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward)
+            {
+                gift?.gameObject.SetActive(true);
+                rewardImage?.gameObject.SetActive(false);
+            }
 
             rewardImage.sprite = rewardIcon;
 
@@ -199,11 +205,27 @@ namespace Monetizr.Campaigns
 
             noThanksButton?.gameObject.SetActive(false);
 
-            rewardImage.sprite = rewardIcon;
+
 
             //v2 updates
 
-            if(MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) &&
+                MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+            }
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite) &&
+               MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+            }
+
+            if (rewardIcon != null)
+                rewardImage.sprite = rewardIcon;
+
+            if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
             {
                 if (m.additionalParams.dictionary.ContainsKey("CongratsNotification.content_text2"))
                 {
@@ -354,12 +376,28 @@ namespace Monetizr.Campaigns
             //buttonText.text = "Learn More";
             //buttonText.text = "Awesome!";
 
+            Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon; ; 
+
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) &&
+                MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+            }
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite) &&
+               MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+            }
+
+            rewardImage.sprite = rewardIcon;
+
             //v2 updates
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
             text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
-
-            rewardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+                       
             rewardImage.gameObject.SetActive(rewardImage.sprite != null);
 
             rewardImageBackgroud.gameObject.SetActive(false);

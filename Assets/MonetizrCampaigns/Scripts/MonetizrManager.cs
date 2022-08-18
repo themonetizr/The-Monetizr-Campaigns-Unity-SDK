@@ -121,7 +121,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            Log.Print($"Adding asset {asset} into {t}");
+            //Log.Print($"Adding asset {asset} into {t}");
 
             MonetizrManager.HoldResource(asset);
 
@@ -667,7 +667,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            Debug.LogWarning("ShowStartupNotification");
+            //Debug.LogWarning("ShowStartupNotification");
 
             //Mission sponsoredMsns = instance.missionsManager.missions.Find((Mission item) => { return item.isSponsored; });
             Mission mission = instance.missionsManager.FindMissionForStartNotify();
@@ -702,7 +702,7 @@ namespace Monetizr.Campaigns
             }
 
 
-            Debug.LogWarning("!!!!-------");
+            //Debug.LogWarning("!!!!-------");
 
             FillInfo(mission);
 
@@ -936,7 +936,7 @@ namespace Monetizr.Campaigns
 
             if (Instance.missionsManager.missions.Count == 1)
             {
-                Debug.Log($"---_PressSingleMission");
+                //Debug.Log($"---_PressSingleMission");
 
                 Instance._PressSingleMission(onComplete,m);
                 return;
@@ -1242,7 +1242,7 @@ namespace Monetizr.Campaigns
             string fname = Path.GetFileName(asset.url);
             string fpath = path + "/" + fname;
 
-            Debug.Log(fpath);
+            //Debug.Log(fpath);
 
             byte[] data = null;
 
@@ -1301,7 +1301,7 @@ namespace Monetizr.Campaigns
             bool texStatus = tex != null;
             bool spriteStatus = s != null;
 
-            Debug.Log($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
+            //Debug.Log($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
         }
 
         private async Task PreloadAssetToCache(ServerCampaignWithAssets ech, ServerCampaign.Asset asset, /*AssetsType urlString,*/ AssetsType fileString, bool required = true)
@@ -1579,7 +1579,7 @@ namespace Monetizr.Campaigns
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
 
-            Log.Print($"RequestChallenges completed with count: {_challenges.Count} {campaignIds.Count} active: {activeChallengeId}");
+            Log.Print($"RequestChallenges completed with count: {campaignIds.Count} active: {activeChallengeId}");
 
             //Ok, even if response empty
             onRequestComplete?.Invoke(/*challengesId.Count > 0*/true);
@@ -1657,7 +1657,7 @@ namespace Monetizr.Campaigns
 
             if(!HasAsset(challengeId,t))
             {
-                Log.Print($"{challengeId} has no asset {t}");
+                //Log.Print($"{challengeId} has no asset {t}");
                 return default(T);
             }
 

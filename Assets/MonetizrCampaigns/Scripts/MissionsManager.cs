@@ -335,7 +335,7 @@ namespace Monetizr.Campaigns
             //show video, then claim rewards if it's completed
             return () =>
             {
-                Debug.Log($"----- {needToPlayVideo}");
+                //Debug.Log($"----- {needToPlayVideo}");
 
                 if (needToPlayVideo)
                 {

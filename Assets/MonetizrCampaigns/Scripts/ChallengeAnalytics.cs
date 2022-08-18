@@ -460,7 +460,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            Log.Print($"MonetizrAnalytics BeginShowAdAsset: {type} {campaignId}");
+           //Log.Print($"MonetizrAnalytics BeginShowAdAsset: {type} {campaignId}");
 
             //Key value pair for duplicated types with different challenge ids
             KeyValuePair<AdType, string> adElement = new KeyValuePair<AdType, string>(type, campaignId);
@@ -535,7 +535,7 @@ namespace Monetizr.Campaigns
 
         private void _EndShowAdAsset(KeyValuePair<AdType, string> adAsset)
         {
-            Log.Print($"MonetizrAnalytics EndShowAdAsset: {adAsset.Key} {adAsset.Value}");
+            //Log.Print($"MonetizrAnalytics EndShowAdAsset: {adAsset.Key} {adAsset.Value}");
 
             //string brandName = visibleAdAsset[adAsset].mission.brandName;//
             //
@@ -607,7 +607,7 @@ namespace Monetizr.Campaigns
 
         public void TrackEvent(string name, string campaign)
         {
-            Log.Print($"TrackEvent: {name} {campaign}");
+            //Log.Print($"TrackEvent: {name} {campaign}");
 
             var eventName = $"[UNITY_SDK] {name}";
 

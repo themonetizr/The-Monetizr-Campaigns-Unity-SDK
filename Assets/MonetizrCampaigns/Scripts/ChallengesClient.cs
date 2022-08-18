@@ -89,8 +89,8 @@ namespace Monetizr.Campaigns
                 {
                     ch.additional_params = ParseContentString(ch.content);
 
-                    foreach(var v in ch.additional_params)
-                        Debug.Log($"!!!! {v.Key}={v.Value}");
+                    //foreach(var v in ch.additional_params)
+                    //    Debug.Log($"!!!! {v.Key}={v.Value}");
                 }
 
                 var result = new List<ServerCampaign>(challenges.challenges);
@@ -152,12 +152,12 @@ namespace Monetizr.Campaigns
 
                     string result = value.Substring(startId + 1, endId - startId - 1);
 
-                    Debug.Log($"-----{startId} {endId} {result}");
+                    //Debug.Log($"-----{startId} {endId} {result}");
 
                     if (res.ContainsKey(result))
                     {
                         value = value.Replace($"%{result}%", res[result]);
-                        Debug.Log($"-----replace {result} {res[result]}");
+                        //Debug.Log($"-----replace {result} {res[result]}");
                     }
                     
                 }

@@ -197,8 +197,13 @@ namespace Monetizr.Campaigns
 
             if (type == EnterEmailType.IngameReward)
             {
+                singleRewardRoot.SetActive(true);
+                selectRewardRoot.SetActive(false);
+
                 rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
-                
+
+                if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite))
+                    rewardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
             }
 
             if(type == EnterEmailType.SelectionReward)
@@ -206,7 +211,11 @@ namespace Monetizr.Campaigns
                 singleRewardRoot.SetActive(false);
                 selectRewardRoot.SetActive(true);
                 
-                selection1Icon.sprite = rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+                selection1Icon.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+
+                if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite))
+                    selection1Icon.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+
                 selection2Icon.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             }
 
