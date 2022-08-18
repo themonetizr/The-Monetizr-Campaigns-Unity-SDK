@@ -204,7 +204,7 @@ namespace Monetizr.Campaigns
                 if (designVersion == 2)
                 {
                     teaserPrefab = "MonetizrMenuTeaser2";
-                    screenPos = Vector2.zero;
+                    //screenPos = Vector2.zero;
                 }
 
 
@@ -219,7 +219,7 @@ namespace Monetizr.Campaigns
                        MonetizrManager.ShowRewardCenter(UpdateGameUI);
                 });
 
-                if (screenPos != Vector2.zero)
+                if (screenPos != null)
                 {
                     teaser.rectTransform.anchoredPosition = screenPos;
                 }

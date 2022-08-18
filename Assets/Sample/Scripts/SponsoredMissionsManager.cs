@@ -7,17 +7,29 @@ using UnityEngine.UI;
 public class SponsoredMissionsManager : MonoBehaviour
 {
     public Sprite defaultRewardIcon;
+    public GameObject dummyUI;
 
     private void Start()
     {
+        //temporary API key for testing
         var key = "e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo";
-        
 
-        MonetizrManager.Initialize(key, null, () =>
+        //define sponsored mission (you can change amount of reward here)
+        var sponsoredMissions = new List<MissionDescription>()
+        {
+           new MissionDescription(20, RewardType.Coins),
+        };
+
+        //initialize SDK
+        MonetizrManager.Initialize(key, sponsoredMissions, () =>
             {
-                if(MonetizrManager.Instance.HasChallengesAndActive())
+                if(MonetizrManager.Instance.HasCampaignsAndActive())
                 {
-                    MonetizrManager.ShowTinyMenuTeaser();
+                    //we can show teaser manually, but better to use TeaserHelper script
+                    //see DummyMainUI object in SampleScene
+                    dummyUI.SetActive(true);
+
+                    //MonetizrManager.ShowTinyMenuTeaser();
                     //Do something
                 }
             },
@@ -26,14 +38,18 @@ public class SponsoredMissionsManager : MonoBehaviour
                 //SoundManager.I.SetSoundAllowed(soundOn);
             });
 
-        MonetizrManager.SetTeaserPosition(new Vector2(-420, 270));
+        //good default placement for teaser
+        MonetizrManager.SetTeaserPosition(new Vector2(-230, -765));
 
+        //define reward type, name, getter and adder for reward
         MonetizrManager.SetGameCoinAsset(RewardType.Coins,defaultRewardIcon, "Coins", () =>
                 {
+                    //return current amount of coins
                     return 0;// GameController.I.GetCoinsTotal();
                 },
                 (int reward) =>
                 {
+                    //add coins
                     //GameController.I.AddCoinsTotal(reward);
                 });
 

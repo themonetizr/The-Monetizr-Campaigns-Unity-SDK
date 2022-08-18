@@ -19,9 +19,16 @@ namespace Monetizr.Campaigns
 
     public class MissionDescription
     {
-        public MissionType missionType;
-        public int reward;
-        public RewardType rewardCurrency;
+        internal MissionType missionType;
+        internal int reward;
+        internal RewardType rewardCurrency;
+
+        public MissionDescription(int reward, RewardType rewardCurrency)
+        {
+            this.missionType = MissionType.VideoWithEmailGiveaway;
+            this.reward = reward;
+            this.rewardCurrency = rewardCurrency;
+        }
     }
 
     internal enum MissionUIState
