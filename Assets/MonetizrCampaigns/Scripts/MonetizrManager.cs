@@ -1422,6 +1422,8 @@ namespace Monetizr.Campaigns
 
             campaignIds.Clear();
 
+            
+
 #if TEST_SLOW_LATENCY
             await Task.Delay(10000);
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -1434,6 +1436,10 @@ namespace Monetizr.Campaigns
                             
                 if (this.challenges.ContainsKey(ch.id))
                     continue;
+
+                string path = Application.persistentDataPath + "/" + ech.campaign.id;
+
+                Debug.Log($"Campaign path: {path}");
 
                 foreach (var asset in ch.assets)
                 {
