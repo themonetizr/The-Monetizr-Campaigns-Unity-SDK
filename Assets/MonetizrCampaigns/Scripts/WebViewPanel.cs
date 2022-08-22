@@ -54,7 +54,7 @@ namespace Monetizr.Campaigns
             }
 
 #if UNITY_EDITOR
-            webView.Frame = new Rect(0,0, 1080, 1920);
+            webView.Frame = new Rect(0,0, 1080.0f*0.9f, 1920.0f*0.9f);
 #else
             if(fullScreen)
                 webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
@@ -148,6 +148,7 @@ body {{
     height: 40px;
     z-index:500;
     border-radius: 50%;
+    opacity: 0.5;
 }}
 .countdown
 {{
@@ -163,15 +164,16 @@ body {{
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 25px;
+    font-size: 20px;
     border-radius: 50%;
     z-index:500;
+    font-family: Verdana, sans-serif;
 }}
 
 .toastInfo
 {{
     position: absolute;
-    bottom: 15px;
+    bottom: 0px;
     left: 0;
     right: 0;
     margin: auto;
@@ -185,6 +187,7 @@ body {{
     font-size: 18px;
     padding-top: 4px;
     color: rgba(128,128, 128, 0.75);
+    font-family: Verdana, sans-serif;
     
     z-index:500;
 }}
