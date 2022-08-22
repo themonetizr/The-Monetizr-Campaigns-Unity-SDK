@@ -307,7 +307,8 @@ namespace Monetizr.Campaigns
                     //new MissionDescription{ missionType = MissionType.MutiplyReward, reward = 500, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.MutiplyReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.TwitterReward, reward = 1000, rewardCurrency = RewardType.Coins },
-                    new MissionDescription{ missionType = MissionType.VideoWithEmailGiveaway, reward = 20, rewardCurrency = RewardType.Coins },
+                    //new MissionDescription{ missionType = MissionType.VideoWithEmailGiveaway, reward = 20, rewardCurrency = RewardType.Coins },
+                    new MissionDescription(20, RewardType.Coins),
                 };
             }
 
@@ -1107,7 +1108,7 @@ namespace Monetizr.Campaigns
 
         public static void ShowTinyMenuTeaser(Action UpdateGameUI = null)
         {
-            Log.Print("ShowTinyMenuTeaser");
+            //Log.Print("ShowTinyMenuTeaser");
 
             //Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
             if (instance == null)
@@ -1370,7 +1371,7 @@ namespace Monetizr.Campaigns
             if (zipFolder != null)
                 fpath = fileToCheck;
 
-            Log.Print($"resource {fileString} {fpath}");
+            //Log.Print($"resource {fileString} {fpath}");
 
             //ech.SetAsset<string>(urlString, asset.url);
             ech.SetAsset<string>(fileString, fpath);

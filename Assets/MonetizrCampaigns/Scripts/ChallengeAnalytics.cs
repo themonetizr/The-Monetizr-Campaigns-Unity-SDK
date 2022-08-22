@@ -284,7 +284,7 @@ namespace Monetizr.Campaigns
 //#endif
             deviceSizeGroup = GetDeviceGroup();
 
-            Log.Print($"!!!osVersion {osVersion} {advertisingID} {limitAdvertising} dg: {deviceSizeGroup}");
+            Log.Print($"OS Version {osVersion} Ad id: {advertisingID} Limit ads: {limitAdvertising} Device group: {deviceSizeGroup}");
 
 #if USING_AMPLITUDE
             amplitude = Amplitude.Instance;
