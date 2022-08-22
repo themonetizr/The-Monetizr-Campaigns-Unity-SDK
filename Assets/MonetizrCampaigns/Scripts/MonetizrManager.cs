@@ -935,7 +935,17 @@ namespace Monetizr.Campaigns
             if (m == null)
                 return;
 
-            if (Instance.missionsManager.missions.Count == 1)
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+
+            /*int i = 1;
+            foreach (var m2 in Instance.missionsManager.missions)
+            {
+                Debug.Log($"{i}:{m2.missionTitle}:{m2.campaignId}");
+                i++;
+            }*/
+
+            if(missions.Count == 1)
+            //if (Instance.missionsManager.missions.Count == 1)
             {
                 //Debug.Log($"---_PressSingleMission");
 
