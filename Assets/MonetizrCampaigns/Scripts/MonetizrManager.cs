@@ -503,6 +503,17 @@ namespace Monetizr.Campaigns
             m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandRewardBannerSprite);
         }
 
+        internal static void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
+        {
+            Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+
+            instance.uiController.ShowPanelFromPrefab("MonetizrMessagePanel",
+                panelId,
+                onComplete,
+                true,
+                m);
+        }
+
         internal static void ShowNotification(Action<bool> onComplete, Mission m, PanelId panelId)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);

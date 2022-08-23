@@ -22,6 +22,7 @@ namespace Monetizr.Campaigns
         DebugPanel,
         TwitterNotification,
         GiveawayEmailEnterNotification,
+        BadEmailMessageNotification,
     }
     
     internal class UIController
