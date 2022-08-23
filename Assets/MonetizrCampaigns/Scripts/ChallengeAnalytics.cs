@@ -150,6 +150,7 @@ namespace Monetizr.Campaigns
         RewardBanner,
         Survey,
         Html5,
+        HtmlPage,
         LoadingScreen
     }
 
@@ -179,6 +180,7 @@ namespace Monetizr.Campaigns
             { AdType.Video, "Video" },
             { AdType.Survey, "Survey" },
             { AdType.Html5, "Html5" },
+            { AdType.HtmlPage, "HtmlPage" },
             { AdType.RewardBanner, "Reward banner" },
             { AdType.LoadingScreen, "Loading screen" },
         };

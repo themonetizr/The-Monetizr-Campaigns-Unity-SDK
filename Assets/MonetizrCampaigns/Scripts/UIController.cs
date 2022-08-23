@@ -17,6 +17,7 @@ namespace Monetizr.Campaigns
         SurveyWebView,
         VideoWebView,
         Html5WebView,
+        HtmlWebPageView,
         TinyMenuTeaser,
         SurveyNotification,
         DebugPanel,

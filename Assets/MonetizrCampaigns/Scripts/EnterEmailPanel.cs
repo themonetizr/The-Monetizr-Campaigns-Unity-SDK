@@ -98,6 +98,10 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
+            //fail test
+            if (result == "aa@aa.aa")
+                result = "asdfqe qe qefqwe";
+
             MonetizrManager.temporaryEmail = result;
             MonetizrManager.temporaryRewardTypeSelection = selection;
             MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner, currentMission);

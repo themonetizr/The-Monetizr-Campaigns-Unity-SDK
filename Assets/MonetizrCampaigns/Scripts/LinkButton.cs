@@ -1,3 +1,4 @@
+using Monetizr.Campaigns;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,12 @@ public class LinkButton : MonoBehaviour
     // Update is called once per frame
     public void OnClick()
     {
-        Application.OpenURL(id);
+        MonetizrManager.ShowWebPage(null, new Mission { surveyUrl = id, additionalParams = new SerializableDictionary<string, string>() });
+
+#if UNITY_EDITOR_WIN
+        //Application.OpenURL(id);
+#else
+        
+#endif
     }
 }

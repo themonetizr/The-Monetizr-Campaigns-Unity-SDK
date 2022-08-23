@@ -614,7 +614,14 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("FAIL!");
 
-                onComplete?.Invoke(false);
+                ShowMessage((bool _) =>
+                {
+                    onComplete?.Invoke(false);
+                },
+                m,
+                PanelId.BadEmailMessageNotification);
+
+                
             };
 
 
@@ -1049,6 +1056,11 @@ namespace Monetizr.Campaigns
         internal static void ShowSurvey(Action<bool> onComplete, Mission m = null)
         {
             _ShowWebView(onComplete, PanelId.SurveyWebView, m);
+        }
+
+        internal static void ShowWebPage(Action<bool> onComplete, Mission m = null)
+        {
+            _ShowWebView(onComplete, PanelId.HtmlWebPageView, m);
         }
 
         internal static void ShowHTML5(Action<bool> onComplete, Mission m = null)
@@ -1716,13 +1728,15 @@ namespace Monetizr.Campaigns
 
             try
             {
-                //await Task.Delay(5000,ct);
+                //await Task.Delay(15000,ct);
 
                 await _challengesClient.Claim(challenge, ct, onSuccess, onFailure);
             }
             catch (Exception e)
-            {
+            {                
                 Log.Print($"An error occured: {e.Message}");
+
+                onFailure.Invoke();
             }
         }
                
