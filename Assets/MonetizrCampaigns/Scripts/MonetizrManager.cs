@@ -962,6 +962,12 @@ namespace Monetizr.Campaigns
                 i++;
             }*/
 
+            if(missions.Count == 0)
+            {
+                onComplete?.Invoke(false);
+                return;
+            }
+
             if(missions.Count == 1)
             //if (Instance.missionsManager.missions.Count == 1)
             {

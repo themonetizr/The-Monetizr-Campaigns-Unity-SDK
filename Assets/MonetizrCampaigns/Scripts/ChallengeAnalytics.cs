@@ -598,7 +598,7 @@ namespace Monetizr.Campaigns
 
         public string GetUserId()
         {
-            return MonetizrAnalytics.advertisingID != null ? MonetizrAnalytics.advertisingID : SystemInfo.deviceUniqueIdentifier;
+            return SystemInfo.deviceUniqueIdentifier;
         }
 
         public void TrackEvent(string name, Mission currentMissionDesc)
