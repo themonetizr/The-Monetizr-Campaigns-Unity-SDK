@@ -185,8 +185,8 @@ namespace Monetizr.Campaigns
 
             item.UpdateWithDescription(this, m);
 
-            if(m.brandBanner != null)
-                MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
+            //if(m.brandBanner != null)
+            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
         private void AddMultiplyCoinsChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -234,8 +234,8 @@ namespace Monetizr.Campaigns
             item.maxProgress = m.reward;
             item.UpdateWithDescription(this, m);
 
-            if (m.brandBanner != null)
-                MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
+            //if (m.brandBanner != null)
+            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
         private void AddSurveyChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -294,8 +294,8 @@ namespace Monetizr.Campaigns
 
             item.UpdateWithDescription(this, m);
 
-            if (m.brandBanner != null)
-                MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
+            //if (m.brandBanner != null)
+            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
         private void AddTwitterChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -354,83 +354,10 @@ namespace Monetizr.Campaigns
 
             item.UpdateWithDescription(this, m);
 
-            if (m.brandBanner != null)
-                MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
+            //if (m.brandBanner != null)
+            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
-
-        private void AddGiveawayChallenge(MonetizrRewardedItem item, Mission m, int missionId)
-        {
-            string campaignId = m.campaignId;
-
-            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
-
-            string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
-
-
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
-            {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
-            }
-
-            var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
-
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
-            m.missionTitle = $"{brandName} giveaway";
-            m.missionDescription = $"Earn {m.reward} {rewardTitle} and get giveaway from {brandName}";
-            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
-
-            m.progress = ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
-
-            m.brandName = brandName;
-            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
-            m.claimButtonText = "Claim reward!";
-
-
-            Action<bool> onComplete = (bool isSkipped) =>
-            {
-                OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
-            };
-
-            //show video, then claim rewards if it's completed
-            m.onClaimButtonPress = () => {
-                /*OnClaimRewardComplete(m, false);*/
-
-                MonetizrManager.ShowEnterEmailPanel(
-                    (bool isSkipped) =>
-                    {
-                        if (!isSkipped)
-                        {
-                            MonetizrManager.WaitForEndRequestAndNotify(onComplete, m);
-
-                            //Debug.Log("Request completed!");
-                            //MonetizrManager.GoToLink(onSurveyComplete, m);
-                        }
-                    },
-                    m,
-                    PanelId.GiveawayEmailEnterNotification);
-
-            };
-
-            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
-
-            //var item = go.GetComponent<MonetizrRewardedItem>();
-
-            if (missionId != 0)
-                m.brandBanner = null;
-
-            Log.Print(m.missionTitle);
-
-            item.showGift = true;
-            item.currectProgress = getCurrencyFunc() - m.startMoney;
-            item.maxProgress = m.reward;
-
-            item.UpdateWithDescription(this, m);
-
-            if (m.brandBanner != null)
-                MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
-        }
+          
 
         private void AddVideoGiveawayChallenge(MonetizrRewardedItem item, Mission m, int missionId)
         {
@@ -496,8 +423,8 @@ namespace Monetizr.Campaigns
 
             item.UpdateWithDescription(this, m);
 
-            if (m.brandBanner != null)
-                MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
+            //if (m.brandBanner != null)
+            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
 
@@ -514,7 +441,7 @@ namespace Monetizr.Campaigns
                 case MissionType.MutiplyReward: AddMultiplyCoinsChallenge(item, m,missionId); break;
                 case MissionType.SurveyReward: AddSurveyChallenge(item, m, missionId); break;
                 case MissionType.TwitterReward: AddTwitterChallenge(item, m, missionId); break;
-                case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
+                //case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
                 case MissionType.VideoWithEmailGiveaway: AddVideoGiveawayChallenge(item, m, missionId); break;
             }
 
@@ -590,10 +517,10 @@ namespace Monetizr.Campaigns
                 MonetizrManager.CleanUserDefinedMissions();
             }
 
-            if (hasSponsoredChallenges)
-            {
-                MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner);
-            }
+            //if (hasSponsoredChallenges)
+            //{
+            //    MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner);
+            //}
 
             
         }

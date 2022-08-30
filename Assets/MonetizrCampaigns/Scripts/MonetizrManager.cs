@@ -587,6 +587,8 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("SUCCESS!");
 
+                MonetizrManager.Analytics.TrackEvent("Enter enter succeeded", m);
+
                 ShowCongratsNotification((bool _) =>
                 {
                     //lscreen.SetActive(false);
@@ -613,6 +615,8 @@ namespace Monetizr.Campaigns
             Action onFail = () =>
             {
                 Debug.Log("FAIL!");
+
+                MonetizrManager.Analytics.TrackEvent("Enter enter failed", m);
 
                 ShowMessage((bool _) =>
                 {
@@ -794,14 +798,6 @@ namespace Monetizr.Campaigns
 
                 gameRewards[m.rewardType].AddCurrencyAction(m.reward);
             }
-            else if (m.type == MissionType.GiveawayWithMail)
-            {
-                //m.reward *= 2;
-
-                //m.AddNormalCurrencyAction.Invoke(m.reward);
-
-                //gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-            }
             if (m.type == MissionType.VideoWithEmailGiveaway)
             {
                 //ShowRewardCenter(null);
@@ -961,6 +957,12 @@ namespace Monetizr.Campaigns
                 Debug.Log($"{i}:{m2.missionTitle}:{m2.campaignId}");
                 i++;
             }*/
+
+            if(missions.Count == 0)
+            {
+                onComplete?.Invoke(false);
+                return;
+            }
 
             if(missions.Count == 1)
             //if (Instance.missionsManager.missions.Count == 1)

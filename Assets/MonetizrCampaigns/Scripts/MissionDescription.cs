@@ -12,7 +12,7 @@ namespace Monetizr.Campaigns
         MutiplyReward = 2,
         SurveyReward = 4,
         TwitterReward = 8,
-        GiveawayWithMail = 16,
+        //GiveawayWithMail = 16,
         VideoWithEmailGiveaway = 32,
         All = uint.MaxValue,
     }
