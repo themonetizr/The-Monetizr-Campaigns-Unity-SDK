@@ -798,14 +798,6 @@ namespace Monetizr.Campaigns
 
                 gameRewards[m.rewardType].AddCurrencyAction(m.reward);
             }
-            else if (m.type == MissionType.GiveawayWithMail)
-            {
-                //m.reward *= 2;
-
-                //m.AddNormalCurrencyAction.Invoke(m.reward);
-
-                //gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-            }
             if (m.type == MissionType.VideoWithEmailGiveaway)
             {
                 //ShowRewardCenter(null);

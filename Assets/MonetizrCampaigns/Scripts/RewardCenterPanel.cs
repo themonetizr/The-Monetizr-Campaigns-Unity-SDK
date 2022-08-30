@@ -441,7 +441,7 @@ namespace Monetizr.Campaigns
                 case MissionType.MutiplyReward: AddMultiplyCoinsChallenge(item, m,missionId); break;
                 case MissionType.SurveyReward: AddSurveyChallenge(item, m, missionId); break;
                 case MissionType.TwitterReward: AddTwitterChallenge(item, m, missionId); break;
-                case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
+                //case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
                 case MissionType.VideoWithEmailGiveaway: AddVideoGiveawayChallenge(item, m, missionId); break;
             }
 
