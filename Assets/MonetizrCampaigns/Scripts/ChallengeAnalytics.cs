@@ -142,16 +142,27 @@ namespace Monetizr.Campaigns
 
     internal enum AdType
     {
-        IntroBanner,
-        BrandLogo,
+        //IntroBanner,
+        //BrandLogo,
         TinyTeaser,
-        RewardLogo,
-        Video,
-        RewardBanner,
-        Survey,
+        //RewardLogo,
+        //Video,
+        //RewardBanner,
+        //Survey,
         Html5,
         HtmlPage,
-        LoadingScreen
+        //LoadingScreen,
+        
+        NotificationScreen,
+        EmailEnterInGameRewardScreen,
+        EmailEnterCouponRewardScreen,
+        EmailEnterSelectionRewardScreen,
+        EmailErrorScreen,
+        CongratsNotificationScreen,
+        EmailCongratsNotificationScreen,
+        Video,
+        Survey,
+        SurveyNotificationScreen,
     }
 
     internal enum DeviceSizeGroup
@@ -171,7 +182,7 @@ namespace Monetizr.Campaigns
 
     internal class MonetizrAnalytics
     {
-        public static readonly Dictionary<AdType, string> adTypeNames = new Dictionary<AdType, string>()
+        /*public static readonly Dictionary<AdType, string> adTypeNames = new Dictionary<AdType, string>()
         {
             { AdType.IntroBanner, "Intro banner" },
             { AdType.BrandLogo, "Banner logo" },
@@ -183,7 +194,7 @@ namespace Monetizr.Campaigns
             { AdType.HtmlPage, "HtmlPage" },
             { AdType.RewardBanner, "Reward banner" },
             { AdType.LoadingScreen, "Loading screen" },
-        };
+        };*/
 
         public static string osVersion;
         public static string advertisingID = null;
@@ -462,7 +473,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-           //Log.Print($"MonetizrAnalytics BeginShowAdAsset: {type} {campaignId}");
+           Log.Print($"MonetizrAnalytics BeginShowAdAsset: {type} {campaignId}");
 
             //Key value pair for duplicated types with different challenge ids
             KeyValuePair<AdType, string> adElement = new KeyValuePair<AdType, string>(type, campaignId);
@@ -485,7 +496,8 @@ namespace Monetizr.Campaigns
 
             visibleAdAsset[adElement] = adAsset;
 
-            Mixpanel.StartTimedEvent($"[UNITY_SDK] [AD] {adTypeNames[type]}");
+            //Mixpanel.StartTimedEvent($"[UNITY_SDK] [AD] {adTypeNames[type]}");
+            Mixpanel.StartTimedEvent($"[UNITY_SDK] [AD] {type.ToString()}");
 
         }
 
@@ -497,6 +509,8 @@ namespace Monetizr.Campaigns
         //if challengeId is define, end only specified ad types, if not - end all
         public void EndShowAdAsset(AdType type, string campaignId = null, bool removeElement = true)
         {
+            Log.Print($"MonetizrAnalytics EndShowAdAsset: {type} {campaignId}");
+
             //Assert.IsNotNull(visibleAdAsset);
             //Assert.AreEqual(type, visibleAdAsset.adType, MonetizrErrors.msg[ErrorType.SimultaneusAdAssets]);
 
@@ -564,12 +578,15 @@ namespace Monetizr.Campaigns
             props["camp_id"] = challenge.id;
             props["brand_id"] = challenge.brand_id;
             props["brand_name"] = brandName;
-            props["type"] = adTypeNames[adAsset.Key];
+            //props["type"] = adTypeNames[adAsset.Key];
+            props["type"] = adAsset.Key.ToString();
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
             //props["duration"] = (DateTime.Now - visibleAdAsset[type].activateTime).TotalSeconds;
 
-            string eventName = $"[UNITY_SDK] [AD] {adTypeNames[adAsset.Key]}";
+            //string eventName = $"[UNITY_SDK] [AD] {adTypeNames[adAsset.Key]}";
+
+            string eventName = $"[UNITY_SDK] [AD] {adAsset.Key.ToString()}";
 
             Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);

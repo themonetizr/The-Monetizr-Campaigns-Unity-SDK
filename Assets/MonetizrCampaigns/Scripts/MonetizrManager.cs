@@ -587,6 +587,8 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("SUCCESS!");
 
+                MonetizrManager.Analytics.TrackEvent("Enter enter succeeded", m);
+
                 ShowCongratsNotification((bool _) =>
                 {
                     //lscreen.SetActive(false);
@@ -613,6 +615,8 @@ namespace Monetizr.Campaigns
             Action onFail = () =>
             {
                 Debug.Log("FAIL!");
+
+                MonetizrManager.Analytics.TrackEvent("Enter enter failed", m);
 
                 ShowMessage((bool _) =>
                 {
