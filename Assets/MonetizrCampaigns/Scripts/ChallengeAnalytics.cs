@@ -263,7 +263,7 @@ namespace Monetizr.Campaigns
             
             osVersion = "0.0";
 
-//#if !UNITY_EDITOR
+#if !UNITY_EDITOR
 #if UNITY_ANDROID
                AndroidJavaClass versionInfo = new AndroidJavaClass("android/os/Build$VERSION");
 
@@ -283,7 +283,7 @@ namespace Monetizr.Campaigns
                advertisingID = Device.advertisingIdentifier;
 
 #endif
-//#endif
+#endif
             deviceSizeGroup = GetDeviceGroup();
 
             Log.Print($"OS Version {osVersion} Ad id: {advertisingID} Limit ads: {limitAdvertising} Device group: {deviceSizeGroup}");
