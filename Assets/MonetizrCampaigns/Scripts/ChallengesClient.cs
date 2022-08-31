@@ -228,10 +228,6 @@ namespace Monetizr.Campaigns
 
             if (MonetizrManager.temporaryEmail != null && MonetizrManager.temporaryEmail.Length > 0)
             {
-                //MonetizrManager.RewardSelectionType.Ingame
-                //MonetizrManager.RewardSelectionType.Product;
-                //MonetizrManager.temporaryRewardTypeSelection
-
                 bool ingame = MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product ? false : true;
 
                 ServerCampaign.Reward reward = challenge.rewards.Find(
@@ -248,7 +244,6 @@ namespace Monetizr.Campaigns
 
                 Debug.Log($"Reward {reward.id} found in_game_only {reward.in_game_only}");
 
-                //requestMessage.Headers.Add("email", MonetizrManager.temporaryEmail);
                 content = $"{{\"email\":\"{MonetizrManager.temporaryEmail}\",\"reward_id\":\"{reward.id}\"}}";
 
                 MonetizrManager.temporaryEmail = "";
