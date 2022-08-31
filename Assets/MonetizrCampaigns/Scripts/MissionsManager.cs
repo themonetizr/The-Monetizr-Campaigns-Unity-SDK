@@ -313,7 +313,7 @@ namespace Monetizr.Campaigns
 
                 if (isVideoSkipped)
                 {
-                    MonetizrManager.Analytics.TrackEvent("Video skipped", m);
+                    //MonetizrManager.Analytics.TrackEvent("Video skipped", m);
 
                     onComplete?.Invoke(isVideoSkipped);
                     return;

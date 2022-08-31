@@ -23,7 +23,7 @@ namespace Monetizr.Campaigns
         private Mission currentMissionDesc;
         private string eventsPrefix;
         private AdType adType;
-        private bool isAnalyticsNeeded = false;
+        private bool isAnalyticsNeeded = true;
 
 
 
@@ -63,6 +63,8 @@ namespace Monetizr.Campaigns
                 webView.Frame = new Rect(x, y, w, h);
 #endif
 
+            Debug.Log($"frame: {fullScreen} {webView.Frame}");
+
             webView.OnMessageReceived += OnMessageReceived;
             webView.OnPageStarted += OnPageStarted;
             webView.OnPageFinished += OnPageFinished;
@@ -94,12 +96,13 @@ namespace Monetizr.Campaigns
 
             webView.Load(webUrl);
 
-            isAnalyticsNeeded = false;
+            //isAnalyticsNeeded = false;
 
         }
 
         private void PrepareHtml5Panel()
         {
+            
             webUrl = "file://" + MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.Html5PathString);
             // eventsPrefix = "Html5";
 
@@ -372,14 +375,20 @@ document.addEventListener('DOMContentLoaded', function(){{
                 case PanelId.HtmlWebPageView: adType = AdType.HtmlPage; PrepareWebViewPanel(m); break;
             }
 
-            eventsPrefix = MonetizrAnalytics.adTypeNames[adType];
+            //eventsPrefix = MonetizrAnalytics.adTypeNames[adType];
 
+            eventsPrefix = adType.ToString();
+
+           
             // Load a URL.
             Debug.Log($"Url to show {webUrl}");
             webView.Show();
 
-            if(isAnalyticsNeeded)
+            if (isAnalyticsNeeded)
+            {
+                TrackEvent($"{eventsPrefix} started");
                 MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMissionDesc);
+            }
 #endif
         }
 

@@ -626,7 +626,7 @@ namespace Monetizr.Campaigns
 
         public void TrackEvent(string name, string campaign)
         {
-            //Log.Print($"TrackEvent: {name} {campaign}");
+            Log.Print($"TrackEvent: {name} {campaign}");
 
             var eventName = $"[UNITY_SDK] {name}";
 
