@@ -587,7 +587,7 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("SUCCESS!");
 
-                MonetizrManager.Analytics.TrackEvent("Enter enter succeeded", m);
+                MonetizrManager.Analytics.TrackEvent("Enter email succeeded", m);
 
                 ShowCongratsNotification((bool _) =>
                 {
@@ -616,7 +616,7 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("FAIL!");
 
-                MonetizrManager.Analytics.TrackEvent("Enter enter failed", m);
+                MonetizrManager.Analytics.TrackEvent("Enter email failed", m);
 
                 ShowMessage((bool _) =>
                 {
