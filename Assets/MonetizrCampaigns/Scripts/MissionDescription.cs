@@ -102,17 +102,17 @@ namespace Monetizr.Campaigns
             return dictionary[p];
         }
 
-        public int GetIntParam(TKey p)
+        public int GetIntParam(TKey p, int defaultParam = 0)
         {
             if (!dictionary.ContainsKey(p))
-                return 0;
+                return defaultParam;
 
             int result = 0;
             string val = dictionary[p].ToString();
 
             if (!Int32.TryParse(val, out result))
             {
-                return 0;
+                return defaultParam;
             }
 
             return result;
@@ -175,6 +175,11 @@ namespace Monetizr.Campaigns
 
         [SerializeField] internal int id;
         [SerializeField] internal ClaimState isClaimed;
+
+
+        [NonSerialized] internal int amountOfNotificationsShown;
+
+        [NonSerialized] internal int amountOfNotificationsSkipped;
 
         [SerializeField] internal bool isDisabled;
 

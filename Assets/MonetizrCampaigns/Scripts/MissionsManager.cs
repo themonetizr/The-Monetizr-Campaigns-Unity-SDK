@@ -281,7 +281,9 @@ namespace Monetizr.Campaigns
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
-            
+            m.additionalParams = new SerializableDictionary<string, string>(MonetizrManager.Instance.GetCampaign(campaign).additional_params);
+            m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications",-1);
+            m.amountOfNotificationsSkipped = int.MaxValue-1; //first notification is always visible
 
             return m;
         }
@@ -449,7 +451,9 @@ namespace Monetizr.Campaigns
                     //if (m != null)
                     //    missions.Add(m);
 
-                    m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
+                    //m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
+
+                    
 
                     InitializeNonSerializedFields(m);
                 }

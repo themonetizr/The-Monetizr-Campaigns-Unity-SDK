@@ -716,8 +716,28 @@ namespace Monetizr.Campaigns
                 forceSkip = mission.additionalParams.GetParam("no_main_menu_notifications") == "true";
             }
 
-            //TODO: check if need to limit notifications amount!!!
-            ///....
+         
+            //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
+
+            if (mission.additionalParams.GetParam("no_campaigns_notification") == "true")
+            {
+                forceSkip = true;
+            }
+
+            Debug.Log($"Notifications sk {mission.amountOfNotificationsSkipped} shown {mission.amountOfNotificationsShown}");
+            
+            mission.amountOfNotificationsSkipped++;
+
+            if (mission.amountOfNotificationsSkipped <= mission.additionalParams.GetIntParam("amount_of_skipped_notifications"))
+            {
+                forceSkip = true;
+            }
+            
+            //check if need to limit notifications amount
+            if (mission.amountOfNotificationsShown == 0)
+            {
+                forceSkip = true;
+            }
 
             if (forceSkip)
             {
@@ -725,13 +745,12 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
+            mission.amountOfNotificationsSkipped = 0;
 
-            if (mission.additionalParams.GetParam("no_campaigns_notification") == "true")
-            {
-                onComplete?.Invoke(false);
-                return;
-            }
+            mission.amountOfNotificationsShown--;
+
+
+            //instance.missionsManager.SaveAll();
 
 
             //Debug.LogWarning("!!!!-------");
