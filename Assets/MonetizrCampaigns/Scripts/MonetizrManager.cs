@@ -194,7 +194,9 @@ namespace Monetizr.Campaigns
     public enum RewardType
     {
         Coins,
+        AdditionalCoins,
         PremiumCurrency
+        
     }
 
     /// <summary>
@@ -311,6 +313,9 @@ namespace Monetizr.Campaigns
                     new MissionDescription(20, RewardType.Coins),
                 };
             }
+
+            if (sponsoredMissions.Count > 1)
+                sponsoredMissions = sponsoredMissions.GetRange(0, 1);
 
 #if UNITY_EDITOR
             keepLocalClaimData = true;
@@ -936,6 +941,14 @@ namespace Monetizr.Campaigns
             instance.missionsManager.CleanUserDefinedMissions();
         }
 
+        public delegate void OnComplete(bool isSkipped);
+
+        public static void EngagedUserAction(OnComplete onComplete)
+        {
+            MonetizrManager.ShowRewardCenter(null, (bool p) => { onComplete(p); });
+        }
+
+
         public static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
@@ -947,7 +960,10 @@ namespace Monetizr.Campaigns
             var m = instance.missionsManager.GetMission(challengeId);
 
             if (m == null)
+            {
+                onComplete?.Invoke(false);
                 return;
+            }
 
             var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
 
