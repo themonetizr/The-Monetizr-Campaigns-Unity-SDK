@@ -46,16 +46,30 @@ namespace Monetizr.Campaigns
             Assert.IsNotNull(animator);
             Assert.IsNotNull(canvasGroup);
 
-          
 
+            Intractable(false);
 
             state = State.Unknown;
         }
 
-        internal void EnableInput(bool enable)
+        internal void BlockRaycasts(bool enable)
         {
-            if(canvasGroup != null)
+            if (canvasGroup != null)
+            {
                 canvasGroup.blocksRaycasts = enable;
+
+
+            }
+        }
+
+        internal void Intractable(bool enable)
+        {
+            if (canvasGroup != null)
+            {
+                canvasGroup.interactable = enable;
+
+
+            }
         }
 
         internal void SetActive(bool active, bool immediately = false)
@@ -64,7 +78,7 @@ namespace Monetizr.Campaigns
             {
                 if (state != State.Animating && state != State.Visible)
                 {
-                    EnableInput(true);
+                    BlockRaycasts(true);
 
                     gameObject.SetActive(true);
                     animator.Play("PanelAnimator_Show");
@@ -74,7 +88,9 @@ namespace Monetizr.Campaigns
             }
             else if(state != State.Hidden) //hiding
             {                
-                EnableInput(false);
+                BlockRaycasts(false);
+
+                Intractable(false);
 
                 if (!immediately && state != State.Animating)
                 {
@@ -118,6 +134,8 @@ namespace Monetizr.Campaigns
 
         internal void OnAnimationShow()
         {
+            Intractable(true);
+
             state = State.Visible;
         }
 

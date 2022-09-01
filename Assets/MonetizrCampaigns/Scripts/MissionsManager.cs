@@ -282,8 +282,7 @@ namespace Monetizr.Campaigns
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
             m.additionalParams = new SerializableDictionary<string, string>(MonetizrManager.Instance.GetCampaign(campaign).additional_params);
-            m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications",-1);
-            m.amountOfNotificationsSkipped = int.MaxValue-1; //first notification is always visible
+            
 
             return m;
         }
@@ -452,8 +451,9 @@ namespace Monetizr.Campaigns
                     //    missions.Add(m);
 
                     //m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
+                    m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
+                    m.amountOfNotificationsSkipped = int.MaxValue - 1; //first notification is always visible
 
-                    
 
                     InitializeNonSerializedFields(m);
                 }

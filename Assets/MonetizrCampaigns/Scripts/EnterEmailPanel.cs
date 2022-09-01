@@ -256,10 +256,26 @@ namespace Monetizr.Campaigns
 
         }
 
-        public void OnNoThanksPress()
+        public void _OnNoThanksPress()
         {
             isSkipped = true;
             SetActive(false);
+        }
+
+        public void OnNoThanksPress()
+        {
+            MonetizrManager.ShowMessage((bool _isSkipped) =>
+                {
+                    if(!_isSkipped)
+                    {
+                        _OnNoThanksPress();
+                    }
+                },
+                this.currentMission,
+                PanelId.EmailEnterCloseConfirmation);
+
+
+            
         }
 
         public void OnButtonPress()
