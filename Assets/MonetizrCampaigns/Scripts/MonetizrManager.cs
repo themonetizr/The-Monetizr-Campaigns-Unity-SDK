@@ -115,7 +115,7 @@ namespace Monetizr.Campaigns
 
         public void SetAsset<T>(AssetsType t, object asset)
         {
-            if(assets.ContainsKey(t))
+            if (assets.ContainsKey(t))
             {
                 Log.PrintWarning($"An item {t} already exist in the campaign {campaign.id}");
                 return;
@@ -196,7 +196,7 @@ namespace Monetizr.Campaigns
         Coins,
         AdditionalCoins,
         PremiumCurrency
-        
+
     }
 
     /// <summary>
@@ -254,7 +254,7 @@ namespace Monetizr.Campaigns
 
         public List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
 
-        internal class GameReward   
+        internal class GameReward
         {
             internal Sprite icon;
             internal string title;
@@ -278,7 +278,7 @@ namespace Monetizr.Campaigns
         internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
         private static int debugAttempt = 0;
         internal static int abTestSegment = 0;
-        
+
         public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<int> GetCurrencyFunc, Action<int> AddCurrencyAction)
         {
             GameReward gr = new GameReward()
@@ -294,14 +294,14 @@ namespace Monetizr.Campaigns
 
 
         public static MonetizrManager Initialize(string apiKey, List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch)
-        { 
+        {
             if (instance != null)
             {
                 //instance.RequestChallenges(onRequestComplete);
                 return instance;
             }
 
-            if(sponsoredMissions == null)
+            if (sponsoredMissions == null)
             {
                 sponsoredMissions = new List<MissionDescription>()
                 {
@@ -326,7 +326,7 @@ namespace Monetizr.Campaigns
             serverClaimForCampaigns = true;
             claimForSkippedCampaigns = false;
 #endif
-                       
+
 
             Log.Print($"MonetizrManager Initialize: {apiKey}");
 
@@ -387,9 +387,10 @@ namespace Monetizr.Campaigns
 
             InitializeUI();
 
-            onRequestComplete = (bool isOk) => {
+            onRequestComplete = (bool isOk) =>
+            {
 
-                if(!isOk)
+                if (!isOk)
                 {
                     Log.Print("ERROR: Request complete is not okay!");
                     return;
@@ -399,8 +400,8 @@ namespace Monetizr.Campaigns
 
                 isActive = true;
 
-//moved together with showing teaser, because here in-game logic may not be ready
-//                createEmbedMissions();
+                //moved together with showing teaser, because here in-game logic may not be ready
+                //                createEmbedMissions();
 
                 gameOnInitSuccess?.Invoke();
 
@@ -420,7 +421,7 @@ namespace Monetizr.Campaigns
 
         public void initializeBuiltinMissions()
         {
-            if(isMissionsIsOudated)
+            if (isMissionsIsOudated)
                 missionsManager.AddMissionsToCampaigns();
 
             isMissionsIsOudated = false;
@@ -448,7 +449,7 @@ namespace Monetizr.Campaigns
         {
             missionsManager.CleanRewardsClaims();
         }
-              
+
         internal string GetCurrentAPIkey()
         {
             return _challengesClient.currentApiKey;
@@ -458,11 +459,11 @@ namespace Monetizr.Campaigns
         {
             if (apiKey == _challengesClient.currentApiKey)
                 return;
-            
+
             _challengesClient.Close();
 
             _challengesClient = new ChallengesClient(apiKey);
-                        
+
             RequestCampaigns();
         }
 
@@ -494,7 +495,7 @@ namespace Monetizr.Campaigns
         {
             var ch = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
-            if(!MonetizrManager.Instance.HasCampaign(ch))
+            if (!MonetizrManager.Instance.HasCampaign(ch))
             {
                 m.brandBanner = MonetizrManager.Instance.LoadSpriteFromCache(m.campaignId, m.brandBannerUrl);
                 m.brandLogo = MonetizrManager.Instance.LoadSpriteFromCache(m.campaignId, m.brandLogoUrl);
@@ -545,7 +546,7 @@ namespace Monetizr.Campaigns
         {
             Mission m = instance.missionsManager.GetFirstUnactiveMission();
 
-            if(m == null)
+            if (m == null)
             {
                 Debug.Log($"Nothing to reset in ResetCampaign");
                 return;
@@ -576,8 +577,8 @@ namespace Monetizr.Campaigns
             {
                 s_cts.Dispose();
             }
-        
-        
+
+
             lscreen.SetActive(false);
         }
 
@@ -587,7 +588,7 @@ namespace Monetizr.Campaigns
             var lscreen = instance.uiController.ShowLoadingScreen();
 
             lscreen.onComplete = (bool _) => { GameObject.Destroy(lscreen); };
-            
+
             Action onSuccess = () =>
             {
                 Debug.Log("SUCCESS!");
@@ -598,7 +599,7 @@ namespace Monetizr.Campaigns
                 {
                     //lscreen.SetActive(false);
 
-                    
+
 
                     m.state = MissionUIState.ToBeHidden;
 
@@ -608,7 +609,7 @@ namespace Monetizr.Campaigns
 
                     instance.missionsManager.TryToActivateSurvey(m);
 
-                 
+
                     MonetizrManager.HideTinyMenuTeaser();
 
 
@@ -630,7 +631,7 @@ namespace Monetizr.Campaigns
                 m,
                 PanelId.BadEmailMessageNotification);
 
-                
+
             };
 
 
@@ -679,16 +680,16 @@ namespace Monetizr.Campaigns
             //if (debugAttempt != 10)
             //    return;
 
-            debugAttempt = 0;            
+            debugAttempt = 0;
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrDebugPanel",PanelId.DebugPanel);
+            instance.uiController.ShowPanelFromPrefab("MonetizrDebugPanel", PanelId.DebugPanel);
         }
 
         public static void ShowStartupNotification(int placement, Action<bool> onComplete)
         {
             bool forceSkip = false;
 
-           
+
             if (instance == null || !instance.HasCampaignsAndActive())
             {
                 onComplete?.Invoke(false);
@@ -714,6 +715,9 @@ namespace Monetizr.Campaigns
             {
                 forceSkip = mission.additionalParams.GetParam("no_main_menu_notifications") == "true";
             }
+
+            //TODO: check if need to limit notifications amount!!!
+            ///....
 
             if (forceSkip)
             {
@@ -753,7 +757,7 @@ namespace Monetizr.Campaigns
                 onComplete?.Invoke();
                 return false;
             }
-                        
+
             FillInfo(sponsoredMsns);
 
             Action<bool> onSurveyComplete = (bool isSkipped) =>
@@ -776,11 +780,11 @@ namespace Monetizr.Campaigns
                     onComplete?.Invoke();
                 }
 
-                
+
             };
 
-            ShowNotification((bool _) => { ShowSurvey(onSurveyComplete, sponsoredMsns); }, 
-                sponsoredMsns, 
+            ShowNotification((bool _) => { ShowSurvey(onSurveyComplete, sponsoredMsns); },
+                sponsoredMsns,
                 PanelId.SurveyNotification);
 
             return true;
@@ -974,22 +978,22 @@ namespace Monetizr.Campaigns
                 i++;
             }*/
 
-            if(missions.Count == 0)
+            if (missions.Count == 0)
             {
                 onComplete?.Invoke(false);
                 return;
             }
 
-            if(missions.Count == 1)
+            if (missions.Count == 1)
             //if (Instance.missionsManager.missions.Count == 1)
             {
                 //Debug.Log($"---_PressSingleMission");
 
-                Instance._PressSingleMission(onComplete,m);
+                Instance._PressSingleMission(onComplete, m);
                 return;
             }
-            
-            
+
+
 
             Log.Print($"ShowRewardCenter with {m?.campaignId}");
 
@@ -1014,43 +1018,43 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, onComplete, null).Invoke();
 
-           /* Action<bool> onTaskComplete = (bool isSkipped) =>
-            {
-                MonetizrManager.Analytics.TrackEvent("Campaign rewarded", m);
+            /* Action<bool> onTaskComplete = (bool isSkipped) =>
+             {
+                 MonetizrManager.Analytics.TrackEvent("Campaign rewarded", m);
 
-                m.isClaimed = ClaimState.Claimed;
-                missionsManager.SaveAll();
+                 m.isClaimed = ClaimState.Claimed;
+                 missionsManager.SaveAll();
 
-                OnClaimRewardComplete(m, isSkipped, null);
+                 OnClaimRewardComplete(m, isSkipped, null);
 
-                HideTinyMenuTeaser();
-            };
+                 HideTinyMenuTeaser();
+             };
 
 
-            if (m.isClaimed == ClaimState.NotClaimed)
-            {
-                MonetizrManager.Analytics.TrackEvent("Campaign shown", m);
+             if (m.isClaimed == ClaimState.NotClaimed)
+             {
+                 MonetizrManager.Analytics.TrackEvent("Campaign shown", m);
 
-                ShowNotification((bool isSkipped) => 
-                    {
-                        if (!isSkipped)
-                        {
-                            m.isClaimed = ClaimState.CompletedNotClaimed;
-                            missionsManager.SaveAll();
+                 ShowNotification((bool isSkipped) => 
+                     {
+                         if (!isSkipped)
+                         {
+                             m.isClaimed = ClaimState.CompletedNotClaimed;
+                             missionsManager.SaveAll();
 
-                            MonetizrManager.Analytics.TrackEvent("Campaign claimed", m);
+                             MonetizrManager.Analytics.TrackEvent("Campaign claimed", m);
 
-                            MonetizrManager.GoToLink(onTaskComplete, m);
-                        }
-                    },
-                    
-                    m,
-                    PanelId.TwitterNotification);
-            }
-            else
-            {
-                onTaskComplete.Invoke(false);
-            }*/
+                             MonetizrManager.GoToLink(onTaskComplete, m);
+                         }
+                     },
+
+                     m,
+                     PanelId.TwitterNotification);
+             }
+             else
+             {
+                 onTaskComplete.Invoke(false);
+             }*/
 
 
         }
@@ -1104,11 +1108,11 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            if(!TryShowSurveyNotification(onComplete))
+            if (!TryShowSurveyNotification(onComplete))
             {
                 //if no survey, show notification
 
-               
+
 
                 ShowStartupNotification(0, (bool isSkipped) =>
                         {
@@ -1118,7 +1122,7 @@ namespace Monetizr.Campaigns
                                 ShowRewardCenter(null, (bool b) => { onComplete?.Invoke(); });
 
                         });
-                
+
             }
         }
 
@@ -1139,15 +1143,15 @@ namespace Monetizr.Campaigns
 
             instance.initializeBuiltinMissions();
 
-            
-                ShowStartupNotification(1, (bool isSkipped) =>
-                {
-                    if (isSkipped)
-                        ShowTinyMenuTeaser();
-                    else
-                        ShowRewardCenter(null, (bool _) => { ShowTinyMenuTeaser(); });
-                });
-           
+
+            ShowStartupNotification(1, (bool isSkipped) =>
+            {
+                if (isSkipped)
+                    ShowTinyMenuTeaser();
+                else
+                    ShowRewardCenter(null, (bool _) => { ShowTinyMenuTeaser(); });
+            });
+
         }
 
         public static void OnMainMenuHide()
@@ -1166,7 +1170,7 @@ namespace Monetizr.Campaigns
                 return;
 
             tinyTeaserCanBeVisible = true;
-            
+
             //has some challanges
             if (!instance.HasCampaignsAndActive())
                 return;
@@ -1176,7 +1180,7 @@ namespace Monetizr.Campaigns
                 return;
 
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
-            if(!instance.HasAsset(challengeId,AssetsType.TinyTeaserTexture))
+            if (!instance.HasAsset(challengeId, AssetsType.TinyTeaserTexture))
             {
                 Log.Print("No texture for tiny teaser!");
                 return;
@@ -1232,12 +1236,13 @@ namespace Monetizr.Campaigns
 
                 if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
                 {
-                    ClaimReward(mission.campaignId, CancellationToken.None, ()=> {
+                    ClaimReward(mission.campaignId, CancellationToken.None, () =>
+                    {
                         RequestCampaigns();
 
 
                     });
-                    
+
                 }
 
                 if (!updateUI)
@@ -1348,7 +1353,7 @@ namespace Monetizr.Campaigns
                 ech.SetAsset<Sprite>(sprite, s);
             }
 
-            ech.SetAssetUrl(sprite,asset.url);
+            ech.SetAssetUrl(sprite, asset.url);
 
             bool texStatus = tex != null;
             bool spriteStatus = s != null;
@@ -1388,7 +1393,7 @@ namespace Monetizr.Campaigns
 
             if (!File.Exists(fileToCheck))
             {
-                 data = await DownloadHelper.DownloadAssetData(asset.url);
+                data = await DownloadHelper.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
@@ -1473,7 +1478,7 @@ namespace Monetizr.Campaigns
 
             campaignIds.Clear();
 
-            
+
 
 #if TEST_SLOW_LATENCY
             await Task.Delay(10000);
@@ -1484,7 +1489,7 @@ namespace Monetizr.Campaigns
             foreach (var ch in _challenges)
             {
                 var ech = new ServerCampaignWithAssets(ch);
-                            
+
                 if (this.challenges.ContainsKey(ch.id))
                     continue;
 
@@ -1585,7 +1590,7 @@ namespace Monetizr.Campaigns
                             break;
 
                         case "loading_screen":
-                            
+
                             await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.LoadingScreenSprite, true);
 
                             break;
@@ -1615,7 +1620,7 @@ namespace Monetizr.Campaigns
                     ech.isChallengeLoaded = false;
                 }*/
 
-                if(ech.HasAsset(AssetsType.SurveyURLString) && ech.GetAsset<string>(AssetsType.SurveyURLString).Length == 0)
+                if (ech.HasAsset(AssetsType.SurveyURLString) && ech.GetAsset<string>(AssetsType.SurveyURLString).Length == 0)
                 {
                     Log.Print($"ERROR: Campaign {ch.id} has survey asset, but url is empty");
                     ech.isChallengeLoaded = false;
@@ -1623,7 +1628,7 @@ namespace Monetizr.Campaigns
 
                 if (ech.isChallengeLoaded)
                 {
-                    
+
                     this.challenges.Add(ch.id, ech);
                     campaignIds.Add(ch.id);
                 }
@@ -1650,7 +1655,7 @@ namespace Monetizr.Campaigns
         /// <returns></returns>
         internal ServerCampaign GetCampaign(String chId)
         {
-            if(!challenges.ContainsKey(chId))
+            if (!challenges.ContainsKey(chId))
             {
                 Debug.LogWarning($"You're trying to get campaign {chId} which is not exist!");
                 return null;
@@ -1685,7 +1690,7 @@ namespace Monetizr.Campaigns
         {
             return activeChallengeId;
         }
-            
+
         public void SetActiveCampaignId(string id)
         {
             activeChallengeId = id;
@@ -1701,19 +1706,19 @@ namespace Monetizr.Campaigns
         /// </summary>
         public T GetAsset<T>(String challengeId, AssetsType t)
         {
-            if(challengeId == null)
+            if (challengeId == null)
             {
                 Log.Print($"You requesting asset for empty challenge.");
                 return default(T);
             }
 
-            if(!challenges.ContainsKey(challengeId))
+            if (!challenges.ContainsKey(challengeId))
             {
                 Log.Print($"You requesting asset for challenge {challengeId} that not exist!");
                 return default(T);
             }
 
-            if(!HasAsset(challengeId,t))
+            if (!HasAsset(challengeId, t))
             {
                 //Log.Print($"{challengeId} has no asset {t}");
                 return default(T);
@@ -1733,7 +1738,7 @@ namespace Monetizr.Campaigns
         }
 
         public bool HasAsset(String challengeId, AssetsType t)
-        {            
+        {
             return challenges[challengeId].HasAsset(t);
         }
 
@@ -1751,13 +1756,13 @@ namespace Monetizr.Campaigns
                 await _challengesClient.Claim(challenge, ct, onSuccess, onFailure);
             }
             catch (Exception e)
-            {                
+            {
                 Log.Print($"An error occured: {e.Message}");
 
                 onFailure.Invoke();
             }
         }
-               
+
     }
 
 }
