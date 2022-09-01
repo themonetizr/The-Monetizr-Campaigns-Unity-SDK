@@ -110,7 +110,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 691.3, y: 0}
+  m_AnchoredPosition: {x: 500.7, y: 0}
   m_SizeDelta: {x: 160, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2325280282776857881
@@ -347,8 +347,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 132.19, y: -0.5}
-  m_SizeDelta: {x: 403.3, y: 164.36}
+  m_AnchoredPosition: {x: 145.9, y: 4.5}
+  m_SizeDelta: {x: 322.8, y: 192.6}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &8517122736306019837
 CanvasRenderer:
@@ -379,11 +379,11 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 6f381fc39e3fddb4c95a55b371966f18, type: 3}
-    m_FontSize: 52
+    m_Font: {fileID: 12800000, guid: 0c353fd7c11a74331ad490642f6b99eb, type: 3}
+    m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 4
     m_MaxSize: 106
     m_Alignment: 3
     m_AlignByGeometry: 0
@@ -391,4 +391,4 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Tide 3x Power booster Tide 3x Power booster
+  m_Text: 'Tide 3x Power booster '

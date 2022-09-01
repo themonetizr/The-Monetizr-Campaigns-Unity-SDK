@@ -228,8 +228,23 @@ namespace Monetizr.Campaigns
 
             if (MonetizrManager.temporaryEmail != null && MonetizrManager.temporaryEmail.Length > 0)
             {
-                //requestMessage.Headers.Add("email", MonetizrManager.temporaryEmail);
-                content = $"{{\"email\":\"{MonetizrManager.temporaryEmail}\"}}";
+                bool ingame = MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product ? false : true;
+
+                ServerCampaign.Reward reward = challenge.rewards.Find(
+                    (ServerCampaign.Reward r) =>
+                    {
+                        return r.in_game_only == ingame;
+                    });
+
+                if(reward == null)
+                {
+                    onFailure?.Invoke();
+                    return;
+                }
+
+                Debug.Log($"Reward {reward.id} found in_game_only {reward.in_game_only}");
+
+                content = $"{{\"email\":\"{MonetizrManager.temporaryEmail}\",\"reward_id\":\"{reward.id}\"}}";
 
                 MonetizrManager.temporaryEmail = "";
             }

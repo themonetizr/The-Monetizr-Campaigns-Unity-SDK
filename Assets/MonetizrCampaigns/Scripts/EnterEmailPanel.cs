@@ -43,6 +43,7 @@ namespace Monetizr.Campaigns
         private EnterEmailType enterEmailType;
 
         private MonetizrManager.RewardSelectionType selection;
+        private AdType adType;
 
         //private Action onComplete;
 
@@ -98,9 +99,14 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
+            //fail test
+            if (result == "aa@aa.aa")
+                result = "asdfqe qe qefqwe";
+
             MonetizrManager.temporaryEmail = result;
             MonetizrManager.temporaryRewardTypeSelection = selection;
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner, currentMission);
+
+            MonetizrManager.Analytics.EndShowAdAsset(adType, currentMission);
         }
 
         static internal EnterEmailType GetPanelType(Mission m)
@@ -136,10 +142,21 @@ namespace Monetizr.Campaigns
         {
             EnterEmailType type = GetPanelType(m);
 
-            if(type == EnterEmailType.ProductReward)
+            if (type == EnterEmailType.ProductReward)
+            {
                 selection = MonetizrManager.RewardSelectionType.Product;
+                adType = AdType.EmailEnterCouponRewardScreen;
+            }
             else if (type == EnterEmailType.IngameReward)
+            {
                 selection = MonetizrManager.RewardSelectionType.Ingame;
+                adType = AdType.EmailEnterInGameRewardScreen;
+            }
+            else
+            {
+                adType = AdType.EmailEnterSelectionRewardScreen;
+            }
+
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
@@ -228,7 +245,7 @@ namespace Monetizr.Campaigns
 
 
             MonetizrManager.Analytics.TrackEvent("Enter email shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, currentMission);
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
 
         }
 

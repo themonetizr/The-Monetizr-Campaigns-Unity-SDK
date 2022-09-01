@@ -194,7 +194,9 @@ namespace Monetizr.Campaigns
     public enum RewardType
     {
         Coins,
+        AdditionalCoins,
         PremiumCurrency
+        
     }
 
     /// <summary>
@@ -311,6 +313,9 @@ namespace Monetizr.Campaigns
                     new MissionDescription(20, RewardType.Coins),
                 };
             }
+
+            if (sponsoredMissions.Count > 1)
+                sponsoredMissions = sponsoredMissions.GetRange(0, 1);
 
 #if UNITY_EDITOR
             keepLocalClaimData = true;
@@ -503,6 +508,17 @@ namespace Monetizr.Campaigns
             m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandRewardBannerSprite);
         }
 
+        internal static void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
+        {
+            Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+
+            instance.uiController.ShowPanelFromPrefab("MonetizrMessagePanel",
+                panelId,
+                onComplete,
+                true,
+                m);
+        }
+
         internal static void ShowNotification(Action<bool> onComplete, Mission m, PanelId panelId)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
@@ -576,6 +592,8 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("SUCCESS!");
 
+                MonetizrManager.Analytics.TrackEvent("Enter email succeeded", m);
+
                 ShowCongratsNotification((bool _) =>
                 {
                     //lscreen.SetActive(false);
@@ -603,7 +621,16 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("FAIL!");
 
-                onComplete?.Invoke(false);
+                MonetizrManager.Analytics.TrackEvent("Enter email failed", m);
+
+                ShowMessage((bool _) =>
+                {
+                    onComplete?.Invoke(false);
+                },
+                m,
+                PanelId.BadEmailMessageNotification);
+
+                
             };
 
 
@@ -776,14 +803,6 @@ namespace Monetizr.Campaigns
 
                 gameRewards[m.rewardType].AddCurrencyAction(m.reward);
             }
-            else if (m.type == MissionType.GiveawayWithMail)
-            {
-                //m.reward *= 2;
-
-                //m.AddNormalCurrencyAction.Invoke(m.reward);
-
-                //gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-            }
             if (m.type == MissionType.VideoWithEmailGiveaway)
             {
                 //ShowRewardCenter(null);
@@ -922,6 +941,14 @@ namespace Monetizr.Campaigns
             instance.missionsManager.CleanUserDefinedMissions();
         }
 
+        public delegate void OnComplete(bool isSkipped);
+
+        public static void EngagedUserAction(OnComplete onComplete)
+        {
+            MonetizrManager.ShowRewardCenter(null, (bool p) => { onComplete(p); });
+        }
+
+
         public static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
@@ -933,9 +960,28 @@ namespace Monetizr.Campaigns
             var m = instance.missionsManager.GetMission(challengeId);
 
             if (m == null)
+            {
+                onComplete?.Invoke(false);
                 return;
+            }
 
-            if (Instance.missionsManager.missions.Count == 1)
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+
+            /*int i = 1;
+            foreach (var m2 in Instance.missionsManager.missions)
+            {
+                Debug.Log($"{i}:{m2.missionTitle}:{m2.campaignId}");
+                i++;
+            }*/
+
+            if(missions.Count == 0)
+            {
+                onComplete?.Invoke(false);
+                return;
+            }
+
+            if(missions.Count == 1)
+            //if (Instance.missionsManager.missions.Count == 1)
             {
                 //Debug.Log($"---_PressSingleMission");
 
@@ -1028,6 +1074,11 @@ namespace Monetizr.Campaigns
         internal static void ShowSurvey(Action<bool> onComplete, Mission m = null)
         {
             _ShowWebView(onComplete, PanelId.SurveyWebView, m);
+        }
+
+        internal static void ShowWebPage(Action<bool> onComplete, Mission m = null)
+        {
+            _ShowWebView(onComplete, PanelId.HtmlWebPageView, m);
         }
 
         internal static void ShowHTML5(Action<bool> onComplete, Mission m = null)
@@ -1422,6 +1473,8 @@ namespace Monetizr.Campaigns
 
             campaignIds.Clear();
 
+            
+
 #if TEST_SLOW_LATENCY
             await Task.Delay(10000);
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -1434,6 +1487,10 @@ namespace Monetizr.Campaigns
                             
                 if (this.challenges.ContainsKey(ch.id))
                     continue;
+
+                string path = Application.persistentDataPath + "/" + ech.campaign.id;
+
+                Debug.Log($"Campaign path: {path}");
 
                 foreach (var asset in ch.assets)
                 {
@@ -1689,13 +1746,15 @@ namespace Monetizr.Campaigns
 
             try
             {
-                //await Task.Delay(5000,ct);
+                //await Task.Delay(15000,ct);
 
                 await _challengesClient.Claim(challenge, ct, onSuccess, onFailure);
             }
             catch (Exception e)
-            {
+            {                
                 Log.Print($"An error occured: {e.Message}");
+
+                onFailure.Invoke();
             }
         }
                

@@ -23,6 +23,7 @@ namespace Monetizr.Campaigns
         private Mission currentMissionDesc;
         private string eventsPrefix;
         private AdType adType;
+        private bool isAnalyticsNeeded = true;
 
 
 
@@ -54,13 +55,15 @@ namespace Monetizr.Campaigns
             }
 
 #if UNITY_EDITOR
-            webView.Frame = new Rect(0,0, 1080, 1920);
+            webView.Frame = new Rect(0,0, 1080.0f*0.9f, 1920.0f*0.9f);
 #else
             if(fullScreen)
                 webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
             else
                 webView.Frame = new Rect(x, y, w, h);
 #endif
+
+            Debug.Log($"frame: {fullScreen} {webView.Frame}");
 
             webView.OnMessageReceived += OnMessageReceived;
             webView.OnPageStarted += OnPageStarted;
@@ -71,7 +74,7 @@ namespace Monetizr.Campaigns
 
         internal void PrepareSurveyPanel(Mission m)
         {
-            MonetizrManager.Analytics.TrackEvent("Survey started", currentMissionDesc);
+            TrackEvent("Survey started");
 
             Debug.Log($"currentMissionDesc: {currentMissionDesc == null}");
             webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
@@ -81,8 +84,25 @@ namespace Monetizr.Campaigns
 
         }
 
+        internal void PrepareWebViewPanel(Mission m)
+        {
+            //MonetizrManager.Analytics.TrackEvent("Survey webview", currentMissionDesc);
+
+            closeButton.gameObject.SetActive(true);
+
+            //Debug.Log($"currentMissionDesc: {currentMissionDesc == null}");
+            webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
+                                 // eventsPrefix = "Survey";
+
+            webView.Load(webUrl);
+
+            //isAnalyticsNeeded = false;
+
+        }
+
         private void PrepareHtml5Panel()
         {
+            
             webUrl = "file://" + MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.Html5PathString);
             // eventsPrefix = "Html5";
 
@@ -148,6 +168,7 @@ body {{
     height: 40px;
     z-index:500;
     border-radius: 50%;
+    opacity: 0.5;
 }}
 .countdown
 {{
@@ -163,15 +184,16 @@ body {{
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 25px;
+    font-size: 20px;
     border-radius: 50%;
     z-index:500;
+    font-family: Verdana, sans-serif;
 }}
 
 .toastInfo
 {{
     position: absolute;
-    bottom: 15px;
+    bottom: 0px;
     left: 0;
     right: 0;
     margin: auto;
@@ -185,6 +207,7 @@ body {{
     font-size: 18px;
     padding-top: 4px;
     color: rgba(128,128, 128, 0.75);
+    font-family: Verdana, sans-serif;
     
     z-index:500;
 }}
@@ -335,28 +358,37 @@ document.addEventListener('DOMContentLoaded', function(){{
             panelId = id;
             currentMissionDesc = m;
 
-            bool fullScreen = id != PanelId.SurveyWebView;
+            bool fullScreen = true;
+
+            if (id == PanelId.SurveyWebView || id == PanelId.HtmlWebPageView)
+                fullScreen = false;
 
             PrepareWebViewComponent(fullScreen);
 
             closeButton.gameObject.SetActive(!fullScreen);
-            
-
-
+                        
             switch (id)
             {
                 case PanelId.SurveyWebView: adType = AdType.Survey; PrepareSurveyPanel(m); break;
                 case PanelId.VideoWebView: adType = AdType.Video; PrepareVideoPanel(); break;
                 case PanelId.Html5WebView: adType = AdType.Html5; PrepareHtml5Panel(); break;
+                case PanelId.HtmlWebPageView: adType = AdType.HtmlPage; PrepareWebViewPanel(m); break;
             }
 
-            eventsPrefix = MonetizrAnalytics.adTypeNames[adType];
+            //eventsPrefix = MonetizrAnalytics.adTypeNames[adType];
 
+            eventsPrefix = adType.ToString();
+
+           
             // Load a URL.
             Debug.Log($"Url to show {webUrl}");
             webView.Show();
 
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMissionDesc);
+            if (isAnalyticsNeeded)
+            {
+                TrackEvent($"{eventsPrefix} started");
+                MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMissionDesc);
+            }
 #endif
         }
 
@@ -375,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
             if (message.RawMessage.Contains("skip"))
             {
-                OnButtonPress();
+                OnSkipPress();
 
                 ClosePanel();
             }
@@ -394,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
             if (statusCode >= 300)
             {
-                MonetizrManager.Analytics.TrackEvent($"{eventsPrefix} error", currentMissionDesc);
+                TrackEvent($"{eventsPrefix} error");
 
                 ClosePanel();
             }
@@ -404,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function(){{
         {
             Debug.Log($"OnPageErrorReceived: {url} code: {errorCode}");
 
-            MonetizrManager.Analytics.TrackEvent($"{eventsPrefix} error", currentMissionDesc);
+            TrackEvent($"{eventsPrefix} error");
 
             ClosePanel();
         }
@@ -425,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function(){{
                         webUrl.Contains("reportabuse") ||
                         webUrl.Contains("google.com/forms/about"))
                     {
-                        OnButtonPress();
+                        OnSkipPress();
                         return;
                     }
 
@@ -445,7 +477,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
         private void OnCompleteEvent()
         {
-            MonetizrManager.Analytics.TrackEvent($"{eventsPrefix} completed",currentMissionDesc);
+            TrackEvent($"{eventsPrefix} completed");
             isSkipped = false;
 
             ClosePanel();
@@ -469,19 +501,30 @@ document.addEventListener('DOMContentLoaded', function(){{
 
         }
 
-        public void OnButtonPress()
+        public void OnSkipPress()
         {
             isSkipped = true;
-            
-            MonetizrManager.Analytics.TrackEvent($"{eventsPrefix} skipped", currentMissionDesc);
+
+            TrackEvent($"{eventsPrefix} skipped");
 
             ClosePanel();
         }
+
+
 #endif
+        private void TrackEvent(string eventName)
+        {
+            if (!isAnalyticsNeeded)
+                return;
+
+            MonetizrManager.Analytics.TrackEvent(eventName, currentMissionDesc);
+        }
+
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(adType, currentMissionDesc);
+            if (isAnalyticsNeeded)
+                MonetizrManager.Analytics.EndShowAdAsset(adType, currentMissionDesc);
 
             MonetizrManager.Instance.SoundSwitch(true);
         }

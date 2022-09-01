@@ -196,8 +196,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 8476186599705654305}
-        m_TargetAssemblyTypeName: Monetizr.Challenges.SurveyPanel, Assembly-CSharp
-        m_MethodName: OnButtonPress
+        m_TargetAssemblyTypeName: Monetizr.Campaigns.WebViewPanel, Assembly-CSharp
+        m_MethodName: OnSkipPress
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -292,6 +292,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d46e2af2ee39149e0bea6c6fccfb32e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiVersion: 0
+  backgroundImage: {fileID: 0}
+  backgroundBorderImage: {fileID: 0}
   nextPanelId: -1
   closeButtonImageAsset: {fileID: 4900000, guid: d470db49358db4e43966772c1ecc75e2,
     type: 3}

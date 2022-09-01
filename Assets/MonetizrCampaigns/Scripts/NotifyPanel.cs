@@ -23,6 +23,7 @@ namespace Monetizr.Campaigns
 
         [HideInInspector]
         public Mission currentMission;
+        private AdType adType;
 
         //private Action onComplete;
 
@@ -38,7 +39,7 @@ namespace Monetizr.Campaigns
             switch (id)
             {
                 case PanelId.CongratsNotification:
-                    if (m.type == MissionType.GiveawayWithMail || m.type == MissionType.VideoWithEmailGiveaway)
+                    if (/*m.type == MissionType.GiveawayWithMail ||*/ m.type == MissionType.VideoWithEmailGiveaway)
                     {
                         if(MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product)
                             PrepareGiveawayCongratsPanel(m);
@@ -60,32 +61,9 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            switch (id)
-            {
-                case PanelId.CongratsNotification:
-                    MonetizrManager.Analytics.EndShowAdAsset(AdType.RewardBanner, currentMission);
-                    break;
-
-                case PanelId.StartNotification:
-                    MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner, currentMission);
-                    break;
-
-                case PanelId.SurveyNotification:
-                    MonetizrManager.Analytics.EndShowAdAsset(AdType.RewardBanner, currentMission);
-                    break;
-
-                case PanelId.TwitterNotification:
-                    MonetizrManager.Analytics.EndShowAdAsset(AdType.RewardBanner, currentMission);
-                    break;
-
-                
-            }
-
-
+            MonetizrManager.Analytics.EndShowAdAsset(adType, currentMission);
         }
-
-
-
+               
         private void PrepareNotificationPanel(Mission m)
         {
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
@@ -149,8 +127,10 @@ namespace Monetizr.Campaigns
 
             text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
 
+            adType = AdType.NotificationScreen;
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
             MonetizrManager.Analytics.TrackEvent("Notification shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, currentMission);
+            
 
         }
 
@@ -242,8 +222,12 @@ namespace Monetizr.Campaigns
             rewardAmount.gameObject.SetActive(false);
 
 
-            MonetizrManager.Analytics.TrackEvent("Reward notification shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
+            adType = AdType.CongratsNotificationScreen;
+            MonetizrManager.Analytics.TrackEvent("Congrats screen shown", m);
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
+
+
+            //MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
 
         }
 
@@ -286,9 +270,11 @@ namespace Monetizr.Campaigns
             rewardImage.sprite = rewardIcon;
 
 
+            adType = AdType.SurveyNotificationScreen;
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
 
             MonetizrManager.Analytics.TrackEvent("Survey notification shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
+            //MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
 
         }
 
@@ -344,9 +330,11 @@ namespace Monetizr.Campaigns
             rewardImage.sprite = rewardIcon;
 
 
+            //adType = AdType.SurveyNotificationScreen;
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
 
-            MonetizrManager.Analytics.TrackEvent("Twitter notification shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Twitter notification shown", m);
+            //MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
 
         }
 
@@ -412,8 +400,10 @@ namespace Monetizr.Campaigns
 
             gift?.gameObject.SetActive(false);
 
-            MonetizrManager.Analytics.TrackEvent("Reward notification shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
+
+            adType = AdType.EmailCongratsNotificationScreen;
+            MonetizrManager.Analytics.TrackEvent("Email congrats shown", m);
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
 
         }
 

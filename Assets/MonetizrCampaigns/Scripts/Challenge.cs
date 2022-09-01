@@ -67,6 +67,9 @@ namespace Monetizr.Campaigns
         [System.Serializable]
         public class Reward
         {
+            //reward id
+            public string id;
+
             //title: informative information
             public string title;
 
@@ -78,6 +81,8 @@ namespace Monetizr.Campaigns
 
             //to deliver any kind of giveaways an email is required
             public bool requires_email_address;
+
+            public bool in_game_only;
         }
 
         [System.Serializable]
