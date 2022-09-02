@@ -183,6 +183,9 @@ namespace Monetizr.Campaigns
 
         [SerializeField] internal bool isDisabled;
 
+        //is video shown already and don't need to be shown again
+        [NonSerialized] internal bool isVideoShown;
+
         [NonSerialized] internal bool isShouldBeDisabled;
 
         [NonSerialized] internal MissionUIState state;

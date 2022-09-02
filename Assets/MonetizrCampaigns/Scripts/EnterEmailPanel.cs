@@ -35,6 +35,8 @@ namespace Monetizr.Campaigns
         public Image selection1Icon;
         public Image selection2Icon;
 
+        public Animator crossButtonAnimator;
+
         [HideInInspector]
         public Mission currentMission;
         private Regex validateEmailRegex;
@@ -61,9 +63,20 @@ namespace Monetizr.Campaigns
 
             validateEmailRegex = new Regex("^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
 
+            int closeButtonDelay = m.additionalParams.GetIntParam("email_enter_close_button_delay",0);
+
+            StartCoroutine(ShowCloseButton(closeButtonDelay));
+
             PreparePanel(m);
 
 
+        }
+
+        IEnumerator ShowCloseButton(float time)
+        {
+            yield return new WaitForSeconds(time);
+
+            crossButtonAnimator.enabled = true;
         }
 
         internal void OnInputFieldChanged(string s)

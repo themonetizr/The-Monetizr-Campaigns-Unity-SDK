@@ -69,6 +69,8 @@ namespace Monetizr.Campaigns
             webView.OnPageStarted += OnPageStarted;
             webView.OnPageFinished += OnPageFinished;
             webView.OnPageErrorReceived += OnPageErrorReceived;
+
+            webView.Alpha = 0;
         }
 
 
@@ -429,7 +431,11 @@ document.addEventListener('DOMContentLoaded', function(){{
                 TrackEvent($"{eventsPrefix} error");
 
                 ClosePanel();
+
+                return;
             }
+
+            webView.Alpha = 1;
         }
 
         void OnPageErrorReceived(UniWebView webView, int errorCode, string url)

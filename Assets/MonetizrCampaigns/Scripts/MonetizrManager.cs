@@ -204,11 +204,13 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
-        public static readonly string SDKVersion = "0.0.3";
+        public static readonly string SDKVersion = "0.0.4";
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
         internal static bool claimForSkippedCampaigns;
+
+        internal static int maximumCampaignAmount = 1;
 
 
         //position relative to center with 1080x1920 screen resolution
@@ -675,10 +677,10 @@ namespace Monetizr.Campaigns
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
-            //debugAttempt++;
+            debugAttempt++;
 
-            //if (debugAttempt != 10)
-            //    return;
+            if (debugAttempt != 10)
+                return;
 
             debugAttempt = 0;
 

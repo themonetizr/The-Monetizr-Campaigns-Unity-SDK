@@ -281,9 +281,7 @@ namespace Monetizr.Campaigns
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
-            m.additionalParams = new SerializableDictionary<string, string>(MonetizrManager.Instance.GetCampaign(campaign).additional_params);
             
-
             return m;
         }
 
@@ -296,6 +294,9 @@ namespace Monetizr.Campaigns
 #if UNITY_EDITOR_WIN
             needToPlayVideo = false;
 #endif
+
+            if(m.isVideoShown)
+                needToPlayVideo = false;
 
             /*Action<bool> onComplete = (bool isSkipped) =>
             {
@@ -319,6 +320,9 @@ namespace Monetizr.Campaigns
                     onComplete?.Invoke(isVideoSkipped);
                     return;
                 }
+
+                if(m.additionalParams.GetParam("watch_video_only_once") == "true")
+                    m.isVideoShown = true;
 
                 MonetizrManager.ShowEnterEmailPanel(
                     (bool isMailSkipped) =>
@@ -415,8 +419,15 @@ namespace Monetizr.Campaigns
 
             
             //search unbinded campaign
-            foreach (string ch in campaigns)
+            for (int c = 0; c < campaigns.Count; c++)
             {
+                string ch = campaigns[c];
+
+                if(c >= MonetizrManager.maximumCampaignAmount)
+                {
+                    break;
+                }
+
                 //TODO: check if such mission type already existed for such campaign
                 //if it exist - do not add it
 
@@ -447,13 +458,12 @@ namespace Monetizr.Campaigns
 
                     m.isServerCampaignActive = true;
                     m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
-                    //if (m != null)
-                    //    missions.Add(m);
 
-                    //m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
+                    //rewrite these parameters here, because otherwise it will be saved in cache
+                    m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
                     m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
                     m.amountOfNotificationsSkipped = int.MaxValue - 1; //first notification is always visible
-
+                    m.isVideoShown = false;
 
                     InitializeNonSerializedFields(m);
                 }
