@@ -582,6 +582,8 @@ namespace Monetizr.Campaigns
             props["type"] = adAsset.Key.ToString();
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
+
+            props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
             //props["duration"] = (DateTime.Now - visibleAdAsset[type].activateTime).TotalSeconds;
 
             //string eventName = $"[UNITY_SDK] [AD] {adTypeNames[adAsset.Key]}";
@@ -668,6 +670,7 @@ namespace Monetizr.Campaigns
             props["brand_name"] = brand_name;
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
+            props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
 
             Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);
