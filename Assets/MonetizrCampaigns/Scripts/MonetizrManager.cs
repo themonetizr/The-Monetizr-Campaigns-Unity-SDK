@@ -689,14 +689,23 @@ namespace Monetizr.Campaigns
 
         public static void ShowStartupNotification(int placement, Action<bool> onComplete)
         {
+            if (instance.uiController.panels.ContainsKey(PanelId.StartNotification))
+            {
+                Debug.Log($"------ShowStartupNotification ContainsKey(PanelId.StartNotification) {placement}");
+                return;
+            }
+
             bool forceSkip = false;
 
+            Debug.Log($"------ShowStartupNotification 1 {placement}");
 
             if (instance == null || !instance.HasCampaignsAndActive())
             {
                 onComplete?.Invoke(false);
                 return;
             }
+
+            Debug.Log($"------ShowStartupNotification 2 {placement}");
 
             //Debug.LogWarning("ShowStartupNotification");
 
@@ -718,7 +727,8 @@ namespace Monetizr.Campaigns
                 forceSkip = mission.additionalParams.GetParam("no_main_menu_notifications") == "true";
             }
 
-         
+            Debug.Log($"------ShowStartupNotification 3 {placement}");
+
             //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
 
             if (mission.additionalParams.GetParam("no_campaigns_notification") == "true")
@@ -754,6 +764,7 @@ namespace Monetizr.Campaigns
 
             //instance.missionsManager.SaveAll();
 
+            Debug.Log($"------ShowStartupNotification 4 {placement}");
 
             //Debug.LogWarning("!!!!-------");
 
@@ -1164,9 +1175,12 @@ namespace Monetizr.Campaigns
 
             instance.initializeBuiltinMissions();
 
+            Debug.Log("------OnMainMenuShow 1");
 
             ShowStartupNotification(1, (bool isSkipped) =>
             {
+                Debug.Log($"------OnMainMenuShow 2 {isSkipped}");
+
                 if (isSkipped)
                     ShowTinyMenuTeaser();
                 else
