@@ -69,6 +69,7 @@ namespace Monetizr.Campaigns
         TeaserGifPathString,
         RewardSprite,
         IngameRewardSprite,
+        UnknownRewardSprite,
     }
 
     internal class ServerCampaignWithAssets
@@ -97,6 +98,7 @@ namespace Monetizr.Campaigns
             { AssetsType.TeaserGifPathString, typeof(String) },
             { AssetsType.RewardSprite, typeof(Sprite) },
             { AssetsType.IngameRewardSprite, typeof(Sprite) },
+            { AssetsType.UnknownRewardSprite, typeof(Sprite) },
 
         };
 
@@ -697,7 +699,7 @@ namespace Monetizr.Campaigns
 
             bool forceSkip = false;
 
-            Debug.Log($"------ShowStartupNotification 1 {placement}");
+            //Debug.Log($"------ShowStartupNotification 1 {placement}");
 
             if (instance == null || !instance.HasCampaignsAndActive())
             {
@@ -705,7 +707,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            Debug.Log($"------ShowStartupNotification 2 {placement}");
+            //Debug.Log($"------ShowStartupNotification 2 {placement}");
 
             //Debug.LogWarning("ShowStartupNotification");
 
@@ -727,7 +729,7 @@ namespace Monetizr.Campaigns
                 forceSkip = mission.additionalParams.GetParam("no_main_menu_notifications") == "true";
             }
 
-            Debug.Log($"------ShowStartupNotification 3 {placement}");
+           // Debug.Log($"------ShowStartupNotification 3 {placement}");
 
             //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
 
@@ -736,7 +738,7 @@ namespace Monetizr.Campaigns
                 forceSkip = true;
             }
 
-            Debug.Log($"Notifications sk {mission.amountOfNotificationsSkipped} shown {mission.amountOfNotificationsShown}");
+            //Debug.Log($"Notifications sk {mission.amountOfNotificationsSkipped} shown {mission.amountOfNotificationsShown}");
             
             mission.amountOfNotificationsSkipped++;
 
@@ -764,7 +766,7 @@ namespace Monetizr.Campaigns
 
             //instance.missionsManager.SaveAll();
 
-            Debug.Log($"------ShowStartupNotification 4 {placement}");
+            //Debug.Log($"------ShowStartupNotification 4 {placement}");
 
             //Debug.LogWarning("!!!!-------");
 
@@ -1175,11 +1177,11 @@ namespace Monetizr.Campaigns
 
             instance.initializeBuiltinMissions();
 
-            Debug.Log("------OnMainMenuShow 1");
+            //Debug.Log("------OnMainMenuShow 1");
 
             ShowStartupNotification(1, (bool isSkipped) =>
             {
-                Debug.Log($"------OnMainMenuShow 2 {isSkipped}");
+                //Debug.Log($"------OnMainMenuShow 2 {isSkipped}");
 
                 if (isSkipped)
                     ShowTinyMenuTeaser();
@@ -1637,6 +1639,12 @@ namespace Monetizr.Campaigns
                             break;
 
                         case "ingame_reward_image":
+
+                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.IngameRewardSprite, true);
+
+                            break;
+
+                        case "unknown_reward_image":
 
                             await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.IngameRewardSprite, true);
 
