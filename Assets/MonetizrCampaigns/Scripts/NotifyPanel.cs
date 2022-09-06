@@ -111,7 +111,13 @@ namespace Monetizr.Campaigns
                 rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             }
 
-            
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.UnknownRewardSprite) &&
+               EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.UnknownRewardSprite);
+            }
+
+
             rewardImage.gameObject.SetActive(true);
             rewardAmount.gameObject.SetActive(false);
             rewardImageBackgroud.gameObject.SetActive(false);
@@ -200,6 +206,12 @@ namespace Monetizr.Campaigns
                MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product)
             {
                 rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+            }
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.UnknownRewardSprite) &&
+               EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.UnknownRewardSprite);
             }
 
             if (rewardIcon != null)
