@@ -25,6 +25,8 @@ namespace Monetizr.Campaigns
         public Mission currentMission;
         private AdType adType;
 
+        private string eventPrefix = null;
+
         //private Action onComplete;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -32,6 +34,8 @@ namespace Monetizr.Campaigns
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
+            this.eventPrefix = null;
+           
 
             closeButton.onClick.AddListener(OnButtonPress);
             noThanksButton?.onClick.AddListener(OnNoThanksPress);
@@ -66,6 +70,10 @@ namespace Monetizr.Campaigns
                
         private void PrepareNotificationPanel(Mission m)
         {
+            eventPrefix = "Notification";
+
+            //----
+
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
             banner.sprite = m.brandBanner;
@@ -245,6 +253,9 @@ namespace Monetizr.Campaigns
 
         private void PrepareSurveyNotificationPanel(Mission m)
         {
+            eventPrefix = "Survey notification";
+
+            //----
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
@@ -428,7 +439,9 @@ namespace Monetizr.Campaigns
 
         public void OnNoThanksPress()
         {
-            //MonetizrManager.Analytics.TrackEvent("Twitter cancel", currentMission);
+            //MonetizrManager.
+			//
+			//ytics.TrackEvent("Twitter cancel", currentMission);
 
             isSkipped = true;
             SetActive(false);
@@ -436,7 +449,8 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
-            //MonetizrManager.Analytics.TrackEvent("Twitter follow", currentMission);
+            if(eventPrefix != null)
+                MonetizrManager.Analytics.TrackEvent($"{eventPrefix} pressed", currentMission);
 
             isSkipped = false;
             SetActive(false);

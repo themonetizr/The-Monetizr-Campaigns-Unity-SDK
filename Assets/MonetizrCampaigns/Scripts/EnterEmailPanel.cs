@@ -293,6 +293,8 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
+            MonetizrManager.Analytics.TrackEvent("Enter email submitted", currentMission);
+
             isSkipped = false;
             SetActive(false);
         }

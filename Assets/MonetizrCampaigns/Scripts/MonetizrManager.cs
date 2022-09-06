@@ -206,7 +206,7 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
-        public static readonly string SDKVersion = "0.0.4";
+        public static readonly string SDKVersion = "0.0.5";
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
@@ -597,7 +597,7 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("SUCCESS!");
 
-                MonetizrManager.Analytics.TrackEvent("Enter email succeeded", m);
+                //MonetizrManager.Analytics.TrackEvent("Enter email succeeded", m);
 
                 ShowCongratsNotification((bool _) =>
                 {
@@ -626,7 +626,7 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("FAIL!");
 
-                MonetizrManager.Analytics.TrackEvent("Enter email failed", m);
+                MonetizrManager.Analytics.TrackEvent("Email enter failed", m);
 
                 ShowMessage((bool _) =>
                 {

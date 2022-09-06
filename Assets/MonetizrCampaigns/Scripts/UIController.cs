@@ -218,9 +218,7 @@ namespace Monetizr.Campaigns
 
                 teaser.uiVersion = designVersion;
                 panels.Add(PanelId.TinyMenuTeaser, teaser);
-                teaser.button.onClick.AddListener(() => {
-                       MonetizrManager.ShowRewardCenter(UpdateGameUI);
-                });
+                
 
                 if (screenPos != null)
                 {

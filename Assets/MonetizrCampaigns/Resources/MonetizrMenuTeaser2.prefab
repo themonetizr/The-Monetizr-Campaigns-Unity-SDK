@@ -342,9 +342,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MissionUI, Assembly-CSharp
-        m_MethodName: CallOpen
+      - m_Target: {fileID: 336197565933457740}
+        m_TargetAssemblyTypeName: Monetizr.Campaigns.MonetizrMenuTeaser, Assembly-CSharp
+        m_MethodName: OnButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

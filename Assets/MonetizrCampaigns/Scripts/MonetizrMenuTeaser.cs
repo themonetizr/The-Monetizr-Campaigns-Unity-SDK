@@ -30,6 +30,8 @@ namespace Monetizr.Campaigns
         private bool hasTextureAnimation = true;
         private bool hasAnimation = true;
 
+        private Mission currentMission;
+
         void Update()
         {
             if (!hasTextureAnimation)
@@ -74,9 +76,17 @@ namespace Monetizr.Campaigns
             return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
         }
 
+        public void OnButtonClick()
+        {
+            MonetizrManager.Analytics.TrackEvent("Tiny teaser pressed", currentMission);
+            MonetizrManager.ShowRewardCenter(null);
+        }
+
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            switch(uiVersion)
+            currentMission = m;
+
+            switch (uiVersion)
             {
                 case 2: PreparePanelVersion2(id, onComplete, m); break;
                 default:
@@ -167,6 +177,8 @@ namespace Monetizr.Campaigns
             Log.PrintWarning($"{m.campaignId} {m}");
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
 
+            MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
+
         }
 
         internal void PreparePanelDefaultVersion(PanelId id, Action<bool> onComplete, Mission m)
@@ -219,6 +231,8 @@ namespace Monetizr.Campaigns
 
             Log.PrintWarning($"{m.campaignId} {m}");
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
+
+            MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
 
         }
 

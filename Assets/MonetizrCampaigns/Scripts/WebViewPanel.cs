@@ -404,14 +404,14 @@ document.addEventListener('DOMContentLoaded', function(){{
             {
                 OnCompleteEvent();
 
-                ClosePanel();
+                //ClosePanel();
             }
 
             if (message.RawMessage.Contains("skip"))
             {
                 OnSkipPress();
 
-                ClosePanel();
+                //ClosePanel();
             }
         }
 
@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function(){{
             ClosePanel();
         }
 
-        private void Update()
+       /* private void Update()
         {
             if (webView != null && panelId == PanelId.SurveyWebView)
             {
@@ -478,7 +478,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
                 }
             }
-        }
+        }*/
 
 
         private void OnCompleteEvent()
