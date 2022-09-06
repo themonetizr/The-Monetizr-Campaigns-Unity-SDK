@@ -679,8 +679,10 @@ namespace Monetizr.Campaigns
 
             debugAttempt++;
 
+#if !UNITY_EDITOR
             if (debugAttempt != 10)
                 return;
+#endif
 
             debugAttempt = 0;
 
