@@ -179,6 +179,40 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
 
+
+            /*MonetizrManager.Analytics.TrackEvent("Reward center opened", m);
+            MonetizrManager.Analytics.TrackEvent("Html5 completed", m);
+            MonetizrManager.Analytics.TrackEvent("Html5 skipped", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 1 shown", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 2 shown", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 3 shown", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 4 shown", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 5 shown", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 6 shown", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 7 shown", m);
+            
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 1 pressed", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 2 pressed", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 3 pressed", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 4 pressed", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 5 pressed", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 6 pressed", m);
+            MonetizrManager.Analytics.TrackEvent("Branded Mission 7 pressed", m);
+            
+            MonetizrManager.Analytics.TrackEvent("Minigame started", m);
+            MonetizrManager.Analytics.TrackEvent("Minigame skipped", m);
+            MonetizrManager.Analytics.TrackEvent("Minigame completed", m);
+            MonetizrManager.Analytics.TrackEvent("Survey started", m);
+            MonetizrManager.Analytics.TrackEvent("Survey skipped", m);
+            MonetizrManager.Analytics.TrackEvent("Survey completed", m);
+            MonetizrManager.Analytics.TrackEvent("Enter email submitted", m);
+            MonetizrManager.Analytics.TrackEvent("Email enter skipped", m);
+            MonetizrManager.Analytics.TrackEvent("Email congrats shown", m);
+
+            MonetizrManager.Analytics.TrackEvent("Custom event shown", m);
+            MonetizrManager.Analytics.TrackEvent("Custom event pressed", m);*/
+
+
         }
 
         internal void PreparePanelDefaultVersion(PanelId id, Action<bool> onComplete, Mission m)

@@ -271,6 +271,8 @@ namespace Monetizr.Campaigns
 
         public void _OnNoThanksPress()
         {
+            MonetizrManager.Analytics.TrackEvent("Enter email skipped", currentMission);
+
             isSkipped = true;
             SetActive(false);
         }

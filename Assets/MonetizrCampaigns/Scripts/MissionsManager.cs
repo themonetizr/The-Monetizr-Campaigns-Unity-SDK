@@ -457,6 +457,9 @@ namespace Monetizr.Campaigns
                         continue;
 
                     m.isServerCampaignActive = true;
+
+                    
+                    
                     m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
 
                     //rewrite these parameters here, because otherwise it will be saved in cache
@@ -464,6 +467,13 @@ namespace Monetizr.Campaigns
                     m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
                     m.amountOfNotificationsSkipped = int.MaxValue - 1; //first notification is always visible
                     m.isVideoShown = false;
+
+                    if (m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey())
+                    {
+                        m.isServerCampaignActive = false;
+                        m.isDisabled = true;
+                        m.state = MissionUIState.Hidden;    
+                    }
 
                     InitializeNonSerializedFields(m);
                 }

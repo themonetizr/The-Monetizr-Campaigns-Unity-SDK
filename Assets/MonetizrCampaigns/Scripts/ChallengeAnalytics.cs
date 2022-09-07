@@ -456,7 +456,7 @@ namespace Monetizr.Campaigns
 
             //string eventName = $"[UNITY_SDK] [AD] {adTypeNames[adAsset.Key]}";
 
-            string eventName = $"[UNITY_SDK] [AD] {adAsset.Key.ToString()}";
+            string eventName = $"[UNITY_SDK] [TIMED] {adAsset.Key.ToString()}";
 
             Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);

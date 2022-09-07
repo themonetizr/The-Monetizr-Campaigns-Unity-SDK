@@ -213,6 +213,7 @@ namespace Monetizr.Campaigns
         internal static bool claimForSkippedCampaigns;
 
         internal static int maximumCampaignAmount = 1;
+        internal static int maximumMissionsAmount = 1;
 
 
         //position relative to center with 1080x1920 screen resolution
