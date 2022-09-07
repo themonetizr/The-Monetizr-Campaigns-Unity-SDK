@@ -206,7 +206,7 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
-        public static readonly string SDKVersion = "0.0.5";
+        public static readonly string SDKVersion = "0.0.6";
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
@@ -1230,7 +1230,7 @@ namespace Monetizr.Campaigns
 
             if (campaign.GetParam("hide_teaser_button") != "true")
             {
-                int uiVersion = campaign.GetIntParam("design_version");
+                int uiVersion = 3;// campaign.GetIntParam("teaser_design_version");
 
                 instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }

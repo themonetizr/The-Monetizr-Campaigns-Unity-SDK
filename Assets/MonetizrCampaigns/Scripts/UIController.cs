@@ -210,6 +210,12 @@ namespace Monetizr.Campaigns
                     //screenPos = Vector2.zero;
                 }
 
+                if (designVersion == 3)
+                {
+                    teaserPrefab = "MonetizrMenuTeaser3";
+                    //screenPos = Vector2.zero;
+                }
+
 
                 var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject, mainCanvas.transform);
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();

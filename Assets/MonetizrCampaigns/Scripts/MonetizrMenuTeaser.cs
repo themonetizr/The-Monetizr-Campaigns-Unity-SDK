@@ -32,6 +32,10 @@ namespace Monetizr.Campaigns
 
         private Mission currentMission;
 
+        public Image singlePictureBackground;
+        public Image watchVideoIcon;
+        public RectTransform buttonTextRect;
+
         void Update()
         {
             if (!hasTextureAnimation)
@@ -88,26 +92,50 @@ namespace Monetizr.Campaigns
 
             switch (uiVersion)
             {
-                case 2: PreparePanelVersion2(id, onComplete, m); break;
+                case 2:
+                case 3:
+                    PreparePanelVersion2(id, onComplete, m); break;
                 default:
                     PreparePanelDefaultVersion(id, onComplete, m); break;
             }
+
+            Log.PrintWarning($"{m.campaignId} {m}");
+            MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
+
+            MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
         }
 
         internal void PreparePanelVersion2(PanelId id, Action<bool> onComplete, Mission m)
         {
+            bool noVideo = false;
 
-//TODO: update gif loader
-//#if !UNITY_EDITOR
+            if (m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true")
+                noVideo = true;
+
+
+            if (m.additionalParams.GetParam("single_picture_teaser") == "true")
+            {
+                //......
+            }
+
+            if (uiVersion == 3)
+            {
+                //TODO: action without video
+                if (noVideo)
+                {
+                    watchVideoIcon.gameObject.SetActive(false);
+                    buttonTextRect.anchoredPosition = new Vector2(0, 0);
+                }
+            }
+
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.TeaserGifPathString))
             {
                 string url = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.TeaserGifPathString);
-
+                    
                 gifImage.SetGifFromUrl(url);
             }
-//#endif
 
-
+            
             //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
             if (m.additionalParams.GetParam("teaser_no_texture_animation") == "true")
@@ -174,10 +202,7 @@ namespace Monetizr.Campaigns
             //rewardText.text = $"Watch {m.brandName} video &\nget $3 coupon!";
             //}
 
-            Log.PrintWarning($"{m.campaignId} {m}");
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
-
-            MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
+ 
 
 
             /*MonetizrManager.Analytics.TrackEvent("Reward center opened", m);
@@ -263,10 +288,7 @@ namespace Monetizr.Campaigns
                 rewardText.text = $"+{m.reward}";
             }
 
-            Log.PrintWarning($"{m.campaignId} {m}");
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
-
-            MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
+            
 
         }
 
