@@ -65,8 +65,8 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 147.6, y: 140}
-  m_Spacing: {x: 72.6, y: 127.8}
+  m_CellSize: {x: 140, y: 140}
+  m_Spacing: {x: 81.9, y: 127.8}
   m_Constraint: 0
   m_ConstraintCount: 2
 --- !u!1 &1166911514270470730
@@ -209,7 +209,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -285,8 +285,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 53d9413ef0ecf4bdab514524f367ad89, type: 3}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -458,7 +458,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -533,7 +533,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -687,7 +687,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -783,10 +783,10 @@ GameObject:
   - component: {fileID: 7387828556660539595}
   - component: {fileID: 7018271603384633207}
   - component: {fileID: 5087530922797124350}
-  - component: {fileID: 6555641535633524879}
   - component: {fileID: 6572120955561666976}
   - component: {fileID: 2331839769963241637}
   - component: {fileID: 6117922490522058262}
+  - component: {fileID: 4930670916765993170}
   m_Layer: 5
   m_Name: MonetizrGamePanel
   m_TagString: Untagged
@@ -847,62 +847,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &6555641535633524879
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2387942495659895709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0cabfa2e43024b189fff65a62ad83eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uiVersion: 0
-  backgroundImage: {fileID: 1601973313011850879}
-  backgroundBorderImage: {fileID: 7226164532691812479}
-  nextPanelId: -1
-  banner: {fileID: 67837266811523669}
-  rewardImageBackgroud: {fileID: 5460336906616306820}
-  rewardImage: {fileID: 0}
-  rewardAmount: {fileID: 7712634603722536435}
-  title: {fileID: 3816175783834833260}
-  text: {fileID: 4387190133157259847}
-  logo: {fileID: 1576714959345372953}
-  closeButton: {fileID: 4344017537882115212}
-  buttonText: {fileID: 7234977449560703399}
-  noThanksButton: {fileID: 3046868277876281524}
-  gift: {fileID: 0}
-  currentMission:
-    apiKey: 
-    type: 0
-    startMoney: 0
-    isSponsored: 0
-    brandName: 
-    reward: 0
-    campaignId: 
-    surveyUrl: 
-    claimedTime: 
-    deactivateTime:
-      _dateTime: 01/01/0001 00:00:00
-    activateTime:
-      _dateTime: 01/01/0001 00:00:00
-    delaySurveyTimeSec: 0
-    surveyAlreadyShown: 0
-    brandId: 
-    appId: 
-    rewardType: 0
-    brandBannerUrl: 
-    brandLogoUrl: 
-    brandRewardBannerUrl: 
-    id: 0
-    isClaimed: 0
-    isDisabled: 0
-    additionalParams:
-      keys: []
-      values: []
-    sdkVersion: 
 --- !u!114 &6572120955561666976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -945,6 +889,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 7234977449560703399}
   textContent: button_text
+--- !u!114 &4930670916765993170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2387942495659895709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0ce8f2e349454939bc231578b9f3692, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiVersion: 0
+  backgroundImage: {fileID: 0}
+  backgroundBorderImage: {fileID: 0}
+  nextPanelId: -1
 --- !u!1 &2540203834186400167
 GameObject:
   m_ObjectHideFlags: 0
@@ -1010,7 +970,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1085,7 +1045,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1239,7 +1199,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1393,7 +1353,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b1fe25561171a4ada9296aa5fd9052bd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1543,7 +1503,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 76dad0e1dfb024252b504ffa27aeb976, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -163,6 +163,7 @@ namespace Monetizr.Campaigns
         Video,
         Survey,
         SurveyNotificationScreen,
+        MinigameScreen,
     }
 
     internal enum DeviceSizeGroup

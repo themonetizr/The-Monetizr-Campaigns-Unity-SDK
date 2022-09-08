@@ -25,6 +25,7 @@ namespace Monetizr.Campaigns
         GiveawayEmailEnterNotification,
         BadEmailMessageNotification,
         EmailEnterCloseConfirmation,
+        MemoryGame,
     }
     
     internal class UIController

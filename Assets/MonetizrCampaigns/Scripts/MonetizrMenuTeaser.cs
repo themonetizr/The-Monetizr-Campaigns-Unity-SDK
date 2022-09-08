@@ -113,7 +113,7 @@ namespace Monetizr.Campaigns
 
             RectTransform rt = GetComponent<RectTransform>();
 
-            float[] values = new float[0];
+            float[] values = null;
 
             try
             {

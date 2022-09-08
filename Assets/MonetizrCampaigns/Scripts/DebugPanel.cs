@@ -87,6 +87,12 @@ namespace Monetizr.Campaigns
             MonetizrManager.ResetCampaign();
         }
 
+        public void OpenGame()
+        {
+            MonetizrManager.ShowMinigame(null, PanelId.MemoryGame, null);
+        }
+
+
         private void ClosePanel()
         {
             SetActive(false);

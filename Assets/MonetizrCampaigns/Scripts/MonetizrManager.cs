@@ -1098,6 +1098,17 @@ namespace Monetizr.Campaigns
 
         }
 
+        internal static void ShowMinigame(Action<bool> onComplete, PanelId id, Mission m = null)
+        {
+            Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+
+            if (!instance.isActive)
+                return;
+
+            instance.uiController.ShowPanelFromPrefab("MonetizrGamePanel", id, onComplete, false, m);
+        }
+
+
         internal static void _ShowWebView(Action<bool> onComplete, PanelId id, Mission m = null)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
