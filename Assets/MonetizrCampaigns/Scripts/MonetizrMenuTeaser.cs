@@ -27,12 +27,12 @@ namespace Monetizr.Campaigns
         private float delayTimeEnd = 0f;
         private float speed = 1f;
         private Rect uvRect = new Rect(0, 0.5f, 1.0f, 0.5f);
-        private bool hasTextureAnimation = true;
+        private bool hasTextureAnimation = false;
         private bool hasAnimation = true;
 
         private Mission currentMission;
 
-        public Image singlePictureBackground;
+        public Image singleBackgroundImage;
         public Image watchVideoIcon;
         public RectTransform buttonTextRect;
 
@@ -90,19 +90,53 @@ namespace Monetizr.Campaigns
         {
             currentMission = m;
 
-            switch (uiVersion)
+            PreparePanelVersion2(id, onComplete, m);
+
+            /*switch (uiVersion)
             {
                 case 2:
                 case 3:
                     PreparePanelVersion2(id, onComplete, m); break;
                 default:
                     PreparePanelDefaultVersion(id, onComplete, m); break;
-            }
+            }*/
 
             Log.PrintWarning($"{m.campaignId} {m}");
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
 
             MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
+        }
+
+        internal void UpdateTransform(Mission m)
+        {
+            string teaser_transform = m.additionalParams.GetParam("teaser_transform");
+
+            RectTransform rt = GetComponent<RectTransform>();
+
+            float[] values = new float[0];
+
+            try
+            {
+                values = Array.ConvertAll(teaser_transform.Split(','), float.Parse);
+            }
+            catch (FormatException)
+            {
+                return;
+            }
+
+            if (values.Length >= 2)
+            {
+                rt.anchoredPosition = new Vector2(values[0], values[1]);
+            }
+
+            if (values.Length >= 4)
+            {
+                if(values[2] + values[3] > 0)
+                    rt.sizeDelta = new Vector2(values[2], values[3]);
+            } 
+
+            if (values.Length == 5)
+                rt.localScale = Vector3.one * (values[4] / 100.0f);
         }
 
         internal void PreparePanelVersion2(PanelId id, Action<bool> onComplete, Mission m)
@@ -112,10 +146,32 @@ namespace Monetizr.Campaigns
             if (m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true")
                 noVideo = true;
 
+            bool isSinglePicture = m.additionalParams.GetParam("teaser_single_picture") == "true";
+                        
 
-            if (m.additionalParams.GetParam("single_picture_teaser") == "true")
+            UpdateTransform(m);
+
+            if (isSinglePicture)
             {
-                //......
+                Array.ForEach(gameObject.GetComponentsInChildren<RectTransform>(),
+                    (RectTransform r) => { if (r.gameObject != gameObject) r.gameObject.SetActive(false); });
+
+                
+
+                /*foreach (RectTransform o in gameObject.GetComponentsInChildren<RectTransform>())
+                {
+                    o.gameObject.SetActive(false);
+                }*/
+
+                //gameObject.SetActive(true);
+
+                singleBackgroundImage.enabled = true;
+
+
+                if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.TinyTeaserSprite))
+                    singleBackgroundImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.TinyTeaserSprite);
+
+                return;
             }
 
             if (uiVersion == 3)
@@ -138,7 +194,7 @@ namespace Monetizr.Campaigns
             
             //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
-            if (m.additionalParams.GetParam("teaser_no_texture_animation") == "true")
+            /*if (m.additionalParams.GetParam("teaser_no_texture_animation") == "true")
             {
                 hasTextureAnimation = false;
             }
@@ -146,15 +202,15 @@ namespace Monetizr.Campaigns
             if (m.additionalParams.GetParam("teaser_no_animation") == "true")
             {
                 hasAnimation = false;
-            }
+            }*/
 
             bool showReward = false;
 
-            if (m.additionalParams.GetParam("show_reward_on_teaser") == "true")
+           /*if (m.additionalParams.GetParam("show_reward_on_teaser") == "true")
             {
                 hasTextureAnimation = false;
                 showReward = true;
-            }
+            }*/
 
             if (!hasTextureAnimation)
             {
@@ -167,19 +223,25 @@ namespace Monetizr.Campaigns
                 scaleAnimator.enabled = false;
             }
 
-            if (!showReward)
-            {
-                teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(m.campaignId, AssetsType.TinyTeaserTexture);
-            }
-            else
-            {
-                rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
-                //rewardText.text = $"+{m.reward}";
-            }
-
             earnText.gameObject.SetActive(true);
             rewardImage.gameObject.SetActive(false);
             rewardText.gameObject.SetActive(true);
+
+            if (!showReward)
+            {
+                //teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(m.campaignId, AssetsType.TinyTeaserTexture);
+            }
+            else
+            {
+                gifImage.enabled = false;
+                gifImage.gameObject.SetActive(false);
+
+                rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+                rewardImage.gameObject.SetActive(true);
+                //rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
+                //rewardText.text = $"+{m.reward}";
+            }
+                        
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
@@ -240,7 +302,7 @@ namespace Monetizr.Campaigns
 
         }
 
-        internal void PreparePanelDefaultVersion(PanelId id, Action<bool> onComplete, Mission m)
+        /*internal void PreparePanelDefaultVersion(PanelId id, Action<bool> onComplete, Mission m)
         {
             
             //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
@@ -290,7 +352,7 @@ namespace Monetizr.Campaigns
 
             
 
-        }
+        }*/
 
         internal override void FinalizePanel(PanelId id)
         {

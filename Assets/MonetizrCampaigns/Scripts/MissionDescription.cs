@@ -196,7 +196,7 @@ namespace Monetizr.Campaigns
         //Field for campaign 
         [SerializeField] internal SerializableDictionary<string, string> additionalParams;
 
-        
+        [SerializeField] internal string sdkVersion;
     }
 
     /*internal class  SurveyMission : Mission

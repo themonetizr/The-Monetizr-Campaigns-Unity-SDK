@@ -263,6 +263,7 @@ GameObject:
   - component: {fileID: 3428934132583326027}
   - component: {fileID: 1200273175110356505}
   - component: {fileID: 497403101516821853}
+  - component: {fileID: 1027851531880307660}
   m_Layer: 5
   m_Name: MonetizrMenuTeaser2
   m_TagString: Untagged
@@ -380,6 +381,9 @@ MonoBehaviour:
   earnText: {fileID: 1101338383327312448}
   rewardImage: {fileID: 5310082287718715514}
   rewardText: {fileID: 4043938307231625026}
+  singleBackgroundImage: {fileID: 1027851531880307660}
+  watchVideoIcon: {fileID: 0}
+  buttonTextRect: {fileID: 0}
 --- !u!95 &8779468765280008942
 Animator:
   serializedVersion: 3
@@ -453,6 +457,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 4043938307231625026}
   textContent: content_text
+--- !u!114 &1027851531880307660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 336197565933457737}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &336197566610468161
 GameObject:
   m_ObjectHideFlags: 0

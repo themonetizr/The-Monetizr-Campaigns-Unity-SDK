@@ -60,7 +60,8 @@ namespace Monetizr.Campaigns
                     //{"game-type", playerInfo.gameType},
                     {"player-id", analytics.GetUserId()},
                     { "app-bundle-id", Application.identifier },
-                    { "sdk-version", MonetizrManager.SDKVersion }
+                    { "sdk-version", MonetizrManager.SDKVersion },
+                    { "api-key", MonetizrManager.Instance.GetCurrentAPIkey() }
                 }
             };
 
@@ -181,7 +182,8 @@ namespace Monetizr.Campaigns
                 {
                     {"player-id", analytics.GetUserId()},
                     {"app-bundle-id", Application.identifier },
-                    {"sdk-version", MonetizrManager.SDKVersion }
+                    {"sdk-version", MonetizrManager.SDKVersion },
+                    { "api-key", MonetizrManager.Instance.GetCurrentAPIkey() }
                 }
             };
                         
@@ -219,7 +221,8 @@ namespace Monetizr.Campaigns
                     //{"duration", analytics.GetElapsedTime(challenge).ToString()}
 
                     { "app-bundle-id", Application.identifier },
-                    { "sdk-version", MonetizrManager.SDKVersion }
+                    { "sdk-version", MonetizrManager.SDKVersion },
+                    { "api-key", MonetizrManager.Instance.GetCurrentAPIkey() }
                 }
             };
 

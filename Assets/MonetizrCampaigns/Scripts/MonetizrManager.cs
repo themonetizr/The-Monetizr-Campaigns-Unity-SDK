@@ -56,6 +56,7 @@ namespace Monetizr.Campaigns
         VideoFilePathString, //video url
         BrandTitleString, //text
         TinyTeaserTexture, //text
+        TinyTeaserSprite,
         //Html5ZipURLString,
         Html5PathString,
         TiledBackgroundSprite,
@@ -85,6 +86,7 @@ namespace Monetizr.Campaigns
             { AssetsType.VideoFilePathString, typeof(String) },
             { AssetsType.BrandTitleString, typeof(String) },
             { AssetsType.TinyTeaserTexture, typeof(Texture2D) },
+            { AssetsType.TinyTeaserSprite, typeof(Sprite) },
             //{ AssetsType.Html5ZipURLString, typeof(String) },
             { AssetsType.Html5PathString, typeof(String) },
             { AssetsType.HeaderTextColor, typeof(Color) },
@@ -518,7 +520,7 @@ namespace Monetizr.Campaigns
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrMessagePanel",
+            instance.uiController.ShowPanelFromPrefab("MonetizrMessagePanel2",
                 panelId,
                 onComplete,
                 true,
@@ -529,7 +531,7 @@ namespace Monetizr.Campaigns
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrNotifyPanel",
+            instance.uiController.ShowPanelFromPrefab("MonetizrNotifyPanel2",
                 panelId,
                 onComplete,
                 true,
@@ -540,7 +542,7 @@ namespace Monetizr.Campaigns
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrEnterEmailPanel",
+            instance.uiController.ShowPanelFromPrefab("MonetizrEnterEmailPanel2",
                 panelId,
                 onComplete,
                 true,
@@ -1103,7 +1105,7 @@ namespace Monetizr.Campaigns
             if (!instance.isActive)
                 return;
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrWebViewPanel", id, onComplete, false, m);
+            instance.uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", id, onComplete, false, m);
         }
 
         internal static void GoToLink(Action<bool> onComplete, Mission m = null)
@@ -1230,7 +1232,7 @@ namespace Monetizr.Campaigns
 
             if (campaign.GetParam("hide_teaser_button") != "true")
             {
-                int uiVersion = 3;// campaign.GetIntParam("teaser_design_version");
+                int uiVersion = 2;// campaign.GetIntParam("teaser_design_version");
 
                 instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }
@@ -1559,7 +1561,7 @@ namespace Monetizr.Campaigns
                             break;
 
                         case "tiny_teaser":
-                            await AssignAssetTextures(ech, asset, AssetsType.TinyTeaserTexture, AssetsType.Unknown);
+                            await AssignAssetTextures(ech, asset, AssetsType.TinyTeaserTexture, AssetsType.TinyTeaserSprite);
 
                             break;
 

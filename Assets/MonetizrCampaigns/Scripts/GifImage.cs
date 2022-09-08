@@ -99,6 +99,9 @@ namespace Monetizr.Campaigns
 
         internal void SetGifFromUrl(string url, bool autoPlay = true)
         {
+            if (!gameObject.activeSelf)
+                return;
+
             StartCoroutine(SetGifFromUrlCoroutine(url, autoPlay));
         }
               

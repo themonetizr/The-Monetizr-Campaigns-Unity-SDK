@@ -281,7 +281,8 @@ namespace Monetizr.Campaigns
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
-            
+            m.sdkVersion = MonetizrManager.SDKVersion;
+
             return m;
         }
 
@@ -467,14 +468,7 @@ namespace Monetizr.Campaigns
                     m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
                     m.amountOfNotificationsSkipped = int.MaxValue - 1; //first notification is always visible
                     m.isVideoShown = false;
-
-                    if (m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey())
-                    {
-                        m.isServerCampaignActive = false;
-                        m.isDisabled = true;
-                        m.state = MissionUIState.Hidden;    
-                    }
-
+                                        
                     InitializeNonSerializedFields(m);
                 }
 

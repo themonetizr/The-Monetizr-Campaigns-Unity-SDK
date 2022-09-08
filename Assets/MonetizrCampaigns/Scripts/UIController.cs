@@ -119,10 +119,10 @@ namespace Monetizr.Campaigns
 
                     //Debug.Log($"-------------{uiVersion}");
                     */
-                    if (id != PanelId.DebugPanel)
+                   /* if (id != PanelId.DebugPanel)
                     {
                         prefab += "2";
-                    }
+                    }*/
                 //}
 
                 GameObject asset = Resources.Load(prefab) as GameObject;
@@ -202,13 +202,13 @@ namespace Monetizr.Campaigns
 
             if (!panels.ContainsKey(PanelId.TinyMenuTeaser))
             {
-                string teaserPrefab = "MonetizrMenuTeaser";
+                string teaserPrefab = "MonetizrMenuTeaser2";
 
-                if (designVersion == 2)
+                /*if (designVersion == 2)
                 {
                     teaserPrefab = "MonetizrMenuTeaser2";
                     //screenPos = Vector2.zero;
-                }
+                }*/
 
                 if (designVersion == 3)
                 {
