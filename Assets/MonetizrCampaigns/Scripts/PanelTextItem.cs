@@ -16,6 +16,9 @@ namespace Monetizr.Campaigns
 
         public void InitializeByParent(PanelId parentId, Mission m)
         {
+            if (m == null)
+                return;
+
             UIController.SetColorForElement(textElement, m.additionalParams.dictionary, "text_color");
             UIController.SetColorForElement(textElement, m.additionalParams.dictionary, $"{parentId.ToString()}.{textContent}_color");
 

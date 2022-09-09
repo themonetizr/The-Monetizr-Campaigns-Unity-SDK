@@ -132,7 +132,7 @@ namespace Monetizr.Campaigns
                 ctrlPanel = panel.GetComponent<PanelController>();
 
 
-                if(id != PanelId.DebugPanel)
+                if(id != PanelId.DebugPanel && m != null)
                 PrepareCustomColors(ctrlPanel.backgroundImage,
                     ctrlPanel.backgroundBorderImage,
                     m.additionalParams.dictionary,

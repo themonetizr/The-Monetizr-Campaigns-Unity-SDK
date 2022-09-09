@@ -53,12 +53,19 @@ namespace Monetizr.Campaigns
                     { "${APP_VERSION}", GetAppVersion },
                     { "${OS_VERSION}", GetOsVersion },
                     { "${OPT_OUT}", GetOptOut },
+
+                   // { "${PLACEMENT_ID}", GetPlacementId },
+                    { "${CY}", GetCY },
+                    { "${CACHEBUSTER}", GetTimeStamp },
+
              };
                         
             foreach (var v in urlModifiers)
             {
                 darTagUrl = darTagUrl.Replace(v.Key, v.Value(type));
             }
+
+            darTagUrl = ReplacePlacementTag(darTagUrl, type);
 
             Log.Print($"DAR: {darTagUrl}");
 
@@ -84,12 +91,46 @@ namespace Monetizr.Campaigns
             Log.Print($"DAR: {obj.isDone}");
         }
 
+        static string GetPlacementName(AdType t)
+        {
+            switch (t)
+            {
+                case AdType.TinyTeaser: return "TinyTeaser";
+                case AdType.Video:
+                case AdType.Html5: return "Html5VideoScreen";
+                case AdType.NotificationScreen: return "NotificationScreen";
+                case AdType.EmailEnterInGameRewardScreen:
+                case AdType.EmailEnterCouponRewardScreen:
+                case AdType.EmailEnterSelectionRewardScreen: return "EmailEnterScreen";
+                case AdType.CongratsNotificationScreen:
+                case AdType.EmailCongratsNotificationScreen: return "CongratsScreen";
+
+                default:
+                    return null;
+       
+            }
+        }
+
+        //{{PLACEMENT_ID=TinyTeaser:Monetizr_plc0001,NotificationScreen:Monetizr_plc0002,Html5VideoScreen:Monetizr_plc0003,EmailEnterScreen:Monetizr_plc0004,CongratsScreen:Monetizr_plc0005}}
+        static string ReplacePlacementTag(string s, AdType t)
+        {
+            return s;
+        }
+
         static string GetCreativeId(AdType t)
         {
             if (t == AdType.Video || t == AdType.Html5)
                 return "video1";
 
             return "display1";
+        }
+
+        static string GetCY(AdType t)
+        {
+            if (t == AdType.Video || t == AdType.Html5)
+                return "2";
+
+            return "0";
         }
 
         static string GetOsGroup(AdType type)
@@ -138,6 +179,12 @@ namespace Monetizr.Campaigns
             return "";
         }
 
+        private static string GetTimeStamp(AdType arg)
+        {
+            var Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+
+            return Timestamp.ToString();
+        }
     }
 
     internal enum AdType

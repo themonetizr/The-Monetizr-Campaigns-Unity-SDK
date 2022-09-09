@@ -89,6 +89,10 @@ namespace Monetizr.Campaigns
 
         public void OpenGame()
         {
+            //var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+
+            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+
             MonetizrManager.ShowMinigame(null, PanelId.MemoryGame, null);
         }
 
