@@ -18,13 +18,13 @@ class UniWebViewEditorSettings: ScriptableObject
     internal bool accessFineLocation = false;
 
     [SerializeField]
-    internal bool addsKotlin = true;
+    internal bool addsKotlin = false;
 
     [SerializeField]
-    internal bool addsAndroidBrowser = true;
+    internal bool addsAndroidBrowser = false;
 
     [SerializeField]
-    internal bool enableJetifier = true;
+    internal bool enableJetifier = false;
 
     internal static UniWebViewEditorSettings GetOrCreateSettings() {
         var settings = AssetDatabase.LoadAssetAtPath<UniWebViewEditorSettings>(assetPath);
