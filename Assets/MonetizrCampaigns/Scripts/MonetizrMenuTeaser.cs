@@ -113,25 +113,35 @@ namespace Monetizr.Campaigns
 
             RectTransform rt = GetComponent<RectTransform>();
 
-            float[] values = null;
+            //float[] values = null;
 
-            try
-            {
-                values = Array.ConvertAll(teaser_transform.Split(','), float.Parse);
-            }
-            catch (FormatException)
-            {
+
+            string[] arr = teaser_transform.Split(',');
+
+            if (arr.Length == 0)
                 return;
-            }
+
+            var values = new List<float>(0);
+
+            arr.ForEach(s =>
+            {
+                float f = 0;
+
+                if (!float.TryParse(s, out f))
+                    return;
+
+                values.Add(f);
+            });
 
             if (values.Length >= 2)
             {
-                rt.anchoredPosition = new Vector2(values[0], values[1]);
+                if (values[0] != 0 && values[1] != 0)
+                    rt.anchoredPosition = new Vector2(values[0], values[1]);
             }
 
             if (values.Length >= 4)
             {
-                if(values[2] + values[3] > 0)
+                if(values[2] != 0 && values[3] != 0)
                     rt.sizeDelta = new Vector2(values[2], values[3]);
             } 
 
