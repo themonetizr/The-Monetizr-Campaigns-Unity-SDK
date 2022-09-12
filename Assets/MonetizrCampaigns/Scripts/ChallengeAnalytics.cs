@@ -8,6 +8,7 @@ using mixpanel;
 using System;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
+using System.Linq;
 
 
 #if UNITY_IOS
@@ -16,7 +17,7 @@ using UnityEngine.Networking;
 #endif
 
 #if UNITY_ANDROID
-    using UnityEngine.Android;
+using UnityEngine.Android;
 #endif
 
 #if USING_FACEBOOK
@@ -34,6 +35,7 @@ namespace Monetizr.Campaigns
             {DeviceSizeGroup.Unknown,"UNWN"},
         };
 
+        internal static Dictionary<string, string> DARPlacementTags = null;
 
         internal static void Track(string m, AdType type)
         {
@@ -69,10 +71,12 @@ namespace Monetizr.Campaigns
 
             Log.Print($"DAR: {darTagUrl}");
 
+#if !UNITY_EDITOR
             UnityWebRequest www = UnityWebRequest.Get(darTagUrl);
             UnityWebRequestAsyncOperation operation = www.SendWebRequest();
 
             operation.completed += BundleOperation_CompletedHandler;
+#endif
 
             ///https://secure-cert.imrworldwide.com/cgi-bin/m?ci=nlsnci535&am=3&at=view&rt=banner&st=image&ca=nlsn13134&
             ///cr=${CREATIVE_ID}&
@@ -112,9 +116,42 @@ namespace Monetizr.Campaigns
         }
 
         //{{PLACEMENT_ID=TinyTeaser:Monetizr_plc0001,NotificationScreen:Monetizr_plc0002,Html5VideoScreen:Monetizr_plc0003,EmailEnterScreen:Monetizr_plc0004,CongratsScreen:Monetizr_plc0005}}
+        //{{PLACEMENT_ID=TinyTeaser:Monetizr_plc0001,NotificationScreen:Monetizr_plc0002,Html5VideoScreen:Monetizr_plc0003,EmailEnterScreen:Monetizr_plc0004,CongratsScreen:Monetizr_plc0005}}
         static string ReplacePlacementTag(string s, AdType t)
         {
-            return s;
+            int startId = s.IndexOf("${{");
+            int endId = s.IndexOf("}}");
+
+            //no braces
+            if (startId < 0 || endId < 0)
+                return s;
+
+            //split string into pieces
+            string s1 = s.Substring(0, startId);
+            string s2 = s.Substring(startId + 3, endId - startId - 3);
+            string s3 = s.Substring(s1.Length + s2.Length + 5, s.Length - (s1.Length + s2.Length + 5));
+
+            string empty_res = s1 + s3;
+
+            //if DAR tag is null, create it
+            if (DARPlacementTags == null)
+            {
+                var arr = s2.Split('=');
+
+                //substring is wrong
+                if (arr.Length != 2 || arr[0] != "PLACEMENT_ID" || arr[1].IndexOf(':') == -1)
+                    return empty_res;
+
+                //creating dictionary
+                DARPlacementTags = arr[1].Split(',').Select(v => v.Split(':')).ToDictionary(v => v.First(), v => v.Last());
+            }
+
+            var adStr = GetPlacementName(t);
+
+            if (!DARPlacementTags.ContainsKey(adStr))
+                return empty_res;
+
+            return s1 + DARPlacementTags[adStr] + s3;
         }
 
         static string GetCreativeId(AdType t)
@@ -509,9 +546,9 @@ namespace Monetizr.Campaigns
             Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);
 
-#if !UNITY_EDITOR
+
             NielsenDar.Track(challenge.id, adAsset.Key);
-#endif
+
 
 #if USING_AMPLITUDE
             Dictionary<string, object> eventProps = new Dictionary<string, object>();
