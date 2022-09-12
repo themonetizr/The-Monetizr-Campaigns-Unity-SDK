@@ -1243,7 +1243,7 @@ namespace Monetizr.Campaigns
 
             if (campaign.GetParam("hide_teaser_button") != "true")
             {
-                int uiVersion = 2;// campaign.GetIntParam("teaser_design_version");
+                int uiVersion = campaign.GetIntParam("teaser_design_version");
 
                 instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }
