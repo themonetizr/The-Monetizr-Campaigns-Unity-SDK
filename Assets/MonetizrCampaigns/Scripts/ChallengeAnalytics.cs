@@ -53,12 +53,19 @@ namespace Monetizr.Campaigns
                     { "${APP_VERSION}", GetAppVersion },
                     { "${OS_VERSION}", GetOsVersion },
                     { "${OPT_OUT}", GetOptOut },
+
+                   // { "${PLACEMENT_ID}", GetPlacementId },
+                    { "${CY}", GetCY },
+                    { "${CACHEBUSTER}", GetTimeStamp },
+
              };
                         
             foreach (var v in urlModifiers)
             {
                 darTagUrl = darTagUrl.Replace(v.Key, v.Value(type));
             }
+
+            darTagUrl = ReplacePlacementTag(darTagUrl, type);
 
             Log.Print($"DAR: {darTagUrl}");
 
@@ -84,12 +91,46 @@ namespace Monetizr.Campaigns
             Log.Print($"DAR: {obj.isDone}");
         }
 
+        static string GetPlacementName(AdType t)
+        {
+            switch (t)
+            {
+                case AdType.TinyTeaser: return "TinyTeaser";
+                case AdType.Video:
+                case AdType.Html5: return "Html5VideoScreen";
+                case AdType.NotificationScreen: return "NotificationScreen";
+                case AdType.EmailEnterInGameRewardScreen:
+                case AdType.EmailEnterCouponRewardScreen:
+                case AdType.EmailEnterSelectionRewardScreen: return "EmailEnterScreen";
+                case AdType.CongratsNotificationScreen:
+                case AdType.EmailCongratsNotificationScreen: return "CongratsScreen";
+
+                default:
+                    return null;
+       
+            }
+        }
+
+        //{{PLACEMENT_ID=TinyTeaser:Monetizr_plc0001,NotificationScreen:Monetizr_plc0002,Html5VideoScreen:Monetizr_plc0003,EmailEnterScreen:Monetizr_plc0004,CongratsScreen:Monetizr_plc0005}}
+        static string ReplacePlacementTag(string s, AdType t)
+        {
+            return s;
+        }
+
         static string GetCreativeId(AdType t)
         {
             if (t == AdType.Video || t == AdType.Html5)
                 return "video1";
 
             return "display1";
+        }
+
+        static string GetCY(AdType t)
+        {
+            if (t == AdType.Video || t == AdType.Html5)
+                return "2";
+
+            return "0";
         }
 
         static string GetOsGroup(AdType type)
@@ -138,6 +179,12 @@ namespace Monetizr.Campaigns
             return "";
         }
 
+        private static string GetTimeStamp(AdType arg)
+        {
+            var Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+
+            return Timestamp.ToString();
+        }
     }
 
     internal enum AdType
@@ -163,6 +210,7 @@ namespace Monetizr.Campaigns
         Video,
         Survey,
         SurveyNotificationScreen,
+        MinigameScreen,
     }
 
     internal enum DeviceSizeGroup
@@ -328,137 +376,6 @@ namespace Monetizr.Campaigns
 #endif
         }
 
-        
-
-        /*public void BeginShowAdAsset(AdType type, MissionUIDescription m)
-        {
-            if(m == null)
-            {
-                Log.Print($"MonetizrAnalytics BeginShowAdAsset: MissionUIDescription shouldn't be null");
-                return;
-            }
-
-            Log.Print($"MonetizrAnalytics BeginShowAdAsset: {type} {m.campaignId}");
-
-            //Key value pair for duplicated types with different challenge ids
-            KeyValuePair<AdType, MissionUIDescription> adElement = new KeyValuePair<AdType, MissionUIDescription>(type, m);
-
-            if (visibleAdAsset.ContainsKey(adElement))
-            {
-                Log.Print(MonetizrErrors.msg[ErrorType.AdAssetStillShowing]);
-            }
-
-            //Assert.IsFalse(visibleAdAsset.ContainsKey(type), MonetizrErrors.msg[ErrorType.AdAssetStillShowing]);
-
-            //var ch = (m == null) ? MonetizrManager.Instance.GetActiveChallenge() : challengeId;
-
-            var adAsset = new VisibleAdAsset() {
-                adType = type,
-                mission = m,
-                activateTime = DateTime.Now
-            };
-
-            visibleAdAsset[adElement] = adAsset;
-
-            Mixpanel.StartTimedEvent($"[UNITY_SDK] [AD] {adTypeNames[type]}");
-
-        }
-
-        //if challengeId is define, end only specified ad types, if not - end all
-        public void EndShowAdAsset(AdType type, MissionUIDescription m, bool removeElement = true)
-        {     
-            //Assert.IsNotNull(visibleAdAsset);
-            //Assert.AreEqual(type, visibleAdAsset.adType, MonetizrErrors.msg[ErrorType.SimultaneusAdAssets]);
-
-            //if challenge id isn't null, sent analytics event with this exact id
-            if (m != null)
-            {
-                KeyValuePair<AdType, MissionUIDescription> key = new KeyValuePair<AdType, MissionUIDescription>(type, m);
-
-
-                _EndShowAdAsset(key);
-
-                if(removeElement)
-                    visibleAdAsset.Remove(key);
-            }
-            //if challenge id is null, send events for all active ad assets with the same type
-            else
-            {
-                List< KeyValuePair<AdType, MissionUIDescription>> toRemove = new List<KeyValuePair<AdType, MissionUIDescription>>();
-
-                foreach(var adAssetElement in visibleAdAsset)
-                {
-                    if(adAssetElement.Key.Key == type)
-                    {
-                        _EndShowAdAsset(adAssetElement.Key);
-
-                        if (removeElement)
-                            toRemove.Add(adAssetElement.Key);
-                    }
-                }
-
-                foreach (var i in toRemove)
-                    visibleAdAsset.Remove(i);
-
-            }
-
-           
-        }
-
-        private void _EndShowAdAsset(KeyValuePair<AdType, MissionUIDescription> adAsset)
-        {
-            Log.Print($"MonetizrAnalytics EndShowAdAsset: {adAsset.Key} {adAsset.Value}");
-
-            string brandName = visibleAdAsset[adAsset].mission.brandName;// MonetizrManager.Instance.GetAsset<string>(visibleAdAsset[adAsset].challengeId, AssetsType.BrandTitleString);
-
-            //var challenge = MonetizrManager.Instance.GetChallenge(visibleAdAsset[adAsset].challengeId);
-            var challenge = visibleAdAsset[adAsset].mission;
-
-            if (challenge == null)
-            {
-                Log.Print($"MonetizrAnalytics _EndShowAdAsset: MissionUIDescription shouldn't be null");
-                return;
-            }
-
-            var props = new Value();
-            props["application_id"] = challenge.appId;
-            props["bundle_id"] = Application.identifier;
-            props["player_id"] = GetUserId();
-            props["application_name"] = Application.productName;
-            props["application_version"] = Application.version;
-            props["impressions"] = "1";
-            //props["campaign_id"] = visibleAdAsset[adAsset].challengeId;
-            props["camp_id"] = challenge.campaignId;
-            props["brand_id"] = challenge.brandId;
-            props["brand_name"] = brandName;
-            props["type"] = adTypeNames[adAsset.Key];
-            props["ab_segment"] = MonetizrManager.abTestSegment;
-            //props["duration"] = (DateTime.Now - visibleAdAsset[type].activateTime).TotalSeconds;
-
-            string eventName = $"[UNITY_SDK] [AD] {adTypeNames[adAsset.Key]}";
-                       
-            Mixpanel.Track(eventName, props);
-
-#if !UNITY_EDITOR
-            NielsenDar.Track(challenge, adAsset.Key);
-#endif
-
-#if USING_AMPLITUDE
-            Dictionary<string, object> eventProps = new Dictionary<string, object>();
-            eventProps.Add("camp_id", challenge.campaignId);
-            eventProps.Add("brand_id", challenge.brandId);
-            eventProps.Add("brand_name", brandName);
-            eventProps.Add("type", adTypeNames[adAsset.Key]);
-            eventProps.Add("duration", (DateTime.Now - visibleAdAsset[adAsset].activateTime).TotalSeconds);
-            eventProps.Add("apiKey", MonetizrManager.Instance.GetCurrentAPIkey());
-            eventProps.Add("ab_segment", MonetizrManager.abTestSegment);
-
-            amplitude.logEvent(eventName, eventProps);
-#endif
-
-            //if (removeElement)
-            //    visibleAdAsset.Remove(adAsset);
-        }*/
 
         public void BeginShowAdAsset(AdType type, Mission m)
         {
@@ -496,8 +413,7 @@ namespace Monetizr.Campaigns
 
             visibleAdAsset[adElement] = adAsset;
 
-            //Mixpanel.StartTimedEvent($"[UNITY_SDK] [AD] {adTypeNames[type]}");
-            Mixpanel.StartTimedEvent($"[UNITY_SDK] [AD] {type.ToString()}");
+            Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {type.ToString()}");
 
         }
 
@@ -582,11 +498,13 @@ namespace Monetizr.Campaigns
             props["type"] = adAsset.Key.ToString();
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
+
+            props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
             //props["duration"] = (DateTime.Now - visibleAdAsset[type].activateTime).TotalSeconds;
 
             //string eventName = $"[UNITY_SDK] [AD] {adTypeNames[adAsset.Key]}";
 
-            string eventName = $"[UNITY_SDK] [AD] {adAsset.Key.ToString()}";
+            string eventName = $"[UNITY_SDK] [TIMED] {adAsset.Key.ToString()}";
 
             Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);
@@ -668,6 +586,7 @@ namespace Monetizr.Campaigns
             props["brand_name"] = brand_name;
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
+            props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
 
             Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);

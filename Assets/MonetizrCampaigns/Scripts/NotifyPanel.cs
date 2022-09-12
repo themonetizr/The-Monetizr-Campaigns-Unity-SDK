@@ -25,6 +25,8 @@ namespace Monetizr.Campaigns
         public Mission currentMission;
         private AdType adType;
 
+        private string eventPrefix = null;
+
         //private Action onComplete;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -32,6 +34,8 @@ namespace Monetizr.Campaigns
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
+            this.eventPrefix = null;
+           
 
             closeButton.onClick.AddListener(OnButtonPress);
             noThanksButton?.onClick.AddListener(OnNoThanksPress);
@@ -66,6 +70,10 @@ namespace Monetizr.Campaigns
                
         private void PrepareNotificationPanel(Mission m)
         {
+            eventPrefix = "Notification";
+
+            //----
+
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
             banner.sprite = m.brandBanner;
@@ -111,7 +119,13 @@ namespace Monetizr.Campaigns
                 rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             }
 
-            
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.UnknownRewardSprite) &&
+               EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.UnknownRewardSprite);
+            }
+
+
             rewardImage.gameObject.SetActive(true);
             rewardAmount.gameObject.SetActive(false);
             rewardImageBackgroud.gameObject.SetActive(false);
@@ -202,6 +216,12 @@ namespace Monetizr.Campaigns
                 rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             }
 
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.UnknownRewardSprite) &&
+               EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.UnknownRewardSprite);
+            }
+
             if (rewardIcon != null)
                 rewardImage.sprite = rewardIcon;
 
@@ -233,6 +253,9 @@ namespace Monetizr.Campaigns
 
         private void PrepareSurveyNotificationPanel(Mission m)
         {
+            eventPrefix = "Survey notification";
+
+            //----
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
@@ -416,7 +439,9 @@ namespace Monetizr.Campaigns
 
         public void OnNoThanksPress()
         {
-            //MonetizrManager.Analytics.TrackEvent("Twitter cancel", currentMission);
+            //MonetizrManager.
+			//
+			//ytics.TrackEvent("Twitter cancel", currentMission);
 
             isSkipped = true;
             SetActive(false);
@@ -424,7 +449,8 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
-            //MonetizrManager.Analytics.TrackEvent("Twitter follow", currentMission);
+            if(eventPrefix != null)
+                MonetizrManager.Analytics.TrackEvent($"{eventPrefix} pressed", currentMission);
 
             isSkipped = false;
             SetActive(false);

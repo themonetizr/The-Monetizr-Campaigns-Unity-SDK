@@ -403,7 +403,7 @@ MonoBehaviour:
   text: {fileID: 4387190133157259847}
   closeButton: {fileID: 4344017537882115212}
   buttonText: {fileID: 7234977449560703399}
-  noThanksButton: {fileID: 3046868277876281524}
+  crossButton: {fileID: 3046868277876281524}
   currentMission:
     apiKey: 
     type: 0
@@ -681,7 +681,7 @@ GameObject:
   - component: {fileID: 1715095924489840407}
   - component: {fileID: 3046868277876281524}
   m_Layer: 5
-  m_Name: NoThanksButton
+  m_Name: CrossButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

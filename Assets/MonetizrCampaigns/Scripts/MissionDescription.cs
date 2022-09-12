@@ -102,17 +102,17 @@ namespace Monetizr.Campaigns
             return dictionary[p];
         }
 
-        public int GetIntParam(TKey p)
+        public int GetIntParam(TKey p, int defaultParam = 0)
         {
             if (!dictionary.ContainsKey(p))
-                return 0;
+                return defaultParam;
 
             int result = 0;
             string val = dictionary[p].ToString();
 
             if (!Int32.TryParse(val, out result))
             {
-                return 0;
+                return defaultParam;
             }
 
             return result;
@@ -176,7 +176,15 @@ namespace Monetizr.Campaigns
         [SerializeField] internal int id;
         [SerializeField] internal ClaimState isClaimed;
 
+
+        [NonSerialized] internal int amountOfNotificationsShown;
+
+        [NonSerialized] internal int amountOfNotificationsSkipped;
+
         [SerializeField] internal bool isDisabled;
+
+        //is video shown already and don't need to be shown again
+        [NonSerialized] internal bool isVideoShown;
 
         [NonSerialized] internal bool isShouldBeDisabled;
 
@@ -188,7 +196,7 @@ namespace Monetizr.Campaigns
         //Field for campaign 
         [SerializeField] internal SerializableDictionary<string, string> additionalParams;
 
-        
+        [SerializeField] internal string sdkVersion;
     }
 
     /*internal class  SurveyMission : Mission

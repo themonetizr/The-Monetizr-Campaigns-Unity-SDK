@@ -24,6 +24,8 @@ namespace Monetizr.Campaigns
         TwitterNotification,
         GiveawayEmailEnterNotification,
         BadEmailMessageNotification,
+        EmailEnterCloseConfirmation,
+        MemoryGame,
     }
     
     internal class UIController
@@ -109,7 +111,7 @@ namespace Monetizr.Campaigns
             else
             {
                 int uiVersion = 0;
-
+/*
                 if (m != null)
                 {
                     //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
@@ -117,12 +119,12 @@ namespace Monetizr.Campaigns
                     uiVersion = m.additionalParams.GetIntParam("design_version");
 
                     //Debug.Log($"-------------{uiVersion}");
-
-                    if (uiVersion == 2 && id != PanelId.DebugPanel)
+                    */
+                   /* if (id != PanelId.DebugPanel)
                     {
                         prefab += "2";
-                    }
-                }
+                    }*/
+                //}
 
                 GameObject asset = Resources.Load(prefab) as GameObject;
 
@@ -130,7 +132,7 @@ namespace Monetizr.Campaigns
                 ctrlPanel = panel.GetComponent<PanelController>();
 
 
-                if(id != PanelId.DebugPanel)
+                if(id != PanelId.DebugPanel && m != null)
                 PrepareCustomColors(ctrlPanel.backgroundImage,
                     ctrlPanel.backgroundBorderImage,
                     m.additionalParams.dictionary,
@@ -201,11 +203,17 @@ namespace Monetizr.Campaigns
 
             if (!panels.ContainsKey(PanelId.TinyMenuTeaser))
             {
-                string teaserPrefab = "MonetizrMenuTeaser";
+                string teaserPrefab = "MonetizrMenuTeaser2";
 
-                if (designVersion == 2)
+                /*if (designVersion == 2)
                 {
                     teaserPrefab = "MonetizrMenuTeaser2";
+                    //screenPos = Vector2.zero;
+                }*/
+
+                if (designVersion == 3)
+                {
+                    teaserPrefab = "MonetizrMenuTeaser3";
                     //screenPos = Vector2.zero;
                 }
 
@@ -217,9 +225,7 @@ namespace Monetizr.Campaigns
 
                 teaser.uiVersion = designVersion;
                 panels.Add(PanelId.TinyMenuTeaser, teaser);
-                teaser.button.onClick.AddListener(() => {
-                       MonetizrManager.ShowRewardCenter(UpdateGameUI);
-                });
+                
 
                 if (screenPos != null)
                 {

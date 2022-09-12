@@ -69,6 +69,8 @@ namespace Monetizr.Campaigns
             webView.OnPageStarted += OnPageStarted;
             webView.OnPageFinished += OnPageFinished;
             webView.OnPageErrorReceived += OnPageErrorReceived;
+
+            webView.Alpha = 0;
         }
 
 
@@ -402,14 +404,14 @@ document.addEventListener('DOMContentLoaded', function(){{
             {
                 OnCompleteEvent();
 
-                ClosePanel();
+                //ClosePanel();
             }
 
             if (message.RawMessage.Contains("skip"))
             {
                 OnSkipPress();
 
-                ClosePanel();
+                //ClosePanel();
             }
         }
 
@@ -429,7 +431,11 @@ document.addEventListener('DOMContentLoaded', function(){{
                 TrackEvent($"{eventsPrefix} error");
 
                 ClosePanel();
+
+                return;
             }
+
+            webView.Alpha = 1;
         }
 
         void OnPageErrorReceived(UniWebView webView, int errorCode, string url)
@@ -441,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function(){{
             ClosePanel();
         }
 
-        private void Update()
+       /* private void Update()
         {
             if (webView != null && panelId == PanelId.SurveyWebView)
             {
@@ -472,7 +478,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
                 }
             }
-        }
+        }*/
 
 
         private void OnCompleteEvent()

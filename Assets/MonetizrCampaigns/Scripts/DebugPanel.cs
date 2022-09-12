@@ -29,6 +29,8 @@ namespace Monetizr.Campaigns
             "XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta@themonetizr.com
             "e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo",  //martins.jansevskis@gmail.com 
             //"mnfie-kWEAzhor9sUeOk5ohlnSCDKTefer2IarKd7zs"   //artem
+            "1BKIRvztaZFq0cklZfY7W-_yIGuSWgj2AHKfFTntzBU", // nauris@themonetizr.com
+            "jZrNLvD9pSWZ-oU7nrIivaIHW_PLnZX-KDWx1Ks8NnY" // gita@themonetizr.com
         };
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -84,6 +86,16 @@ namespace Monetizr.Campaigns
         {
             MonetizrManager.ResetCampaign();
         }
+
+        public void OpenGame()
+        {
+            //var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+
+            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+
+            MonetizrManager.ShowMinigame(null, PanelId.MemoryGame, null);
+        }
+
 
         private void ClosePanel()
         {

@@ -281,7 +281,7 @@ namespace Monetizr.Campaigns
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
-            
+            m.sdkVersion = MonetizrManager.SDKVersion;
 
             return m;
         }
@@ -296,13 +296,16 @@ namespace Monetizr.Campaigns
             needToPlayVideo = false;
 #endif
 
+            if(m.isVideoShown)
+                needToPlayVideo = false;
+
             /*Action<bool> onComplete = (bool isSkipped) =>
             {
                 //OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
                 //MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
             };*/
 
-            MonetizrManager.Analytics.TrackEvent("Claim pressed", m);
+            //MonetizrManager.Analytics.TrackEvent("Claim pressed", m);
 
             Action<bool> onVideoComplete = (bool isVideoSkipped) =>
             {
@@ -318,6 +321,9 @@ namespace Monetizr.Campaigns
                     onComplete?.Invoke(isVideoSkipped);
                     return;
                 }
+
+                if(m.additionalParams.GetParam("watch_video_only_once") == "true")
+                    m.isVideoShown = true;
 
                 MonetizrManager.ShowEnterEmailPanel(
                     (bool isMailSkipped) =>
@@ -359,7 +365,7 @@ namespace Monetizr.Campaigns
 
         internal void OnVideoPlayPress(Mission m, Action<bool> onComplete)
         {
-            MonetizrManager.Analytics.TrackEvent("Watch video press", m);
+            //MonetizrManager.Analytics.TrackEvent("Watch video press", m);
 
             var htmlPath = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.Html5PathString);
 
@@ -414,8 +420,15 @@ namespace Monetizr.Campaigns
 
             
             //search unbinded campaign
-            foreach (string ch in campaigns)
+            for (int c = 0; c < campaigns.Count; c++)
             {
+                string ch = campaigns[c];
+
+                if(c >= MonetizrManager.maximumCampaignAmount)
+                {
+                    break;
+                }
+
                 //TODO: check if such mission type already existed for such campaign
                 //if it exist - do not add it
 
@@ -445,12 +458,17 @@ namespace Monetizr.Campaigns
                         continue;
 
                     m.isServerCampaignActive = true;
+
+                    
+                    
                     m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
-                    //if (m != null)
-                    //    missions.Add(m);
 
+                    //rewrite these parameters here, because otherwise it will be saved in cache
                     m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
-
+                    m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
+                    m.amountOfNotificationsSkipped = int.MaxValue - 1; //first notification is always visible
+                    m.isVideoShown = false;
+                                        
                     InitializeNonSerializedFields(m);
                 }
 

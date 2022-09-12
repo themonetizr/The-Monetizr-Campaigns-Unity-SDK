@@ -36,6 +36,17 @@ namespace Monetizr.Campaigns
             Log.Print($"Loading campaigns: {jsonString}");
 
             campaignsCollection = JsonUtility.FromJson<CampaignsCollection>(jsonString);
+
+
+            int deleted = campaignsCollection.missions.RemoveAll((Mission m) => { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
+          
+            deleted += campaignsCollection.missions.RemoveAll((Mission m) => { return m.sdkVersion != MonetizrManager.SDKVersion; });
+
+            if(deleted > 0)
+            {
+                Log.Print($"Deleted {deleted} incorrect(wrong SDK version or api key) missions");
+                SaveAll();
+            }
         }
 
         internal void SaveAll()

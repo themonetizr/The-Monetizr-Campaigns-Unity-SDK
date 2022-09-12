@@ -814,6 +814,7 @@ MonoBehaviour:
   selectRewardRoot: {fileID: 2011783584587739805}
   selection1Icon: {fileID: 1400274685770372009}
   selection2Icon: {fileID: 1967890598260252041}
+  crossButtonAnimator: {fileID: 7432772928640070619}
   currentMission:
     apiKey: 
     type: 0
@@ -1220,8 +1221,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -158.71, y: -20.6097}
-  m_SizeDelta: {x: 290.19, y: 30.4914}
+  m_AnchoredPosition: {x: -156.6502, y: -20.61}
+  m_SizeDelta: {x: 146.001, y: 30.491}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3598844007393505758
 CanvasRenderer:
@@ -1367,8 +1368,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -53, y: 21.569}
-  m_SizeDelta: {x: 152.2709, y: 28.0009}
+  m_AnchoredPosition: {x: -160.16, y: 17.785}
+  m_SizeDelta: {x: 162.42, y: 35.569}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6276028864972355001
 CanvasRenderer:
@@ -1489,6 +1490,7 @@ GameObject:
   - component: {fileID: 7617380228034610017}
   - component: {fileID: 680839398070700916}
   - component: {fileID: 2054473298092138798}
+  - component: {fileID: 7432772928640070619}
   m_Layer: 5
   m_Name: CancelButton
   m_TagString: Untagged
@@ -1537,7 +1539,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1579,7 +1581,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 1, g: 1, b: 1, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -1593,11 +1595,30 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 680839398070700916}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!95 &7432772928640070619
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4596498856462182920}
+  m_Enabled: 0
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: fb8563d67a54ee444ba6c45ae68f9bcc, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &4809014407243476439
 GameObject:
   m_ObjectHideFlags: 0
@@ -2031,8 +2052,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 173.476, y: -20.61}
-  m_SizeDelta: {x: 250.2681, y: 30.491}
+  m_AnchoredPosition: {x: 101.38156, y: -20.61}
+  m_SizeDelta: {x: 254.3879, y: 30.491}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2276067185556720572
 CanvasRenderer:
@@ -2409,8 +2430,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 284.6104, y: 21.569}
-  m_SizeDelta: {x: 63.1877, y: 28.001}
+  m_AnchoredPosition: {x: 240.8387, y: 20.5539}
+  m_SizeDelta: {x: 202.2273, y: 30.0313}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4135530623963927806
 CanvasRenderer:

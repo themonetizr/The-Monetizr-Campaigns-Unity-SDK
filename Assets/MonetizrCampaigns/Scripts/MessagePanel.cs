@@ -13,7 +13,7 @@ namespace Monetizr.Campaigns
         public Text text;
         public Button closeButton;
         public Text buttonText;
-        public Button noThanksButton;
+        public Button crossButton;
 
         [HideInInspector]
         public Mission currentMission;
@@ -27,7 +27,7 @@ namespace Monetizr.Campaigns
             this.currentMission = m;
 
             closeButton.onClick.AddListener(OnClosePress);
-            noThanksButton?.onClick.AddListener(OnNoThanksPress);
+            crossButton?.onClick.AddListener(OnCrossPress);
 
         }
 
@@ -41,7 +41,7 @@ namespace Monetizr.Campaigns
             base.Awake();
         }
 
-        public void OnNoThanksPress()
+        public void OnCrossPress()
         {
             isSkipped = true;
             SetActive(false);

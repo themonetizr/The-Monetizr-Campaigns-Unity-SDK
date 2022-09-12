@@ -56,13 +56,13 @@ class UniWebViewPostBuildProcessor : IPostGenerateGradleAndroidProject
         if (dependenciesNode != null) {
             // Add kotlin
             if (settings.addsKotlin) {
-                dependenciesNode.ReplaceContenOrAddStartsWith(kotlinPrefix, kotlinPrefix + kotlinVersion);
+                //dependenciesNode.ReplaceContenOrAddStartsWith(kotlinPrefix, kotlinPrefix + kotlinVersion);
                 Debug.Log("<UniWebView> Updated Kotlin dependency in build.gradle.");
             }
 
             // Add browser package
             if (settings.addsAndroidBrowser) {
-                dependenciesNode.ReplaceContenOrAddStartsWith(browserPrefix, browserPrefix + browserVersion);
+                //dependenciesNode.ReplaceContenOrAddStartsWith(browserPrefix, browserPrefix + browserVersion);
                 Debug.Log("<UniWebView> Updated Browser dependency in build.gradle.");
             }
         } else {
