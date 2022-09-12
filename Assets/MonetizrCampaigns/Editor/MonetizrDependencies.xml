@@ -2,5 +2,11 @@
 <dependencies>
     <androidPackages>
         <androidPackage spec="com.google.android.gms:play-services-ads-identifier:18.0.1"/>
-</androidPackages>
+    </androidPackages>
+    <androidPackages>
+      <androidPackage spec="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.31"/>
+    </androidPackages>
+    <androidPackages>
+      <androidPackage spec="androidx.browser:browser:1.2.0"/>
+    </androidPackages>
 </dependencies>
