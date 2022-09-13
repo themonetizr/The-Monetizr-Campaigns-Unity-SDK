@@ -399,17 +399,22 @@ namespace Monetizr.Campaigns
             //bind to server campagns
             var campaigns = MonetizrManager.Instance.GetAvailableCampaigns();
 
-            //List<Tuple<int, MissionType, int>> tupleMiss = new List<Tuple<int, MissionType, int>>();
+            var prefefinedSponsoredMissions = MonetizrManager.Instance.sponsoredMissions;
 
-            var miss = MonetizrManager.Instance.sponsoredMissions;
+            int serverDefinedMission = 0;
 
-            //int id = 0;
-            //foreach (var m in MonetizrManager.Instance.sponsoredMissions)
-            //{
-            //    tupleMiss.Add(Tuple.Create(id, m.missionType, m.reward));
-            //    id++;
-            //}
-              
+            if (campaigns.Count > 0)
+            {
+                ServerCampaign sc = MonetizrManager.Instance.GetCampaign(campaigns[0]);
+
+                serverDefinedMission = sc.GetIntParam("server_defined_mission",0);
+
+            }
+
+            if (prefefinedSponsoredMissions.Count > 1)
+                prefefinedSponsoredMissions = prefefinedSponsoredMissions.GetRange(serverDefinedMission, 1);
+
+
             serializedMissions.Load();
 
             //check if campaign is alive for current mission
@@ -432,13 +437,13 @@ namespace Monetizr.Campaigns
                 //TODO: check if such mission type already existed for such campaign
                 //if it exist - do not add it
 
-                for (int i = 0; i < miss.Count; i++)
+                for (int i = 0; i < prefefinedSponsoredMissions.Count; i++)
                 {
-                    Mission m = FindMissionInCache(i, miss[i].missionType, ch);
+                    Mission m = FindMissionInCache(i, prefefinedSponsoredMissions[i].missionType, ch);
 
                     if (m == null)
                     {
-                        m = prepareNewMission(i, miss[i].missionType, ch, miss[i].reward);
+                        m = prepareNewMission(i, prefefinedSponsoredMissions[i].missionType, ch, prefefinedSponsoredMissions[i].reward);
 
                         if (m != null)
                         {
@@ -446,7 +451,7 @@ namespace Monetizr.Campaigns
                         }
                         else
                         {
-                            Debug.LogError($"Can't create campaign with type {miss[i].missionType}");
+                            Debug.LogError($"Can't create campaign with type {prefefinedSponsoredMissions[i].missionType}");
                         }
                     }
                     else
@@ -465,6 +470,7 @@ namespace Monetizr.Campaigns
 
                     //rewrite these parameters here, because otherwise it will be saved in cache
                     m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
+                    m.amountOfRVOffersShown = m.additionalParams.GetIntParam("amount_of_rv_offers", -1);
                     m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
                     m.amountOfNotificationsSkipped = int.MaxValue - 1; //first notification is always visible
                     m.isVideoShown = false;

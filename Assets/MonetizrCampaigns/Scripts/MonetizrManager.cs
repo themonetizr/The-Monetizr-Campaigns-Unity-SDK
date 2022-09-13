@@ -321,8 +321,8 @@ namespace Monetizr.Campaigns
                 };
             }
 
-            if (sponsoredMissions.Count > 1)
-                sponsoredMissions = sponsoredMissions.GetRange(0, 1);
+            //if (sponsoredMissions.Count > 1)
+            //    sponsoredMissions = sponsoredMissions.GetRange(0, 1);
 
 #if UNITY_EDITOR
             keepLocalClaimData = true;
@@ -988,6 +988,19 @@ namespace Monetizr.Campaigns
 
         public static void EngagedUserAction(OnComplete onComplete)
         {
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+
+            if(missions != null && missions.Count > 0)
+            {
+                //no more offers, skipping
+                if (missions[0].amountOfRVOffersShown == 0)
+                {
+                    onComplete(false);
+                }
+
+                missions[0].amountOfRVOffersShown--;
+            }
+
             MonetizrManager.ShowRewardCenter(null, (bool p) => { onComplete(p); });
         }
 
@@ -1243,7 +1256,7 @@ namespace Monetizr.Campaigns
 
             if (campaign.GetParam("hide_teaser_button") != "true")
             {
-                int uiVersion = campaign.GetIntParam("teaser_design_version");
+                int uiVersion = campaign.GetIntParam("teaser_design_version",2);
 
                 instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }

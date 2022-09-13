@@ -177,6 +177,9 @@ namespace Monetizr.Campaigns
         [SerializeField] internal ClaimState isClaimed;
 
 
+        //how much times RC is offered to show instead of rewarded video
+        [NonSerialized] internal int amountOfRVOffersShown;
+
         [NonSerialized] internal int amountOfNotificationsShown;
 
         [NonSerialized] internal int amountOfNotificationsSkipped;
