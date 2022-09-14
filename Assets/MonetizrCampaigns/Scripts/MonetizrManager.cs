@@ -321,8 +321,8 @@ namespace Monetizr.Campaigns
                 };
             }
 
-            if (sponsoredMissions.Count > 1)
-                sponsoredMissions = sponsoredMissions.GetRange(0, 1);
+            //if (sponsoredMissions.Count > 1)
+            //    sponsoredMissions = sponsoredMissions.GetRange(0, 1);
 
 #if UNITY_EDITOR
             keepLocalClaimData = true;
@@ -988,6 +988,19 @@ namespace Monetizr.Campaigns
 
         public static void EngagedUserAction(OnComplete onComplete)
         {
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+
+            if(missions != null && missions.Count > 0)
+            {
+                //no more offers, skipping
+                if (missions[0].amountOfRVOffersShown == 0)
+                {
+                    onComplete(false);
+                }
+
+                missions[0].amountOfRVOffersShown--;
+            }
+
             MonetizrManager.ShowRewardCenter(null, (bool p) => { onComplete(p); });
         }
 
@@ -1002,9 +1015,10 @@ namespace Monetizr.Campaigns
 
             var m = instance.missionsManager.GetMission(challengeId);
 
+            //no missions, consider as a skipped
             if (m == null)
             {
-                onComplete?.Invoke(false);
+                onComplete?.Invoke(true);
                 return;
             }
 
@@ -1019,7 +1033,7 @@ namespace Monetizr.Campaigns
 
             if (missions.Count == 0)
             {
-                onComplete?.Invoke(false);
+                onComplete?.Invoke(true);
                 return;
             }
 
@@ -1048,54 +1062,10 @@ namespace Monetizr.Campaigns
 
         internal void _PressSingleMission(Action<bool> onComplete, Mission m)
         {
-            //if notification is alredy visible - do nothing
-            //if (uiController.panels.ContainsKey(PanelId.TwitterNotification))
-            //    return;
-
             if (m.isClaimed == ClaimState.Claimed)
                 return;
 
             MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, onComplete, null).Invoke();
-
-            /* Action<bool> onTaskComplete = (bool isSkipped) =>
-             {
-                 MonetizrManager.Analytics.TrackEvent("Campaign rewarded", m);
-
-                 m.isClaimed = ClaimState.Claimed;
-                 missionsManager.SaveAll();
-
-                 OnClaimRewardComplete(m, isSkipped, null);
-
-                 HideTinyMenuTeaser();
-             };
-
-
-             if (m.isClaimed == ClaimState.NotClaimed)
-             {
-                 MonetizrManager.Analytics.TrackEvent("Campaign shown", m);
-
-                 ShowNotification((bool isSkipped) => 
-                     {
-                         if (!isSkipped)
-                         {
-                             m.isClaimed = ClaimState.CompletedNotClaimed;
-                             missionsManager.SaveAll();
-
-                             MonetizrManager.Analytics.TrackEvent("Campaign claimed", m);
-
-                             MonetizrManager.GoToLink(onTaskComplete, m);
-                         }
-                     },
-
-                     m,
-                     PanelId.TwitterNotification);
-             }
-             else
-             {
-                 onTaskComplete.Invoke(false);
-             }*/
-
-
         }
 
         internal static void ShowMinigame(Action<bool> onComplete, PanelId id, Mission m = null)
@@ -1243,7 +1213,7 @@ namespace Monetizr.Campaigns
 
             if (campaign.GetParam("hide_teaser_button") != "true")
             {
-                int uiVersion = campaign.GetIntParam("teaser_design_version");
+                int uiVersion = campaign.GetIntParam("teaser_design_version",2);
 
                 instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }

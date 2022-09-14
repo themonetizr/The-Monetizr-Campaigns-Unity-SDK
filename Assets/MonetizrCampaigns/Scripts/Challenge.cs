@@ -38,7 +38,7 @@ namespace Monetizr.Campaigns
         public string dar_tag;
         public List<Reward> rewards = new List<Reward>();
         public List<Asset> assets = new List<Asset>();
-        [System.NonSerialized] public Dictionary<string, string> additional_params;
+        [System.NonSerialized] public Dictionary<string, string> additional_params = new Dictionary<string, string>();
 
         public string GetParam(string p)
         {
@@ -48,7 +48,7 @@ namespace Monetizr.Campaigns
             return additional_params[p];
         }
 
-        public int GetIntParam(string p)
+        public int GetIntParam(string p, int default_val)
         {
             if (!additional_params.ContainsKey(p))
                 return 0;
@@ -58,7 +58,7 @@ namespace Monetizr.Campaigns
 
             if (!Int32.TryParse(val, out result))
             {
-                return 0;
+                return default_val;
             }
 
             return result;
