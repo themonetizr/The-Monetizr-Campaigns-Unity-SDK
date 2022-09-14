@@ -1015,9 +1015,10 @@ namespace Monetizr.Campaigns
 
             var m = instance.missionsManager.GetMission(challengeId);
 
+            //no missions, consider as a skipped
             if (m == null)
             {
-                onComplete?.Invoke(false);
+                onComplete?.Invoke(true);
                 return;
             }
 
@@ -1032,7 +1033,7 @@ namespace Monetizr.Campaigns
 
             if (missions.Count == 0)
             {
-                onComplete?.Invoke(false);
+                onComplete?.Invoke(true);
                 return;
             }
 
@@ -1061,54 +1062,10 @@ namespace Monetizr.Campaigns
 
         internal void _PressSingleMission(Action<bool> onComplete, Mission m)
         {
-            //if notification is alredy visible - do nothing
-            //if (uiController.panels.ContainsKey(PanelId.TwitterNotification))
-            //    return;
-
             if (m.isClaimed == ClaimState.Claimed)
                 return;
 
             MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, onComplete, null).Invoke();
-
-            /* Action<bool> onTaskComplete = (bool isSkipped) =>
-             {
-                 MonetizrManager.Analytics.TrackEvent("Campaign rewarded", m);
-
-                 m.isClaimed = ClaimState.Claimed;
-                 missionsManager.SaveAll();
-
-                 OnClaimRewardComplete(m, isSkipped, null);
-
-                 HideTinyMenuTeaser();
-             };
-
-
-             if (m.isClaimed == ClaimState.NotClaimed)
-             {
-                 MonetizrManager.Analytics.TrackEvent("Campaign shown", m);
-
-                 ShowNotification((bool isSkipped) => 
-                     {
-                         if (!isSkipped)
-                         {
-                             m.isClaimed = ClaimState.CompletedNotClaimed;
-                             missionsManager.SaveAll();
-
-                             MonetizrManager.Analytics.TrackEvent("Campaign claimed", m);
-
-                             MonetizrManager.GoToLink(onTaskComplete, m);
-                         }
-                     },
-
-                     m,
-                     PanelId.TwitterNotification);
-             }
-             else
-             {
-                 onTaskComplete.Invoke(false);
-             }*/
-
-
         }
 
         internal static void ShowMinigame(Action<bool> onComplete, PanelId id, Mission m = null)
