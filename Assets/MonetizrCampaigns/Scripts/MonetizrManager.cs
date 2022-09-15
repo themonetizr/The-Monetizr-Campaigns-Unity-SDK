@@ -1075,7 +1075,7 @@ namespace Monetizr.Campaigns
             if (!instance.isActive)
                 return;
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrGamePanel", id, onComplete, false, m);
+            instance.uiController.ShowPanelFromPrefab("MonetizrCarGamePanel", id, onComplete, false, m);
         }
 
 
