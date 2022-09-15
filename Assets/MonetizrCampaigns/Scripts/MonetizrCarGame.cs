@@ -97,15 +97,29 @@ namespace Monetizr.Campaigns
         bool disabledClick = false;
         int totalUnknownOpened = 0;
 
-        int[] map = { 0, 0, 1, 2, 3, 4, 5, 6, 5 };
+        //int[] map = { 0, 0, 1, 2, 3, 4, 5, 6, 5 };
 
-        List<int> []openFields = {
+        int[] map = { 0, 0, 11, 7, 8, 1, 5, 9, 10 };
+
+        /*List<int> []openFields = {
             new List<int>{ 1, 3 },
             new List<int>{ 2, 4 },
             new List<int>{ 5 },
             new List<int>{ 6, 4 },
             new List<int>{ 1, 3, 5, 7 },
             new List<int>{ 2, 4, 8 },
+        };*/
+
+        List<int>[] openFields = {
+            new List<int>{ 1, 3 },
+            new List<int>{ 2, 4 },
+            new List<int>{ -1 },
+            new List<int>{ 6 },
+            new List<int>{ 5 },
+            new List<int>{ 4, 8 },
+            new List<int>{ -1 },
+            new List<int>{ -1 },
+            new List<int>{ 7 },
         };
 
         internal void OnItemClick(int item)
@@ -126,21 +140,25 @@ namespace Monetizr.Campaigns
 
         internal override void OnOpenDone(int item)
         {
-             amountOpened++;
+            amountOpened++;
 
             movesLeftText.text = $"MOVES LEFT: {4 - amountOpened}";
 
             //found finish
-            if (map[item] == 6)
+            //if (map[item] == 6)
+            if(item == 7)
             {
-                car.GetComponent<Animator>().Play("CarDrive");
+                car.GetComponent<Animator>().Play("CarDrive2");
 
                 StartCoroutine(OnGameVictory());
                 return;
             }
 
             //failed
-            if(amountOpened >= 4)
+            //if(false)
+            //*
+            if (map[item] == 5 || map[item] == 11)
+            //if(amountOpened >= 4)
             {
                 amountOpened = 0;
                 disabledClick = true;
@@ -149,10 +167,11 @@ namespace Monetizr.Campaigns
 
                 return;
             }
+            //*/
 
             //open something
             if (item < openFields.Length)
-                openFields[item].ForEach((int i) => { gameItems[i].b.interactable = true; });
+                openFields[item].ForEach((int i) => { if(i > 0) gameItems[i].b.interactable = true; });
 
           
 
@@ -161,7 +180,10 @@ namespace Monetizr.Campaigns
 
         internal IEnumerator RestartGame()
         {
-            yield return new WaitForSeconds(2);
+            Debug.Log("RestartGame");
+
+
+            yield return new WaitForSeconds(0.5f);
 
             gameItems.ForEach((Item i) => {
                 if (i.isOpened)
@@ -196,7 +218,7 @@ namespace Monetizr.Campaigns
 
         internal IEnumerator OnGameVictory()
         {
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(3);
 
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
