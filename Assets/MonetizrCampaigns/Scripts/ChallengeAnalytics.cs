@@ -537,6 +537,7 @@ namespace Monetizr.Campaigns
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
 
             props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
+            props["sdk_version"] = MonetizrManager.SDKVersion;
 
             props["ad_id"] = MonetizrAnalytics.advertisingID;
 
@@ -633,6 +634,7 @@ namespace Monetizr.Campaigns
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
             props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
+            props["sdk_version"] = MonetizrManager.SDKVersion;
 
             props["ad_id"] = MonetizrAnalytics.advertisingID;
 
