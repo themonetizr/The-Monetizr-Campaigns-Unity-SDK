@@ -542,6 +542,8 @@ namespace Monetizr.Campaigns
 
             props["ad_id"] = MonetizrAnalytics.advertisingID;
 
+            props["camp_title"] = challenge.title;
+
             foreach (var s in challenge.additional_params)
             {
                 string key = s.Key;
@@ -577,6 +579,16 @@ namespace Monetizr.Campaigns
 
             //if (removeElement)
             //    visibleAdAsset.Remove(adAsset);
+        }
+
+        private string RemoveContentInBrackets(string str)
+        {
+            int i = str.IndexOf('[');
+            int j = str.LastIndexOf(']');
+
+            string result = str.Remove(i, j - i + 1).Trim();
+
+            return result;
         }
 
         public string GetUserId()
@@ -638,6 +650,8 @@ namespace Monetizr.Campaigns
             props["sdk_version"] = MonetizrManager.SDKVersion;
 
             props["ad_id"] = MonetizrAnalytics.advertisingID;
+
+            props["camp_title"] = challenge.title;
 
             foreach (var s in challenge.additional_params)
             {
