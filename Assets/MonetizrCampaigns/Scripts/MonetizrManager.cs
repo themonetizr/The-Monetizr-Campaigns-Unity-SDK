@@ -984,8 +984,26 @@ namespace Monetizr.Campaigns
             instance.missionsManager.CleanUserDefinedMissions();
         }
 
-        public delegate void OnComplete(bool isSkipped);
 
+        public enum OnCompleteStatus
+        {
+            //if player rejected the offer or haven't seen anything
+            Skipped, 
+
+            //if player completed the offer
+            Completed
+        }
+
+        public delegate void OnComplete(OnCompleteStatus isSkipped);
+
+        /// <summary>
+        /// This method helps to show Monetizr offer instead of RV ads
+        /// If player skipped Monetizr offer or haven't seen anything 
+        /// OnComplete callback will be called with the parameter OnCompleteStatus.Skipped
+        /// </summary>
+        /// <param name="onComplete">Depending on whether the player completed the task this method calls with the corresponding parameter
+        /// </param>
+        /// 
         public static void EngagedUserAction(OnComplete onComplete)
         {
             var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
@@ -995,17 +1013,17 @@ namespace Monetizr.Campaigns
                 //no more offers, skipping
                 if (missions[0].amountOfRVOffersShown == 0)
                 {
-                    onComplete(false);
+                    onComplete(OnCompleteStatus.Skipped);
                 }
 
                 missions[0].amountOfRVOffersShown--;
             }
 
-            MonetizrManager.ShowRewardCenter(null, (bool p) => { onComplete(p); });
+            MonetizrManager.ShowRewardCenter(null, (bool p) => { onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed); });
         }
 
 
-        public static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
+        internal static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
@@ -1151,29 +1169,83 @@ namespace Monetizr.Campaigns
             //ShowStartupNotification((bool _) => { ShowRewardCenter(null, onComplete); });
         }
 
-        public static void OnMainMenuShow()
+        /// <summary>
+        /// Call this method to show Notification and if player close it teaser will be shown
+        /// </summary>
+        /// <param name="showNotifications"></param>
+        public static void OnMainMenuShow(bool showNotifications = true)
         {
             if (instance == null)
                 return;
 
-            tinyTeaserCanBeVisible = true;
+            //tinyTeaserCanBeVisible = true;
 
             if (!Instance.HasCampaignsAndActive())
                 return;
 
             instance.initializeBuiltinMissions();
 
-            //Debug.Log("------OnMainMenuShow 1");
-
-            ShowStartupNotification(1, (bool isSkipped) =>
+            if (showNotifications)
             {
-                //Debug.Log($"------OnMainMenuShow 2 {isSkipped}");
+                ShowStartupNotification(1, (bool isSkipped) =>
+                        {
+                            if (isSkipped)
+                                ShowTinyMenuTeaser();
+                            else
+                                ShowRewardCenter(null, (bool _) => { ShowTinyMenuTeaser(); });
+                        });
+            }
+            else
+            {
+                ShowTinyMenuTeaser();
+            }
 
-                if (isSkipped)
-                    ShowTinyMenuTeaser();
-                else
-                    ShowRewardCenter(null, (bool _) => { ShowTinyMenuTeaser(); });
-            });
+        }
+
+        /// <summary>
+        /// Shows campaign notification
+        /// </summary>
+        /// <param name="onComplete">
+        /// IF there's no campaigns, if player closed notification or if player do not complete task 
+        /// - OnComplete called with parameter TRUE (skipped)
+        /// IF campaign task is completed
+        /// - OnComplete called with paraneter FALSE (completed)
+        /// </param>
+        public static void ShowCampaignNotification(OnComplete onComplete = null)
+        {
+            if (instance == null)
+                return;
+
+            //tinyTeaserCanBeVisible = true;
+
+            if (!Instance.HasCampaignsAndActive())
+            {
+                onComplete?.Invoke(OnCompleteStatus.Skipped);
+                return;
+            }
+
+            instance.initializeBuiltinMissions();
+
+            //Notification is shown
+            ShowStartupNotification(1, (bool isSkipped) =>
+                 {
+                     //If notification is closed
+                     if (isSkipped)
+                     {
+                         onComplete?.Invoke(OnCompleteStatus.Skipped);
+                     }
+                     //If notification isn't closed
+                     else
+                     {
+                         ShowRewardCenter(null, (bool isRCSkipped) => 
+                            {
+                                //Does player complete the task?
+                                onComplete?.Invoke(isRCSkipped ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
+                            });
+                     }
+                });
+            
+           
 
         }
 
