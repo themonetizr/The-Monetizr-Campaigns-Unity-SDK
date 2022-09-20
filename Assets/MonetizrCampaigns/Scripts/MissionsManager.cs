@@ -472,7 +472,7 @@ namespace Monetizr.Campaigns
                     m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
                     m.amountOfRVOffersShown = m.additionalParams.GetIntParam("amount_of_rv_offers", -1);
                     m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
-                    m.amountOfNotificationsSkipped = int.MaxValue - 1; //first notification is always visible
+                    m.amountOfNotificationsSkipped = m.additionalParams.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
                     m.isVideoShown = false;
                                         
                     InitializeNonSerializedFields(m);

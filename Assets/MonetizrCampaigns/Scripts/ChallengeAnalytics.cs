@@ -282,7 +282,7 @@ namespace Monetizr.Campaigns
         };*/
 
         public static string osVersion;
-        public static string advertisingID = null;
+        public static string advertisingID = "";
         public static bool limitAdvertising = false;
         internal static DeviceSizeGroup deviceSizeGroup = DeviceSizeGroup.Unknown;
 
@@ -524,6 +524,7 @@ namespace Monetizr.Campaigns
             props["application_id"] = challenge.application_id;
             props["bundle_id"] = Application.identifier;
             props["player_id"] = GetUserId();
+            
             props["application_name"] = Application.productName;
             props["application_version"] = Application.version;
             props["impressions"] = "1";
@@ -537,9 +538,19 @@ namespace Monetizr.Campaigns
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
 
             props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
-            //props["duration"] = (DateTime.Now - visibleAdAsset[type].activateTime).TotalSeconds;
+            props["sdk_version"] = MonetizrManager.SDKVersion;
 
-            //string eventName = $"[UNITY_SDK] [AD] {adTypeNames[adAsset.Key]}";
+            props["ad_id"] = MonetizrAnalytics.advertisingID;
+
+            foreach (var s in challenge.additional_params)
+            {
+                string key = s.Key;
+
+                if (!key.EndsWith("_text"))
+                {
+                    props[$"cs_{s.Key}"] = s.Value;
+                }
+            }
 
             string eventName = $"[UNITY_SDK] [TIMED] {adAsset.Key.ToString()}";
 
@@ -624,6 +635,19 @@ namespace Monetizr.Campaigns
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
             props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
+            props["sdk_version"] = MonetizrManager.SDKVersion;
+
+            props["ad_id"] = MonetizrAnalytics.advertisingID;
+
+            foreach (var s in challenge.additional_params)
+            {
+                string key = s.Key;
+
+                if (!key.EndsWith("_text"))
+                {
+                    props[$"cs_{s.Key}"] = s.Value;
+                }
+            }
 
             Mixpanel.Identify(challenge.brand_id);
             Mixpanel.Track(eventName, props);

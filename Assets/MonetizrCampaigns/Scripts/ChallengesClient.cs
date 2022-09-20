@@ -93,7 +93,7 @@ namespace Monetizr.Campaigns
                     //foreach(var v in ch.additional_params)
                     //    Debug.Log($"!!!! {v.Key}={v.Value}");
                 }
-
+                
                 var result = new List<ServerCampaign>(challenges.challenges);
 
                 //remove all campaigns without assets
@@ -102,6 +102,21 @@ namespace Monetizr.Campaigns
                     return e.assets.Count == 0;
                 });
 
+                //remove all campaign with SDK version lower than current
+                result.RemoveAll(e =>
+                {
+                    string minSdkVersion = e.GetParam("min_sdk_version");
+                    
+                    if (minSdkVersion != null)
+                    {
+                        return CompareVersions(MonetizrManager.SDKVersion, minSdkVersion) < 0;
+                    }
+
+                    return false;
+                });
+
+
+
                 return result;
             }
             else
@@ -109,6 +124,33 @@ namespace Monetizr.Campaigns
                 return null;
             }
 
+        }
+
+        private int CompareVersions(string First, string Second)
+        {
+            var f = Array.ConvertAll(First.Split('.'), (v) => { int k = 0; return int.TryParse(v, out k) ? k : 0; });
+            var s = Array.ConvertAll(Second.Split('.'), (v) => { int k = 0; return int.TryParse(v, out k) ? k : 0; });
+              
+            for(int i = 0; i < 3; i++)
+            {
+                int f_i = 0;
+
+                if (f.Length > i)
+                    f_i = f[i];
+
+                int s_i = 0;
+
+                if (s.Length > i)
+                    s_i = s[i];
+
+                if (f_i > s_i)
+                    return 1;
+
+                if (f_i < s_i)
+                    return -1;
+            }
+
+            return 0;
         }
 
         private Dictionary<string, string> ParseJson(string content)

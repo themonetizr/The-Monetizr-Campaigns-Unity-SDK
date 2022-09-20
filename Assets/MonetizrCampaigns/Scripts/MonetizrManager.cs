@@ -208,7 +208,7 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
-        public static readonly string SDKVersion = "0.0.6";
+        public static readonly string SDKVersion = "0.0.7";
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
@@ -1075,7 +1075,7 @@ namespace Monetizr.Campaigns
             if (!instance.isActive)
                 return;
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrGamePanel", id, onComplete, false, m);
+            instance.uiController.ShowPanelFromPrefab("MonetizrCarGamePanel", id, onComplete, false, m);
         }
 
 
