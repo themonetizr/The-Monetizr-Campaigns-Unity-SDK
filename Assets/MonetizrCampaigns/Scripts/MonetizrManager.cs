@@ -208,7 +208,7 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
-        public static readonly string SDKVersion = "0.0.7";
+        public static readonly string SDKVersion = "0.0.8";
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
