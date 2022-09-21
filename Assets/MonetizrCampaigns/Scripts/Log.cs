@@ -1,5 +1,6 @@
 #define MONETIZR_VERBOSE
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,14 @@ namespace Monetizr.Campaigns
             Debug.Log(message);
 #endif
         }
+
+        internal static void PrintToConsole(object message)
+        {
+#if MONETIZR_VERBOSE
+            Console.WriteLine(message);
+#endif
+        }
+
 
         internal static void PrintError(object message)
         {

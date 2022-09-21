@@ -1495,35 +1495,41 @@ namespace Monetizr.Campaigns
             string zipFolder = null;
             string fileToCheck = fpath;
 
-            //Log.Print(fname);
+            Log.Print("PreloadAssetToCache: " + fname);
 
             if (fname.Contains("zip"))
             {
                 zipFolder = path + "/" + fname.Replace(".zip", "");
                 fileToCheck = zipFolder + "/index.html";
 
-                //Log.Print($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
+                Log.Print($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
             }
 
             byte[] data = null;
 
             if (!File.Exists(fileToCheck))
             {
+                Log.Print($"Downloading archive {asset.url}");
+
                 data = await DownloadHelper.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
+                    Log.Print("Nothing downloaded! Data == null");
+
                     if (required)
                         ech.isChallengeLoaded = false;
 
                     return;
                 }
 
+                Log.Print($"WriteAllBytes to {fpath} size: {data.Length}");
+
                 File.WriteAllBytes(fpath, data);
 
                 if (zipFolder != null)
                 {
-                    //Log.Print("extracting to: " + zipFolder);
+                    Log.Print("Extracting to: " + zipFolder);
 
                     if (Directory.Exists(zipFolder))
                         DeleteDirectory(zipFolder);
@@ -1543,7 +1549,9 @@ namespace Monetizr.Campaigns
             if (zipFolder != null)
                 fpath = fileToCheck;
 
-            //Log.Print($"resource {fileString} {fpath}");
+            Log.Print($"Resource {fileString} {fpath}");
+
+            //Log.Print("zip path to: " + fpath);
 
             //ech.SetAsset<string>(urlString, asset.url);
             ech.SetAsset<string>(fileString, fpath);
