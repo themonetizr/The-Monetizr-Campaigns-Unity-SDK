@@ -82,6 +82,8 @@ namespace Monetizr.Campaigns
 
         public void OnButtonClick()
         {
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.TinyTeaser), MonetizrManager.EventType.ButtonPressOk);
+
             MonetizrManager.Analytics.TrackEvent("Tiny teaser pressed", currentMission);
             MonetizrManager.ShowRewardCenter(null);
         }
@@ -105,6 +107,8 @@ namespace Monetizr.Campaigns
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
 
             MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
+
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.TinyTeaser), MonetizrManager.EventType.Impression);
         }
 
         internal void UpdateTransform(Mission m)

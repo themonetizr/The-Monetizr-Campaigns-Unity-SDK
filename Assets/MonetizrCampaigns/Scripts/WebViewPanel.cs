@@ -76,6 +76,8 @@ namespace Monetizr.Campaigns
 
         internal void PrepareSurveyPanel(Mission m)
         {
+            
+
             TrackEvent("Survey started");
 
             Debug.Log($"currentMissionDesc: {currentMissionDesc == null}");
@@ -368,7 +370,9 @@ document.addEventListener('DOMContentLoaded', function(){{
             PrepareWebViewComponent(fullScreen);
 
             closeButton.gameObject.SetActive(!fullScreen);
-                        
+
+            
+
             switch (id)
             {
                 case PanelId.SurveyWebView: adType = AdType.Survey; PrepareSurveyPanel(m); break;
@@ -381,7 +385,8 @@ document.addEventListener('DOMContentLoaded', function(){{
 
             eventsPrefix = adType.ToString();
 
-           
+            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+
             // Load a URL.
             Debug.Log($"Url to show {webUrl}");
             webView.Show();
@@ -483,6 +488,8 @@ document.addEventListener('DOMContentLoaded', function(){{
 
         private void OnCompleteEvent()
         {
+            MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
+
             TrackEvent($"{eventsPrefix} completed");
             isSkipped = false;
 
@@ -510,6 +517,8 @@ document.addEventListener('DOMContentLoaded', function(){{
         public void OnSkipPress()
         {
             isSkipped = true;
+
+            MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
 
             TrackEvent($"{eventsPrefix} skipped");
 

@@ -95,7 +95,7 @@ namespace Monetizr.Campaigns
             Log.Print($"DAR: {obj.isDone}");
         }
 
-        static string GetPlacementName(AdType t)
+        internal static string GetPlacementName(AdType t)
         {
             switch (t)
             {

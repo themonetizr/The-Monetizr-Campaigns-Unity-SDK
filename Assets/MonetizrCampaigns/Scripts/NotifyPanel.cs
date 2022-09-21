@@ -61,6 +61,8 @@ namespace Monetizr.Campaigns
                 case PanelId.TwitterNotification: PrepareTwitterNotificationPanel(m); break;
                 
             }
+
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
         }
 
         internal override void FinalizePanel(PanelId id)
@@ -427,7 +429,7 @@ namespace Monetizr.Campaigns
             adType = AdType.EmailCongratsNotificationScreen;
             MonetizrManager.Analytics.TrackEvent("Email congrats shown", m);
             MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
-
+                        
         }
 
         private new void Awake()
@@ -439,9 +441,11 @@ namespace Monetizr.Campaigns
 
         public void OnNoThanksPress()
         {
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
+
             //MonetizrManager.
-			//
-			//ytics.TrackEvent("Twitter cancel", currentMission);
+            //
+            //ytics.TrackEvent("Twitter cancel", currentMission);
 
             isSkipped = true;
             SetActive(false);
@@ -449,7 +453,9 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
-            if(eventPrefix != null)
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
+
+            if (eventPrefix != null)
                 MonetizrManager.Analytics.TrackEvent($"{eventPrefix} pressed", currentMission);
 
             isSkipped = false;

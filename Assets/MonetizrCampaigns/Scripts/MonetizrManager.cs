@@ -244,6 +244,26 @@ namespace Monetizr.Campaigns
 
         internal MissionsManager missionsManager = null;
 
+        public enum EventType
+        {
+            Impression,
+            ButtonPressSkip,
+            ButtonPressOk,
+        }
+
+        public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
+
+        /// <summary>
+        /// This delegate is using for tracking user defines events from SDK side
+        /// </summary>
+        public UserDefinedEvent userDefinedEvent = null;
+
+        static internal void CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
+        {
+            instance?.userDefinedEvent?.Invoke(campaignId, placement, eventType);
+        }
+        
+
         //Hold resources to prevent automatic unload
         public static void HoldResource(object o)
         {
@@ -300,7 +320,7 @@ namespace Monetizr.Campaigns
         }
 
 
-        public static MonetizrManager Initialize(string apiKey, List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch)
+        public static MonetizrManager Initialize(string apiKey, List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch, UserDefinedEvent userEvent = null)
         {
             if (instance != null)
             {
@@ -343,6 +363,7 @@ namespace Monetizr.Campaigns
             DontDestroyOnLoad(monetizrObject);
             instance = monetizrManager;
             instance.sponsoredMissions = sponsoredMissions;
+            instance.userDefinedEvent = userEvent;
 
             monetizrManager.Initalize(apiKey, onRequestComplete, soundSwitch);
 
@@ -416,7 +437,7 @@ namespace Monetizr.Campaigns
                 {
                     //isMissionsIsOudated = true;
                     //ShowTinyMenuTeaser(null);
-                    OnMainMenuShow();
+                    OnMainMenuShow(false);
                 }
 
             };

@@ -256,6 +256,7 @@ namespace Monetizr.Campaigns
 
             //rewardImage.sprite = rewardIcon;
 
+            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
             MonetizrManager.Analytics.TrackEvent("Enter email shown", m);
             MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
@@ -271,6 +272,8 @@ namespace Monetizr.Campaigns
 
         public void _OnNoThanksPress()
         {
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
+
             MonetizrManager.Analytics.TrackEvent("Enter email skipped", currentMission);
 
             isSkipped = true;
@@ -295,6 +298,8 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
+
             MonetizrManager.Analytics.TrackEvent("Enter email submitted", currentMission);
 
             isSkipped = false;
