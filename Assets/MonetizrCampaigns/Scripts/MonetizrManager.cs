@@ -1224,7 +1224,7 @@ namespace Monetizr.Campaigns
         }
 
         /// <summary>
-        /// Shows campaign notification
+        /// Shows campaign notification and if player press Ok button - he sees an offer
         /// </summary>
         /// <param name="onComplete">
         /// IF there's no campaigns, if player closed notification or if player do not complete task 
@@ -1232,7 +1232,7 @@ namespace Monetizr.Campaigns
         /// IF campaign task is completed
         /// - OnComplete called with paraneter FALSE (completed)
         /// </param>
-        public static void ShowCampaignNotification(OnComplete onComplete = null)
+        public static void ShowCampaignNotificationAndEngage(OnComplete onComplete = null)
         {
             if (instance == null)
                 return;
