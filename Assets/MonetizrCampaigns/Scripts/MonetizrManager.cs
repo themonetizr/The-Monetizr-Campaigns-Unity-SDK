@@ -337,7 +337,7 @@ namespace Monetizr.Campaigns
                     //new MissionDescription{ mission = MissionType.MutiplyReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.TwitterReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ missionType = MissionType.VideoWithEmailGiveaway, reward = 20, rewardCurrency = RewardType.Coins },
-                    new MissionDescription(20, RewardType.Coins),
+                    new MissionDescription(200, RewardType.Coins),
                 };
             }
 
@@ -745,6 +745,15 @@ namespace Monetizr.Campaigns
                 onComplete?.Invoke(false);
                 return;
             }
+
+            //manual notification calls, no limis
+            if(placement == 2)
+            {
+                FillInfo(mission);
+                ShowNotification(onComplete, mission, PanelId.StartNotification);
+                return;
+            }
+
 
             if (placement == 0)
             {
@@ -1199,7 +1208,7 @@ namespace Monetizr.Campaigns
             if (instance == null)
                 return;
 
-            //tinyTeaserCanBeVisible = true;
+            tinyTeaserCanBeVisible = true;
 
             if (!Instance.HasCampaignsAndActive())
                 return;
@@ -1228,9 +1237,9 @@ namespace Monetizr.Campaigns
         /// </summary>
         /// <param name="onComplete">
         /// IF there's no campaigns, if player closed notification or if player do not complete task 
-        /// - OnComplete called with parameter TRUE (skipped)
+        /// - OnComplete called with parameter OnCompleteStatus.Skipped
         /// IF campaign task is completed
-        /// - OnComplete called with paraneter FALSE (completed)
+        /// - OnComplete called with parameter OnCompleteStatus.Completed
         /// </param>
         public static void ShowCampaignNotificationAndEngage(OnComplete onComplete = null)
         {
@@ -1248,7 +1257,7 @@ namespace Monetizr.Campaigns
             instance.initializeBuiltinMissions();
 
             //Notification is shown
-            ShowStartupNotification(1, (bool isSkipped) =>
+            ShowStartupNotification(2, (bool isSkipped) =>
                  {
                      //If notification is closed
                      if (isSkipped)
