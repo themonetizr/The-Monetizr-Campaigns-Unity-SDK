@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using System.Text.RegularExpressions;
+using System.Net;
 
 namespace Monetizr.Campaigns
 {
@@ -23,6 +24,8 @@ namespace Monetizr.Campaigns
 
         public ChallengesClient(string apiKey, int timeout = 30)
         {
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
             currentApiKey = apiKey;
             analytics = new MonetizrAnalytics();
 
