@@ -29,6 +29,13 @@ namespace Monetizr.Campaigns
             this.reward = reward;
             this.rewardCurrency = rewardCurrency;
         }
+
+        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency)
+        {
+            this.missionType = missionType;
+            this.reward = reward;
+            this.rewardCurrency = rewardCurrency;
+        }
     }
 
     internal enum MissionUIState

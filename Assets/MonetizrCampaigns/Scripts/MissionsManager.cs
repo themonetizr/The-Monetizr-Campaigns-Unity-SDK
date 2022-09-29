@@ -411,8 +411,8 @@ namespace Monetizr.Campaigns
 
             }
 
-            if (prefefinedSponsoredMissions.Count > 1)
-                prefefinedSponsoredMissions = prefefinedSponsoredMissions.GetRange(serverDefinedMission, 1);
+            //if (prefefinedSponsoredMissions.Count > 1)
+            //    prefefinedSponsoredMissions = prefefinedSponsoredMissions.GetRange(serverDefinedMission, 1);
 
 
             serializedMissions.Load();
