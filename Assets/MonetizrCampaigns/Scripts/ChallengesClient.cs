@@ -64,7 +64,7 @@ namespace Monetizr.Campaigns
                     {"player-id", analytics.GetUserId()},
                     { "app-bundle-id", Application.identifier },
                     { "sdk-version", MonetizrManager.SDKVersion },
-                    { "api-key", MonetizrManager.Instance.GetCurrentAPIkey() }
+                    
                 }
             };
 
@@ -228,7 +228,7 @@ namespace Monetizr.Campaigns
                     {"player-id", analytics.GetUserId()},
                     {"app-bundle-id", Application.identifier },
                     {"sdk-version", MonetizrManager.SDKVersion },
-                    { "api-key", MonetizrManager.Instance.GetCurrentAPIkey() }
+                    
                 }
             };
                         
@@ -267,7 +267,7 @@ namespace Monetizr.Campaigns
 
                     { "app-bundle-id", Application.identifier },
                     { "sdk-version", MonetizrManager.SDKVersion },
-                    { "api-key", MonetizrManager.Instance.GetCurrentAPIkey() }
+                  
                 }
             };
 
