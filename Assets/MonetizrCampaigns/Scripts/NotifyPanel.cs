@@ -262,7 +262,8 @@ namespace Monetizr.Campaigns
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
             banner.sprite = m.brandRewardBanner;
-            logo.sprite = m.brandLogo;
+            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.gameObject.SetActive(logo.sprite != null);
             rewardAmount.text = m.reward.ToString();
 
             title.text = $"Survey!";
@@ -275,17 +276,26 @@ namespace Monetizr.Campaigns
                 rewardTitle = MonetizrManager.Instance.GetAsset<string>(challengeId, AssetsType.CustomCoinString);
             }
 
+            Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite))
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+            }
+
             //text.text = $"<color=#F05627>Complete the survey</color>\nby {m.brandName} to earn\n<color=#F05627>{m.reward} {rewardTitle}</color>";
 
             //buttonText.text = "Learn More";
             //buttonText.text = "Awesome!";
 
             rewardImage.gameObject.SetActive(true);
-            rewardImageBackgroud.gameObject.SetActive(true);
-            rewardAmount.gameObject.SetActive(true);
+            rewardImageBackgroud.gameObject.SetActive(false);
+            rewardAmount.gameObject.SetActive(false);
             noThanksButton?.gameObject.SetActive(true);
 
-            Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
+            gift?.gameObject.SetActive(false);
+
+            
 
             Sprite customCoin = MonetizrManager.Instance.GetAsset<Sprite>(challengeId, AssetsType.CustomCoinSprite);
 

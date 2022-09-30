@@ -13,12 +13,12 @@ namespace Monetizr.Campaigns
             get
             {
                 return serializedMissions.GetMissions();
-            }            
+            }
         }
 
         private CampaignsSerializeManager serializedMissions = new CampaignsSerializeManager();
 
-       
+
         internal void CleanRewardsClaims()
         {
             serializedMissions.Reset();
@@ -55,7 +55,7 @@ namespace Monetizr.Campaigns
 
             missions.RemoveAll((e) => { return e.isSponsored == false; });
         }
-              
+
 
         public void AddMission(Mission m)
         {
@@ -130,7 +130,7 @@ namespace Monetizr.Campaigns
             bool hasHtml = MonetizrManager.Instance.HasAsset(campaign, AssetsType.Html5PathString);
             bool hasVideo = MonetizrManager.Instance.HasAsset(campaign, AssetsType.VideoFilePathString);
 
-            if(!hasVideo)
+            if (!hasVideo)
             {
                 Debug.LogWarning($"campaign {campaign} has no video asset!");
             }
@@ -161,8 +161,8 @@ namespace Monetizr.Campaigns
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
-               
-        };
+
+            };
         }
 
         Mission prepareDoubleMission(MissionType mt, string campaign, int reward)
@@ -261,14 +261,14 @@ namespace Monetizr.Campaigns
         Mission prepareNewMission(int id, MissionType mt, string campaign, int reward)
         {
             Mission m = null;
-            
+
             switch (mt)
             {
                 case MissionType.MutiplyReward: m = prepareDoubleMission(mt, campaign, reward); break;
                 case MissionType.VideoReward: m = prepareVideoMission(mt, campaign, reward); break;
                 case MissionType.SurveyReward: m = prepareSurveyMission(mt, campaign, reward); break;
                 case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign, reward); break;
-               // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
+                // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
                 case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign, reward); break;
             }
 
@@ -284,6 +284,34 @@ namespace Monetizr.Campaigns
             m.sdkVersion = MonetizrManager.SDKVersion;
 
             return m;
+        }
+
+        internal Action ClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        {
+            switch (m.type)
+            {
+                case MissionType.SurveyReward: return SurveyClaimAction(m, onComplete, updateUIDelegate);
+                case MissionType.VideoWithEmailGiveaway: return GetEmailGiveawayClaimAction(m, onComplete, updateUIDelegate);
+            }
+
+            return null;
+        }
+
+        internal Action SurveyClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        {
+            Action<bool> onSurveyComplete = (bool isSkipped) =>
+            {
+                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
+            };
+
+            return () =>
+            {
+                //MonetizrManager.ShowSurvey(onSurveyComplete, m);
+
+                MonetizrManager.ShowNotification((bool _) => { MonetizrManager.ShowSurvey(onSurveyComplete, m); },
+                           m,
+                           PanelId.SurveyNotification);
+            };
         }
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)

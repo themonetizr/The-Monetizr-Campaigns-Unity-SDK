@@ -1113,7 +1113,9 @@ namespace Monetizr.Campaigns
             if (m.isClaimed == ClaimState.Claimed)
                 return;
 
-            MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, onComplete, null).Invoke();
+            //MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, onComplete, null).Invoke();
+
+            MonetizrManager.Instance.missionsManager.ClaimAction(m, onComplete, null).Invoke();
         }
 
         internal static void ShowMinigame(Action<bool> onComplete, PanelId id, Mission m = null)
