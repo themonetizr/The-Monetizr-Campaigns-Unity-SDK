@@ -8,13 +8,7 @@ namespace Monetizr.Campaigns
 
     internal class MissionsManager
     {
-        internal List<Mission> missions
-        {
-            get
-            {
-                return serializedMissions.GetMissions();
-            }
-        }
+        internal List<Mission> missions => serializedMissions.GetMissions();
 
         private CampaignsSerializeManager serializedMissions = new CampaignsSerializeManager();
 
@@ -182,7 +176,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareSurveyMission(MissionType mt, string campaign, int reward)
+        Mission PrepareSurveyMission(MissionType mt, string campaign, int reward)
         {
             string url = MonetizrManager.Instance.GetAsset<string>(campaign, AssetsType.SurveyURLString);
 
@@ -194,16 +188,16 @@ namespace Monetizr.Campaigns
                 rewardType = RewardType.Coins,
                 type = mt,
                 reward = reward,
-                isDisabled = true, //survey is disabled from start
+                isDisabled = false, //survey is disabled from start
                 surveyUrl = url,
-                delaySurveyTimeSec = 30,//86400,
-                progress = 1.0f,
+                //delaySurveyTimeSec = 30,//86400,
+                progress = 0.0f,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
             };
         }
 
-        Mission prepareGiveawayMission(MissionType mt, string campaign, int reward)
+        Mission PrepareGiveawayMission(MissionType mt, string campaign, int reward)
         {
             //if no claimable reward in campaign - no give away missions
             var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
@@ -266,7 +260,7 @@ namespace Monetizr.Campaigns
             {
                 case MissionType.MutiplyReward: m = prepareDoubleMission(mt, campaign, reward); break;
                 case MissionType.VideoReward: m = prepareVideoMission(mt, campaign, reward); break;
-                case MissionType.SurveyReward: m = prepareSurveyMission(mt, campaign, reward); break;
+                case MissionType.SurveyReward: m = PrepareSurveyMission(mt, campaign, reward); break;
                 case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign, reward); break;
                 // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
                 case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign, reward); break;
