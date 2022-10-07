@@ -422,6 +422,99 @@ namespace Monetizr.Campaigns
             return null;
         }
 
+        [Serializable]
+        public class ServerMissionsHelper
+        {
+            public mission[] missions;
+
+            public List<MissionDescription> CreateMissionDescriptions(List<MissionDescription> originalList)
+            {
+                List<MissionDescription> m = new List<MissionDescription>();
+
+                Array.ForEach(missions, (mission _m)=>{
+
+                    //TODO: find original reward from original list
+
+                    MissionDescription original = originalList.Find((MissionDescription md) => { return md.missionType == _m.GetMissionType(); });
+
+
+                    
+                                        
+
+                    int rewardAmount = 1;
+                    RewardType type = RewardType.Coins;
+
+                    if(original != null)
+                    {
+                        rewardAmount = original.reward;
+                        type = original.rewardCurrency;
+                    }
+                    else
+                    {
+                        rewardAmount = _m.GetRewardAmount();
+                        
+                        type = _m.GetRewardType();
+
+                        MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(type);
+
+                        //no such reward
+                        if (gr == null)
+                            return;
+
+                        //award is too much
+                        if (rewardAmount > gr.maximumAmount)
+                            return;
+                        
+                    }
+
+
+                    m.Add(new MissionDescription(_m.GetMissionType(), rewardAmount, type));
+
+                });
+
+                return m;
+            }
+        }
+
+        [Serializable]
+        public class mission
+        {
+            public string type;
+            public string amount;
+            public string currency;
+
+            public RewardType GetRewardType()
+            {
+                RewardType rt;
+
+                if (System.Enum.TryParse<RewardType>(currency, out rt))
+                    return rt;
+
+                return RewardType.Undefined;
+            }
+
+            public int GetRewardAmount()
+            {
+                int reward = 0;
+
+                if (int.TryParse(amount, out reward))
+                    return reward;
+
+                return 0;
+            }
+
+            public MissionType GetMissionType()
+            {
+                MissionType mt;
+
+                if (System.Enum.TryParse<MissionType>(type, out mt))
+                    return mt;
+
+                return MissionType.Undefined;
+            }
+        }
+
+
         internal void AddMissionsToCampaigns()
         {
             //bind to server campagns
@@ -435,8 +528,17 @@ namespace Monetizr.Campaigns
             {
                 ServerCampaign sc = MonetizrManager.Instance.GetCampaign(campaigns[0]);
 
-                serverDefinedMission = sc.GetIntParam("server_defined_mission",0);
+                serverDefinedMission = sc.GetIntParam("server_defined_mission", 0);
 
+
+                string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).GetParam("custom_missions");
+
+                if (serverMissionsJson.Length > 0)
+                {
+                    ServerMissionsHelper ic = JsonUtility.FromJson<ServerMissionsHelper>(serverMissionsJson);
+
+                    prefefinedSponsoredMissions = ic.CreateMissionDescriptions(prefefinedSponsoredMissions);
+                }
             }
 
             //if (prefefinedSponsoredMissions.Count > 1)

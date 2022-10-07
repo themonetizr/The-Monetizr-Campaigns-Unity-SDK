@@ -8,6 +8,7 @@ namespace Monetizr.Campaigns
     [Flags]
     public enum MissionType : uint
     {
+        Undefined = 0,
         VideoReward = 1,
         MutiplyReward = 2,
         SurveyReward = 4,

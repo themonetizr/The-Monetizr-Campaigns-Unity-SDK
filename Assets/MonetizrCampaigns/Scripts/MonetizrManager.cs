@@ -197,6 +197,7 @@ namespace Monetizr.Campaigns
 
     public enum RewardType
     {
+        Undefined = 0,
         Coins,
         AdditionalCoins,
         PremiumCurrency
@@ -287,6 +288,7 @@ namespace Monetizr.Campaigns
             internal string title;
             internal Func<int> GetCurrencyFunc;
             internal Action<int> AddCurrencyAction;
+            internal int maximumAmount;
         }
 
         public static string temporaryEmail = "";
@@ -306,7 +308,7 @@ namespace Monetizr.Campaigns
         private static int debugAttempt = 0;
         internal static int abTestSegment = 0;
 
-        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<int> GetCurrencyFunc, Action<int> AddCurrencyAction)
+        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<int> GetCurrencyFunc, Action<int> AddCurrencyAction, int maxAmount)
         {
             GameReward gr = new GameReward()
             {
@@ -314,9 +316,18 @@ namespace Monetizr.Campaigns
                 title = title,
                 GetCurrencyFunc = GetCurrencyFunc,
                 AddCurrencyAction = AddCurrencyAction,
+                maximumAmount = maxAmount,
             };
 
             gameRewards[rt] = gr;
+        }
+
+        internal static GameReward GetGameReward(RewardType rt)
+        {
+            if (gameRewards.ContainsKey(rt))
+                return gameRewards[rt];
+
+            return null;
         }
 
 
