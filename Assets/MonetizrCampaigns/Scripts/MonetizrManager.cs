@@ -1366,11 +1366,16 @@ namespace Monetizr.Campaigns
 
                 ClaimMissionData(mission);
 
-                if (missionsManager.TryToActivateSurvey(mission))
+                if(missionsManager.UpdateMissionsActivity(mission))
+                {
+                    updateUI = true;
+                }
+
+                /*if (missionsManager.TryToActivateSurvey(mission))
                 {
                     //UpdateUI();
                     updateUI = true;
-                }
+                }*/
 
                 if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
                 {

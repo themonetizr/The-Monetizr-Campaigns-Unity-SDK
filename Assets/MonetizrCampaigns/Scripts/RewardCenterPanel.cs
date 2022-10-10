@@ -268,24 +268,26 @@ namespace Monetizr.Campaigns
             m.claimButtonText = "Start survey";
 
 
-            Action<bool> onSurveyComplete = (bool isSkipped) =>
+           /* Action<bool> onSurveyComplete = (bool isSkipped) =>
             {
                OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
-            };
+            };*/
 
             //show video, then claim rewards if it's completed
-            m.onClaimButtonPress = () => {
-                /*OnClaimRewardComplete(m, false);*/
+            /*m.onClaimButtonPress = () => {
+                
 
                 MonetizrManager.ShowNotification((bool _) => { MonetizrManager.ShowSurvey(onSurveyComplete, m); },
                         m,
                         PanelId.SurveyNotification);
 
-            };
+            };*/
 
-            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, onComplete, AddNewUIMissions);
+            
+                //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
 
-            //var item = go.GetComponent<MonetizrRewardedItem>();
+                //var item = go.GetComponent<MonetizrRewardedItem>();
 
             if (missionId != 0)
                 m.brandBanner = null;

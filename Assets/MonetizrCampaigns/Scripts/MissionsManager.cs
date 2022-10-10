@@ -252,7 +252,7 @@ namespace Monetizr.Campaigns
         }
 
         //TODO: make separate classes for each mission type
-        Mission prepareNewMission(int id, MissionType mt, string campaign, int reward)
+        Mission prepareNewMission(int id, MissionType mt, string campaign, int reward, RangeInt activateAfter)
         {
             Mission m = null;
 
@@ -269,6 +269,7 @@ namespace Monetizr.Campaigns
             if (m == null)
                 return null;
 
+            m.activateAfter = activateAfter;
             m.state = MissionUIState.Visible;
             m.id = id;
             m.isSponsored = true;
@@ -277,8 +278,12 @@ namespace Monetizr.Campaigns
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
             m.sdkVersion = MonetizrManager.SDKVersion;
 
+
+
             return m;
         }
+
+        
 
         internal Action ClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
         {
@@ -297,6 +302,11 @@ namespace Monetizr.Campaigns
             {
                 MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
             };
+
+#if UNITY_EDITOR_WIN
+            return () => onSurveyComplete.Invoke(false);
+#endif
+                     
 
             return () =>
             {
@@ -427,29 +437,33 @@ namespace Monetizr.Campaigns
 
                 Array.ForEach(missions, (mission _m)=>{
 
-                    //TODO: find original reward from original list
+                    MissionType serverMissionType = _m.GetMissionType();
 
-                    MissionDescription original = originalList.Find((MissionDescription md) => { return md.missionType == _m.GetMissionType(); });
-
-
+                    if (serverMissionType == MissionType.Undefined)
+                        return;
                     
+
+                    MissionDescription original = originalList.Find((MissionDescription md) => { return md.missionType == serverMissionType; });
+
                                         
 
                     int rewardAmount = 1;
-                    RewardType type = RewardType.Coins;
+                    RewardType currency = RewardType.Coins;
+                    RangeInt activateAfter = new RangeInt(0,-1);
 
                     if(original != null)
                     {
                         rewardAmount = original.reward;
-                        type = original.rewardCurrency;
+                        currency = original.rewardCurrency;
                     }
                     else
                     {
                         rewardAmount = _m.GetRewardAmount();
                         
-                        type = _m.GetRewardType();
+                        currency = _m.GetRewardType();
+                                                
 
-                        MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(type);
+                        MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(currency);
 
                         //no such reward
                         if (gr == null)
@@ -458,11 +472,13 @@ namespace Monetizr.Campaigns
                         //award is too much
                         if (rewardAmount > gr.maximumAmount)
                             return;
-                        
+
+                        rewardAmount = (int)(gr.maximumAmount*(rewardAmount / 100.0f));
                     }
 
+                    activateAfter = _m.GetActivateRange();
 
-                    m.Add(new MissionDescription(_m.GetMissionType(), rewardAmount, type));
+                    m.Add(new MissionDescription(_m.GetMissionType(), rewardAmount, currency, activateAfter));
 
                 });
 
@@ -474,8 +490,39 @@ namespace Monetizr.Campaigns
         public class mission
         {
             public string type;
-            public string amount;
+            public string percent_amount;
             public string currency;
+            public string activate_after;
+
+            public RangeInt GetActivateRange()
+            {
+                RangeInt defaultRange = new RangeInt(-1,0);
+
+                if (activate_after == null)
+                    return defaultRange;
+
+                string[] p = activate_after.Split('-');
+
+                int p1 = 0;
+                int p2 = 0;
+
+                if(p.Length > 0)
+                    int.TryParse(p[0], out p1);
+
+                if (p.Length > 1)
+                    int.TryParse(p[1], out p2);
+
+                if (p.Length == 0)
+                    return defaultRange;
+
+                if (p.Length == 1)
+                    return new RangeInt(p1,0);
+
+                if (p.Length == 2)
+                    return new RangeInt(p1, p2-p1);
+
+                return defaultRange;
+            }
 
             public RewardType GetRewardType()
             {
@@ -484,15 +531,15 @@ namespace Monetizr.Campaigns
                 if (System.Enum.TryParse<RewardType>(currency, out rt))
                     return rt;
 
-                return RewardType.Undefined;
+                return RewardType.Coins;
             }
 
             public int GetRewardAmount()
             {
                 int reward = 0;
 
-                if (int.TryParse(amount, out reward))
-                    return reward;
+                if (int.TryParse(percent_amount, out reward))
+                    return Mathf.Clamp(reward,0,100);
 
                 return 0;
             }
@@ -567,7 +614,11 @@ namespace Monetizr.Campaigns
 
                     if (m == null)
                     {
-                        m = prepareNewMission(i, prefefinedSponsoredMissions[i].missionType, ch, prefefinedSponsoredMissions[i].reward);
+                        m = prepareNewMission(i, 
+                                prefefinedSponsoredMissions[i].missionType, 
+                                ch, 
+                                prefefinedSponsoredMissions[i].reward,
+                                prefefinedSponsoredMissions[i].activateAfter);
 
                         if (m != null)
                         {
@@ -601,6 +652,8 @@ namespace Monetizr.Campaigns
                                         
                     InitializeNonSerializedFields(m);
                 }
+
+                UpdateMissionsActivity(null);
 
             }
 
@@ -730,6 +783,37 @@ namespace Monetizr.Campaigns
                         m.isServerCampaignActive;
                    
             });
+        }
+
+        internal bool UpdateMissionsActivity(Mission finishedMission)
+        {
+            foreach(var m in missions)
+            {
+                if (finishedMission != null && m != finishedMission)
+                    continue;
+
+                RangeInt r = m.activateAfter;
+
+                //no activate_after here
+                if (r.start == -1)
+                    continue;
+
+                bool shouldBeDisabled = false;
+
+                for(int i = r.start; i < r.start + r.length; i++)
+                {
+                    if (finishedMission != null && missions[i] == finishedMission)
+                        continue;
+
+                    if (missions[i].isClaimed != ClaimState.Claimed)
+                        shouldBeDisabled = true;
+                }
+
+                
+                m.isDisabled = shouldBeDisabled;
+            }
+
+            return false;
         }
     }
 }

@@ -23,6 +23,7 @@ namespace Monetizr.Campaigns
         internal MissionType missionType;
         internal int reward;
         internal RewardType rewardCurrency;
+        internal RangeInt activateAfter = new RangeInt(-1,0);
 
         public MissionDescription(int reward, RewardType rewardCurrency)
         {
@@ -36,6 +37,14 @@ namespace Monetizr.Campaigns
             this.missionType = missionType;
             this.reward = reward;
             this.rewardCurrency = rewardCurrency;
+        }
+
+        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency, RangeInt activateAfter)
+        {
+            this.missionType = missionType;
+            this.reward = reward;
+            this.rewardCurrency = rewardCurrency;
+            this.activateAfter = activateAfter;
         }
     }
 
@@ -208,6 +217,9 @@ namespace Monetizr.Campaigns
         [SerializeField] internal SerializableDictionary<string, string> additionalParams;
 
         [SerializeField] internal string sdkVersion;
+
+        //Integer ids shows when this missions should be activated (maybe it's better to convert into list)
+        [NonSerialized] internal RangeInt activateAfter;
     }
 
     /*internal class  SurveyMission : Mission
