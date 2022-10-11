@@ -252,7 +252,7 @@ namespace Monetizr.Campaigns
         }
 
         //TODO: make separate classes for each mission type
-        Mission prepareNewMission(int id, MissionType mt, string campaign, int reward, RangeInt activateAfter)
+        Mission prepareNewMission(int id, MissionType mt, string campaign, int reward)
         {
             Mission m = null;
 
@@ -268,8 +268,7 @@ namespace Monetizr.Campaigns
 
             if (m == null)
                 return null;
-
-            m.activateAfter = activateAfter;
+                        
             m.state = MissionUIState.Visible;
             m.id = id;
             m.isSponsored = true;
@@ -470,7 +469,7 @@ namespace Monetizr.Campaigns
                             return;
 
                         //award is too much
-                        if (rewardAmount > gr.maximumAmount)
+                        if (rewardAmount > 100.0f)
                             return;
 
                         rewardAmount = (int)(gr.maximumAmount*(rewardAmount / 100.0f));
@@ -617,8 +616,7 @@ namespace Monetizr.Campaigns
                         m = prepareNewMission(i, 
                                 prefefinedSponsoredMissions[i].missionType, 
                                 ch, 
-                                prefefinedSponsoredMissions[i].reward,
-                                prefefinedSponsoredMissions[i].activateAfter);
+                                prefefinedSponsoredMissions[i].reward);
 
                         if (m != null)
                         {
@@ -649,13 +647,18 @@ namespace Monetizr.Campaigns
                     m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
                     m.amountOfNotificationsSkipped = m.additionalParams.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
                     m.isVideoShown = false;
-                                        
+                    m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity
+                    m.activateAfter = prefefinedSponsoredMissions[i].activateAfter;
+
                     InitializeNonSerializedFields(m);
                 }
 
-                UpdateMissionsActivity(null);
+                
 
             }
+
+
+            UpdateMissionsActivity(null);
 
             //TODO: remove outdated missions from local cache
             //???
@@ -785,9 +788,12 @@ namespace Monetizr.Campaigns
             });
         }
 
+        //check activateAfter ranges for all missions and activate them if missions in range already active 
         internal bool UpdateMissionsActivity(Mission finishedMission)
         {
-            foreach(var m in missions)
+            bool isUpdateNeeded = false;
+
+            foreach (var m in missions)
             {
                 if (finishedMission != null && m != finishedMission)
                     continue;
@@ -796,24 +802,43 @@ namespace Monetizr.Campaigns
 
                 //no activate_after here
                 if (r.start == -1)
+                {
+                    if (m.isDisabled)
+                        isUpdateNeeded = true;
+
+                    m.isDisabled = false;
                     continue;
+                }
 
                 bool shouldBeDisabled = false;
 
-                for(int i = r.start; i < r.start + r.length; i++)
+                for(int i = r.start;; i++)
                 {
+                    if (i > r.start + r.length)
+                        break;
+
+                    if (i >= missions.Count)
+                        break;
+
                     if (finishedMission != null && missions[i] == finishedMission)
                         continue;
 
                     if (missions[i].isClaimed != ClaimState.Claimed)
                         shouldBeDisabled = true;
+                    
                 }
 
-                
-                m.isDisabled = shouldBeDisabled;
+                //activate if all in range claimed
+                if (!shouldBeDisabled)
+                {
+                    if (m.isDisabled)
+                        isUpdateNeeded = true;
+
+                    m.isDisabled = shouldBeDisabled;
+                }
             }
 
-            return false;
+            return isUpdateNeeded;
         }
     }
 }
