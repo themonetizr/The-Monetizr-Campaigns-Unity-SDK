@@ -112,7 +112,8 @@ namespace Monetizr.Campaigns
                 t.InitializeByParent(PanelId.RewardCenter, m);
 
             //active-deactive
-            if (m.type == MissionType.SurveyReward)
+            if(m.activateTime != DateTime.MinValue && m.deactivateTime != DateTime.MaxValue)
+            //if (m.type == MissionType.SurveyReward)
             {
                 updateWithTimer = true;
                 lastUpdateTime = DateTime.Now.AddSeconds(1);
@@ -122,8 +123,6 @@ namespace Monetizr.Campaigns
                     
                     updateButtonTimer();
                 //}
-
-                
             }
 
             actionButton.clickReceiver = this;

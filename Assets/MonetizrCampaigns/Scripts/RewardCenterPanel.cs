@@ -46,10 +46,10 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            string uiItemPrefab = "MonetizrRewardedItem";
+            //string uiItemPrefab = "MonetizrRewardedItem";
 
-            if (uiVersion == 2)
-                uiItemPrefab = "MonetizrRewardedItem2";
+            //if (uiVersion == 2)
+            string uiItemPrefab = "MonetizrRewardedItem2";
 
             itemUI = (Resources.Load(uiItemPrefab) as GameObject).GetComponent<MonetizrRewardedItem>();
             
@@ -429,6 +429,67 @@ namespace Monetizr.Campaigns
             //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
+        private void AddMinigameChallenge(MonetizrRewardedItem item, Mission m, int missionId)
+        {
+            string campaignId = m.campaignId;
+
+            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
+
+            string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
+
+
+            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
+            {
+                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
+            }
+
+            var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
+
+            //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
+
+            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
+            m.missionTitle = $"{brandName} minigame";
+
+                        
+            m.missionDescription = $"Play game and get {m.reward} {rewardTitle} from {brandName}";
+            
+
+            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
+
+            m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
+
+            m.brandName = brandName;
+            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
+            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
+            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
+
+
+            m.claimButtonText = "Play!";
+
+
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
+
+
+
+            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
+
+            //var item = go.GetComponent<MonetizrRewardedItem>();
+
+            if (missionId != 0)
+                m.brandBanner = null;
+
+            Log.Print(m.missionTitle);
+
+            //item.showGift = true;
+            //item.currectProgress = getCurrencyFunc() - m.startMoney;
+            //item.maxProgress = m.reward;
+
+            item.UpdateWithDescription(this, m);
+
+            //if (m.brandBanner != null)
+            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
+        }
+
 
         private void AddSponsoredChallenge(Mission m, int missionId)
         {
@@ -445,6 +506,7 @@ namespace Monetizr.Campaigns
                 case MissionType.TwitterReward: AddTwitterChallenge(item, m, missionId); break;
                 //case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
                 case MissionType.VideoWithEmailGiveaway: AddVideoGiveawayChallenge(item, m, missionId); break;
+                case MissionType.MinigameReward: AddMinigameChallenge(item, m, missionId); break;
             }
 
         }

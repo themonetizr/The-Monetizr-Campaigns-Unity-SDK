@@ -15,6 +15,7 @@ namespace Monetizr.Campaigns
         TwitterReward = 8,
         //GiveawayWithMail = 16,
         VideoWithEmailGiveaway = 32,
+        MinigameReward = 64,
         All = uint.MaxValue,
     }
 

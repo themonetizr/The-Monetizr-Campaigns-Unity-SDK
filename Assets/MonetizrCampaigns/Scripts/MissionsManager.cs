@@ -251,6 +251,23 @@ namespace Monetizr.Campaigns
             };
         }
 
+        Mission prepareMinigameMission(MissionType mt, string campaign, int reward)
+        {            
+            RewardType rt = RewardType.Coins;
+
+            return new Mission()
+            {
+                rewardType = rt,
+                startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
+                type = mt,
+                reward = reward,
+                progress = 1.0f,
+                isDisabled = false,
+                activateTime = DateTime.MinValue,
+                deactivateTime = DateTime.MaxValue,
+            };
+        }
+
         //TODO: make separate classes for each mission type
         Mission prepareNewMission(int id, MissionType mt, string campaign, int reward)
         {
@@ -264,6 +281,7 @@ namespace Monetizr.Campaigns
                 case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign, reward); break;
                 // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
                 case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign, reward); break;
+                case MissionType.MinigameReward: m = prepareMinigameMission(mt, campaign, reward); break;
             }
 
             if (m == null)
@@ -289,10 +307,27 @@ namespace Monetizr.Campaigns
             switch (m.type)
             {
                 case MissionType.SurveyReward: return SurveyClaimAction(m, onComplete, updateUIDelegate);
+                case MissionType.MinigameReward: return MinigameClaimAction(m, onComplete, updateUIDelegate);
                 case MissionType.VideoWithEmailGiveaway: return GetEmailGiveawayClaimAction(m, onComplete, updateUIDelegate);
             }
 
             return null;
+        }
+
+        internal Action MinigameClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        {
+            Action<bool> onMinigameComplete = (bool isSkipped) =>
+            {
+                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
+            };
+
+            return () =>
+            {
+                //MonetizrManager.ShowSurvey(onSurveyComplete, m);
+
+                MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.MemoryGame, m);
+                    
+            };
         }
 
         internal Action SurveyClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)

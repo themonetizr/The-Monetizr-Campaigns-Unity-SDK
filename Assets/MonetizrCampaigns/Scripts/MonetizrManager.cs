@@ -1109,7 +1109,7 @@ namespace Monetizr.Campaigns
 
             Log.Print($"ShowRewardCenter with {m?.campaignId}");
 
-            string uiItemPrefab = "MonetizrRewardCenterPanel";
+            string uiItemPrefab = "MonetizrRewardCenterPanel2";
 
             instance.uiController.ShowPanelFromPrefab(uiItemPrefab, PanelId.RewardCenter, onComplete, true, m);
         }
