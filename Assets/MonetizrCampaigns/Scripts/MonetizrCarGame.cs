@@ -35,6 +35,7 @@ namespace Monetizr.Campaigns
         public Text movesLeftText;
         public GameObject car;
         public Button closeButton;
+        public Image logo;
 
         void Update()
         {
@@ -63,6 +64,9 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.gameObject.SetActive(logo.sprite != null);
+
             currentMission = m;
 
             gameItems = new List<Item>(9);

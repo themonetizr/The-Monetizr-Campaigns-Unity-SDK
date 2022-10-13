@@ -16,10 +16,13 @@ namespace Monetizr.Campaigns
         public Text headerText;
         public Image background;
         public Image mainBanner;
+        public GameObject banner;
+        public RectTransform scrollView;
 
         private List<MonetizrRewardedItem> missionItems = new List<MonetizrRewardedItem>();
 
         private int amountOfItems = 0;
+        private readonly int bannerHeight = 1050+170;
 
         //public List<MissionUIDescription> missionsDescriptions;
 
@@ -46,6 +49,7 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            
             //string uiItemPrefab = "MonetizrRewardedItem";
 
             //if (uiVersion == 2)
@@ -108,9 +112,13 @@ namespace Monetizr.Campaigns
 
             var campId = missions[0].campaignId;
 
-            mainBanner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
+            //mainBanner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 
             amountOfItems = 0;
+
+
+            var go = GameObject.Instantiate<GameObject>(banner, contentRoot);
+            go.GetComponent<Image>().sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 
             foreach (var m in missions)
             {
@@ -599,7 +607,7 @@ namespace Monetizr.Campaigns
         void Update()
         {
             float z = 0;
-            Vector2 pos = new Vector2();
+            Vector2 pos = new Vector2(0,-bannerHeight);
             
 
             foreach(var it in missionItems)
