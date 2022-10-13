@@ -34,6 +34,7 @@ namespace Monetizr.Campaigns
         public GameObject[] items;
         public Text movesLeftText;
         public GameObject car;
+        public Button closeButton;
 
         void Update()
         {
@@ -56,6 +57,8 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
             //MonetizrManager.ShowRewardCenter(null);
+
+            SetActive(false);
         }
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -223,6 +226,8 @@ namespace Monetizr.Campaigns
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
             Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+
+            SetActive(false);
 
             MonetizrManager.ShowCongratsNotification(null, m);
         }

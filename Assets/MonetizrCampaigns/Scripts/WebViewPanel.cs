@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function(){{
             ClosePanel();
         }
 
-       /* private void Update()
+        private void Update()
         {
             if (webView != null && panelId == PanelId.SurveyWebView)
             {
@@ -464,13 +464,13 @@ document.addEventListener('DOMContentLoaded', function(){{
                     Debug.Log("Update: " + webView.Url);
 
 
-                    if (webUrl.Contains("withdraw-consent") ||
+                    /* if (webUrl.Contains("withdraw-consent") ||
                         webUrl.Contains("reportabuse") ||
                         webUrl.Contains("google.com/forms/about"))
                     {
                         OnSkipPress();
                         return;
-                    }
+                    }*/
 
 
                     if (webUrl.Contains("end-page-gateway") ||
@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
                 }
             }
-        }*/
+        }
 
 
         private void OnCompleteEvent()
