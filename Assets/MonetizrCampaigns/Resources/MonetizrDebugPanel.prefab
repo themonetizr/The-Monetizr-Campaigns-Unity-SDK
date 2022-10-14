@@ -334,7 +334,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3392802043166533025
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1920,12 +1920,12 @@ GameObject:
   - component: {fileID: 5300531404886392149}
   - component: {fileID: 3743380438701720981}
   m_Layer: 5
-  m_Name: ClearClaimDataButton (1)
+  m_Name: GameButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &886929118893673666
 RectTransform:
   m_ObjectHideFlags: 0

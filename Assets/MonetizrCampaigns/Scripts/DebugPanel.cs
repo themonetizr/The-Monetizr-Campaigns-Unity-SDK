@@ -22,15 +22,24 @@ namespace Monetizr.Campaigns
       
         static public readonly List<string> keys = new List<string>()
         {
+            "zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE",
             "4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU", //design@monetizr.io ?
-            "9-JosxHvT8ds9H0A3SOcOSSQl25yab5vSBItAlY6ags", //andris
+            //"9-JosxHvT8ds9H0A3SOcOSSQl25yab5vSBItAlY6ags", //andris
             //"PUHzF8UQLXJUuaW0vX0D0lTAFlWU2G0J2NaN2SHk6AA", //martins.jansevskis@themonetizr.com 
             //"oRE6-DIXqfHgoU5TEohXycVkthRv2Tt3pG8hG8q8O9U", 
-            "XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta@themonetizr.com
-            "e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo",  //martins.jansevskis@gmail.com 
+
+            //"XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta@themonetizr.com
+            //"e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo",  //martins.jansevskis@gmail.com 
             //"mnfie-kWEAzhor9sUeOk5ohlnSCDKTefer2IarKd7zs"   //artem
-            "1BKIRvztaZFq0cklZfY7W-_yIGuSWgj2AHKfFTntzBU", // nauris@themonetizr.com
-            "jZrNLvD9pSWZ-oU7nrIivaIHW_PLnZX-KDWx1Ks8NnY" // gita@themonetizr.com
+            //"1BKIRvztaZFq0cklZfY7W-_yIGuSWgj2AHKfFTntzBU", // nauris@themonetizr.com
+            //"jZrNLvD9pSWZ-oU7nrIivaIHW_PLnZX-KDWx1Ks8NnY" // gita@themonetizr.com
+        };
+
+        static public readonly Dictionary<string, string> keyNames = new Dictionary<string, string>()
+        {
+            {"zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE","FEBREZE" },
+            {"4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU","TIDE" },
+            
         };
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -53,7 +62,7 @@ namespace Monetizr.Campaigns
             //for (int i = 0; i < keys.Count; i++)
             //    k2.Add($"{(i+1).ToString()}. {keys[i]}");
 
-            apiKeysList.AddOptions(keys);
+            apiKeysList.AddOptions(new List<string>(keyNames.Values));
 
             versionText.text = $"App version: {Application.version} " +
                 $"OS: {MonetizrAnalytics.osVersion}\n" +
@@ -61,7 +70,13 @@ namespace Monetizr.Campaigns
                 $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +
                 $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()}";
 
-            apiKeysList.value = keys.FindIndex(0, (string v)=> { return v == MonetizrManager.Instance.GetCurrentAPIkey();  });
+            apiKeysList.value = keys.FindIndex(0, (string v)=>
+                {
+                    if (!keyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
+                        return false;
+
+                    return v == keyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
+                });
         }
 
         public void OnToggleChanged(bool _)

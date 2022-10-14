@@ -266,7 +266,7 @@ namespace Monetizr.Campaigns
             logo.gameObject.SetActive(logo.sprite != null);
             rewardAmount.text = m.reward.ToString();
 
-            title.text = $"Survey!";
+            //title.text = $"Survey!";
             //text.text = $"Please spend some time and  <color=#F05627>{m.reward} {m.rewardTitle}</color> from {m.brandName}";
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;

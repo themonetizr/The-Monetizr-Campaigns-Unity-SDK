@@ -459,7 +459,7 @@ namespace Monetizr.Campaigns
             m.missionTitle = $"{brandName} minigame";
 
                         
-            m.missionDescription = $"Play game and get {m.reward} {rewardTitle} from {brandName}";
+            m.missionDescription = $"Play minigame and get {m.reward} {rewardTitle} from {brandName}";
             
 
             m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);

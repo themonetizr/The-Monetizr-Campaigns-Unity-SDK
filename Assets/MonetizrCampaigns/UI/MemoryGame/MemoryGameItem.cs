@@ -14,6 +14,7 @@ namespace Monetizr.Campaigns
         internal Sprite middleAnimSprite;
         internal bool hasEvents;
 
+        public GameObject bonus;
         public Image image;
 
         internal Action onCloseDone;

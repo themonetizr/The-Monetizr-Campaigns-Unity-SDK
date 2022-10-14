@@ -714,14 +714,14 @@ namespace Monetizr.Campaigns
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
-            debugAttempt++;
+            /*debugAttempt++;
 
 #if !UNITY_EDITOR
             if (debugAttempt != 10)
                 return;
 #endif
 
-            debugAttempt = 0;
+            debugAttempt = 0;*/
 
             instance.uiController.ShowPanelFromPrefab("MonetizrDebugPanel", PanelId.DebugPanel);
         }
@@ -1183,7 +1183,9 @@ namespace Monetizr.Campaigns
 
         public static void OnStartGameLevel(Action onComplete)
         {
-            if (instance == null)
+            onComplete?.Invoke();
+
+            /*if (instance == null)
             {
                 onComplete?.Invoke();
                 return;
@@ -1204,7 +1206,7 @@ namespace Monetizr.Campaigns
 
                         });
 
-            }
+            }*/
         }
 
         public static void OnNextLevel(Action<bool> onComplete)
@@ -1360,9 +1362,14 @@ namespace Monetizr.Campaigns
             {
                 bool updateUI = false;
 
-                mission.state = MissionUIState.ToBeHidden;
 
-                mission.isClaimed = ClaimState.Claimed;
+                if (mission.additionalParams.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
+                {
+                    mission.state = MissionUIState.ToBeHidden;
+                    mission.isClaimed = ClaimState.Claimed;
+                }
+
+
 
                 ClaimMissionData(mission);
 

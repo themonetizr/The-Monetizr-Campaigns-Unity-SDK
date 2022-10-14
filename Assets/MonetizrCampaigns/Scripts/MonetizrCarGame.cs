@@ -59,16 +59,20 @@ namespace Monetizr.Campaigns
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
             //MonetizrManager.ShowRewardCenter(null);
 
+            isSkipped = true;
+
             SetActive(false);
         }
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            this.onComplete = onComplete;
+            this.panelId = id;
+            this.currentMission = m;
+
             logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null);
-
-            currentMission = m;
-
+              
             gameItems = new List<Item>(9);
 
             for (int i = 0; i < items.Length; i++)
@@ -230,6 +234,8 @@ namespace Monetizr.Campaigns
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
             Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+
+            isSkipped = false;
 
             SetActive(false);
 

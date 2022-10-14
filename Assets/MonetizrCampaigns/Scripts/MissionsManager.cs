@@ -346,7 +346,7 @@ namespace Monetizr.Campaigns
             {
                 //MonetizrManager.ShowSurvey(onSurveyComplete, m);
 
-                MonetizrManager.ShowNotification((bool _) => { MonetizrManager.ShowSurvey(onSurveyComplete, m); },
+                MonetizrManager.ShowNotification((bool isSkipped) => { if(!isSkipped) MonetizrManager.ShowSurvey(onSurveyComplete, m); },
                            m,
                            PanelId.SurveyNotification);
             };
