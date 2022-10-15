@@ -872,7 +872,9 @@ namespace Monetizr.Campaigns
 
         internal void ClaimMissionData(Mission m)
         {
-            if (m.type == MissionType.VideoReward)
+            gameRewards[m.rewardType].AddCurrencyAction(m.reward);
+
+            /*if (m.type == MissionType.VideoReward)
             {
                 ShowRewardCenter(null);
                 //m.AddPremiumCurrencyAction.Invoke(m.reward);
@@ -905,7 +907,7 @@ namespace Monetizr.Campaigns
                 gameRewards[m.rewardType].AddCurrencyAction(m.reward);
 
                 //ShowRewardCenter(null);
-            }
+            }*/
 
             if (keepLocalClaimData)
                 Instance.SaveClaimedReward(m);

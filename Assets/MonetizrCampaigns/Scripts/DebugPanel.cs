@@ -22,7 +22,7 @@ namespace Monetizr.Campaigns
       
         static public readonly List<string> keys = new List<string>()
         {
-            "zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE",
+            "zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE", //slice game
             "4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU", //design@monetizr.io ?
             //"9-JosxHvT8ds9H0A3SOcOSSQl25yab5vSBItAlY6ags", //andris
             //"PUHzF8UQLXJUuaW0vX0D0lTAFlWU2G0J2NaN2SHk6AA", //martins.jansevskis@themonetizr.com 
@@ -70,7 +70,9 @@ namespace Monetizr.Campaigns
                 $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +
                 $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()}";
 
-            apiKeysList.value = keys.FindIndex(0, (string v)=>
+            var k = new List<string>(keyNames.Values);
+
+            apiKeysList.value = k.FindIndex(0, (string v)=>
                 {
                     if (!keyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
                         return false;
