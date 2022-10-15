@@ -14,21 +14,33 @@ namespace Monetizr.Campaigns
         internal Sprite middleAnimSprite;
         internal bool hasEvents;
 
-        public GameObject bonus;
         public Image image;
+        public GameObject bonus;
 
         internal Action onCloseDone;
+        internal bool hasBonus;
+        internal bool isOpening;
+
+        internal Animator bonusAnimator;
 
         // Start is called before the first frame update
         void Start()
         {
             hasEvents = true;
+            bonus?.SetActive(false);
+
+            bonusAnimator = bonus?.GetComponent<Animator>();
         }
 
         // Update is called once per frame
         void Update()
         {
 
+        }
+
+        public void PlayOnBonus(string anim)
+        {
+            bonusAnimator?.Play(anim);
         }
 
         public void OnOpenDone()
@@ -42,13 +54,21 @@ namespace Monetizr.Campaigns
         public void OnCloseDone()
         {
 
-            if(hasEvents)
+            if (hasEvents)
                 parent.OnCloseDone(id);
         }
 
         public void OnMiddle()
         {
-            if (middleAnimSprite != null) image.sprite = middleAnimSprite;
+            if (hasBonus)
+            {
+                bonus?.SetActive(isOpening);
+            }
+
+            if (middleAnimSprite != null)
+            {
+                image.sprite = middleAnimSprite;
+            }
         }
     }
 

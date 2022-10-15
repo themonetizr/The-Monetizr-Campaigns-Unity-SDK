@@ -33,9 +33,11 @@ namespace Monetizr.Campaigns
         public Sprite[] mapSprites;
         public GameObject[] items;
         public Text movesLeftText;
-        public GameObject car;
+        public MonetizrCar car;
         public Button closeButton;
         public Image logo;
+
+        private int bonusTaken = 0;
 
         void Update()
         {
@@ -69,6 +71,10 @@ namespace Monetizr.Campaigns
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
+
+            bonusTaken = 0;
+
+            car.parent = this;
 
             logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null);
@@ -133,6 +139,10 @@ namespace Monetizr.Campaigns
             new List<int>{ 7 },
         };
 
+
+       
+        int[] bonusIds = { 0, 4, 7 };
+
         internal void OnItemClick(int item)
         {
             if (disabledClick)
@@ -146,7 +156,18 @@ namespace Monetizr.Campaigns
             gameItems[item].gi.middleAnimSprite = mapSprites[map[item]];
             gameItems[item].gi.hasEvents = true;
 
+
             gameItems[item].isOpened = true;
+
+            gameItems[item].gi.hasBonus = Array.FindIndex(bonusIds, i => i == item) != -1;
+            gameItems[item].gi.isOpening = true;
+        }
+
+        internal void OnBonusTaken()
+        {
+            gameItems[bonusIds[bonusTaken]].gi.PlayOnBonus("BonusDisappear");
+
+            bonusTaken++;
         }
 
         internal override void OnOpenDone(int item)
@@ -159,7 +180,7 @@ namespace Monetizr.Campaigns
             //if (map[item] == 6)
             if(item == 7)
             {
-                car.GetComponent<Animator>().Play("CarDrive2");
+                car.gameObject.GetComponent<Animator>().Play("CarDrive2");
 
                 StartCoroutine(OnGameVictory());
                 return;
@@ -203,7 +224,7 @@ namespace Monetizr.Campaigns
                     i.a.Play("MonetizrMemoryGameTap2");
                     i.gi.middleAnimSprite = backSprite;
 
-
+                    i.gi.isOpening = false;
 
                     //i.gi.image.sprite = backSprite;
                     i.gi.hasEvents = false;
