@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
             bool fullScreen = true;
 
-            if (id == PanelId.SurveyWebView || id == PanelId.HtmlWebPageView)
+            if (id == PanelId.HtmlWebPageView)
                 fullScreen = false;
 
             PrepareWebViewComponent(fullScreen);

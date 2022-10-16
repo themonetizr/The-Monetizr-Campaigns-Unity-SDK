@@ -397,7 +397,8 @@ namespace Monetizr.Campaigns
 #endif
 
             if (needToPlayVideo)
-                m.missionDescription = $"Watch video and get {m.reward} {rewardTitle} from {brandName}";
+                // m.missionDescription = $"Watch video and get {m.reward} {rewardTitle} from {brandName}";
+                m.missionDescription = $"Watch video and get $3 OFF Coupon from {brandName}";
             else
                 m.missionDescription = $"Get {m.reward} {rewardTitle} from {brandName}";
 
