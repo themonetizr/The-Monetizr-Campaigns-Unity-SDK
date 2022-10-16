@@ -22,7 +22,7 @@ namespace Monetizr.Campaigns
       
         static public readonly List<string> keys = new List<string>()
         {
-            "zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE", //slice game
+            "XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta@themonetizr.com
             "4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU", //design@monetizr.io ?
             //"9-JosxHvT8ds9H0A3SOcOSSQl25yab5vSBItAlY6ags", //andris
             //"PUHzF8UQLXJUuaW0vX0D0lTAFlWU2G0J2NaN2SHk6AA", //martins.jansevskis@themonetizr.com 
@@ -33,11 +33,12 @@ namespace Monetizr.Campaigns
             //"mnfie-kWEAzhor9sUeOk5ohlnSCDKTefer2IarKd7zs"   //artem
             //"1BKIRvztaZFq0cklZfY7W-_yIGuSWgj2AHKfFTntzBU", // nauris@themonetizr.com
             //"jZrNLvD9pSWZ-oU7nrIivaIHW_PLnZX-KDWx1Ks8NnY" // gita@themonetizr.com
+            //"zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE", //slice game
         };
 
         static public readonly Dictionary<string, string> keyNames = new Dictionary<string, string>()
         {
-            {"zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE","FEBREZE" },
+            {"XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg","FEBREZE" },
             {"4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU","TIDE" },
             
         };

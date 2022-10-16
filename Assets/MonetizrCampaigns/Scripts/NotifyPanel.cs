@@ -204,6 +204,9 @@ namespace Monetizr.Campaigns
 
 
             //v2 updates
+            //FIXME
+            if (m.type != MissionType.VideoWithEmailGiveaway)
+                MonetizrManager.temporaryRewardTypeSelection = MonetizrManager.RewardSelectionType.Ingame;
 
 
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) &&
