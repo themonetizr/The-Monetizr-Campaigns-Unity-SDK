@@ -432,6 +432,11 @@ namespace Monetizr.Campaigns
             item.currectProgress = getCurrencyFunc() - m.startMoney;
             item.maxProgress = m.reward;
 
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite))
+            {
+                item.giftIcon.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+            }
+
             item.UpdateWithDescription(this, m);
 
             //if (m.brandBanner != null)

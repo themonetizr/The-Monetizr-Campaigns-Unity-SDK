@@ -344,11 +344,11 @@ namespace Monetizr.Campaigns
 
             return () =>
             {
-                //MonetizrManager.ShowSurvey(onSurveyComplete, m);
+                MonetizrManager.ShowSurvey(onSurveyComplete, m);
 
-                MonetizrManager.ShowNotification((bool isSkipped) => { if(!isSkipped) MonetizrManager.ShowSurvey(onSurveyComplete, m); },
+                /*MonetizrManager.ShowNotification((bool isSkipped) => { if(!isSkipped) MonetizrManager.ShowSurvey(onSurveyComplete, m); },
                            m,
-                           PanelId.SurveyNotification);
+                           PanelId.SurveyNotification);*/
             };
         }
 

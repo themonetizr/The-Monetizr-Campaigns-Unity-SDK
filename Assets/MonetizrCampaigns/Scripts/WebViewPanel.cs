@@ -32,6 +32,12 @@ namespace Monetizr.Campaigns
 #if UNI_WEB_VIEW
         internal void PrepareWebViewComponent(bool fullScreen)
         {
+
+
+#if UNITY_EDITOR
+    fullScreen = false;
+#endif
+
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
             UniWebView.SetWebContentsDebuggingEnabled(true);
@@ -57,9 +63,10 @@ namespace Monetizr.Campaigns
 #if UNITY_EDITOR
             webView.Frame = new Rect(0,0, 1080.0f*0.9f, 1920.0f*0.9f);
 #else
-            if(fullScreen)
-                webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
+            if (fullScreen)
+                webView.Frame = Screen.safeArea; // new Rect(0, 0, Screen.width, Screen.height);
             else
+                
                 webView.Frame = new Rect(x, y, w, h);
 #endif
 
