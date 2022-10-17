@@ -22,7 +22,7 @@ namespace Monetizr.Campaigns
         private List<MonetizrRewardedItem> missionItems = new List<MonetizrRewardedItem>();
 
         private int amountOfItems = 0;
-        private readonly int bannerHeight = 1050+170;
+        private readonly int bannerHeight = 1050+100;
 
         //public List<MissionUIDescription> missionsDescriptions;
 
@@ -118,7 +118,13 @@ namespace Monetizr.Campaigns
 
 
             var go = GameObject.Instantiate<GameObject>(banner, contentRoot);
-            go.GetComponent<Image>().sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
+
+            var images = go.GetComponentsInChildren<Image>();
+
+            images[0].sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
+            images[1].sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandRewardLogoSprite);
+
+            //go.GetComponent<Image>().sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 
             foreach (var m in missions)
             {

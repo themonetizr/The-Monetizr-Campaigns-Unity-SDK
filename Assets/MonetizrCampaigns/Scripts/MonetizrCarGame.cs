@@ -30,6 +30,7 @@ namespace Monetizr.Campaigns
         private Mission currentMission;
 
         public Sprite backSprite;
+        public Sprite backSpriteDisabled;
         public Sprite[] mapSprites;
         public GameObject[] items;
         public Text movesLeftText;
@@ -96,7 +97,11 @@ namespace Monetizr.Campaigns
 
                 _gi.parent = this;
                 _gi.id = i;
-                _gi.image.sprite = backSprite;
+
+                if(!_b.interactable)
+                    _gi.image.sprite = backSpriteDisabled;
+                else
+                    _gi.image.sprite = backSprite;
 
                 gameItems.Add(new Item { b = _b, go = items[i], value = 0, a = _a, gi = _gi, isOpened = false  });
             }
@@ -203,7 +208,15 @@ namespace Monetizr.Campaigns
 
             //open something
             if (item < openFields.Length)
-                openFields[item].ForEach((int i) => { if(i > 0) gameItems[i].b.interactable = true; });
+            {
+                openFields[item].ForEach((int i) => {
+                    if (i > 0 && !gameItems[i].isOpened)
+                    {
+                        gameItems[i].b.interactable = true;
+                        gameItems[i].gi.image.sprite = backSprite;
+                    }
+                });
+            }
 
           
 
@@ -218,15 +231,15 @@ namespace Monetizr.Campaigns
             yield return new WaitForSeconds(0.5f);
 
             gameItems.ForEach((Item i) => {
-                if (i.isOpened)
+                if (i.b.interactable)
                 {
 
                     i.a.Play("MonetizrMemoryGameTap2");
-                    i.gi.middleAnimSprite = backSprite;
+                    i.gi.middleAnimSprite = backSpriteDisabled;
 
                     i.gi.isOpening = false;
 
-                    //i.gi.image.sprite = backSprite;
+                    //i.gi.image.sprite = backSpriteDisabled;
                     i.gi.hasEvents = false;
 
 
@@ -239,6 +252,8 @@ namespace Monetizr.Campaigns
 
                 if (i.gi.id == 0)
                 {
+                    i.gi.middleAnimSprite = backSprite;
+
                     i.gi.onCloseDone = () =>
                     {
                         disabledClick = false;
