@@ -352,7 +352,7 @@ namespace Monetizr.Campaigns
 
 
 
-        public MonetizrAnalytics()
+        public MonetizrAnalytics(string mixpanelApiKey)
         {
             Log.Print($"MonetizrAnalytics initialized with user id: {GetUserId()}");
 
@@ -393,7 +393,7 @@ namespace Monetizr.Campaigns
 
             //Mixpanel.SetToken("cda45517ed8266e804d4966a0e693d0d");
             Mixpanel.Init();
-            Mixpanel.SetToken("cda45517ed8266e804d4966a0e693d0d");
+            Mixpanel.SetToken(mixpanelApiKey);
             
 
 #if USING_FACEBOOK

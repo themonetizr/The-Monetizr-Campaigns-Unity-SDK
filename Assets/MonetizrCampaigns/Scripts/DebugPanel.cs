@@ -22,6 +22,7 @@ namespace Monetizr.Campaigns
       
         static public readonly List<string> keys = new List<string>()
         {
+            "zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE", //slice game
             "XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta@themonetizr.com
             "4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU", //design@monetizr.io ?
             //"9-JosxHvT8ds9H0A3SOcOSSQl25yab5vSBItAlY6ags", //andris
@@ -38,6 +39,7 @@ namespace Monetizr.Campaigns
 
         static public readonly Dictionary<string, string> keyNames = new Dictionary<string, string>()
         {
+            {"zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE","SLICE GAME" },
             {"XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg","FEBREZE" },
             {"4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU","TIDE" },
             

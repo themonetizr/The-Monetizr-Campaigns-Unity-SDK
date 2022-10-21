@@ -1769,7 +1769,7 @@ namespace Monetizr.Campaigns
 
                         case "unknown_reward_image":
 
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.IngameRewardSprite, true);
+                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.UnknownRewardSprite, true);
 
                             break;
 

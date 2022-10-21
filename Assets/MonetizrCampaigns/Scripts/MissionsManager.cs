@@ -592,6 +592,8 @@ namespace Monetizr.Campaigns
 
         internal void AddMissionsToCampaigns()
         {
+            
+
             //bind to server campagns
             var campaigns = MonetizrManager.Instance.GetAvailableCampaigns();
 

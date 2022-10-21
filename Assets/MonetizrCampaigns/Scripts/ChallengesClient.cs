@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using System.Net;
+using static System.Net.WebRequestMethods;
 
 namespace Monetizr.Campaigns
 {
@@ -16,7 +17,7 @@ namespace Monetizr.Campaigns
     {
         //public PlayerInfo playerInfo { get; set; }
 
-        private const string k_BaseUri = "https://api3.themonetizr.com/";
+        private string k_BaseUri = "https://api3.themonetizr.com/";
         private static readonly HttpClient Client = new HttpClient();
         
         public MonetizrAnalytics analytics { get; private set; }
@@ -26,8 +27,24 @@ namespace Monetizr.Campaigns
         {
             System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
+            bool testEnvironment = false;
+
+#if UNITY_EDITOR
+            testEnvironment = true;
+#endif
+
+            string mixPanelApikey = "cda45517ed8266e804d4966a0e693d0d";
+            k_BaseUri = "https://api.themonetizr.com/";
+
+            if (testEnvironment)
+            {
+                mixPanelApikey = "d4de97058730720b3b8080881c6ba2e0";
+                k_BaseUri = "https://api-test.themonetizr.com/";
+            }
+           
+
             currentApiKey = apiKey;
-            analytics = new MonetizrAnalytics();
+            analytics = new MonetizrAnalytics(mixPanelApikey);
 
             Client.Timeout = TimeSpan.FromSeconds(timeout);
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
