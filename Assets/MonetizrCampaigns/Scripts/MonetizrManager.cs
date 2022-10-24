@@ -222,6 +222,8 @@ namespace Monetizr.Campaigns
         //position relative to center with 1080x1920 screen resolution
         private static Vector2 tinyTeaserPosition = new Vector2(-430, 600);
 
+        private Transform teaserRoot;
+
         internal ChallengesClient _challengesClient { get; private set; }
 
         private static MonetizrManager instance = null;
@@ -448,7 +450,7 @@ namespace Monetizr.Campaigns
                 {
                     //isMissionsIsOudated = true;
                     //ShowTinyMenuTeaser(null);
-                    OnMainMenuShow(false);
+                    //OnMainMenuShow(false);
                 }
 
             };
@@ -1183,6 +1185,11 @@ namespace Monetizr.Campaigns
             tinyTeaserPosition = pos;
         }
 
+        public static void SetTeaserRoot(Transform root)
+        {
+            instance.teaserRoot = root;
+        }
+
         public static void OnStartGameLevel(Action onComplete)
         {
             onComplete?.Invoke();
@@ -1334,7 +1341,7 @@ namespace Monetizr.Campaigns
             {
                 int uiVersion = campaign.GetIntParam("teaser_design_version",2);
 
-                instance.uiController.ShowTinyMenuTeaser(tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
+                instance.uiController.ShowTinyMenuTeaser(instance.teaserRoot,tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }
         }
 

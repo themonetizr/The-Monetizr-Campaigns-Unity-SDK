@@ -197,7 +197,7 @@ namespace Monetizr.Campaigns
             panels.Remove(PanelId.TinyMenuTeaser);
         }
 
-        public void ShowTinyMenuTeaser(Vector2 screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
+        public void ShowTinyMenuTeaser(Transform root, Vector2 screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
         {
              MonetizrMenuTeaser teaser;     
 
@@ -217,8 +217,10 @@ namespace Monetizr.Campaigns
                     //screenPos = Vector2.zero;
                 }
 
+                               
+                var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject,
+                    root ?? mainCanvas.transform);
 
-                var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject, mainCanvas.transform);
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
 
                 PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.additional_params, PanelId.TinyMenuTeaser);

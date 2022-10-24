@@ -7,6 +7,9 @@ public class TeaserHelper : MonoBehaviour
 {
     void OnEnable()
     {
+
+        MonetizrManager.SetTeaserRoot(GetComponentInParent<RectTransform>());
+
         MonetizrManager.OnMainMenuShow();
         //MonetizrManager.ShowTinyMenuTeaser();
     }
