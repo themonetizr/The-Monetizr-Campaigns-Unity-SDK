@@ -10,7 +10,7 @@ namespace Monetizr.Campaigns
     {
         internal List<Mission> missions => serializedMissions.GetMissions();
 
-        private CampaignsSerializeManager serializedMissions = new CampaignsSerializeManager();
+        private MissionsSerializeManager serializedMissions = new MissionsSerializeManager();
 
 
         internal void CleanRewardsClaims()

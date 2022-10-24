@@ -3,44 +3,91 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Monetizr.Campaigns
 {
+    internal abstract class LocalSerializer<T> where T: BaseCollection
+    {
+        internal abstract string GetDataKey();
 
-    internal class CampaignsSerializeManager
+        internal T LoadData(T previousData)
+        {
+            Assert.IsNotNull(previousData);
+
+            previousData.Clear();
+
+            var jsonString = PlayerPrefs.GetString(GetDataKey(), "");
+
+            if (jsonString.Length == 0)
+                return previousData;
+
+            Log.Print($"Loading {GetDataKey()}: {jsonString}");
+
+            return JsonUtility.FromJson<T>(jsonString);
+        }
+
+        internal void SaveData(T data)
+        {
+            Assert.IsNotNull(data);
+
+            string jsonString = JsonUtility.ToJson(data);
+
+            Log.Print($"Saving {GetDataKey()}: {jsonString}");
+
+            PlayerPrefs.SetString(GetDataKey(), jsonString);
+        }
+
+        internal void ResetData(T data)
+        {
+            Assert.IsNotNull(data);
+
+            data.Clear();
+
+            PlayerPrefs.SetString(GetDataKey(), "");
+        }
+    }
+
+    [Serializable]
+    internal abstract class BaseCollection
+    {
+        internal abstract void Clear();
+    }
+
+    [Serializable]
+    internal class MissionsCollection : BaseCollection
+    {
+        [SerializeField] internal List<Mission> missions = new List<Mission>();
+
+        internal override void Clear()
+        {
+            missions.Clear();
+        }
+    };
+
+    internal class MissionsSerializeManager : LocalSerializer<MissionsCollection>
     {
         //private readonly string dateTimeOffsetFormatString = "yyyy-MM-ddTHH:mm:sszzz";
 
-        [Serializable]
-        internal class CampaignsCollection
-        {
-            [SerializeField] internal List<Mission> missions = new List<Mission>();
-        };
+        MissionsCollection missionsCollection = new MissionsCollection();
 
-        CampaignsCollection campaignsCollection = new CampaignsCollection();
+        internal override string GetDataKey()
+        {
+            return "missions";
+        }
 
         internal List<Mission> GetMissions()
         {
-            return campaignsCollection.missions;
+            return missionsCollection.missions;
         }
 
         internal void Load()
         {
-            campaignsCollection.missions.Clear();
+            missionsCollection = LoadData(missionsCollection);
 
-            var jsonString = PlayerPrefs.GetString("campaigns", "");
-
-            if (jsonString.Length == 0)
-                return;
-
-            Log.Print($"Loading campaigns: {jsonString}");
-
-            campaignsCollection = JsonUtility.FromJson<CampaignsCollection>(jsonString);
-
-
-            int deleted = campaignsCollection.missions.RemoveAll((Mission m) => { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
+            int deleted = missionsCollection.missions.RemoveAll((Mission m) => { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
           
-            deleted += campaignsCollection.missions.RemoveAll((Mission m) => { return m.sdkVersion != MonetizrManager.SDKVersion; });
+            deleted += missionsCollection.missions.RemoveAll((Mission m) => { return m.sdkVersion != MonetizrManager.SDKVersion; });
 
             if(deleted > 0)
             {
@@ -51,30 +98,19 @@ namespace Monetizr.Campaigns
 
         internal void SaveAll()
         {
-            string jsonString = JsonUtility.ToJson(campaignsCollection);
-
-            Log.Print($"Saving campaigns: {jsonString}");
-
-            PlayerPrefs.SetString("campaigns", jsonString);
+            SaveData(missionsCollection);
         }
 
         internal void Add(Mission m)
         {
-            campaignsCollection.missions.Add(m);
+            missionsCollection.missions.Add(m);
         }
-
-       
+               
         internal void Reset()
         {
-            campaignsCollection.missions.Clear();
-
-            ResetPlayerPrefs();
+            ResetData(missionsCollection);
         }
-
-        internal static void ResetPlayerPrefs()
-        {
-            PlayerPrefs.SetString("campaigns", "");
-        }
+        
 
     }
 

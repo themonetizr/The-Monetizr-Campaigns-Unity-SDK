@@ -204,6 +204,38 @@ namespace Monetizr.Campaigns
 
     }
 
+    internal class LocalCampaignSettings
+    {
+        [SerializeField] internal SerializableDictionary<string,string> settings;
+    }
+
+    [Serializable]
+    internal class CampaignsCollection : BaseCollection
+    {
+         [SerializeField] internal List<LocalCampaignSettings> missions = new List<LocalCampaignSettings>();
+
+        internal override void Clear()
+        {
+            missions.Clear();
+        }
+    };
+
+    internal class LocalSettingsManager : LocalSerializer<CampaignsCollection>
+    {
+        CampaignsCollection campaignsCollection = new CampaignsCollection();
+
+        internal override string GetDataKey()
+        {
+            return "campaigns";
+        }
+
+        internal void Load()
+        {
+            campaignsCollection = LoadData(campaignsCollection);
+        }
+
+    }
+
     /// <summary>
     /// Main manager for Monetizr
     /// </summary>
@@ -246,6 +278,8 @@ namespace Monetizr.Campaigns
         internal static bool tinyTeaserCanBeVisible;
 
         internal MissionsManager missionsManager = null;
+
+        internal LocalSettingsManager localSettings = null;
 
         public enum EventType
         {
