@@ -102,10 +102,10 @@ namespace Monetizr.Campaigns
 
             }*/
 
-            UIController.PrepareCustomColors(backgroundImage, borderImage, m.additionalParams.dictionary, PanelId.RewardCenter);
+            UIController.PrepareCustomColors(backgroundImage, borderImage, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
 
 
-            UIController.PrepareCustomColors(null, backgroundImage2, m.additionalParams.dictionary, PanelId.RewardCenter);
+            UIController.PrepareCustomColors(null, backgroundImage2, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
 
 
             foreach (var t in gameObject.GetComponents<PanelTextItem>())

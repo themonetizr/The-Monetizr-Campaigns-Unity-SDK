@@ -264,7 +264,7 @@ namespace Monetizr.Campaigns
 
         internal void AddCampaign(ServerCampaign campaign)
         {
-            foreach(var v in campaign.additional_params)
+            foreach(var v in campaign.serverSettings.dictionary)
             {
                 SetParam(campaign.id, v.Key, v.Value, false);
             }
@@ -889,18 +889,18 @@ namespace Monetizr.Campaigns
 
             if (placement == 0)
             {
-                forceSkip = mission.additionalParams.GetParam("no_start_level_notifications") == "true";
+                forceSkip = mission.campaignServerSettings.GetParam("no_start_level_notifications") == "true";
             }
             else if (placement == 1)
             {
-                forceSkip = mission.additionalParams.GetParam("no_main_menu_notifications") == "true";
+                forceSkip = mission.campaignServerSettings.GetParam("no_main_menu_notifications") == "true";
             }
 
            // Debug.Log($"------ShowStartupNotification 3 {placement}");
 
             //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
 
-            if (mission.additionalParams.GetParam("no_campaigns_notification") == "true")
+            if (mission.campaignServerSettings.GetParam("no_campaigns_notification") == "true")
             {
                 forceSkip = true;
             }
@@ -909,7 +909,7 @@ namespace Monetizr.Campaigns
             
             mission.amountOfNotificationsSkipped++;
 
-            if (mission.amountOfNotificationsSkipped <= mission.additionalParams.GetIntParam("amount_of_skipped_notifications"))
+            if (mission.amountOfNotificationsSkipped <= mission.campaignServerSettings.GetIntParam("amount_of_skipped_notifications"))
             {
                 forceSkip = true;
             }
@@ -1457,9 +1457,9 @@ namespace Monetizr.Campaigns
 
             var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
-            if (campaign.GetParam("hide_teaser_button") != "true")
+            if (campaign.serverSettings.GetParam("hide_teaser_button") != "true")
             {
-                int uiVersion = campaign.GetIntParam("teaser_design_version",2);
+                int uiVersion = campaign.serverSettings.GetIntParam("teaser_design_version",2);
 
                 instance.uiController.ShowTinyMenuTeaser(teaserRoot,tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }
@@ -1492,7 +1492,7 @@ namespace Monetizr.Campaigns
                 bool updateUI = false;
 
 
-                if (mission.additionalParams.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
+                if (mission.campaignServerSettings.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
                 {
                     mission.state = MissionUIState.ToBeHidden;
                     mission.isClaimed = ClaimState.Claimed;

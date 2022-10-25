@@ -544,7 +544,7 @@ namespace Monetizr.Campaigns
 
             props["camp_title"] = challenge.title;
 
-            foreach (var s in challenge.additional_params)
+            foreach (var s in challenge.serverSettings.dictionary)
             {
                 string key = s.Key;
 
@@ -653,7 +653,7 @@ namespace Monetizr.Campaigns
 
             props["camp_title"] = challenge.title;
 
-            foreach (var s in challenge.additional_params)
+            foreach (var s in challenge.serverSettings.dictionary)
             {
                 string key = s.Key;
 

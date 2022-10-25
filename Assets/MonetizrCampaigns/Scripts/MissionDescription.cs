@@ -166,6 +166,46 @@ namespace Monetizr.Campaigns
         }
     }
 
+    public class SettingsDictionary<TKey, TValue>
+    {
+        public Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
+
+        public SettingsDictionary()
+        {
+
+        }
+
+        public SettingsDictionary(Dictionary<TKey, TValue> d)
+        {
+            dictionary = d;
+        }
+
+        public TValue GetParam(TKey p)
+        {
+            if (!dictionary.ContainsKey(p))
+                return default(TValue);
+
+            return dictionary[p];
+        }
+
+        public int GetIntParam(TKey p, int defaultParam = 0)
+        {
+            if (!dictionary.ContainsKey(p))
+                return defaultParam;
+
+            int result = 0;
+            string val = dictionary[p].ToString();
+
+            if (!Int32.TryParse(val, out result))
+            {
+                return defaultParam;
+            }
+
+            return result;
+        }
+
+    }
+
     [Serializable]
     public class Mission
     {
@@ -244,7 +284,9 @@ namespace Monetizr.Campaigns
         [NonSerialized] internal bool isServerCampaignActive;
 
         //Field for campaign 
-        [SerializeField] internal SerializableDictionary<string, string> additionalParams;
+        //[SerializeField] internal SerializableDictionary<string, string> additionalParams;
+
+        [NonSerialized] internal SettingsDictionary<string, string> campaignServerSettings;
 
         [SerializeField] internal string sdkVersion;
 

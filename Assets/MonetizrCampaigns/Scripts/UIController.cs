@@ -135,7 +135,7 @@ namespace Monetizr.Campaigns
                 if(id != PanelId.DebugPanel && m != null)
                 PrepareCustomColors(ctrlPanel.backgroundImage,
                     ctrlPanel.backgroundBorderImage,
-                    m.additionalParams.dictionary,
+                    m.campaignServerSettings.dictionary,
                     id);
 
 
@@ -223,7 +223,7 @@ namespace Monetizr.Campaigns
 
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
 
-                PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.additional_params, PanelId.TinyMenuTeaser);
+                PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.serverSettings.dictionary, PanelId.TinyMenuTeaser);
 
                 teaser.uiVersion = designVersion;
                 panels.Add(PanelId.TinyMenuTeaser, teaser);

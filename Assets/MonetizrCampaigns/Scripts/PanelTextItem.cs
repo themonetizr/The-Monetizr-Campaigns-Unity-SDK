@@ -19,8 +19,8 @@ namespace Monetizr.Campaigns
             if (m == null)
                 return;
 
-            UIController.SetColorForElement(textElement, m.additionalParams.dictionary, "text_color");
-            UIController.SetColorForElement(textElement, m.additionalParams.dictionary, $"{parentId.ToString()}.{textContent}_color");
+            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, "text_color");
+            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{parentId.ToString()}.{textContent}_color");
 
             var param = $"{parentId.ToString()}.{textContent}";
 
@@ -28,15 +28,15 @@ namespace Monetizr.Campaigns
             {
                 var param2 = $"{parentId.ToString()}.{textContent}2";
 
-                if (m.additionalParams.dictionary.ContainsKey(param2))
+                if (m.campaignServerSettings.dictionary.ContainsKey(param2))
                 {
                     param = param2;
                 }
             }
 
-            if (m.additionalParams.dictionary.ContainsKey(param))
+            if (m.campaignServerSettings.dictionary.ContainsKey(param))
             {
-                string t = m.additionalParams.GetParam(param);
+                string t = m.campaignServerSettings.GetParam(param);
 
                 string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 

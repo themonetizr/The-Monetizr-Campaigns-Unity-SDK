@@ -113,7 +113,7 @@ namespace Monetizr.Campaigns
 
         internal void UpdateTransform(Mission m)
         {
-            string teaser_transform = m.additionalParams.GetParam("teaser_transform");
+            string teaser_transform = m.campaignServerSettings.GetParam("teaser_transform");
 
             if (teaser_transform == null)
                 return;
@@ -160,10 +160,10 @@ namespace Monetizr.Campaigns
         {
             bool noVideo = false;
 
-            if (m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true")
+            if (m.campaignServerSettings.GetParam("email_giveaway_mission_without_video") == "true")
                 noVideo = true;
 
-            bool isSinglePicture = m.additionalParams.GetParam("teaser_single_picture") == "true";
+            bool isSinglePicture = m.campaignServerSettings.GetParam("teaser_single_picture") == "true";
                         
 
             UpdateTransform(m);

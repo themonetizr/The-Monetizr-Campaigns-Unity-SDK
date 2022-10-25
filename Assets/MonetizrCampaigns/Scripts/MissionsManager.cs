@@ -356,7 +356,7 @@ namespace Monetizr.Campaigns
         {
             MonetizrManager.temporaryRewardTypeSelection = MonetizrManager.RewardSelectionType.Product;
 
-            bool needToPlayVideo = !(m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true");
+            bool needToPlayVideo = !(m.campaignServerSettings.GetParam("email_giveaway_mission_without_video") == "true");
 
 #if UNITY_EDITOR_WIN
             needToPlayVideo = false;
@@ -388,7 +388,7 @@ namespace Monetizr.Campaigns
                     return;
                 }
 
-                if(m.additionalParams.GetParam("watch_video_only_once") == "true")
+                if(m.campaignServerSettings.GetParam("watch_video_only_once") == "true")
                     m.isVideoShown = true;
 
                 MonetizrManager.ShowEnterEmailPanel(
@@ -605,10 +605,10 @@ namespace Monetizr.Campaigns
             {
                 ServerCampaign sc = MonetizrManager.Instance.GetCampaign(campaigns[0]);
 
-                serverDefinedMission = sc.GetIntParam("server_defined_mission", 0);
+                serverDefinedMission = sc.serverSettings.GetIntParam("server_defined_mission", 0);
 
 
-                string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).GetParam("custom_missions");
+                string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).serverSettings.GetParam("custom_missions");
 
                 if (serverMissionsJson.Length > 0)
                 {
@@ -679,10 +679,12 @@ namespace Monetizr.Campaigns
                     m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
 
                     //rewrite these parameters here, because otherwise it will be saved in cache
-                    m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
-                    m.amountOfRVOffersShown = m.additionalParams.GetIntParam("amount_of_rv_offers", -1);
-                    m.amountOfNotificationsShown = m.additionalParams.GetIntParam("amount_of_notifications", -1);
-                    m.amountOfNotificationsSkipped = m.additionalParams.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
+                    //m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
+
+                    m.campaignServerSettings = MonetizrManager.Instance.GetCampaign(ch).serverSettings;
+                    m.amountOfRVOffersShown = m.campaignServerSettings.GetIntParam("amount_of_rv_offers", -1);
+                    m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
+                    m.amountOfNotificationsSkipped = m.campaignServerSettings.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
                     m.isVideoShown = false;
                     m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity
                     m.activateAfter = prefefinedSponsoredMissions[i].activateAfter;
@@ -702,6 +704,8 @@ namespace Monetizr.Campaigns
 
             serializedMissions.SaveAll();
         }
+
+
 
         private void InitializeNonSerializedFields(Mission m)
         {

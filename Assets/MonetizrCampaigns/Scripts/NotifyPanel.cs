@@ -232,9 +232,9 @@ namespace Monetizr.Campaigns
 
             if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
             {
-                if (m.additionalParams.dictionary.ContainsKey("CongratsNotification.content_text2"))
+                if (m.campaignServerSettings.dictionary.ContainsKey("CongratsNotification.content_text2"))
                 {
-                    text.text = m.additionalParams.GetParam("CongratsNotification.content_text2");
+                    text.text = m.campaignServerSettings.GetParam("CongratsNotification.content_text2");
                 }
             }
 

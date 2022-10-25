@@ -108,7 +108,7 @@ namespace Monetizr.Campaigns
 
                 foreach (var ch in challenges.challenges)
                 {
-                    ch.additional_params = ParseContentString(ch.content);
+                    ch.serverSettings = new SettingsDictionary<string,string>(ParseContentString(ch.content));
 
                     //foreach(var v in ch.additional_params)
                     //    Debug.Log($"!!!! {v.Key}={v.Value}");
@@ -125,7 +125,7 @@ namespace Monetizr.Campaigns
                 //remove all campaign with SDK version lower than current
                 result.RemoveAll(e =>
                 {
-                    string minSdkVersion = e.GetParam("min_sdk_version");
+                    string minSdkVersion = e.serverSettings.GetParam("min_sdk_version");
                     
                     if (minSdkVersion != null)
                     {
