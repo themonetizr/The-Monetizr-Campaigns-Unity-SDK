@@ -18,6 +18,7 @@ using UnityEngine.Assertions;
 using System.IO.Compression;
 using System.Text;
 using System.Threading;
+using System.Linq;
 
 namespace Monetizr.Campaigns
 {
@@ -204,25 +205,39 @@ namespace Monetizr.Campaigns
 
     }
 
+    [Serializable]
     internal class LocalCampaignSettings
     {
-        [SerializeField] internal SerializableDictionary<string,string> settings;
+        [SerializeField] internal string campId;
+        [SerializeField] internal string apiKey;
+        [SerializeField] internal string sdkVersion;
+        [SerializeField] internal SerializableDictionary<string,string> settings = new SerializableDictionary<string, string>();
     }
 
     [Serializable]
     internal class CampaignsCollection : BaseCollection
     {
-         [SerializeField] internal List<LocalCampaignSettings> missions = new List<LocalCampaignSettings>();
+        //campaign id and settings
+         [SerializeField] internal List<LocalCampaignSettings> campaigns = 
+            new List<LocalCampaignSettings>();
 
         internal override void Clear()
         {
-            missions.Clear();
+            campaigns.Clear();
+        }
+
+        internal LocalCampaignSettings GetCampaign(string id)
+        {
+            return campaigns.Find(c => c.campId == id);
         }
     };
 
     internal class LocalSettingsManager : LocalSerializer<CampaignsCollection>
     {
-        CampaignsCollection campaignsCollection = new CampaignsCollection();
+        internal LocalSettingsManager()
+        {
+            data = new CampaignsCollection();
+        }
 
         internal override string GetDataKey()
         {
@@ -231,9 +246,77 @@ namespace Monetizr.Campaigns
 
         internal void Load()
         {
-            campaignsCollection = LoadData(campaignsCollection);
+            //ResetData();
+
+            LoadData();
+
+            int deleted = data.campaigns.RemoveAll((LocalCampaignSettings m) => 
+                { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
+
+            deleted += data.campaigns.RemoveAll((LocalCampaignSettings m) => 
+                { return m.sdkVersion != MonetizrManager.SDKVersion; });
+
+            if (deleted > 0)
+            {                
+                SaveData();
+            }
         }
 
+        internal void AddCampaign(ServerCampaign campaign)
+        {
+            foreach(var v in campaign.additional_params)
+            {
+                SetParam(campaign.id, v.Key, v.Value, false);
+            }
+        }
+
+        internal void SetParam(string campaign, string param, string val, bool saveData = true)
+        {
+            var camp = data.GetCampaign(campaign);
+
+            if (camp == null)
+            {
+                data.campaigns.Add(new LocalCampaignSettings()
+                { apiKey = MonetizrManager.Instance.GetCurrentAPIkey(),
+                  sdkVersion = MonetizrManager.SDKVersion,
+                  campId = campaign});
+
+                camp = data.campaigns[data.campaigns.Count - 1];
+            }
+
+            camp.settings[param] = val;
+
+            if(saveData)
+                SaveData();
+        }
+
+        internal string GetParam(string campaign, string param)
+        {
+            var camp = data.GetCampaign(campaign);
+
+            if (camp == null)
+                return "";
+
+            if (!camp.settings.ContainsKey(param))
+                return "";
+
+            return camp.settings[param]; 
+        }
+
+        internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaignWithAssets> challenges)
+        {
+            //load old settings
+            //сheck if apikey/sdkversion is old
+            Load();
+
+            //check if campaign is missing - remove it from data
+            data.campaigns.RemoveAll((LocalCampaignSettings c) => !challenges.ContainsKey(c.campId));
+                        
+            //update settings from server
+            challenges.Values.ToList().ForEach(c => AddCampaign(c.campaign));
+
+            SaveData();
+        }
     }
 
     /// <summary>
@@ -254,7 +337,7 @@ namespace Monetizr.Campaigns
         //position relative to center with 1080x1920 screen resolution
         private static Vector2 tinyTeaserPosition = new Vector2(-430, 600);
 
-        private Transform teaserRoot;
+        private static Transform teaserRoot;
 
         internal ChallengesClient _challengesClient { get; private set; }
 
@@ -452,6 +535,8 @@ namespace Monetizr.Campaigns
             }
 #endif
 
+            localSettings = new LocalSettingsManager();
+
             missionsManager = new MissionsManager();
 
             //missionsManager.CleanUp();
@@ -484,7 +569,7 @@ namespace Monetizr.Campaigns
                 {
                     //isMissionsIsOudated = true;
                     //ShowTinyMenuTeaser(null);
-                    //OnMainMenuShow(false);
+                    OnMainMenuShow(false);
                 }
 
             };
@@ -1221,7 +1306,7 @@ namespace Monetizr.Campaigns
 
         public static void SetTeaserRoot(Transform root)
         {
-            instance.teaserRoot = root;
+            teaserRoot = root;
         }
 
         public static void OnStartGameLevel(Action onComplete)
@@ -1263,10 +1348,11 @@ namespace Monetizr.Campaigns
         /// <param name="showNotifications"></param>
         public static void OnMainMenuShow(bool showNotifications = true)
         {
+            tinyTeaserCanBeVisible = true;
+
             if (instance == null)
                 return;
-
-            tinyTeaserCanBeVisible = true;
+                       
 
             if (!Instance.HasCampaignsAndActive())
                 return;
@@ -1375,7 +1461,7 @@ namespace Monetizr.Campaigns
             {
                 int uiVersion = campaign.GetIntParam("teaser_design_version",2);
 
-                instance.uiController.ShowTinyMenuTeaser(instance.teaserRoot,tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
+                instance.uiController.ShowTinyMenuTeaser(teaserRoot,tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
             }
         }
 
@@ -1662,7 +1748,6 @@ namespace Monetizr.Campaigns
 
             try
             {
-
                 _challenges = await _challengesClient.GetList();
             }
             catch (Exception e)
@@ -1678,7 +1763,7 @@ namespace Monetizr.Campaigns
             }
 
             campaignIds.Clear();
-
+                        
 
 
 #if TEST_SLOW_LATENCY
@@ -1848,6 +1933,7 @@ namespace Monetizr.Campaigns
 #if TEST_SLOW_LATENCY
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
+            localSettings.LoadOldAndUpdateNew(challenges);
 
             Log.Print($"RequestChallenges completed with count: {campaignIds.Count} active: {activeChallengeId}");
 

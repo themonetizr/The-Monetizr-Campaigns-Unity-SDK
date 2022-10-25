@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Monetizr.Campaigns
@@ -134,6 +135,34 @@ namespace Monetizr.Campaigns
             }
 
             return result;
+        }
+
+        internal void Clear()
+        {
+            dictionary.Clear();
+        }
+
+        internal int RemoveAllByValue(Func<TValue, bool> predicate)
+        {
+            int count = 0;
+            foreach (var item in dictionary.Where(kvp => predicate(kvp.Value)).ToList())
+            {
+                count++;
+                dictionary.Remove(item.Key);
+            }
+
+            return count;
+        }
+
+        public TValue this[TKey k]
+        {
+            get => dictionary[k];
+            set => dictionary[k] = value;
+        }
+
+        public bool ContainsKey(TKey k)
+        {
+            return dictionary.ContainsKey(k);
         }
     }
 

@@ -9,28 +9,25 @@ namespace Monetizr.Campaigns
 {
     internal abstract class LocalSerializer<T> where T: BaseCollection
     {
+        internal T data = default(T);
         internal abstract string GetDataKey();
-
-        internal T LoadData(T previousData)
+        
+        internal void LoadData()
         {
-            Assert.IsNotNull(previousData);
-
-            previousData.Clear();
+            data?.Clear();
 
             var jsonString = PlayerPrefs.GetString(GetDataKey(), "");
 
             if (jsonString.Length == 0)
-                return previousData;
+                return;
 
             Log.Print($"Loading {GetDataKey()}: {jsonString}");
 
-            return JsonUtility.FromJson<T>(jsonString);
+            data = JsonUtility.FromJson<T>(jsonString);
         }
 
-        internal void SaveData(T data)
+        internal void SaveData()
         {
-            Assert.IsNotNull(data);
-
             string jsonString = JsonUtility.ToJson(data);
 
             Log.Print($"Saving {GetDataKey()}: {jsonString}");
@@ -38,11 +35,9 @@ namespace Monetizr.Campaigns
             PlayerPrefs.SetString(GetDataKey(), jsonString);
         }
 
-        internal void ResetData(T data)
+        internal void ResetData()
         {
-            Assert.IsNotNull(data);
-
-            data.Clear();
+            data?.Clear();
 
             PlayerPrefs.SetString(GetDataKey(), "");
         }
@@ -69,7 +64,14 @@ namespace Monetizr.Campaigns
     {
         //private readonly string dateTimeOffsetFormatString = "yyyy-MM-ddTHH:mm:sszzz";
 
-        MissionsCollection missionsCollection = new MissionsCollection();
+        private MissionsCollection missionsCollection = null;
+
+        internal MissionsSerializeManager()
+        {
+            missionsCollection = new MissionsCollection();
+
+            data = missionsCollection;
+        }
 
         internal override string GetDataKey()
         {
@@ -78,16 +80,16 @@ namespace Monetizr.Campaigns
 
         internal List<Mission> GetMissions()
         {
-            return missionsCollection.missions;
+            return data.missions;
         }
 
         internal void Load()
         {
-            missionsCollection = LoadData(missionsCollection);
+            LoadData();
 
-            int deleted = missionsCollection.missions.RemoveAll((Mission m) => { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
+            int deleted = data.missions.RemoveAll((Mission m) => { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
           
-            deleted += missionsCollection.missions.RemoveAll((Mission m) => { return m.sdkVersion != MonetizrManager.SDKVersion; });
+            deleted += data.missions.RemoveAll((Mission m) => { return m.sdkVersion != MonetizrManager.SDKVersion; });
 
             if(deleted > 0)
             {
@@ -98,17 +100,17 @@ namespace Monetizr.Campaigns
 
         internal void SaveAll()
         {
-            SaveData(missionsCollection);
+            SaveData();
         }
 
         internal void Add(Mission m)
         {
-            missionsCollection.missions.Add(m);
+            data.missions.Add(m);
         }
                
         internal void Reset()
         {
-            ResetData(missionsCollection);
+            ResetData();
         }
         
 
