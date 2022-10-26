@@ -683,7 +683,7 @@ namespace Monetizr.Campaigns
 
                     m.campaignServerSettings = MonetizrManager.Instance.GetCampaign(ch).serverSettings;
                     m.amountOfRVOffersShown = m.campaignServerSettings.GetIntParam("amount_of_rv_offers", -1);
-                    m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
+                    //m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
                     m.amountOfNotificationsSkipped = m.campaignServerSettings.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
                     m.isVideoShown = false;
                     m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity

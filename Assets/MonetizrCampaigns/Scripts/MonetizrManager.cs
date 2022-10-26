@@ -211,7 +211,11 @@ namespace Monetizr.Campaigns
         [SerializeField] internal string campId;
         [SerializeField] internal string apiKey;
         [SerializeField] internal string sdkVersion;
-        [SerializeField] internal SerializableDictionary<string,string> settings = new SerializableDictionary<string, string>();
+        [SerializeField] internal UDateTime lastTimeShowNotification;
+        [SerializeField] internal int amountNotificationsShown;
+        [SerializeField] internal int amountTeasersShown;
+        
+        //[SerializeField] internal SerializableDictionary<string,string> settings = new SerializableDictionary<string, string>();
     }
 
     [Serializable]
@@ -250,27 +254,43 @@ namespace Monetizr.Campaigns
 
             LoadData();
 
-            int deleted = data.campaigns.RemoveAll((LocalCampaignSettings m) => 
+            int deleted = data.campaigns.RemoveAll((LocalCampaignSettings m) =>
                 { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
 
-            deleted += data.campaigns.RemoveAll((LocalCampaignSettings m) => 
+            deleted += data.campaigns.RemoveAll((LocalCampaignSettings m) =>
                 { return m.sdkVersion != MonetizrManager.SDKVersion; });
 
             if (deleted > 0)
-            {                
+            {
                 SaveData();
             }
         }
 
         internal void AddCampaign(ServerCampaign campaign)
         {
-            foreach(var v in campaign.serverSettings.dictionary)
+            var camp = data.GetCampaign(campaign.id);
+
+            if (camp == null)
             {
-                SetParam(campaign.id, v.Key, v.Value, false);
+                data.campaigns.Add(new LocalCampaignSettings()
+                {
+                    apiKey = MonetizrManager.Instance.GetCurrentAPIkey(),
+                    sdkVersion = MonetizrManager.SDKVersion,
+                    campId = campaign.id
+                });
             }
         }
 
-        internal void SetParam(string campaign, string param, string val, bool saveData = true)
+        internal LocalCampaignSettings GetSetting(string campaign)
+        {
+            var camp = data.GetCampaign(campaign);
+
+            Debug.Assert(camp != null);
+                        
+            return camp;
+        }
+
+        /*internal void SetParam(string campaign, string param, string val, bool saveData = true)
         {
             var camp = data.GetCampaign(campaign);
 
@@ -301,7 +321,7 @@ namespace Monetizr.Campaigns
                 return "";
 
             return camp.settings[param]; 
-        }
+        }*/
 
         internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaignWithAssets> challenges)
         {
@@ -312,7 +332,7 @@ namespace Monetizr.Campaigns
             //check if campaign is missing - remove it from data
             data.campaigns.RemoveAll((LocalCampaignSettings c) => !challenges.ContainsKey(c.campId));
                         
-            //update settings from server
+            //add empty campaign into settings
             challenges.Values.ToList().ForEach(c => AddCampaign(c.campaign));
 
             SaveData();
@@ -913,12 +933,25 @@ namespace Monetizr.Campaigns
             {
                 forceSkip = true;
             }
-            
+
             //check if need to limit notifications amount
-            if (mission.amountOfNotificationsShown == 0)
+            var serverMaxAmount = mission.campaignServerSettings.GetIntParam("amount_of_notifications");
+            var currentAmount = instance.localSettings.GetSetting(mission.campaignId).amountNotificationsShown;
+            if (currentAmount > serverMaxAmount)
             {
                 forceSkip = true;
             }
+
+            //check last time
+            var lastTimeShow = instance.localSettings.GetSetting(mission.campaignId).lastTimeShowNotification;
+            var serverDelay = mission.campaignServerSettings.GetIntParam("notifications_delay_time_sec");
+
+            if ((DateTime.Now - lastTimeShow).TotalSeconds < serverDelay)
+            {
+                forceSkip = true;
+            }
+
+
 
             if (forceSkip)
             {
@@ -928,8 +961,12 @@ namespace Monetizr.Campaigns
 
             mission.amountOfNotificationsSkipped = 0;
 
-            mission.amountOfNotificationsShown--;
+            //mission.amountOfNotificationsShown--;
 
+            instance.localSettings.GetSetting(mission.campaignId).lastTimeShowNotification = DateTime.Now;
+            instance.localSettings.GetSetting(mission.campaignId).amountNotificationsShown++;
+
+            instance.localSettings.SaveData();
 
             //instance.missionsManager.SaveAll();
 
@@ -1457,12 +1494,24 @@ namespace Monetizr.Campaigns
 
             var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
-            if (campaign.serverSettings.GetParam("hide_teaser_button") != "true")
-            {
-                int uiVersion = campaign.serverSettings.GetIntParam("teaser_design_version",2);
+            if (campaign.serverSettings.GetParam("hide_teaser_button") == "true")
+                return;
 
-                instance.uiController.ShowTinyMenuTeaser(teaserRoot,tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
+            var serverMaxAmount = campaign.serverSettings.GetIntParam("amount_of_teasers");
+            var currentAmount = instance.localSettings.GetSetting(campaign.id).amountTeasersShown;
+            if (currentAmount > serverMaxAmount)
+            {
+                return;
             }
+
+
+            instance.localSettings.GetSetting(campaign.id).amountTeasersShown++;
+            instance.localSettings.SaveData();
+
+            int uiVersion = campaign.serverSettings.GetIntParam("teaser_design_version",2);
+
+            instance.uiController.ShowTinyMenuTeaser(teaserRoot,tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
+            
         }
 
         public static void HideTinyMenuTeaser()
