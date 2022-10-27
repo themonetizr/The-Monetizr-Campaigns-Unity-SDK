@@ -61,6 +61,8 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
             //MonetizrManager.ShowRewardCenter(null);
+            MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
+
 
             isSkipped = true;
 
@@ -109,7 +111,9 @@ namespace Monetizr.Campaigns
             movesLeftText.text = "MOVES LEFT: 4";
 
             //Log.PrintWarning($"{m.campaignId} {m}");
-            //MonetizrManager.Analytics.BeginShowAdAsset(AdType.MinigameScreen, m);
+            MonetizrManager.Analytics.BeginShowAdAsset(AdType.Minigame, m);
+
+            MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
         }
@@ -275,6 +279,8 @@ namespace Monetizr.Campaigns
 
             SetActive(false);
 
+            MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
+
             MonetizrManager.ShowCongratsNotification(null, m);
         }
 
@@ -294,7 +300,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.MinigameScreen);
+            MonetizrManager.Analytics.EndShowAdAsset(AdType.Minigame);
         }
     }
 

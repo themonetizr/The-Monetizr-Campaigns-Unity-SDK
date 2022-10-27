@@ -36,6 +36,8 @@ namespace Monetizr.Campaigns
         public int progress;
         public int reward;
         public string dar_tag;
+        public string panel_key;
+        public bool testmode;
         public List<Reward> rewards = new List<Reward>();
         public List<Asset> assets = new List<Asset>();
         [System.NonSerialized] public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();

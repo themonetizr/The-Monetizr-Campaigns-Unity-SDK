@@ -276,6 +276,7 @@ namespace Monetizr.Campaigns
                 {
                     apiKey = MonetizrManager.Instance.GetCurrentAPIkey(),
                     sdkVersion = MonetizrManager.SDKVersion,
+                    lastTimeShowNotification = DateTime.Now,
                     campId = campaign.id
                 });
             }
@@ -540,7 +541,7 @@ namespace Monetizr.Campaigns
 
         void OnApplicationQuit()
         {
-            Analytics.OnApplicationQuit();
+            Analytics?.OnApplicationQuit();
         }
 
         /// <summary>
@@ -627,6 +628,7 @@ namespace Monetizr.Campaigns
 
         internal void CleanRewardsClaims()
         {
+            localSettings.ResetData();
             missionsManager.CleanRewardsClaims();
         }
 
@@ -871,7 +873,7 @@ namespace Monetizr.Campaigns
         {
             if (instance.uiController.panels.ContainsKey(PanelId.StartNotification))
             {
-                Debug.Log($"------ShowStartupNotification ContainsKey(PanelId.StartNotification) {placement}");
+                Debug.Log($"ShowStartupNotification ContainsKey(PanelId.StartNotification) {placement}");
                 return;
             }
 
@@ -910,10 +912,16 @@ namespace Monetizr.Campaigns
             if (placement == 0)
             {
                 forceSkip = mission.campaignServerSettings.GetParam("no_start_level_notifications") == "true";
+
+                if (forceSkip)
+                    Debug.Log($"No notifications on level start defined on serverside");
             }
             else if (placement == 1)
             {
                 forceSkip = mission.campaignServerSettings.GetParam("no_main_menu_notifications") == "true";
+
+                if(forceSkip)
+                    Debug.Log($"No notifications in main menu defined on serverside");
             }
 
            // Debug.Log($"------ShowStartupNotification 3 {placement}");
@@ -922,6 +930,7 @@ namespace Monetizr.Campaigns
 
             if (mission.campaignServerSettings.GetParam("no_campaigns_notification") == "true")
             {
+                Debug.Log($"No notifications defined on serverside");
                 forceSkip = true;
             }
 
@@ -931,6 +940,7 @@ namespace Monetizr.Campaigns
 
             if (mission.amountOfNotificationsSkipped <= mission.campaignServerSettings.GetIntParam("amount_of_skipped_notifications"))
             {
+                Debug.Log($"Amount of skipped notifications less then {mission.amountOfNotificationsSkipped}");
                 forceSkip = true;
             }
 
@@ -939,15 +949,18 @@ namespace Monetizr.Campaigns
             var currentAmount = instance.localSettings.GetSetting(mission.campaignId).amountNotificationsShown;
             if (currentAmount > serverMaxAmount)
             {
+                Debug.Log($"Startup notification impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
                 forceSkip = true;
             }
 
             //check last time
             var lastTimeShow = instance.localSettings.GetSetting(mission.campaignId).lastTimeShowNotification;
             var serverDelay = mission.campaignServerSettings.GetIntParam("notifications_delay_time_sec");
+            var lastTime = (DateTime.Now - lastTimeShow).TotalSeconds;
 
-            if ((DateTime.Now - lastTimeShow).TotalSeconds < serverDelay)
+            if (lastTime < serverDelay)
             {
+                Debug.Log($"Startup notification last show time less then {serverDelay}");
                 forceSkip = true;
             }
 
@@ -973,6 +986,8 @@ namespace Monetizr.Campaigns
             //Debug.Log($"------ShowStartupNotification 4 {placement}");
 
             //Debug.LogWarning("!!!!-------");
+
+            Debug.Log($"Notification shown {currentAmount}/{serverMaxAmount} last time: {lastTime}/{serverDelay}");
 
             FillInfo(mission);
 
@@ -1256,7 +1271,9 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            if (missions.Count == 1)
+            bool showRewardCenterForOneMission = missions[0].campaignServerSettings.GetBoolParam("RewardCenter.show_for_one_mission", false);
+
+            if (missions.Count == 1 && !showRewardCenterForOneMission)
             //if (Instance.missionsManager.missions.Count == 1)
             {
                 //Debug.Log($"---_PressSingleMission");
@@ -1482,7 +1499,7 @@ namespace Monetizr.Campaigns
                 return;
 
             //has some active missions
-            if (instance.missionsManager.missions.Find((Mission m) => { return m.isClaimed != ClaimState.Claimed; }) == null)
+            if (instance.missionsManager.GetActiveMissionsNum() > 0)
                 return;
 
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
@@ -1501,9 +1518,11 @@ namespace Monetizr.Campaigns
             var currentAmount = instance.localSettings.GetSetting(campaign.id).amountTeasersShown;
             if (currentAmount > serverMaxAmount)
             {
+                Debug.Log($"Teaser impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
                 return;
             }
 
+            Debug.Log($"Teaser shown {currentAmount}/{serverMaxAmount}");
 
             instance.localSettings.GetSetting(campaign.id).amountTeasersShown++;
             instance.localSettings.SaveData();
@@ -1812,8 +1831,20 @@ namespace Monetizr.Campaigns
             }
 
             campaignIds.Clear();
-                        
 
+            if (_challenges.Count > 0)
+            {
+                _challengesClient.InitializeMixpanel(_challenges[0].testmode, _challenges[0].panel_key);
+
+                _challengesClient.analytics.TrackEvent("Get List Started",_challenges[0]);
+                _challengesClient.analytics.StartTimedEvent("Get List Finished");
+            }
+            else
+            {
+                _challengesClient.InitializeMixpanel(false, null);
+            }
+                                    
+           
 
 #if TEST_SLOW_LATENCY
             await Task.Delay(10000);
@@ -1986,13 +2017,24 @@ namespace Monetizr.Campaigns
 
             Log.Print($"RequestChallenges completed with count: {campaignIds.Count} active: {activeChallengeId}");
 
+            if (activeChallengeId != null)
+            {
+                _challengesClient.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
+            }
+            else
+            {
+                if(_challenges.Count > 0)
+                {
+                    _challengesClient.analytics.TrackEvent("Get List Load Failed", _challenges[0]);
+                }
+            }
+
             //Ok, even if response empty
             onRequestComplete?.Invoke(/*challengesId.Count > 0*/true);
         }
 
         /// <summary>
         /// Get Challenge by Id
-        /// TODO: Don't give access to challenge itself, update progress internally
         /// </summary>
         /// <returns></returns>
         internal ServerCampaign GetCampaign(String chId)
@@ -2081,6 +2123,12 @@ namespace Monetizr.Campaigns
 
         public bool HasAsset(String challengeId, AssetsType t)
         {
+            if (challenges == null)
+                return false;
+
+            if (!challenges.ContainsKey(challengeId))
+                return false;
+
             return challenges[challengeId].HasAsset(t);
         }
 

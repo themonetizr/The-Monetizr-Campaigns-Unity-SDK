@@ -158,10 +158,18 @@ namespace Monetizr.Campaigns
 
         internal void PreparePanelVersion2(PanelId id, Action<bool> onComplete, Mission m)
         {
-            bool noVideo = false;
+            bool noVideo = !m.hasVideo;
 
-            if (m.campaignServerSettings.GetParam("email_giveaway_mission_without_video") == "true")
+            //if there's video and it's already shown
+            if (!noVideo && m.isVideoShown)
                 noVideo = true;
+
+            //more than one mission - no video sign
+            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum() > 1)
+                noVideo = true;
+
+            //if (m.campaignServerSettings.GetParam("email_giveaway_mission_without_video") == "true")
+            //    noVideo = true;
 
             bool isSinglePicture = m.campaignServerSettings.GetParam("teaser_single_picture") == "true";
                         

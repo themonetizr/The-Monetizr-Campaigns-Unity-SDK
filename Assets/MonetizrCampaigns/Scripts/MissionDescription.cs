@@ -188,6 +188,22 @@ namespace Monetizr.Campaigns
             return dictionary[p];
         }
 
+        public bool GetBoolParam(TKey p, bool defaultParam)
+        {
+            if (!dictionary.ContainsKey(p))
+                return defaultParam;
+
+            Boolean result = defaultParam;
+            string val = dictionary[p].ToString();
+
+            if (!Boolean.TryParse(val, out result))
+            {
+                return defaultParam;
+            }
+
+            return result;
+        }
+
         public int GetIntParam(TKey p, int defaultParam = 0)
         {
             if (!dictionary.ContainsKey(p))
@@ -276,6 +292,8 @@ namespace Monetizr.Campaigns
         //is video shown already and don't need to be shown again
         [NonSerialized] internal bool isVideoShown;
 
+        [SerializeField] internal bool hasVideo;
+
         [NonSerialized] internal bool isShouldBeDisabled;
 
         [NonSerialized] internal MissionUIState state;
@@ -292,6 +310,8 @@ namespace Monetizr.Campaigns
 
         //Integer ids shows when this missions should be activated (maybe it's better to convert into list)
         [NonSerialized] internal RangeInt activateAfter;
+
+        [NonSerialized] internal bool isToBeRemoved;
     }
 
     /*internal class  SurveyMission : Mission

@@ -82,11 +82,16 @@ namespace Monetizr.Campaigns
             return claimed;
         }
 
-        internal Mission FindMissionInCache(int id, MissionType mt, string ch)
+        //TODO: add currency
+        internal Mission FindMissionInCache(int id, MissionType mt, string ch, int reward)
         {
             foreach (var m in missions)
             {
-                if (m.type == mt && m.campaignId == ch && m.id == id && m.apiKey == MonetizrManager.Instance.GetCurrentAPIkey())
+                if (m.type == mt && 
+                    m.campaignId == ch && 
+                    m.id == id && 
+                    m.apiKey == MonetizrManager.Instance.GetCurrentAPIkey() &&
+                    m.reward == reward)
                     return m;
             }
 
@@ -141,6 +146,7 @@ namespace Monetizr.Campaigns
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
+                hasVideo = true,
             };
         }
 
@@ -155,7 +161,7 @@ namespace Monetizr.Campaigns
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
-
+                hasVideo = false,
             };
         }
 
@@ -173,6 +179,7 @@ namespace Monetizr.Campaigns
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
+                hasVideo = false,
             };
         }
 
@@ -194,6 +201,7 @@ namespace Monetizr.Campaigns
                 progress = 0.0f,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
+                hasVideo = false,
             };
         }
 
@@ -217,6 +225,7 @@ namespace Monetizr.Campaigns
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
+                hasVideo = false,
             };
         }
 
@@ -236,6 +245,8 @@ namespace Monetizr.Campaigns
             //if (claimableReward == null)
             //    return null;
 
+            bool video = !(MonetizrManager.Instance.GetCampaign(campaign).serverSettings.GetParam("email_giveaway_mission_without_video") == "true");
+
             RewardType rt = RewardType.Coins;
 
             return new Mission()
@@ -248,6 +259,7 @@ namespace Monetizr.Campaigns
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
+                hasVideo = video,
             };
         }
 
@@ -265,6 +277,7 @@ namespace Monetizr.Campaigns
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
+                hasVideo = false,
             };
         }
 
@@ -356,7 +369,7 @@ namespace Monetizr.Campaigns
         {
             MonetizrManager.temporaryRewardTypeSelection = MonetizrManager.RewardSelectionType.Product;
 
-            bool needToPlayVideo = !(m.campaignServerSettings.GetParam("email_giveaway_mission_without_video") == "true");
+            bool needToPlayVideo = m.hasVideo;
 
 #if UNITY_EDITOR_WIN
             needToPlayVideo = false;
@@ -628,6 +641,9 @@ namespace Monetizr.Campaigns
             foreach(var m in missions)
             {
                 m.isServerCampaignActive = MonetizrManager.Instance.HasCampaign(m.campaignId);
+
+                //remove if it will not be in the predefined list
+                m.isToBeRemoved = true;
             }
 
             
@@ -644,9 +660,10 @@ namespace Monetizr.Campaigns
                 //TODO: check if such mission type already existed for such campaign
                 //if it exist - do not add it
 
+                //TODO: use prefefinedSponsoredMissions for all cases
                 for (int i = 0; i < prefefinedSponsoredMissions.Count; i++)
                 {
-                    Mission m = FindMissionInCache(i, prefefinedSponsoredMissions[i].missionType, ch);
+                    Mission m = FindMissionInCache(i, prefefinedSponsoredMissions[i].missionType, ch, prefefinedSponsoredMissions[i].reward);
 
                     if (m == null)
                     {
@@ -674,8 +691,8 @@ namespace Monetizr.Campaigns
 
                     m.isServerCampaignActive = true;
 
-                    
-                    
+
+                    m.isToBeRemoved = false;
                     m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
 
                     //rewrite these parameters here, because otherwise it will be saved in cache
@@ -696,6 +713,10 @@ namespace Monetizr.Campaigns
 
             }
 
+            //remove if mission in save, but not in the predefined list
+            missions.RemoveAll(m => m.isToBeRemoved);
+
+            Debug.Log($"Total amount of missions {missions.Count}");
 
             UpdateMissionsActivity(null);
 
@@ -827,6 +848,13 @@ namespace Monetizr.Campaigns
                         m.isServerCampaignActive;
                    
             });
+        }
+
+        internal int GetActiveMissionsNum()
+        {
+            var mList = missions.FindAll((Mission m) => { return m.isClaimed != ClaimState.Claimed; });
+
+            return mList.Count;
         }
 
         //check activateAfter ranges for all missions and activate them if missions in range already active 

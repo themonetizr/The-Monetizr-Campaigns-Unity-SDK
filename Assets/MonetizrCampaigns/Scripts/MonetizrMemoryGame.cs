@@ -189,7 +189,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.MinigameScreen);
+            MonetizrManager.Analytics.EndShowAdAsset(AdType.Minigame);
         }
     }
 
