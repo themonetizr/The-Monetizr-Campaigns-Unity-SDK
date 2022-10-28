@@ -282,7 +282,7 @@ namespace Monetizr.Campaigns
         }
 
         //TODO: make separate classes for each mission type
-        Mission prepareNewMission(int id, MissionType mt, string campaign, int reward)
+        Mission prepareNewMission(int id, MissionType mt, string campaign, int reward, string surveyUrl)
         {
             Mission m = null;
 
@@ -307,7 +307,7 @@ namespace Monetizr.Campaigns
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
             m.sdkVersion = MonetizrManager.SDKVersion;
-
+            m.surveyUrl = surveyUrl;
 
 
             return m;
@@ -476,56 +476,54 @@ namespace Monetizr.Campaigns
         [Serializable]
         public class ServerMissionsHelper
         {
-            public mission[] missions;
+            public ServerDefinedMissions[] missions;
 
-            public List<MissionDescription> CreateMissionDescriptions(List<MissionDescription> originalList)
+            public List<MissionDescription> CreateMissionDescriptions(List<MissionDescription> originalList, SettingsDictionary<string, string> serverSettings)
             {
                 List<MissionDescription> m = new List<MissionDescription>();
 
-                Array.ForEach(missions, (mission _m)=>{
+                Array.ForEach(missions, (ServerDefinedMissions _m) =>
+                {
 
                     MissionType serverMissionType = _m.GetMissionType();
 
                     if (serverMissionType == MissionType.Undefined)
                         return;
-                    
 
-                    MissionDescription original = originalList.Find((MissionDescription md) => { return md.missionType == serverMissionType; });
-
-                                        
+                    //MissionDescription original = originalList.Find((MissionDescription md) => { return md.missionType == serverMissionType; });
 
                     int rewardAmount = 1;
                     RewardType currency = RewardType.Coins;
-                    RangeInt activateAfter = new RangeInt(0,-1);
+                    RangeInt activateAfter = new RangeInt(0, -1);
 
-                    if(original != null)
+                    /*if(original != null)
                     {
                         rewardAmount = original.reward;
                         currency = original.rewardCurrency;
                     }
                     else
-                    {
-                        rewardAmount = _m.GetRewardAmount();
-                        
-                        currency = _m.GetRewardType();
-                                                
+                    {*/
+                    rewardAmount = _m.GetRewardAmount();
+                    currency = _m.GetRewardType();
 
-                        MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(currency);
+                    MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(currency);
 
-                        //no such reward
-                        if (gr == null)
-                            return;
+                    //no such reward
+                    if (gr == null)
+                        return;
 
-                        //award is too much
-                        if (rewardAmount > 100.0f)
-                            return;
+                    //award is too much
+                    if (rewardAmount > 100.0f)
+                        return;
 
-                        rewardAmount = (int)(gr.maximumAmount*(rewardAmount / 100.0f));
-                    }
+                    rewardAmount = (int)(gr.maximumAmount * (rewardAmount / 100.0f));
+                    //}
 
                     activateAfter = _m.GetActivateRange();
 
-                    m.Add(new MissionDescription(_m.GetMissionType(), rewardAmount, currency, activateAfter));
+                    string surveyUrl = serverSettings.GetParam(_m.survey);
+
+                    m.Add(new MissionDescription(_m.GetMissionType(), rewardAmount, currency, activateAfter,surveyUrl));
 
                 });
 
@@ -534,12 +532,22 @@ namespace Monetizr.Campaigns
         }
 
         [Serializable]
-        public class mission
+        public class ServerDefinedMissions
         {
+            //MissionType
             public string type;
+
+            //0...100 integer
             public string percent_amount;
+
+            //RewardType
             public string currency;
+
+            //Range N-M or single number N
             public string activate_after;
+
+            //Survey link
+            public string survey;
 
             public RangeInt GetActivateRange()
             {
@@ -625,15 +633,31 @@ namespace Monetizr.Campaigns
 
                 if (serverMissionsJson.Length > 0)
                 {
-                    ServerMissionsHelper ic = JsonUtility.FromJson<ServerMissionsHelper>(serverMissionsJson);
+                    ServerMissionsHelper ic = null;
 
-                    prefefinedSponsoredMissions = ic.CreateMissionDescriptions(prefefinedSponsoredMissions);
+                    try
+                    {
+                       ic = JsonUtility.FromJson<ServerMissionsHelper>(serverMissionsJson);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogWarning($"Problem {e.ToString()} with json {serverMissionsJson}");
+                    }
+
+                    if (ic != null)
+                    {
+                        prefefinedSponsoredMissions = ic.CreateMissionDescriptions(prefefinedSponsoredMissions, sc.serverSettings);
+
+                        Debug.Log($"Custom server missions loaded with {prefefinedSponsoredMissions.Count} values");
+                    }
                 }
             }
 
             //if (prefefinedSponsoredMissions.Count > 1)
             //    prefefinedSponsoredMissions = prefefinedSponsoredMissions.GetRange(serverDefinedMission, 1);
 
+            Debug.Log($"Predefined missions has {prefefinedSponsoredMissions.Count} values");
 
             serializedMissions.Load();
 
@@ -670,7 +694,8 @@ namespace Monetizr.Campaigns
                         m = prepareNewMission(i, 
                                 prefefinedSponsoredMissions[i].missionType, 
                                 ch, 
-                                prefefinedSponsoredMissions[i].reward);
+                                prefefinedSponsoredMissions[i].reward,
+                                prefefinedSponsoredMissions[i].surveyUrl);
 
                         if (m != null)
                         {
@@ -852,9 +877,9 @@ namespace Monetizr.Campaigns
 
         internal int GetActiveMissionsNum()
         {
-            var mList = missions.FindAll((Mission m) => { return m.isClaimed != ClaimState.Claimed; });
+            //var mList = missions.FindAll((Mission m) => { return m.isClaimed != ClaimState.Claimed; });
 
-            return mList.Count;
+            return GetMissionsForRewardCenter().Count;
         }
 
         //check activateAfter ranges for all missions and activate them if missions in range already active 

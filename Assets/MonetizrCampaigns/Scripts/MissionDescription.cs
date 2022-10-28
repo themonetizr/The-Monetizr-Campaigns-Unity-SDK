@@ -26,6 +26,7 @@ namespace Monetizr.Campaigns
         internal int reward;
         internal RewardType rewardCurrency;
         internal RangeInt activateAfter = new RangeInt(-1,0);
+        internal string surveyUrl;
 
         public MissionDescription(int reward, RewardType rewardCurrency)
         {
@@ -41,12 +42,13 @@ namespace Monetizr.Campaigns
             this.rewardCurrency = rewardCurrency;
         }
 
-        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency, RangeInt activateAfter)
+        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency, RangeInt activateAfter, string surveyUrl)
         {
             this.missionType = missionType;
             this.reward = reward;
             this.rewardCurrency = rewardCurrency;
             this.activateAfter = activateAfter;
+            this.surveyUrl = surveyUrl;
         }
     }
 
@@ -182,6 +184,9 @@ namespace Monetizr.Campaigns
 
         public TValue GetParam(TKey p)
         {
+            if(p == null)
+                return default(TValue);
+
             if (!dictionary.ContainsKey(p))
                 return default(TValue);
 
@@ -190,6 +195,9 @@ namespace Monetizr.Campaigns
 
         public bool GetBoolParam(TKey p, bool defaultParam)
         {
+            if (p == null)
+                return defaultParam;
+
             if (!dictionary.ContainsKey(p))
                 return defaultParam;
 
@@ -206,6 +214,9 @@ namespace Monetizr.Campaigns
 
         public int GetIntParam(TKey p, int defaultParam = 0)
         {
+            if (p == null)
+                return defaultParam;
+
             if (!dictionary.ContainsKey(p))
                 return defaultParam;
 

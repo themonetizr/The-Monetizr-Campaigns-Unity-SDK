@@ -568,7 +568,7 @@ namespace Monetizr.Campaigns
             {
                 string key = s.Key;
 
-                if (!key.EndsWith("_text"))
+                if (!key.EndsWith("_text") && key != "custom_missions")
                 {
                     props[$"cs_{s.Key}"] = s.Value;
                 }

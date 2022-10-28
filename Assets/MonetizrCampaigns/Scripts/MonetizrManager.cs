@@ -403,7 +403,7 @@ namespace Monetizr.Campaigns
         {
             instance?.userDefinedEvent?.Invoke(campaignId, placement, eventType);
         }
-        
+
 
         //Hold resources to prevent automatic unload
         public static void HoldResource(object o)
@@ -649,7 +649,7 @@ namespace Monetizr.Campaigns
             RequestCampaigns();
         }
 
-        internal void RequestCampaigns()
+        internal void RequestCampaigns(bool callRequestComplete = true)
         {
             isActive = false;
 
@@ -660,7 +660,7 @@ namespace Monetizr.Campaigns
             challenges.Clear();
             campaignIds.Clear();
 
-            RequestChallenges(onRequestComplete);
+            RequestChallenges(callRequestComplete ? onRequestComplete : null);
         }
 
         public void SoundSwitch(bool on)
@@ -792,7 +792,7 @@ namespace Monetizr.Campaigns
                     instance.missionsManager.TryToActivateSurvey(m);
 
 
-                    MonetizrManager.HideTinyMenuTeaser();
+                    MonetizrManager.HideTinyMenuTeaser(true);
 
 
                     onComplete?.Invoke(false);
@@ -883,7 +883,7 @@ namespace Monetizr.Campaigns
 
             if (instance == null || !instance.HasCampaignsAndActive())
             {
-                onComplete?.Invoke(false);
+                onComplete?.Invoke(true);
                 return;
             }
 
@@ -892,13 +892,15 @@ namespace Monetizr.Campaigns
             //Debug.LogWarning("ShowStartupNotification");
 
             //Mission sponsoredMsns = instance.missionsManager.missions.Find((Mission item) => { return item.isSponsored; });
-            Mission mission = instance.missionsManager.FindMissionForStartNotify();
+            var missions = instance.missionsManager.GetMissionsForRewardCenter();
 
-            if (mission == null)
+            if (missions == null || missions?.Count == 0)
             {
-                onComplete?.Invoke(false);
+                onComplete?.Invoke(true);
                 return;
             }
+
+            Mission mission = missions[0];
 
             //manual notification calls, no limis
             if(placement == 2)
@@ -1278,6 +1280,8 @@ namespace Monetizr.Campaigns
             {
                 //Debug.Log($"---_PressSingleMission");
 
+                Log.Print($"Only one mission available and showRewardCenterForOneMission is false");
+
                 Instance._PressSingleMission(onComplete, m);
                 return;
             }
@@ -1496,11 +1500,17 @@ namespace Monetizr.Campaigns
 
             //has some challanges
             if (!instance.HasCampaignsAndActive())
+            {
+                Debug.Log($"No active campaigns for teaser");
                 return;
+            }
 
             //has some active missions
-            if (instance.missionsManager.GetActiveMissionsNum() > 0)
+            if (instance.missionsManager.GetActiveMissionsNum() == 0)
+            {
+                Debug.Log($"No active missions for teaser");
                 return;
+            }
 
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
             if (!instance.HasAsset(challengeId, AssetsType.TinyTeaserTexture))
@@ -1533,16 +1543,21 @@ namespace Monetizr.Campaigns
             
         }
 
-        public static void HideTinyMenuTeaser()
+        public static void HideTinyMenuTeaser(bool checkIfSomeMissionsAvailable = false)
         {
             //Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
             if (instance == null)
+                return;
+
+            if (checkIfSomeMissionsAvailable && instance.missionsManager.GetActiveMissionsNum() > 0)
                 return;
 
             tinyTeaserCanBeVisible = false;
 
             if (!instance.isActive)
                 return;
+
+            MonetizrManager.Analytics.EndShowAdAsset(AdType.TinyTeaser);
 
             instance.uiController.HidePanel(PanelId.TinyMenuTeaser);
         }
@@ -1581,16 +1596,22 @@ namespace Monetizr.Campaigns
                     updateUI = true;
                 }*/
 
-                if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
+
+                if (mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false))
                 {
-                    ClaimReward(mission.campaignId, CancellationToken.None, () =>
+                    if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
                     {
-                        RequestCampaigns();
+                        ClaimReward(mission.campaignId, CancellationToken.None, () =>
+                        {
+                            RequestCampaigns(false);
 
 
-                    });
+                        });
 
+                    }
                 }
+
+                MonetizrManager.HideTinyMenuTeaser(true);
 
                 if (!updateUI)
                     return;

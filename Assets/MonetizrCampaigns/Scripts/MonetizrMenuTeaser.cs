@@ -104,10 +104,9 @@ namespace Monetizr.Campaigns
             }*/
 
             Log.PrintWarning($"{m.campaignId} {m}");
+
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
-
             MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
-
             MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.TinyTeaser), MonetizrManager.EventType.Impression);
         }
 
@@ -381,7 +380,8 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.TinyTeaser);
+            //Moved to HideTinyMenuTeaser
+            //MonetizrManager.Analytics.EndShowAdAsset(AdType.TinyTeaser);
         }
     }
 

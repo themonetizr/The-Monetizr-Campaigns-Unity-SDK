@@ -7,7 +7,7 @@ public class TeaserHelper : MonoBehaviour
 {
     private void Start()
     {
-        MonetizrManager.SetTeaserRoot(GetComponentInParent<RectTransform>());
+        //MonetizrManager.SetTeaserRoot(GetComponentInParent<RectTransform>());
     }
 
     void OnEnable()
@@ -17,6 +17,7 @@ public class TeaserHelper : MonoBehaviour
 
     void OnDisable()
     {
+        //Debug.Log("on disable!");
         MonetizrManager.OnMainMenuHide();
     }
 }
