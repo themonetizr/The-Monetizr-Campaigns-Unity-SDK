@@ -197,7 +197,7 @@ namespace Monetizr.Campaigns
             panels.Remove(PanelId.TinyMenuTeaser);
         }
 
-        public void ShowTinyMenuTeaser(Transform root, Vector2 screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
+        public void ShowTinyMenuTeaser(Transform root, Vector2? screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
         {
              MonetizrMenuTeaser teaser;     
 
@@ -228,11 +228,7 @@ namespace Monetizr.Campaigns
                 teaser.uiVersion = designVersion;
                 panels.Add(PanelId.TinyMenuTeaser, teaser);
                 
-
-                if (screenPos != null)
-                {
-                    teaser.rectTransform.anchoredPosition = screenPos;
-                }
+                                
             }
             else
             {
@@ -242,6 +238,7 @@ namespace Monetizr.Campaigns
             if (teaser.IsVisible())
                 return;
 
+            
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
             Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
@@ -253,10 +250,14 @@ namespace Monetizr.Campaigns
 
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
 
+            if (screenPos != null)
+            {
+                teaser.rectTransform.anchoredPosition = screenPos.Value;
+            }
 
             //previousPanel = PanelId.TinyMenuTeaser;
 
-            
+
         }
         
         public void HidePanel(PanelId id = PanelId.Unknown)

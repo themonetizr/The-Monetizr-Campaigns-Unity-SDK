@@ -49,11 +49,15 @@ namespace Monetizr.Campaigns
                 k_BaseUri = "https://api-test.themonetizr.com/";
             }
 
-            //checking corrupted mixpanel key
-            if (mixPanelApiKey?.Length == 0 || mixPanelApiKey.IndexOf("\n") >= 0)
-                mixPanelApiKey = null;
 
-            key = mixPanelApiKey ?? key;
+            if (mixPanelApiKey != null)
+            {
+                //checking corrupted mixpanel key
+                if (mixPanelApiKey.Length == 0 || mixPanelApiKey.IndexOf("\n") >= 0)
+                    mixPanelApiKey = null;
+
+                key = mixPanelApiKey;
+            }
 
             analytics.InitializeMixpanel(key);
         }

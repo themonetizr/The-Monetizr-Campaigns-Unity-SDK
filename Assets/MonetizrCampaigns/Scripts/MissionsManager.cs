@@ -350,7 +350,7 @@ namespace Monetizr.Campaigns
                 MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
             };
 
-#if UNITY_EDITOR_WIN
+#if UNITY_EDITOR
             return () => onSurveyComplete.Invoke(false);
 #endif
                      
@@ -631,7 +631,7 @@ namespace Monetizr.Campaigns
 
                 string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).serverSettings.GetParam("custom_missions");
 
-                if (serverMissionsJson.Length > 0)
+                if (serverMissionsJson?.Length > 0)
                 {
                     ServerMissionsHelper ic = null;
 

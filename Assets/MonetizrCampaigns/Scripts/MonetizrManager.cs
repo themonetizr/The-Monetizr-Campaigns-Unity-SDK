@@ -356,7 +356,7 @@ namespace Monetizr.Campaigns
 
 
         //position relative to center with 1080x1920 screen resolution
-        private static Vector2 tinyTeaserPosition = new Vector2(-430, 600);
+        private static Vector2? tinyTeaserPosition = null;
 
         private static Transform teaserRoot;
 
@@ -2036,7 +2036,7 @@ namespace Monetizr.Campaigns
 #endif
             localSettings.LoadOldAndUpdateNew(challenges);
 
-            Log.Print($"RequestChallenges completed with count: {campaignIds.Count} active: {activeChallengeId}");
+            Log.Print($"RequestChallenges completed with count: {campaignIds.Count} active: {activeChallengeId} {challenges[activeChallengeId].campaign.title}");
 
             if (activeChallengeId != null)
             {
