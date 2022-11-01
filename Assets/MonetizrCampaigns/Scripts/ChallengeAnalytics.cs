@@ -247,7 +247,7 @@ namespace Monetizr.Campaigns
         Video,
         Survey,
         SurveyNotificationScreen,
-        MinigameScreen,
+        Minigame,
     }
 
     internal enum DeviceSizeGroup
@@ -285,6 +285,7 @@ namespace Monetizr.Campaigns
         public static string advertisingID = "";
         public static bool limitAdvertising = false;
         internal static DeviceSizeGroup deviceSizeGroup = DeviceSizeGroup.Unknown;
+        public static bool isMixpanelInitialized = false;
 
         public static readonly Dictionary<DeviceSizeGroup, string> deviceSizeGroupNames = new Dictionary<DeviceSizeGroup, string>()
         {
@@ -390,11 +391,10 @@ namespace Monetizr.Campaigns
             amplitude.init("6a1fad35d3813820b6b68af48b36e9d5");
             amplitude.setOnceUserProperty("user_segment", MonetizrManager.abTestSegment);
 #endif
+            isMixpanelInitialized = false;
 
             //Mixpanel.SetToken("cda45517ed8266e804d4966a0e693d0d");
-            Mixpanel.Init();
-            Mixpanel.SetToken("cda45517ed8266e804d4966a0e693d0d");
-            
+                        
 
 #if USING_FACEBOOK
             if (FB.IsInitialized)
@@ -411,6 +411,18 @@ namespace Monetizr.Campaigns
                 });
             }
 #endif
+        }
+
+        public void InitializeMixpanel(string apikey)
+        {
+            if (isMixpanelInitialized)
+                return;
+
+            isMixpanelInitialized = true;
+
+            Mixpanel.Init();
+            Mixpanel.SetToken(apikey);
+            
         }
 
 
@@ -450,8 +462,14 @@ namespace Monetizr.Campaigns
 
             visibleAdAsset[adElement] = adAsset;
 
-            Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {type.ToString()}");
+            StartTimedEvent(type.ToString());
 
+            //Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {type.ToString()}");
+        }
+
+        public void StartTimedEvent(string eventName)
+        {
+            Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {eventName}");
         }
 
         public void EndShowAdAsset(AdType type, Mission m, bool removeElement = true)
@@ -504,6 +522,8 @@ namespace Monetizr.Campaigns
 
         private void _EndShowAdAsset(KeyValuePair<AdType, string> adAsset)
         {
+            Debug.Assert(isMixpanelInitialized);
+
             //Log.Print($"MonetizrAnalytics EndShowAdAsset: {adAsset.Key} {adAsset.Value}");
 
             //string brandName = visibleAdAsset[adAsset].mission.brandName;//
@@ -544,11 +564,11 @@ namespace Monetizr.Campaigns
 
             props["camp_title"] = challenge.title;
 
-            foreach (var s in challenge.additional_params)
+            foreach (var s in challenge.serverSettings.dictionary)
             {
                 string key = s.Key;
 
-                if (!key.EndsWith("_text"))
+                if (!key.EndsWith("_text") && key != "custom_missions")
                 {
                     props[$"cs_{s.Key}"] = s.Value;
                 }
@@ -602,11 +622,25 @@ namespace Monetizr.Campaigns
         }
 
 
-        public void TrackEvent(string name, string campaign)
+        public void TrackEvent(string name, string campaign, bool timed = false)
         {
-            Log.Print($"TrackEvent: {name} {campaign}");
+            var campaignName = MonetizrManager.Instance.GetCampaign(campaign);
+
+            TrackEvent(name, campaignName, timed);
+        }
+
+        public void TrackEvent(string name, ServerCampaign campaign, bool timed = false)
+        {
+            Debug.Assert(isMixpanelInitialized);
+
+            Log.Print($"TrackEvent: {name} {campaign.id}");
 
             var eventName = $"[UNITY_SDK] {name}";
+
+            if (timed)
+            {
+                eventName = $"[UNITY_SDK] [TIMED] {name}";
+            }
 
             string campaign_id = "none";
             string brand_id = "none";
@@ -619,16 +653,15 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            var challenge = MonetizrManager.Instance.GetCampaign(campaign);
 
+            var ch = campaign.id;
 
-            //if (currentMissionDesc != null)
-            //{
-            var ch = challenge.id;
+            brand_id = campaign.brand_id;// MonetizrManager.Instance.GetChallenge(ch).brand_id;
+            app_id = campaign.application_id;// MonetizrManager.Instance.GetChallenge(ch).application_id;
 
-            brand_id = challenge.brand_id;// MonetizrManager.Instance.GetChallenge(ch).brand_id;
-            app_id = challenge.application_id;// MonetizrManager.Instance.GetChallenge(ch).application_id;
-            brand_name = MonetizrManager.Instance.GetAsset<string>(ch, AssetsType.BrandTitleString);
+            if(MonetizrManager.Instance.HasAsset(ch, AssetsType.BrandTitleString))
+                brand_name = MonetizrManager.Instance.GetAsset<string>(ch, AssetsType.BrandTitleString);
+
             campaign_id = ch;
 
             //}
@@ -651,19 +684,19 @@ namespace Monetizr.Campaigns
 
             props["ad_id"] = MonetizrAnalytics.advertisingID;
 
-            props["camp_title"] = challenge.title;
+            props["camp_title"] = campaign.title;
 
-            foreach (var s in challenge.additional_params)
+            foreach (var s in campaign.serverSettings.dictionary)
             {
                 string key = s.Key;
 
-                if (!key.EndsWith("_text"))
+                if (!key.EndsWith("_text") && key != "custom_missions")
                 {
                     props[$"cs_{s.Key}"] = s.Value;
                 }
             }
 
-            Mixpanel.Identify(challenge.brand_id);
+            Mixpanel.Identify(campaign.brand_id);
             Mixpanel.Track(eventName, props);
 
 #if USING_AMPLITUDE

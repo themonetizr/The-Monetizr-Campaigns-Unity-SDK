@@ -11,7 +11,9 @@ namespace Monetizr.Campaigns
         internal static void CleanupLocalSaves()
         {
             PlayerPrefs.SetString("campaigns", "");
+            PlayerPrefs.SetString("missions", "");
             Debug.Log($"PlayerPrefs cleaned {PlayerPrefs.GetString("campaigns")}");
+            Debug.Log($"PlayerPrefs cleaned {PlayerPrefs.GetString("missions")}");
         }
     }
 }

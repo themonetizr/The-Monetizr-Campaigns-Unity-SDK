@@ -63,7 +63,7 @@ namespace Monetizr.Campaigns
 
             validateEmailRegex = new Regex("^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
 
-            int closeButtonDelay = m.additionalParams.GetIntParam("email_enter_close_button_delay",0);
+            int closeButtonDelay = m.campaignServerSettings.GetIntParam("email_enter_close_button_delay",0);
 
             StartCoroutine(ShowCloseButton(closeButtonDelay));
 
@@ -124,7 +124,7 @@ namespace Monetizr.Campaigns
 
         static internal EnterEmailType GetPanelType(Mission m)
         {
-            var s = m.additionalParams.GetParam("email_giveaway_type");
+            var s = m.campaignServerSettings.GetParam("email_giveaway_type");
 
             switch(s)
             {

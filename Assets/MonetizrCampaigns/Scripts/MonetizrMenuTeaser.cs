@@ -104,16 +104,15 @@ namespace Monetizr.Campaigns
             }*/
 
             Log.PrintWarning($"{m.campaignId} {m}");
+
             MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
-
             MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
-
             MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.TinyTeaser), MonetizrManager.EventType.Impression);
         }
 
         internal void UpdateTransform(Mission m)
         {
-            string teaser_transform = m.additionalParams.GetParam("teaser_transform");
+            string teaser_transform = m.campaignServerSettings.GetParam("teaser_transform");
 
             if (teaser_transform == null)
                 return;
@@ -158,12 +157,20 @@ namespace Monetizr.Campaigns
 
         internal void PreparePanelVersion2(PanelId id, Action<bool> onComplete, Mission m)
         {
-            bool noVideo = false;
+            bool noVideo = !m.hasVideo;
 
-            if (m.additionalParams.GetParam("email_giveaway_mission_without_video") == "true")
+            //if there's video and it's already shown
+            if (!noVideo && m.isVideoShown)
                 noVideo = true;
 
-            bool isSinglePicture = m.additionalParams.GetParam("teaser_single_picture") == "true";
+            //more than one mission - no video sign
+            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum() > 1)
+                noVideo = true;
+
+            //if (m.campaignServerSettings.GetParam("email_giveaway_mission_without_video") == "true")
+            //    noVideo = true;
+
+            bool isSinglePicture = m.campaignServerSettings.GetParam("teaser_single_picture") == "true";
                         
 
             UpdateTransform(m);
@@ -373,7 +380,8 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.TinyTeaser);
+            //Moved to HideTinyMenuTeaser
+            //MonetizrManager.Analytics.EndShowAdAsset(AdType.TinyTeaser);
         }
     }
 

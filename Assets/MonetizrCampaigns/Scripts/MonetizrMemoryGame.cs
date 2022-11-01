@@ -166,11 +166,12 @@ namespace Monetizr.Campaigns
         {
             yield return new WaitForSeconds(2);
 
-            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+            //var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
-            Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
-            MonetizrManager.ShowCongratsNotification(null, m);
+            isSkipped = false;
+            //MonetizrManager.ShowCongratsNotification(null, m);
         }
 
         internal override void OnCloseDone(int item)
@@ -189,7 +190,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.MinigameScreen);
+            MonetizrManager.Analytics.EndShowAdAsset(AdType.Minigame);
         }
     }
 

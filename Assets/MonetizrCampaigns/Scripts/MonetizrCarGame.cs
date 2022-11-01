@@ -30,10 +30,15 @@ namespace Monetizr.Campaigns
         private Mission currentMission;
 
         public Sprite backSprite;
+        public Sprite backSpriteDisabled;
         public Sprite[] mapSprites;
         public GameObject[] items;
         public Text movesLeftText;
-        public GameObject car;
+        public MonetizrCar car;
+        public Button closeButton;
+        public Image logo;
+
+        private int bonusTaken = 0;
 
         void Update()
         {
@@ -56,12 +61,27 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
             //MonetizrManager.ShowRewardCenter(null);
+            MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
+
+
+            isSkipped = true;
+
+            SetActive(false);
         }
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            currentMission = m;
+            this.onComplete = onComplete;
+            this.panelId = id;
+            this.currentMission = m;
 
+            bonusTaken = 0;
+
+            car.parent = this;
+
+            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.gameObject.SetActive(logo.sprite != null);
+              
             gameItems = new List<Item>(9);
 
             for (int i = 0; i < items.Length; i++)
@@ -79,7 +99,11 @@ namespace Monetizr.Campaigns
 
                 _gi.parent = this;
                 _gi.id = i;
-                _gi.image.sprite = backSprite;
+
+                if(!_b.interactable)
+                    _gi.image.sprite = backSpriteDisabled;
+                else
+                    _gi.image.sprite = backSprite;
 
                 gameItems.Add(new Item { b = _b, go = items[i], value = 0, a = _a, gi = _gi, isOpened = false  });
             }
@@ -87,7 +111,9 @@ namespace Monetizr.Campaigns
             movesLeftText.text = "MOVES LEFT: 4";
 
             //Log.PrintWarning($"{m.campaignId} {m}");
-            //MonetizrManager.Analytics.BeginShowAdAsset(AdType.MinigameScreen, m);
+            MonetizrManager.Analytics.BeginShowAdAsset(AdType.Minigame, m);
+
+            MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
         }
@@ -122,6 +148,10 @@ namespace Monetizr.Campaigns
             new List<int>{ 7 },
         };
 
+
+       
+        int[] bonusIds = { 0, 4, 7 };
+
         internal void OnItemClick(int item)
         {
             if (disabledClick)
@@ -135,7 +165,18 @@ namespace Monetizr.Campaigns
             gameItems[item].gi.middleAnimSprite = mapSprites[map[item]];
             gameItems[item].gi.hasEvents = true;
 
+
             gameItems[item].isOpened = true;
+
+            gameItems[item].gi.hasBonus = Array.FindIndex(bonusIds, i => i == item) != -1;
+            gameItems[item].gi.isOpening = true;
+        }
+
+        internal void OnBonusTaken()
+        {
+            gameItems[bonusIds[bonusTaken]].gi.PlayOnBonus("BonusDisappear");
+
+            bonusTaken++;
         }
 
         internal override void OnOpenDone(int item)
@@ -148,7 +189,7 @@ namespace Monetizr.Campaigns
             //if (map[item] == 6)
             if(item == 7)
             {
-                car.GetComponent<Animator>().Play("CarDrive2");
+                car.gameObject.GetComponent<Animator>().Play("CarDrive2");
 
                 StartCoroutine(OnGameVictory());
                 return;
@@ -171,7 +212,15 @@ namespace Monetizr.Campaigns
 
             //open something
             if (item < openFields.Length)
-                openFields[item].ForEach((int i) => { if(i > 0) gameItems[i].b.interactable = true; });
+            {
+                openFields[item].ForEach((int i) => {
+                    if (i > 0 && !gameItems[i].isOpened)
+                    {
+                        gameItems[i].b.interactable = true;
+                        gameItems[i].gi.image.sprite = backSprite;
+                    }
+                });
+            }
 
           
 
@@ -186,15 +235,15 @@ namespace Monetizr.Campaigns
             yield return new WaitForSeconds(0.5f);
 
             gameItems.ForEach((Item i) => {
-                if (i.isOpened)
+                if (i.b.interactable)
                 {
 
                     i.a.Play("MonetizrMemoryGameTap2");
-                    i.gi.middleAnimSprite = backSprite;
+                    i.gi.middleAnimSprite = backSpriteDisabled;
 
+                    i.gi.isOpening = false;
 
-
-                    //i.gi.image.sprite = backSprite;
+                    //i.gi.image.sprite = backSpriteDisabled;
                     i.gi.hasEvents = false;
 
 
@@ -207,6 +256,8 @@ namespace Monetizr.Campaigns
 
                 if (i.gi.id == 0)
                 {
+                    i.gi.middleAnimSprite = backSprite;
+
                     i.gi.onCloseDone = () =>
                     {
                         disabledClick = false;
@@ -220,11 +271,17 @@ namespace Monetizr.Campaigns
         {
             yield return new WaitForSeconds(3);
 
-            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+            //var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
-            Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
-            MonetizrManager.ShowCongratsNotification(null, m);
+            isSkipped = false;
+
+            SetActive(false);
+
+            MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
+
+            //MonetizrManager.ShowCongratsNotification(null, m);
         }
 
         internal override void OnCloseDone(int item)
@@ -243,7 +300,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.MinigameScreen);
+            MonetizrManager.Analytics.EndShowAdAsset(AdType.Minigame);
         }
     }
 

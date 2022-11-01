@@ -36,11 +36,13 @@ namespace Monetizr.Campaigns
         public int progress;
         public int reward;
         public string dar_tag;
+        public string panel_key;
+        public bool testmode;
         public List<Reward> rewards = new List<Reward>();
         public List<Asset> assets = new List<Asset>();
-        [System.NonSerialized] public Dictionary<string, string> additional_params = new Dictionary<string, string>();
+        [System.NonSerialized] public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
 
-        public string GetParam(string p)
+        /*public string GetParam(string p)
         {
             if (!additional_params.ContainsKey(p))
                 return "";
@@ -62,7 +64,7 @@ namespace Monetizr.Campaigns
             }
 
             return result;
-        }
+        }*/
 
         [System.Serializable]
         public class Reward

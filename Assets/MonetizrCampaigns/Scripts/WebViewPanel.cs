@@ -26,12 +26,16 @@ namespace Monetizr.Campaigns
         private bool isAnalyticsNeeded = true;
 
 
-
-
         //private Action onComplete;
 #if UNI_WEB_VIEW
-        internal void PrepareWebViewComponent(bool fullScreen)
+        internal void PrepareWebViewComponent(bool fullScreen, bool useSafeFrame)
         {
+
+
+#if UNITY_EDITOR
+    fullScreen = false;
+#endif
+
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
             UniWebView.SetWebContentsDebuggingEnabled(true);
@@ -57,9 +61,12 @@ namespace Monetizr.Campaigns
 #if UNITY_EDITOR
             webView.Frame = new Rect(0,0, 1080.0f*0.9f, 1920.0f*0.9f);
 #else
-            if(fullScreen)
-                webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
+            if (fullScreen)
+            {                
+                webView.Frame = useSafeFrame ? Screen.safeArea : new Rect(0, 0, Screen.width, Screen.height);
+            }
             else
+
                 webView.Frame = new Rect(x, y, w, h);
 #endif
 
@@ -363,11 +370,15 @@ document.addEventListener('DOMContentLoaded', function(){{
             currentMissionDesc = m;
 
             bool fullScreen = true;
+            bool useSafeFrame = false;
 
-            if (id == PanelId.SurveyWebView || id == PanelId.HtmlWebPageView)
+            if (id == PanelId.HtmlWebPageView)
                 fullScreen = false;
 
-            PrepareWebViewComponent(fullScreen);
+            if (id == PanelId.SurveyWebView)
+                useSafeFrame = true;
+
+            PrepareWebViewComponent(fullScreen, useSafeFrame);
 
             closeButton.gameObject.SetActive(!fullScreen);
 
@@ -452,7 +463,7 @@ document.addEventListener('DOMContentLoaded', function(){{
             ClosePanel();
         }
 
-       /* private void Update()
+        private void Update()
         {
             if (webView != null && panelId == PanelId.SurveyWebView)
             {
@@ -464,13 +475,13 @@ document.addEventListener('DOMContentLoaded', function(){{
                     Debug.Log("Update: " + webView.Url);
 
 
-                    if (webUrl.Contains("withdraw-consent") ||
+                    /* if (webUrl.Contains("withdraw-consent") ||
                         webUrl.Contains("reportabuse") ||
                         webUrl.Contains("google.com/forms/about"))
                     {
                         OnSkipPress();
                         return;
-                    }
+                    }*/
 
 
                     if (webUrl.Contains("end-page-gateway") ||
@@ -483,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 
                 }
             }
-        }*/
+        }
 
 
         private void OnCompleteEvent()

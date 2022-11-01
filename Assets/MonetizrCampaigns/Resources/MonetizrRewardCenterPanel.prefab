@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -159.99976}
-  m_SizeDelta: {x: 1010, y: 590}
+  m_AnchoredPosition: {x: 0, y: -160}
+  m_SizeDelta: {x: 1010, y: 1010}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &4072799139624633844
 CanvasRenderer:
@@ -668,7 +668,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -750}
+  m_AnchoredPosition: {x: 0, y: -1197}
   m_SizeDelta: {x: 1010, y: -750}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6763807591102839318
@@ -1185,6 +1185,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiVersion: 0
+  backgroundImage: {fileID: 0}
+  backgroundBorderImage: {fileID: 0}
   nextPanelId: -1
   contentRoot: {fileID: 5110331719432731126}
   contentRect: {fileID: 5110331719432731126}

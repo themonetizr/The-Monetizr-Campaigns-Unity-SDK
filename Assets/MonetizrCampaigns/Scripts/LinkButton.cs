@@ -16,7 +16,7 @@ public class LinkButton : MonoBehaviour
     // Update is called once per frame
     public void OnClick()
     {
-        MonetizrManager.ShowWebPage(null, new Mission { surveyUrl = id, additionalParams = new SerializableDictionary<string, string>() });
+        MonetizrManager.ShowWebPage(null, new Mission { surveyUrl = id, campaignServerSettings = new SettingsDictionary<string, string>() });
 
 #if UNITY_EDITOR_WIN
         //Application.OpenURL(id);

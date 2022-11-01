@@ -5,15 +5,19 @@ using Monetizr.Campaigns;
 
 public class TeaserHelper : MonoBehaviour
 {
+    private void Start()
+    {
+        //MonetizrManager.SetTeaserRoot(GetComponentInParent<RectTransform>());
+    }
+
     void OnEnable()
     {
         MonetizrManager.OnMainMenuShow();
-        //MonetizrManager.ShowTinyMenuTeaser();
     }
 
     void OnDisable()
     {
+        //Debug.Log("on disable!");
         MonetizrManager.OnMainMenuHide();
-        //MonetizrManager.HideTinyMenuTeaser();
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Monetizr.Campaigns
@@ -8,12 +9,14 @@ namespace Monetizr.Campaigns
     [Flags]
     public enum MissionType : uint
     {
+        Undefined = 0,
         VideoReward = 1,
         MutiplyReward = 2,
         SurveyReward = 4,
         TwitterReward = 8,
         //GiveawayWithMail = 16,
         VideoWithEmailGiveaway = 32,
+        MinigameReward = 64,
         All = uint.MaxValue,
     }
 
@@ -22,12 +25,36 @@ namespace Monetizr.Campaigns
         internal MissionType missionType;
         internal int reward;
         internal RewardType rewardCurrency;
+        internal List<int> activateAfter = new List<int>();
+        internal string surveyUrl;
+        internal int id;
+
+        public MissionDescription()
+        {
+
+        }
 
         public MissionDescription(int reward, RewardType rewardCurrency)
         {
             this.missionType = MissionType.VideoWithEmailGiveaway;
             this.reward = reward;
             this.rewardCurrency = rewardCurrency;
+        }
+
+        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency)
+        {
+            this.missionType = missionType;
+            this.reward = reward;
+            this.rewardCurrency = rewardCurrency;
+        }
+
+        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency, List<int> activateAfter, string surveyUrl)
+        {
+            this.missionType = missionType;
+            this.reward = reward;
+            this.rewardCurrency = rewardCurrency;
+            this.activateAfter = activateAfter;
+            this.surveyUrl = surveyUrl;
         }
     }
 
@@ -117,6 +144,99 @@ namespace Monetizr.Campaigns
 
             return result;
         }
+
+        internal void Clear()
+        {
+            dictionary.Clear();
+        }
+
+        internal int RemoveAllByValue(Func<TValue, bool> predicate)
+        {
+            int count = 0;
+            foreach (var item in dictionary.Where(kvp => predicate(kvp.Value)).ToList())
+            {
+                count++;
+                dictionary.Remove(item.Key);
+            }
+
+            return count;
+        }
+
+        public TValue this[TKey k]
+        {
+            get => dictionary[k];
+            set => dictionary[k] = value;
+        }
+
+        public bool ContainsKey(TKey k)
+        {
+            return dictionary.ContainsKey(k);
+        }
+    }
+
+    public class SettingsDictionary<TKey, TValue>
+    {
+        public Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
+
+        public SettingsDictionary()
+        {
+
+        }
+
+        public SettingsDictionary(Dictionary<TKey, TValue> d)
+        {
+            dictionary = d;
+        }
+
+        public TValue GetParam(TKey p)
+        {
+            if(p == null)
+                return default(TValue);
+
+            if (!dictionary.ContainsKey(p))
+                return default(TValue);
+
+            return dictionary[p];
+        }
+
+        public bool GetBoolParam(TKey p, bool defaultParam)
+        {
+            if (p == null)
+                return defaultParam;
+
+            if (!dictionary.ContainsKey(p))
+                return defaultParam;
+
+            Boolean result = defaultParam;
+            string val = dictionary[p].ToString();
+
+            if (!Boolean.TryParse(val, out result))
+            {
+                return defaultParam;
+            }
+
+            return result;
+        }
+
+        public int GetIntParam(TKey p, int defaultParam = 0)
+        {
+            if (p == null)
+                return defaultParam;
+
+            if (!dictionary.ContainsKey(p))
+                return defaultParam;
+
+            int result = 0;
+            string val = dictionary[p].ToString();
+
+            if (!Int32.TryParse(val, out result))
+            {
+                return defaultParam;
+            }
+
+            return result;
+        }
+
     }
 
     [Serializable]
@@ -174,13 +294,14 @@ namespace Monetizr.Campaigns
 
 
         [SerializeField] internal int id;
+        [SerializeField] internal int serverId;
         [SerializeField] internal ClaimState isClaimed;
 
 
         //how much times RC is offered to show instead of rewarded video
         [NonSerialized] internal int amountOfRVOffersShown;
 
-        [NonSerialized] internal int amountOfNotificationsShown;
+        //[NonSerialized] internal int amountOfNotificationsShown;
 
         [NonSerialized] internal int amountOfNotificationsSkipped;
 
@@ -188,6 +309,8 @@ namespace Monetizr.Campaigns
 
         //is video shown already and don't need to be shown again
         [NonSerialized] internal bool isVideoShown;
+
+        [SerializeField] internal bool hasVideo;
 
         [NonSerialized] internal bool isShouldBeDisabled;
 
@@ -197,9 +320,16 @@ namespace Monetizr.Campaigns
         [NonSerialized] internal bool isServerCampaignActive;
 
         //Field for campaign 
-        [SerializeField] internal SerializableDictionary<string, string> additionalParams;
+        //[SerializeField] internal SerializableDictionary<string, string> additionalParams;
+
+        [NonSerialized] internal SettingsDictionary<string, string> campaignServerSettings;
 
         [SerializeField] internal string sdkVersion;
+
+        //Integer ids shows when this missions should be activated (maybe it's better to convert into list)
+        [NonSerialized] internal List<int> activateAfter;
+
+        [NonSerialized] internal bool isToBeRemoved;
     }
 
     /*internal class  SurveyMission : Mission

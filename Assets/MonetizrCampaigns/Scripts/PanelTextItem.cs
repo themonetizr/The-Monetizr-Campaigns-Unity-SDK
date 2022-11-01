@@ -19,28 +19,48 @@ namespace Monetizr.Campaigns
             if (m == null)
                 return;
 
-            UIController.SetColorForElement(textElement, m.additionalParams.dictionary, "text_color");
-            UIController.SetColorForElement(textElement, m.additionalParams.dictionary, $"{parentId.ToString()}.{textContent}_color");
-
             var param = $"{parentId.ToString()}.{textContent}";
+            var param_with_type = $"{parentId.ToString()}.{m.type.ToString()}.{textContent}";
+
+            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, "text_color");
+            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{param}_color");
+            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{param_with_type}_color");
+
+            
 
             if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
             {
                 var param2 = $"{parentId.ToString()}.{textContent}2";
 
-                if (m.additionalParams.dictionary.ContainsKey(param2))
+                if (m.campaignServerSettings.dictionary.ContainsKey(param2))
                 {
                     param = param2;
                 }
             }
 
-            if (m.additionalParams.dictionary.ContainsKey(param))
+            if (m.campaignServerSettings.dictionary.ContainsKey(param))
             {
-                string t = m.additionalParams.GetParam(param);
+                string t = m.campaignServerSettings.GetParam(param);
 
                 string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
                 t = t.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
+                t = t.Replace("%reward_amount%", $"{m.reward}");
+                t = t.Replace("%reward_title%", $"{rewardTitle}");
+                t = t.Replace("<br/>", "\n");
+
+                textElement.text = t;
+            }
+
+            if (m.campaignServerSettings.dictionary.ContainsKey(param_with_type))
+            {
+                string t = m.campaignServerSettings.GetParam(param_with_type);
+
+                string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
+
+                t = t.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
+                t = t.Replace("%reward_amount%", $"{m.reward}");
+                t = t.Replace("%reward_title%", $"{rewardTitle}");
                 t = t.Replace("<br/>", "\n");
 
                 textElement.text = t;

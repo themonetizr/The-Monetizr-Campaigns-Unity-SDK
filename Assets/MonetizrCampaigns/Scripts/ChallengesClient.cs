@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using System.Net;
+using static System.Net.WebRequestMethods;
 
 namespace Monetizr.Campaigns
 {
@@ -16,7 +17,7 @@ namespace Monetizr.Campaigns
     {
         //public PlayerInfo playerInfo { get; set; }
 
-        private const string k_BaseUri = "https://api3.themonetizr.com/";
+        private string k_BaseUri = "https://api.themonetizr.com/";
         private static readonly HttpClient Client = new HttpClient();
         
         public MonetizrAnalytics analytics { get; private set; }
@@ -25,15 +26,40 @@ namespace Monetizr.Campaigns
         public ChallengesClient(string apiKey, int timeout = 30)
         {
             System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
+                      
             currentApiKey = apiKey;
+
             analytics = new MonetizrAnalytics();
 
             Client.Timeout = TimeSpan.FromSeconds(timeout);
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            
+       
+        }
 
+        public void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey)
+        {           
+            string key = "cda45517ed8266e804d4966a0e693d0d";
+
+            k_BaseUri = "https://api.themonetizr.com/";
+
+            if (testEnvironment)
+            {                
+                key = "d4de97058730720b3b8080881c6ba2e0";
+                k_BaseUri = "https://api-test.themonetizr.com/";
+            }
+
+
+            if (mixPanelApiKey != null)
+            {
+                //checking corrupted mixpanel key
+                if (mixPanelApiKey.Length == 0 || mixPanelApiKey.IndexOf("\n") >= 0)
+                    mixPanelApiKey = null;
+
+                key = mixPanelApiKey;
+            }
+
+            analytics.InitializeMixpanel(key);
         }
 
         public void Close()
@@ -91,7 +117,7 @@ namespace Monetizr.Campaigns
 
                 foreach (var ch in challenges.challenges)
                 {
-                    ch.additional_params = ParseContentString(ch.content);
+                    ch.serverSettings = new SettingsDictionary<string,string>(ParseContentString(ch.content));
 
                     //foreach(var v in ch.additional_params)
                     //    Debug.Log($"!!!! {v.Key}={v.Value}");
@@ -108,7 +134,7 @@ namespace Monetizr.Campaigns
                 //remove all campaign with SDK version lower than current
                 result.RemoveAll(e =>
                 {
-                    string minSdkVersion = e.GetParam("min_sdk_version");
+                    string minSdkVersion = e.serverSettings.GetParam("min_sdk_version");
                     
                     if (minSdkVersion != null)
                     {
