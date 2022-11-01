@@ -488,7 +488,7 @@ namespace Monetizr.Campaigns
                     //new MissionDescription{ mission = MissionType.MutiplyReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.TwitterReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ missionType = MissionType.VideoWithEmailGiveaway, reward = 20, rewardCurrency = RewardType.Coins },
-                    new MissionDescription(200, RewardType.Coins),
+                    //new MissionDescription(200, RewardType.Coins),
                 };
             }
 
