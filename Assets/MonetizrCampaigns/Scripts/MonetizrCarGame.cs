@@ -271,9 +271,9 @@ namespace Monetizr.Campaigns
         {
             yield return new WaitForSeconds(3);
 
-            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+            //var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
-            Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
             isSkipped = false;
 
@@ -281,7 +281,7 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
 
-            MonetizrManager.ShowCongratsNotification(null, m);
+            //MonetizrManager.ShowCongratsNotification(null, m);
         }
 
         internal override void OnCloseDone(int item)

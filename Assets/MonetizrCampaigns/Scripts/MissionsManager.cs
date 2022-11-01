@@ -282,8 +282,11 @@ namespace Monetizr.Campaigns
         }
 
         //TODO: make separate classes for each mission type
-        Mission prepareNewMission(int id, MissionType mt, string campaign, int reward, string surveyUrl)
+        Mission prepareNewMission(int id, string campaign, MissionDescription md)
         {
+            MissionType mt = md.missionType;
+            int reward = md.reward;
+            
             Mission m = null;
 
             switch (mt)
@@ -307,7 +310,8 @@ namespace Monetizr.Campaigns
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
             m.sdkVersion = MonetizrManager.SDKVersion;
-            m.surveyUrl = surveyUrl;
+            m.surveyUrl = md.surveyUrl;
+            m.serverId = md.id;
 
 
             return m;
@@ -446,6 +450,11 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.TrackEvent("Watch video press", m);
 
+#if UNITY_EDITOR_WIN
+            onComplete?.Invoke(false);
+            return; 
+#endif
+
             var htmlPath = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.Html5PathString);
 
             if (htmlPath != null)
@@ -492,9 +501,9 @@ namespace Monetizr.Campaigns
 
                     //MissionDescription original = originalList.Find((MissionDescription md) => { return md.missionType == serverMissionType; });
 
-                    int rewardAmount = 1;
-                    RewardType currency = RewardType.Coins;
-                    RangeInt activateAfter = new RangeInt(0, -1);
+                    //int rewardAmount = 1;
+                    //RewardType currency = RewardType.Coins;
+                    //List<int> activateAfter = new List<int>();
 
                     /*if(original != null)
                     {
@@ -503,8 +512,8 @@ namespace Monetizr.Campaigns
                     }
                     else
                     {*/
-                    rewardAmount = _m.GetRewardAmount();
-                    currency = _m.GetRewardType();
+                    int rewardAmount = _m.GetRewardAmount();
+                    RewardType currency = _m.GetRewardType();
 
                     MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(currency);
 
@@ -519,11 +528,17 @@ namespace Monetizr.Campaigns
                     rewardAmount = (int)(gr.maximumAmount * (rewardAmount / 100.0f));
                     //}
 
-                    activateAfter = _m.GetActivateRange();
+                    //activateAfter = _m.GetActivateRange();
 
-                    string surveyUrl = serverSettings.GetParam(_m.survey);
+                    //string surveyUrl = serverSettings.GetParam(_m.survey);
 
-                    m.Add(new MissionDescription(_m.GetMissionType(), rewardAmount, currency, activateAfter,surveyUrl));
+                    m.Add(new MissionDescription {
+                            missionType = _m.GetMissionType(),
+                            reward = rewardAmount,
+                            rewardCurrency = _m.GetRewardType(),
+                            activateAfter = _m.GetActivateRange(),
+                            surveyUrl = serverSettings.GetParam(_m.survey),
+                            id = _m.getId() });
 
                 });
 
@@ -549,34 +564,37 @@ namespace Monetizr.Campaigns
             //Survey link
             public string survey;
 
-            public RangeInt GetActivateRange()
+            //Survey link
+            public string id;
+
+            public int getId()
             {
-                RangeInt defaultRange = new RangeInt(-1,0);
+                int res = -1;
+
+                if (int.TryParse(id, out res))
+                    return res;
+
+                return -1;
+            }
+
+            public List<int> GetActivateRange()
+            {
+                List<int> result = new List<int>();
 
                 if (activate_after == null)
-                    return defaultRange;
+                    return result;
 
-                string[] p = activate_after.Split('-');
+                string[] p = activate_after.Split(';');
 
-                int p1 = 0;
-                int p2 = 0;
+                Array.ForEach(p, (string s) => {
+                    int res = 0;
+                    if(int.TryParse(s,out res))
+                    {
+                        result.Add(res);
+                    }
+                });
 
-                if(p.Length > 0)
-                    int.TryParse(p[0], out p1);
-
-                if (p.Length > 1)
-                    int.TryParse(p[1], out p2);
-
-                if (p.Length == 0)
-                    return defaultRange;
-
-                if (p.Length == 1)
-                    return new RangeInt(p1,0);
-
-                if (p.Length == 2)
-                    return new RangeInt(p1, p2-p1);
-
-                return defaultRange;
+                return result;
             }
 
             public RewardType GetRewardType()
@@ -691,11 +709,8 @@ namespace Monetizr.Campaigns
 
                     if (m == null)
                     {
-                        m = prepareNewMission(i, 
-                                prefefinedSponsoredMissions[i].missionType, 
-                                ch, 
-                                prefefinedSponsoredMissions[i].reward,
-                                prefefinedSponsoredMissions[i].surveyUrl);
+                        //
+                        m = prepareNewMission(i, ch, prefefinedSponsoredMissions[i]);
 
                         if (m != null)
                         {
@@ -889,24 +904,37 @@ namespace Monetizr.Campaigns
 
             foreach (var m in missions)
             {
-                if (finishedMission != null && m != finishedMission)
+                if (m == finishedMission)
                     continue;
 
-                RangeInt r = m.activateAfter;
+                if (m.isClaimed == ClaimState.Claimed)
+                    continue;
 
                 //no activate_after here
-                if (r.start == -1)
+                if (m.activateAfter.Count == 0)
                 {
                     if (m.isDisabled)
                         isUpdateNeeded = true;
 
                     m.isDisabled = false;
+                    m.state = MissionUIState.ToBeShown;
                     continue;
                 }
 
                 bool shouldBeDisabled = false;
 
-                for(int i = r.start;; i++)
+                foreach(var id in m.activateAfter)
+                {
+                    Mission _m = missions.Find(x => x.serverId == id);
+
+                    if(_m != null && _m.isClaimed != ClaimState.Claimed)
+                    {
+                        shouldBeDisabled = true;
+                    }
+                }
+                                
+
+                /*for(int i = r.start;; i++)
                 {
                     if (i > r.start + r.length)
                         break;
@@ -914,13 +942,13 @@ namespace Monetizr.Campaigns
                     if (i >= missions.Count)
                         break;
 
-                    if (finishedMission != null && missions[i] == finishedMission)
+                    if (missions[i] == finishedMission)
                         continue;
 
                     if (missions[i].isClaimed != ClaimState.Claimed)
                         shouldBeDisabled = true;
                     
-                }
+                }*/
 
                 //activate if all in range claimed
                 if (!shouldBeDisabled)
@@ -929,6 +957,7 @@ namespace Monetizr.Campaigns
                         isUpdateNeeded = true;
 
                     m.isDisabled = shouldBeDisabled;
+                    m.state = MissionUIState.ToBeShown;
                 }
             }
 

@@ -575,7 +575,7 @@ namespace Monetizr.Campaigns
             //try to update UI
             foreach (var m in MonetizrManager.Instance.missionsManager.missions)
             {
-                if (m.state == MissionUIState.ToBeShown)
+                if (m.state == MissionUIState.ToBeShown && m.isClaimed != ClaimState.Claimed)
                 {
                     AddSponsoredChallenge(m, amountOfItems);
                     amountOfItems++;

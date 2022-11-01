@@ -25,8 +25,14 @@ namespace Monetizr.Campaigns
         internal MissionType missionType;
         internal int reward;
         internal RewardType rewardCurrency;
-        internal RangeInt activateAfter = new RangeInt(-1,0);
+        internal List<int> activateAfter = new List<int>();
         internal string surveyUrl;
+        internal int id;
+
+        public MissionDescription()
+        {
+
+        }
 
         public MissionDescription(int reward, RewardType rewardCurrency)
         {
@@ -42,7 +48,7 @@ namespace Monetizr.Campaigns
             this.rewardCurrency = rewardCurrency;
         }
 
-        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency, RangeInt activateAfter, string surveyUrl)
+        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency, List<int> activateAfter, string surveyUrl)
         {
             this.missionType = missionType;
             this.reward = reward;
@@ -288,6 +294,7 @@ namespace Monetizr.Campaigns
 
 
         [SerializeField] internal int id;
+        [SerializeField] internal int serverId;
         [SerializeField] internal ClaimState isClaimed;
 
 
@@ -320,7 +327,7 @@ namespace Monetizr.Campaigns
         [SerializeField] internal string sdkVersion;
 
         //Integer ids shows when this missions should be activated (maybe it's better to convert into list)
-        [NonSerialized] internal RangeInt activateAfter;
+        [NonSerialized] internal List<int> activateAfter;
 
         [NonSerialized] internal bool isToBeRemoved;
     }
