@@ -488,7 +488,7 @@ namespace Monetizr.Campaigns
                     //new MissionDescription{ mission = MissionType.MutiplyReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ mission = MissionType.TwitterReward, reward = 1000, rewardCurrency = RewardType.Coins },
                     //new MissionDescription{ missionType = MissionType.VideoWithEmailGiveaway, reward = 20, rewardCurrency = RewardType.Coins },
-                    new MissionDescription(200, RewardType.Coins),
+                    //new MissionDescription(200, RewardType.Coins),
                 };
             }
 
@@ -2036,7 +2036,7 @@ namespace Monetizr.Campaigns
 #endif
             localSettings.LoadOldAndUpdateNew(challenges);
 
-            Log.Print($"RequestChallenges completed with count: {campaignIds.Count} active: {activeChallengeId} {challenges[activeChallengeId].campaign.title}");
+            Log.Print($"RequestChallenges completed with count: {campaignIds.Count} active: {activeChallengeId}");
 
             if (activeChallengeId != null)
             {
