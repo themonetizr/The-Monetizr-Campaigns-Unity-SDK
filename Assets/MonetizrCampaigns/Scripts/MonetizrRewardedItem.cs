@@ -138,6 +138,12 @@ namespace Monetizr.Campaigns
             if (m.rewardType == RewardType.Coins && customCoin != null)
                 rewardIcon = customCoin;
 
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) && m.isRewardIngame)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+            }
+
+
             boosterIcon.sprite = rewardIcon == null ? defaultBoosterIcon : rewardIcon;
 
             boosterIcon.gameObject.SetActive(!showGift);

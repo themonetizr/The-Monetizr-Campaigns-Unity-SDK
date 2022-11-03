@@ -330,6 +330,8 @@ namespace Monetizr.Campaigns
         [NonSerialized] internal List<int> activateAfter;
 
         [NonSerialized] internal bool isToBeRemoved;
+
+        [NonSerialized] internal bool isRewardIngame;
     }
 
     /*internal class  SurveyMission : Mission

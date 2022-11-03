@@ -24,6 +24,7 @@ namespace Monetizr.Campaigns
         private string eventsPrefix;
         private AdType adType;
         private bool isAnalyticsNeeded = true;
+        public Image background;
 
 
         //private Action onComplete;
@@ -62,8 +63,9 @@ namespace Monetizr.Campaigns
             webView.Frame = new Rect(0,0, 1080.0f*0.9f, 1920.0f*0.9f);
 #else
             if (fullScreen)
-            {                
-                webView.Frame = useSafeFrame ? Screen.safeArea : new Rect(0, 0, Screen.width, Screen.height);
+            {
+                //webView.Frame = useSafeFrame ? Screen.safeArea : new Rect(0, 0, Screen.width, Screen.height);
+                webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
             }
             else
 
@@ -382,7 +384,10 @@ document.addEventListener('DOMContentLoaded', function(){{
 
             closeButton.gameObject.SetActive(!fullScreen);
 
-            
+            if (id == PanelId.Html5WebView)
+                background.color = Color.black;
+            else
+                background.color = Color.white;
 
             switch (id)
             {
