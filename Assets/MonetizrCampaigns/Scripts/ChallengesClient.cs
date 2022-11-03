@@ -10,9 +10,24 @@ using UnityEngine;
 using System.Text.RegularExpressions;
 using System.Net;
 using static System.Net.WebRequestMethods;
+using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
 {
+    [Serializable]
+    public class IpApiData
+    {
+        public string country_name;
+
+        public static IpApiData CreateFromJSON(string jsonString)
+        {
+            return JsonUtility.FromJson<IpApiData>(jsonString);
+        }
+    }
+
+
+    
+
     internal class ChallengesClient
     {
         //public PlayerInfo playerInfo { get; set; }
@@ -22,6 +37,28 @@ namespace Monetizr.Campaigns
         
         public MonetizrAnalytics analytics { get; private set; }
         public string currentApiKey;
+
+        internal async Task<IpApiData> GetIpApiData()
+        {
+            IpApiData ipApiData = null;
+
+            //string ip = new System.Net.WebClient().DownloadString("https://api.ipify.org");
+            string uri = $"https://ipapi.co/json/";
+                      
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
+            {
+                await webRequest.SendWebRequest();
+
+                string[] pages = uri.Split('/');
+                int page = pages.Length - 1;
+
+                ipApiData = IpApiData.CreateFromJSON(webRequest.downloadHandler.text);
+
+                Debug.Log(ipApiData.country_name);
+            }
+
+            return ipApiData;
+        }
 
         public ChallengesClient(string apiKey, int timeout = 30)
         {
@@ -99,6 +136,11 @@ namespace Monetizr.Campaigns
             var challengesString = await response.Content.ReadAsStringAsync();
 
             string responseOk = response.IsSuccessStatusCode == true ? "OK" : "Not OK";
+
+            //---
+
+            var locData = await GetIpApiData();
+
 
             Log.Print($"Response is: {responseOk} {response.StatusCode}");
             Log.Print(challengesString);
