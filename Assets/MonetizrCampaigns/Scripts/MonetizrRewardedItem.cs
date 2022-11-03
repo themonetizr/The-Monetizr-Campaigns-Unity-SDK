@@ -143,6 +143,11 @@ namespace Monetizr.Campaigns
                 rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
             }
 
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite) && !m.isRewardIngame)
+            {
+                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+            }
+
 
             boosterIcon.sprite = rewardIcon == null ? defaultBoosterIcon : rewardIcon;
 

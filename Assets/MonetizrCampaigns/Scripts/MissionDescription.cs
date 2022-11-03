@@ -327,11 +327,11 @@ namespace Monetizr.Campaigns
         [SerializeField] internal string sdkVersion;
 
         //Integer ids shows when this missions should be activated (maybe it's better to convert into list)
-        [NonSerialized] internal List<int> activateAfter;
+        [SerializeField] internal List<int> activateAfter;
 
         [NonSerialized] internal bool isToBeRemoved;
 
-        [NonSerialized] internal bool isRewardIngame;
+        [SerializeField] internal bool isRewardIngame;
     }
 
     /*internal class  SurveyMission : Mission

@@ -147,6 +147,7 @@ namespace Monetizr.Campaigns
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                 hasVideo = true,
+                isRewardIngame = true,
             };
         }
 
@@ -162,6 +163,7 @@ namespace Monetizr.Campaigns
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                 hasVideo = false,
+                isRewardIngame = true,
             };
         }
 
@@ -180,6 +182,7 @@ namespace Monetizr.Campaigns
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                 hasVideo = false,
+                isRewardIngame = true,
             };
         }
 
@@ -202,6 +205,7 @@ namespace Monetizr.Campaigns
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                 hasVideo = false,
+                isRewardIngame = true,
             };
         }
 
@@ -226,6 +230,7 @@ namespace Monetizr.Campaigns
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                 hasVideo = false,
+                isRewardIngame = false,
             };
         }
 
@@ -260,6 +265,7 @@ namespace Monetizr.Campaigns
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                 hasVideo = video,
+                isRewardIngame = false,
             };
         }
 
@@ -278,6 +284,7 @@ namespace Monetizr.Campaigns
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                 hasVideo = false,
+                isRewardIngame = false,
             };
         }
 
