@@ -15,18 +15,17 @@ using UnityEngine.Networking;
 namespace Monetizr.Campaigns
 {
     [Serializable]
-    public class IpApiData
+    internal class IpApiData
     {
         public string country_name;
+        public string country_code;
+        public string region_code;
 
         public static IpApiData CreateFromJSON(string jsonString)
         {
             return JsonUtility.FromJson<IpApiData>(jsonString);
         }
     }
-
-
-    
 
     internal class ChallengesClient
     {
@@ -38,6 +37,26 @@ namespace Monetizr.Campaigns
         public MonetizrAnalytics analytics { get; private set; }
         public string currentApiKey;
 
+        private CancellationTokenSource downloadCancellationTokenSource;
+       
+
+        private static async Task RequestEnd(UnityWebRequest request, CancellationToken token)
+        {
+            request.SendWebRequest();
+            Debug.Log($"Location request sent");
+
+            while (!request.isDone)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    //Debug.Log("Task {0} cancelled");
+                    token.ThrowIfCancellationRequested();
+                }
+                await Task.Yield();
+            }
+        }
+
+
         internal async Task<IpApiData> GetIpApiData()
         {
             IpApiData ipApiData = null;
@@ -47,14 +66,33 @@ namespace Monetizr.Campaigns
                       
             using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
             {
-                await webRequest.SendWebRequest();
+                //await webRequest.SendWebRequest();
+
+                downloadCancellationTokenSource = new CancellationTokenSource();
+                downloadCancellationTokenSource.CancelAfter(1000);
+                var token = this.downloadCancellationTokenSource.Token;
+
+                try
+                {
+                    await RequestEnd(webRequest, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    Debug.Log("\nTasks cancelled: timed out.\n");
+                }
+                finally
+                {
+                    downloadCancellationTokenSource.Dispose();
+                }
+
 
                 string[] pages = uri.Split('/');
                 int page = pages.Length - 1;
 
                 ipApiData = IpApiData.CreateFromJSON(webRequest.downloadHandler.text);
 
-                Debug.Log(ipApiData.country_name);
+                if(ipApiData != null)
+                    Debug.Log($"Location: {ipApiData.country_code} {ipApiData.region_code}");
             }
 
             return ipApiData;
@@ -138,9 +176,7 @@ namespace Monetizr.Campaigns
             string responseOk = response.IsSuccessStatusCode == true ? "OK" : "Not OK";
 
             //---
-
-            var locData = await GetIpApiData();
-
+            
 
             Log.Print($"Response is: {responseOk} {response.StatusCode}");
             Log.Print(challengesString);
@@ -186,8 +222,34 @@ namespace Monetizr.Campaigns
                     return false;
                 });
 
+                //if there's some campaigns, filter them by location
+                if(result.Count > 0)
+                {
+                    bool needFilter = result[0].serverSettings.GetBoolParam("filter_campaigns_by_location", false);
 
+                    if (needFilter)
+                    {
+                        analytics.locationData = await GetIpApiData();
 
+                        if (analytics.locationData != null)
+                        {
+                            result.RemoveAll(e =>
+                            {
+                                return !e.IsCampaignInsideLocation(analytics.locationData);
+                            });
+
+                            if (result.Count > 0)
+                            {
+                                Debug.Log($"{result.Count} campaigns passed location filter");
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log($"No location data");
+                        }
+                    }
+                }
+                
                 return result;
             }
             else
@@ -197,6 +259,7 @@ namespace Monetizr.Campaigns
 
         }
 
+       
         private int CompareVersions(string First, string Second)
         {
             var f = Array.ConvertAll(First.Split('.'), (v) => { int k = 0; return int.TryParse(v, out k) ? k : 0; });

@@ -267,6 +267,8 @@ namespace Monetizr.Campaigns
 
     internal class MonetizrAnalytics
     {
+        internal IpApiData locationData = null;
+
         /*public static readonly Dictionary<AdType, string> adTypeNames = new Dictionary<AdType, string>()
         {
             { AdType.IntroBanner, "Intro banner" },
@@ -520,6 +522,49 @@ namespace Monetizr.Campaigns
 
         }
 
+        private void AddDefaultMixpanelValues(Value props, ServerCampaign campaign, string brandName)
+        {
+            props["application_id"] = campaign.application_id;
+            props["bundle_id"] = Application.identifier;
+            props["player_id"] = GetUserId();
+
+            props["application_name"] = Application.productName;
+            props["application_version"] = Application.version;
+            props["impressions"] = "1";
+            
+            props["camp_id"] = campaign.id;
+            props["brand_id"] = campaign.brand_id;
+            props["brand_name"] = brandName;
+            //props["type"] = adTypeNames[adAsset.Key];
+            //props["type"] = adAsset.Key.ToString();
+            props["ab_segment"] = MonetizrManager.abTestSegment;
+            props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
+
+            props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
+            props["sdk_version"] = MonetizrManager.SDKVersion;
+
+            props["ad_id"] = MonetizrAnalytics.advertisingID;
+
+            props["camp_title"] = campaign.title;
+
+            if (locationData != null)
+            {
+                props["country_code"] = locationData.country_code;
+                props["region_code"] = locationData.region_code;
+                props["country_name"] = locationData.country_name;
+            }
+           
+            foreach (var s in campaign.serverSettings.dictionary)
+            {
+                string key = s.Key;
+
+                if (!key.EndsWith("_text") && key != "custom_missions")
+                {
+                    props[$"cs_{s.Key}"] = s.Value;
+                }
+            }
+        }
+
         private void _EndShowAdAsset(KeyValuePair<AdType, string> adAsset)
         {
             Debug.Assert(isMixpanelInitialized);
@@ -541,7 +586,7 @@ namespace Monetizr.Campaigns
             }
 
             var props = new Value();
-            props["application_id"] = challenge.application_id;
+            /*props["application_id"] = challenge.application_id;
             props["bundle_id"] = Application.identifier;
             props["player_id"] = GetUserId();
             
@@ -562,17 +607,13 @@ namespace Monetizr.Campaigns
 
             props["ad_id"] = MonetizrAnalytics.advertisingID;
 
-            props["camp_title"] = challenge.title;
+            props["camp_title"] = challenge.title;*/
 
-            foreach (var s in challenge.serverSettings.dictionary)
-            {
-                string key = s.Key;
+            AddDefaultMixpanelValues(props, challenge, brandName);
 
-                if (!key.EndsWith("_text") && key != "custom_missions")
-                {
-                    props[$"cs_{s.Key}"] = s.Value;
-                }
-            }
+            props["type"] = adAsset.Key.ToString();
+
+            
 
             string eventName = $"[UNITY_SDK] [TIMED] {adAsset.Key.ToString()}";
 
@@ -668,7 +709,9 @@ namespace Monetizr.Campaigns
 
 
             var props = new Value();
-            props["application_id"] = app_id;
+
+
+            /*props["application_id"] = app_id;
             props["bundle_id"] = Application.identifier;
             props["player_id"] = SystemInfo.deviceUniqueIdentifier;
             props["application_name"] = Application.productName;
@@ -694,7 +737,9 @@ namespace Monetizr.Campaigns
                 {
                     props[$"cs_{s.Key}"] = s.Value;
                 }
-            }
+            }*/
+
+            AddDefaultMixpanelValues(props, campaign, brand_name);
 
             Mixpanel.Identify(campaign.brand_id);
             Mixpanel.Track(eventName, props);

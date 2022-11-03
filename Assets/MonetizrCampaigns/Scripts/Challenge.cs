@@ -40,31 +40,24 @@ namespace Monetizr.Campaigns
         public bool testmode;
         public List<Reward> rewards = new List<Reward>();
         public List<Asset> assets = new List<Asset>();
+        public List<Location> locations = new List<Location>();
+
         [System.NonSerialized] public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
 
-        /*public string GetParam(string p)
+        [System.Serializable]
+        public class Location
         {
-            if (!additional_params.ContainsKey(p))
-                return "";
+            public string country;
 
-            return additional_params[p];
+            public List<Region> regions = new List<Region>();
         }
 
-        public int GetIntParam(string p, int default_val)
+        [System.Serializable]
+        public class Region
         {
-            if (!additional_params.ContainsKey(p))
-                return 0;
+            public string region;
+        }
 
-            int result = 0;
-            string val = additional_params[p];
-
-            if (!Int32.TryParse(val, out result))
-            {
-                return default_val;
-            }
-
-            return result;
-        }*/
 
         [System.Serializable]
         public class Reward
@@ -94,6 +87,35 @@ namespace Monetizr.Campaigns
             public string type;
             public string title;
             public string url;
+        }
+
+        internal bool IsCampaignInsideLocation(IpApiData locData)
+        {
+            //no location data
+            if (locData == null)
+                return true;
+
+            //whole world
+            if (locations.Count == 0)
+                return true;
+
+            var country = locations.Find(l => l.country == locData.country_code);
+
+            //outside desired country
+            if (country == null)
+                return false;
+
+            //no regions defined
+            if (country.regions == null)
+                return true;
+
+            if (country.regions.Count == 0)
+                return true;
+
+            var region = country.regions.Find(r => r.region == locData.region_code);
+
+            //region found
+            return region != null;
         }
     }
 }
