@@ -38,8 +38,7 @@ namespace Monetizr.Campaigns
         public string currentApiKey;
 
         private CancellationTokenSource downloadCancellationTokenSource;
-       
-
+              
         private static async Task RequestEnd(UnityWebRequest request, CancellationToken token)
         {
             request.SendWebRequest();
@@ -84,12 +83,15 @@ namespace Monetizr.Campaigns
                 {
                     downloadCancellationTokenSource.Dispose();
                 }
-
-
-                string[] pages = uri.Split('/');
-                int page = pages.Length - 1;
-
-                ipApiData = IpApiData.CreateFromJSON(webRequest.downloadHandler.text);
+                
+                try
+                {
+                    ipApiData = IpApiData.CreateFromJSON(webRequest.downloadHandler.text);
+                }
+                catch (Exception)
+                {
+                                        
+                }
 
                 if(ipApiData != null)
                     Debug.Log($"Location: {ipApiData.country_code} {ipApiData.region_code}");
@@ -247,6 +249,10 @@ namespace Monetizr.Campaigns
                         {
                             Debug.Log($"No location data");
                         }
+                    }
+                    else
+                    {
+                        Debug.Log($"Geo-filtering disabled");
                     }
                 }
                 

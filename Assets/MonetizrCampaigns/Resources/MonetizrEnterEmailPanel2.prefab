@@ -838,11 +838,13 @@ MonoBehaviour:
     brandLogoUrl: 
     brandRewardBannerUrl: 
     id: 0
+    serverId: 0
     isClaimed: 0
     isDisabled: 0
-    additionalParams:
-      keys: []
-      values: []
+    hasVideo: 0
+    sdkVersion: 
+    activateAfter: 
+    isRewardIngame: 0
 --- !u!114 &8112458042353325120
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2736,13 +2738,13 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5274565836672719344}
   m_TextComponent: {fileID: 5162707208603512940}
   m_Placeholder: {fileID: 4954255537914366396}
-  m_ContentType: 0
+  m_ContentType: 6
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 7
   m_LineType: 0
   m_HideMobileInput: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 5
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
