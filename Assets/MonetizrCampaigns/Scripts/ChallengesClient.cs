@@ -60,14 +60,11 @@ namespace Monetizr.Campaigns
         internal async Task<IpApiData> GetIpApiData()
         {
             IpApiData ipApiData = null;
-
-            //string ip = new System.Net.WebClient().DownloadString("https://api.ipify.org");
+                        
             string uri = $"https://ipapi.co/json/";
                       
             using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
             {
-                //await webRequest.SendWebRequest();
-
                 downloadCancellationTokenSource = new CancellationTokenSource();
                 downloadCancellationTokenSource.CancelAfter(1000);
                 var token = this.downloadCancellationTokenSource.Token;
