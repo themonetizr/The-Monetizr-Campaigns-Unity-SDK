@@ -71,31 +71,53 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            Debug.Log("Prepare panel - car game");
+
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
 
             bonusTaken = 0;
 
+            Debug.Log($"1 {car}");
+
             car.parent = this;
 
+            Debug.Log($"2 {logo} {logo.sprite}");
+
             logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+
+            Debug.Log($"3 {logo.gameObject}");
+
             logo.gameObject.SetActive(logo.sprite != null);
-              
+
+            
+
             gameItems = new List<Item>(9);
+
+            Debug.Log($"4 {gameItems}");
 
             for (int i = 0; i < items.Length; i++)
             {
+                Debug.Log($"5 item {i}");
+
                 int i_copy = i;
                 Button _b = items[i].GetComponent<Button>();
+
+                Debug.Log($"6 item {_b}");
+
                 _b.onClick.RemoveAllListeners();
                 _b.onClick.AddListener( ()=>{ OnItemClick(i_copy); });
                 Animator _a = items[i].GetComponent<Animator>();
+
+                Debug.Log($"6 item {_a}");
 
                 if (i != 0)
                     _b.interactable = false;
 
                 MemoryGameItem _gi = items[i].GetComponent<MemoryGameItem>();
+
+                Debug.Log($"7 item {_gi} {_gi.image}");
 
                 _gi.parent = this;
                 _gi.id = i;
@@ -107,6 +129,8 @@ namespace Monetizr.Campaigns
 
                 gameItems.Add(new Item { b = _b, go = items[i], value = 0, a = _a, gi = _gi, isOpened = false  });
             }
+
+            Debug.Log("5");
 
             movesLeftText.text = "MOVES LEFT: 4";
 
