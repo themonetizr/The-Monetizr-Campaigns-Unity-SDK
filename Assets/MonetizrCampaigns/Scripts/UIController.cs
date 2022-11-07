@@ -100,8 +100,17 @@ namespace Monetizr.Campaigns
                 GameObject.Destroy(panel.gameObject);
 
                 panels.Remove(id);
+
+                //nothing, but teaser
+                if(panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser))
+                {
+                    MonetizrManager.Instance?.onUIVisible?.Invoke(false);
+                }
             };
 
+            //nothing or only teaser
+            if ((panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser)) || panels.Count == 0)
+                MonetizrManager.Instance?.onUIVisible?.Invoke(true);
 
             if (panels.ContainsKey(id))
             {
@@ -151,6 +160,8 @@ namespace Monetizr.Campaigns
 
                 panels.Add(id, ctrlPanel);
             }
+
+            
 
             ctrlPanel.SetActive(true);
 
