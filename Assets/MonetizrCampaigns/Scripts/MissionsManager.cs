@@ -284,7 +284,7 @@ namespace Monetizr.Campaigns
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
                 hasVideo = false,
-                isRewardIngame = false,
+                isRewardIngame = true,
             };
         }
 

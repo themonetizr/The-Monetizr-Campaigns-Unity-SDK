@@ -506,7 +506,7 @@ namespace Monetizr.Campaigns
 #endif
 
 
-            Log.Print($"MonetizrManager Initialize: {apiKey}");
+            Log.Print($"MonetizrManager Initialize: {apiKey} {SDKVersion}");
 
             var monetizrObject = new GameObject("MonetizrManager");
             var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
