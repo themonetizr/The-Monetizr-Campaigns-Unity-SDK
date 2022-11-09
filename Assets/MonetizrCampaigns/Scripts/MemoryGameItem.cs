@@ -9,27 +9,30 @@ namespace Monetizr.Campaigns
 
     internal class MemoryGameItem : MonoBehaviour
     {
-        internal int id;
-        internal MonetizrGameParentBase parent;
-        internal Sprite middleAnimSprite;
-        internal bool hasEvents;
+        internal int id = 0;
+        internal MonetizrGameParentBase parent = null;
+        internal Sprite middleAnimSprite = null;
+        internal bool hasEvents = false;
 
-        public Image image;
-        public GameObject bonus;
+        public Image image = null;
+        public GameObject bonus = null;
 
-        internal Action onCloseDone;
-        internal bool hasBonus;
-        internal bool isOpening;
+        internal Action onCloseDone = null;
+        internal bool hasBonus = false;
+        internal bool isOpening = false;
 
-        internal Animator bonusAnimator;
+        internal Animator bonusAnimator = null;
 
         // Start is called before the first frame update
         void Start()
         {
             hasEvents = true;
-            bonus?.SetActive(false);
 
-            bonusAnimator = bonus?.GetComponent<Animator>();
+            if (bonus != null)
+            {
+                bonus.SetActive(false);
+                bonusAnimator = bonus.GetComponent<Animator>();
+            }
         }
 
         // Update is called once per frame

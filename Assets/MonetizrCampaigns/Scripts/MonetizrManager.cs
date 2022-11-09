@@ -1310,14 +1310,20 @@ namespace Monetizr.Campaigns
             MonetizrManager.Instance.missionsManager.ClaimAction(m, onComplete, null).Invoke();
         }
 
-        internal static void ShowMinigame(Action<bool> onComplete, PanelId id, Mission m = null)
+        internal static void ShowMinigame(Action<bool> onComplete, PanelId id, Mission m)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
             if (!instance.isActive)
                 return;
 
-            instance.uiController.ShowPanelFromPrefab("MonetizrCarGamePanel", id, onComplete, false, m);
+            var panelNames = new Dictionary<PanelId, string>()
+            {
+                {PanelId.CarMemoryGame,"MonetizrCarGamePanel"},
+                {PanelId.MemoryGame,"MonetizrGamePanel"},
+            };           
+            
+            instance.uiController.ShowPanelFromPrefab(panelNames[id], id, onComplete, false, m);
         }
 
 

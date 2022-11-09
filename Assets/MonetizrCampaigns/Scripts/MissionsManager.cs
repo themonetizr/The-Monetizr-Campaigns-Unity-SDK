@@ -349,8 +349,10 @@ namespace Monetizr.Campaigns
             {
                 //MonetizrManager.ShowSurvey(onSurveyComplete, m);
 
+                //MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.CarMemoryGame, m);
+
                 MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.MemoryGame, m);
-                    
+
             };
         }
 

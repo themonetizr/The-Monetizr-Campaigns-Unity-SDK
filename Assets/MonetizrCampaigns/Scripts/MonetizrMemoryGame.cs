@@ -20,18 +20,21 @@ namespace Monetizr.Campaigns
             internal bool isOpened;
         }
 
+        public Sprite[] mapSprites;
         private List<Item> gameItems;
         private Mission currentMission;
-
-       
-
         public GameObject[] items;
-
-
-        void Update()
+        
+        public void OnButtonClick()
         {
-            
+            //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
+            //MonetizrManager.ShowRewardCenter(null);
+            MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
 
+
+            isSkipped = true;
+
+            SetActive(false);
         }
 
         void SetProgress(float a)
@@ -44,16 +47,12 @@ namespace Monetizr.Campaigns
         {
             return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
         }
-
-        public void OnButtonClick()
-        {
-            //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
-            //MonetizrManager.ShowRewardCenter(null);
-        }
-
+        
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            currentMission = m;
+            this.onComplete = onComplete;
+            this.panelId = id;
+            this.currentMission = m;
 
             gameItems = new List<Item>(9);
 
@@ -106,10 +105,12 @@ namespace Monetizr.Campaigns
                                     
             }
            
-            if (gameItems[item].value == 1)
-                gameItems[item].a.Play("MonetizrMemoryGameTap");
-            else
-                gameItems[item].a.Play("MonetizrMemoryGameTapCorrect");
+            //if (gameItems[item].value == 1)
+            gameItems[item].a.Play("MonetizrMemoryGameTap");
+            gameItems[item].gi.middleAnimSprite = mapSprites[gameItems[item].value];
+            gameItems[item].gi.hasEvents = true;
+            //else
+            //    gameItems[item].a.Play("MonetizrMemoryGameTapCorrect");
 
             gameItems[item].isOpened = true;
         }
@@ -150,10 +151,15 @@ namespace Monetizr.Campaigns
                 {
                     if (i.isOpened == true)
                     {
-                        if (i.value == 1)
-                            i.a.Play("MonetizrMemoryGameTapBack");
-                        else
-                            i.a.Play("MonetizrMemoryGameTapBackCorrect");
+                        
+                        i.a.Play("MonetizrMemoryGameTap");
+                        gameItems[item].gi.middleAnimSprite = mapSprites[0];
+                        gameItems[item].gi.hasEvents = false;
+
+                        //if (i.value == 1)
+                        //    i.a.Play("MonetizrMemoryGameTapBack");
+                        //else
+                        //    i.a.Play("MonetizrMemoryGameTapBackCorrect");
                     }
                 }
                 //close opened

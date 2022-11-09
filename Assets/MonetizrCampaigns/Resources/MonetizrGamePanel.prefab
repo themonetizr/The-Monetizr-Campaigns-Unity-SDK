@@ -510,6 +510,10 @@ MonoBehaviour:
   backgroundImage: {fileID: 1601973313011850879}
   backgroundBorderImage: {fileID: 7226164532691812479}
   nextPanelId: -1
+  mapSprites:
+  - {fileID: 21300000, guid: 1400e724da1a44a028130fc10ae5e8af, type: 3}
+  - {fileID: 21300000, guid: 428aed9a553484ecda04463eba54afc3, type: 3}
+  - {fileID: 21300000, guid: 9cce5f525ce6a447b98948497b00279c, type: 3}
   items:
   - {fileID: 5004032377318712901}
   - {fileID: 2248236548197578343}
@@ -1140,7 +1144,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1715095924489840407}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4930670916765993170}
+        m_TargetAssemblyTypeName: Monetizr.Campaigns.MonetizrMemoryGame, Assembly-CSharp
+        m_MethodName: OnButtonClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8407368819920530979
 GameObject:
   m_ObjectHideFlags: 0
