@@ -370,8 +370,9 @@ namespace Monetizr.Campaigns
 
         private string activeChallengeId = null;
 
-        private Action<bool> soundSwitch;
-        private Action<bool> onRequestComplete;
+        private Action<bool> soundSwitch = null;
+        private Action<bool> onRequestComplete = null;
+        internal Action<bool> onUIVisible = null;
 
         private bool isActive = false;
         private bool isMissionsIsOudated = true;
@@ -471,7 +472,12 @@ namespace Monetizr.Campaigns
         }
 
 
-        public static MonetizrManager Initialize(string apiKey, List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch, UserDefinedEvent userEvent = null)
+        public static MonetizrManager Initialize(string apiKey,
+            List<MissionDescription> sponsoredMissions, 
+            Action onRequestComplete, 
+            Action<bool> soundSwitch,
+            Action<bool> onUIVisible,
+            UserDefinedEvent userEvent = null)
         {
             if (instance != null)
             {
@@ -515,6 +521,7 @@ namespace Monetizr.Campaigns
             instance = monetizrManager;
             instance.sponsoredMissions = sponsoredMissions;
             instance.userDefinedEvent = userEvent;
+            instance.onUIVisible = onUIVisible;
 
             monetizrManager.Initalize(apiKey, onRequestComplete, soundSwitch);
 
