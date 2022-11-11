@@ -693,8 +693,6 @@ namespace Monetizr.Campaigns
                     if (ic != null)
                     {
                         prefefinedSponsoredMissions = ic.CreateMissionDescriptions(prefefinedSponsoredMissions, sc.serverSettings);
-
-                        Debug.Log($"Custom server missions loaded with {prefefinedSponsoredMissions.Count} values");
                     }
                 }
             }
@@ -760,12 +758,19 @@ namespace Monetizr.Campaigns
 
 
                     m.isToBeRemoved = false;
+                    m.campaignServerSettings = MonetizrManager.Instance.GetCampaign(ch).serverSettings;
+
+                    bool showNotClaimedDisabled = m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
+
                     m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
+
+                    if (showNotClaimedDisabled)
+                        m.state = MissionUIState.Visible;
 
                     //rewrite these parameters here, because otherwise it will be saved in cache
                     //m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
 
-                    m.campaignServerSettings = MonetizrManager.Instance.GetCampaign(ch).serverSettings;
+                    
                     m.amountOfRVOffersShown = m.campaignServerSettings.GetIntParam("amount_of_rv_offers", -1);
                     //m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
                     m.amountOfNotificationsSkipped = m.campaignServerSettings.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible

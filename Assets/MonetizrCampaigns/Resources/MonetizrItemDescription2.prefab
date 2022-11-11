@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -18, y: 20.8}
-  m_SizeDelta: {x: 1079, y: 376.19}
+  m_AnchoredPosition: {x: -18, y: 16.7}
+  m_SizeDelta: {x: 1052.1, y: 405.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7012875437549923954
 CanvasRenderer:
@@ -58,14 +58,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.9372549}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.8235294}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 53d9413ef0ecf4bdab514524f367ad89, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 85c73c3d7cc004c2d95f31995b08ab56, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -184,8 +184,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -234, y: 1.6}
-  m_SizeDelta: {x: 655.4, y: 195.3}
+  m_AnchoredPosition: {x: -234, y: 15.4}
+  m_SizeDelta: {x: 655.4, y: 350.3}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &8462040305928130315
 CanvasRenderer:
@@ -217,10 +217,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 6f381fc39e3fddb4c95a55b371966f18, type: 3}
-    m_FontSize: 38
+    m_FontSize: 45
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 4
     m_MaxSize: 129
     m_Alignment: 3
     m_AlignByGeometry: 0
@@ -228,7 +228,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Watch <a>video</a> by Charmin and get 2 Energy Boosters '
+  m_Text: Complete survey mission to unlock
 --- !u!1 &4058316587423139965
 GameObject:
   m_ObjectHideFlags: 0

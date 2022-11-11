@@ -339,6 +339,8 @@ namespace Monetizr.Campaigns
         [SerializeField] internal bool isRewardIngame;
 
         [NonSerialized] internal bool showHidden;
+
+        [NonSerialized] internal MonetizrRewardedItem rewardCenterItem;
     }
 
     /*internal class  SurveyMission : Mission

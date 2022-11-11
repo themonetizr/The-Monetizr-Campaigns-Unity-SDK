@@ -114,7 +114,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            bool showNotClaimedDisabled = campaign.serverSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
+            showNotClaimedDisabled = campaign.serverSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
 
             var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
 
@@ -144,7 +144,8 @@ namespace Monetizr.Campaigns
             {
                 var ch = m.campaignId;
 
-                m.showHidden = showNotClaimedDisabled;
+                if(showNotClaimedDisabled && m.isDisabled && m.isClaimed != ClaimState.Claimed)
+                    m.showHidden = true;
 
                 if (ch == missions[0].campaignId)
                 //if (ch == activeChallenge)
@@ -532,6 +533,8 @@ namespace Monetizr.Campaigns
             var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
             var item = go.GetComponent<MonetizrRewardedItem>();
 
+            m.rewardCenterItem = item;
+
             missionItems.Add(item);
 
             switch (m.type)
@@ -595,11 +598,21 @@ namespace Monetizr.Campaigns
             {
                 if (m.state == MissionUIState.ToBeShown && m.isClaimed != ClaimState.Claimed)
                 {
-                    AddSponsoredChallenge(m, amountOfItems);
-                    amountOfItems++;
+                    if (!showNotClaimedDisabled)
+                    {
+                        AddSponsoredChallenge(m, amountOfItems);
+                        amountOfItems++;
+                        
+                    }
+                    else
+                    {
+                        m.rewardCenterItem.hideOverlay.SetActive(false);
+                    }
+
                     m.state = MissionUIState.Visible;
                     m.isDisabled = false;
                 }
+                
             }
         }
 

@@ -107,6 +107,9 @@ namespace Monetizr.Campaigns
             { AssetsType.RewardSprite, typeof(Sprite) },
             { AssetsType.IngameRewardSprite, typeof(Sprite) },
             { AssetsType.UnknownRewardSprite, typeof(Sprite) },
+            { AssetsType.MinigameSprite1, typeof(Sprite) },
+            { AssetsType.MinigameSprite2, typeof(Sprite) },
+            { AssetsType.MinigameSprite3, typeof(Sprite) },
 
         };
 
@@ -1908,6 +1911,7 @@ namespace Monetizr.Campaigns
 
             foreach (var ch in _challenges)
             {
+                
                 var ech = new ServerCampaignWithAssets(ch);
 
                 if (this.challenges.ContainsKey(ch.id))
@@ -1919,6 +1923,8 @@ namespace Monetizr.Campaigns
 
                 foreach (var asset in ch.assets)
                 {
+                    Debug.Log($"Loading {asset.type}");
+
                     switch (asset.type)
                     {
                         case "icon":
@@ -2071,6 +2077,8 @@ namespace Monetizr.Campaigns
                     ech.isChallengeLoaded = false;
                 }
 
+                Debug.Log($"Loadind finished {ech.isChallengeLoaded}");
+
                 if (ech.isChallengeLoaded)
                 {
 
@@ -2080,6 +2088,8 @@ namespace Monetizr.Campaigns
             }
 
             activeChallengeId = campaignIds.Count > 0 ? campaignIds[0] : null;
+
+            Debug.Log($"Active challenge {activeChallengeId}");
 
             isMissionsIsOudated = true;
 
