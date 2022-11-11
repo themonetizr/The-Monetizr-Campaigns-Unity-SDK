@@ -18,13 +18,14 @@ namespace Monetizr.Campaigns
             //0 - undefined, 1 - empty, 2 - item
             public int value;
             internal bool isOpened;
+            internal bool isFullyOpened;
         }
 
         public Sprite[] mapSprites;
         private List<Item> gameItems;
         private Mission currentMission;
         public GameObject[] items;
-        
+
         public void OnButtonClick()
         {
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
@@ -47,7 +48,7 @@ namespace Monetizr.Campaigns
         {
             return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
         }
-        
+
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             this.onComplete = onComplete;
@@ -61,7 +62,7 @@ namespace Monetizr.Campaigns
                 int i_copy = i;
                 Button _b = items[i].GetComponent<Button>();
                 _b.onClick.RemoveAllListeners();
-                _b.onClick.AddListener( ()=>{ OnItemClick(i_copy); });
+                _b.onClick.AddListener(() => { OnItemClick(i_copy); });
                 Animator _a = items[i].GetComponent<Animator>();
 
                 MemoryGameItem _gi = items[i].GetComponent<MemoryGameItem>();
@@ -69,9 +70,11 @@ namespace Monetizr.Campaigns
                 _gi.parent = this;
                 _gi.id = i;
 
-                gameItems.Add(new Item { b = _b, go = items[i], value = 0, a = _a, gi = _gi, isOpened = false  });
+                _gi.image.sprite = mapSprites[0];
+
+                gameItems.Add(new Item { b = _b, go = items[i], value = 0, a = _a, gi = _gi, isOpened = false });
             }
-            
+
 
             //Log.PrintWarning($"{m.campaignId} {m}");
             //MonetizrManager.Analytics.BeginShowAdAsset(AdType.MinigameScreen, m);
@@ -83,7 +86,9 @@ namespace Monetizr.Campaigns
         int phase = 0;
         bool disabledClick = false;
         int totalUnknownOpened = 0;
-
+        int correctCreated = 0;
+        int numTapped = 0;
+       
         internal void OnItemClick(int item)
         {
             if (disabledClick)
@@ -100,72 +105,100 @@ namespace Monetizr.Campaigns
 
                 gameItems[item].value = 1;
 
-                if (totalUnknownOpened > 3)
+                if (totalUnknownOpened > 3 && correctCreated < 2)
+                {
+                    correctCreated++;
                     gameItems[item].value = 2;
-                                    
+                }
+
             }
-           
+            
+
+
             //if (gameItems[item].value == 1)
             gameItems[item].a.Play("MonetizrMemoryGameTap");
             gameItems[item].gi.middleAnimSprite = mapSprites[gameItems[item].value];
             gameItems[item].gi.hasEvents = true;
-            //else
-            //    gameItems[item].a.Play("MonetizrMemoryGameTapCorrect");
-
             gameItems[item].isOpened = true;
+            gameItems[item].isFullyOpened = false;
+
+            numTapped++;
+
+            if (numTapped > 1)
+                disabledClick = true;
         }
 
         internal override void OnOpenDone(int item)
         {
             //disabledClick = false;
 
-            
-
             amountOpened++;
 
-            if (amountOpened == 2)
+            gameItems[item].isFullyOpened = true;
+
+
+            Debug.Log($"OnOpenDone {item} {gameItems[item].value}");
+
+            if (amountOpened < 2)
+                return;
+
+            phase++;
+            amountOpened = 0;
+
+            
+            int correct = 0;
+            gameItems.ForEach((Item i) => { if (i.value == 2 && i.isFullyOpened) correct++; });
+
+            //end game
+            if (correct == 2)
             {
-                
-                phase++;
-                amountOpened = 0;
+                disabledClick = true;
 
-                int correct = 0;
+                gameItems.ForEach((Item i) => { if (i.value == 2 && i.isOpened) i.a.Play("MonetizrMemoryGameVictory"); });
 
-                gameItems.ForEach((Item i) => { if (i.value == 2) correct++; });
+                StartCoroutine(OnGameVictory());
 
-                //end game
-                if (correct == 2)
-                {
-                    disabledClick = true;
+                return;
 
-                    gameItems.ForEach((Item i) => { if (i.value == 2) i.a.Play("MonetizrMemoryGameVictory"); });
-
-                    StartCoroutine(OnGameVictory());
-
-                    return;
-                }
-
-
-
-                foreach (var i in gameItems)
-                {
-                    if (i.isOpened == true)
-                    {
-                        
-                        i.a.Play("MonetizrMemoryGameTap");
-                        gameItems[item].gi.middleAnimSprite = mapSprites[0];
-                        gameItems[item].gi.hasEvents = false;
-
-                        //if (i.value == 1)
-                        //    i.a.Play("MonetizrMemoryGameTapBack");
-                        //else
-                        //    i.a.Play("MonetizrMemoryGameTapBackCorrect");
-                    }
-                }
-                //close opened
             }
 
-            Debug.Log("OnOpenDone" + item);
+            numTapped = 0;
+        
+
+            disabledClick = true;
+            bool hasEvents = false;
+            
+
+            foreach (var i in gameItems)
+            {
+                if (i.isOpened == true)
+                {
+
+                    i.a.Play("MonetizrMemoryGameTap2");
+                    i.gi.middleAnimSprite = mapSprites[0];
+                    i.gi.hasEvents = false;
+                    i.gi.isOpening = false;
+                    i.isOpened = false;
+                    i.isFullyOpened = false;
+
+                    if (!hasEvents)
+                    {
+                        hasEvents = true;
+
+                        i.gi.onCloseDone = () =>
+                        {
+                            disabledClick = false;
+                            
+
+                        };
+                    }
+
+                }
+            }
+            //close opened
+
+
+
         }
 
         internal IEnumerator OnGameVictory()
@@ -176,8 +209,13 @@ namespace Monetizr.Campaigns
 
             //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
-            isSkipped = false;
+            //isSkipped = false;
             //MonetizrManager.ShowCongratsNotification(null, m);
+            isSkipped = false;
+
+            SetActive(false);
+
+            MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
         }
 
         internal override void OnCloseDone(int item)
@@ -186,7 +224,7 @@ namespace Monetizr.Campaigns
 
             gameItems[item].isOpened = false;
 
-            
+
 
             Debug.Log("OnCloseDone" + item);
         }

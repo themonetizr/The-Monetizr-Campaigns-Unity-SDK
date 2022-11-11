@@ -17,6 +17,7 @@ namespace Monetizr.Campaigns
         //GiveawayWithMail = 16,
         VideoWithEmailGiveaway = 32,
         MinigameReward = 64,
+        MemoryMinigameReward = 128,
         All = uint.MaxValue,
     }
 

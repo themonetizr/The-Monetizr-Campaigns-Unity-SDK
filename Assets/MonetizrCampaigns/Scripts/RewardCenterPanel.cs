@@ -526,7 +526,9 @@ namespace Monetizr.Campaigns
                 case MissionType.TwitterReward: AddTwitterChallenge(item, m, missionId); break;
                 //case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
                 case MissionType.VideoWithEmailGiveaway: AddVideoGiveawayChallenge(item, m, missionId); break;
-                case MissionType.MinigameReward: AddMinigameChallenge(item, m, missionId); break;
+                case MissionType.MinigameReward:
+                case MissionType.MemoryMinigameReward:
+                    AddMinigameChallenge(item, m, missionId); break;
             }
 
         }

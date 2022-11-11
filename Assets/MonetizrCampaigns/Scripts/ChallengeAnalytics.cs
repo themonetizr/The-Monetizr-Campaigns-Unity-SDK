@@ -659,6 +659,9 @@ namespace Monetizr.Campaigns
 
         public void TrackEvent(string name, Mission currentMissionDesc)
         {
+            if (currentMissionDesc.campaignId == null)
+                return;
+
             TrackEvent(name, currentMissionDesc.campaignId);
         }
 

@@ -239,7 +239,9 @@ namespace Monetizr.Campaigns
             bool hasHtml = MonetizrManager.Instance.HasAsset(campaign, AssetsType.Html5PathString);
             bool hasVideo = MonetizrManager.Instance.HasAsset(campaign, AssetsType.VideoFilePathString);
 
-            if (!hasHtml && !hasVideo)
+            bool video = !(MonetizrManager.Instance.GetCampaign(campaign).serverSettings.GetParam("email_giveaway_mission_without_video") == "true");
+
+            if (video && !hasHtml && !hasVideo)
             {
                 return null;
             }
@@ -250,7 +252,7 @@ namespace Monetizr.Campaigns
             //if (claimableReward == null)
             //    return null;
 
-            bool video = !(MonetizrManager.Instance.GetCampaign(campaign).serverSettings.GetParam("email_giveaway_mission_without_video") == "true");
+            
 
             RewardType rt = RewardType.Coins;
 
@@ -304,7 +306,9 @@ namespace Monetizr.Campaigns
                 case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign, reward); break;
                 // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
                 case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign, reward); break;
-                case MissionType.MinigameReward: m = prepareMinigameMission(mt, campaign, reward); break;
+                case MissionType.MinigameReward: 
+                case MissionType.MemoryMinigameReward: m = prepareMinigameMission(mt, campaign, reward); break;
+
             }
 
             if (m == null)
@@ -331,7 +335,8 @@ namespace Monetizr.Campaigns
             switch (m.type)
             {
                 case MissionType.SurveyReward: return SurveyClaimAction(m, onComplete, updateUIDelegate);
-                case MissionType.MinigameReward: return MinigameClaimAction(m, onComplete, updateUIDelegate);
+                case MissionType.MinigameReward:
+                case MissionType.MemoryMinigameReward: return MinigameClaimAction(m, onComplete, updateUIDelegate);
                 case MissionType.VideoWithEmailGiveaway: return GetEmailGiveawayClaimAction(m, onComplete, updateUIDelegate);
             }
 
@@ -349,9 +354,9 @@ namespace Monetizr.Campaigns
             {
                 //MonetizrManager.ShowSurvey(onSurveyComplete, m);
 
-                //MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.CarMemoryGame, m);
-
-                MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.MemoryGame, m);
+               //MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.CarMemoryGame, m);
+               
+               MonetizrManager.ShowMinigame(onMinigameComplete, m);
 
             };
         }

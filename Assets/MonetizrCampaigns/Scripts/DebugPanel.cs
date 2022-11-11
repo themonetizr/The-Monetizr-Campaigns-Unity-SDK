@@ -116,7 +116,7 @@ namespace Monetizr.Campaigns
 
             //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 
-            MonetizrManager.ShowMinigame(null, PanelId.CarMemoryGame, null);
+            //MonetizrManager.ShowMinigame(null, PanelId.CarMemoryGame, null);
         }
 
 
