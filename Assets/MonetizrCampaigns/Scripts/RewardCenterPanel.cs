@@ -24,6 +24,8 @@ namespace Monetizr.Campaigns
         private int amountOfItems = 0;
         private readonly int bannerHeight = 1050+100;
 
+        private bool showNotClaimedDisabled = false;
+
         //public List<MissionUIDescription> missionsDescriptions;
 
         private new void Awake()
@@ -102,7 +104,19 @@ namespace Monetizr.Campaigns
             //challenges.Remove(activeChallenge);
             //challenges.Insert(0, activeChallenge);
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+            var campaignId = MonetizrManager.Instance.GetActiveCampaign();
+
+            var campaign = MonetizrManager.Instance.GetCampaign(campaignId);
+
+            if (campaign == null)
+            {
+                Debug.LogWarning("No active campaigns for RC!");
+                return;
+            }
+
+            bool showNotClaimedDisabled = campaign.serverSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
+
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
 
             if(missions.Count == 0)
             {
@@ -129,6 +143,8 @@ namespace Monetizr.Campaigns
             foreach (var m in missions)
             {
                 var ch = m.campaignId;
+
+                m.showHidden = showNotClaimedDisabled;
 
                 if (ch == missions[0].campaignId)
                 //if (ch == activeChallenge)
@@ -170,7 +186,7 @@ namespace Monetizr.Campaigns
 
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} video";
-            m.missionDescription = $"Watch video by {brandName} and earn {m.reward} {rewardTitle}";
+            m.missionDescription = $"Watch video by {brandName} and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}";
             m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
             m.progress = 1;
             m.brandName = brandName;
@@ -221,7 +237,7 @@ namespace Monetizr.Campaigns
 
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} multiply";
-            m.missionDescription = $"Earn {m.reward} {rewardTitle} and double it with {brandName}";
+            m.missionDescription = $"Earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} and double it with {brandName}";
             m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
 
             m.progress = ((float)(getCurrencyFunc() - m.startMoney))/(float)m.reward;
@@ -270,7 +286,7 @@ namespace Monetizr.Campaigns
 
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} survey";
-            m.missionDescription = $"Complete survey and earn {m.reward} {rewardTitle} with {brandName}";
+            m.missionDescription = $"Complete survey and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} with {brandName}";
             m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
 
             m.progress = 1.0f;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
@@ -332,7 +348,7 @@ namespace Monetizr.Campaigns
 
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} twitter";
-            m.missionDescription = $"Follow twitter and earn {m.reward} {rewardTitle} with {brandName}";
+            m.missionDescription = $"Follow twitter and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} with {brandName}";
             m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
 
             m.progress = 1.0f; // ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
@@ -403,10 +419,10 @@ namespace Monetizr.Campaigns
 #endif
 
             if (needToPlayVideo)
-                // m.missionDescription = $"Watch video and get {m.reward} {rewardTitle} from {brandName}";
+                // m.missionDescription = $"Watch video and get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
                 m.missionDescription = $"Watch video and get $3 OFF Coupon from {brandName}";
             else
-                m.missionDescription = $"Get {m.reward} {rewardTitle} from {brandName}";
+                m.missionDescription = $"Get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
 
             m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
 
@@ -471,7 +487,7 @@ namespace Monetizr.Campaigns
             m.missionTitle = $"{brandName} minigame";
 
                         
-            m.missionDescription = $"Play minigame and get {m.reward} {rewardTitle} from {brandName}";
+            m.missionDescription = $"Play minigame and get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
             
 
             m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
@@ -629,10 +645,13 @@ namespace Monetizr.Campaigns
                 if (it.mission == null)
                     continue;
 
-                if (it.mission.isDisabled)
+                //if (it.mission.isDisabled)
+                //    continue;
+
+                if (it.mission.state == MissionUIState.Hidden)
                     continue;
 
-                if(it.mission.state == MissionUIState.ToBeHidden)
+                if (it.mission.state == MissionUIState.ToBeHidden)
                 {
                     if (it.gameObject.activeSelf)
                     {

@@ -83,7 +83,7 @@ namespace Monetizr.Campaigns
         }
 
         //TODO: add currency
-        internal Mission FindMissionInCache(int id, MissionType mt, string ch, int reward)
+        internal Mission FindMissionInCache(int id, MissionType mt, string ch, ulong reward)
         {
             foreach (var m in missions)
             {
@@ -124,7 +124,7 @@ namespace Monetizr.Campaigns
         //- claim full campaigns when all missions conntected to this campaign is over
         //- saving progress  
 
-        Mission prepareVideoMission(MissionType mt, string campaign, int reward)
+        Mission prepareVideoMission(MissionType mt, string campaign)
         {
             bool hasHtml = MonetizrManager.Instance.HasAsset(campaign, AssetsType.Html5PathString);
             bool hasVideo = MonetizrManager.Instance.HasAsset(campaign, AssetsType.VideoFilePathString);
@@ -141,7 +141,7 @@ namespace Monetizr.Campaigns
             {
                 rewardType = RewardType.Coins,
                 type = MissionType.VideoReward,
-                reward = reward,
+                //reward = reward,
                 progress = 1.0f,
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
@@ -151,13 +151,13 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareTwitterMission(MissionType mt, string campaign, int reward)
+        Mission prepareTwitterMission(MissionType mt, string campaign)
         {
             return new Mission()
             {
                 rewardType = RewardType.Coins,
                 type = MissionType.TwitterReward,
-                reward = reward,
+                //reward = reward,
                 progress = 1.0f,
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
@@ -167,7 +167,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareDoubleMission(MissionType mt, string campaign, int reward)
+        Mission prepareDoubleMission(MissionType mt, string campaign)
         {
             RewardType rt = RewardType.Coins;
 
@@ -176,7 +176,7 @@ namespace Monetizr.Campaigns
                 rewardType = rt,
                 startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = MissionType.MutiplyReward,
-                reward = reward,
+                //reward = reward,
                 progress = 0.0f,
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
@@ -186,7 +186,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission PrepareSurveyMission(MissionType mt, string campaign, int reward)
+        Mission PrepareSurveyMission(MissionType mt, string campaign)
         {
             string url = MonetizrManager.Instance.GetAsset<string>(campaign, AssetsType.SurveyURLString);
 
@@ -197,7 +197,7 @@ namespace Monetizr.Campaigns
             {
                 rewardType = RewardType.Coins,
                 type = mt,
-                reward = reward,
+                //reward = reward,
                 isDisabled = false, //survey is disabled from start
                 surveyUrl = url,
                 //delaySurveyTimeSec = 30,//86400,
@@ -209,7 +209,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission PrepareGiveawayMission(MissionType mt, string campaign, int reward)
+        Mission PrepareGiveawayMission(MissionType mt, string campaign)
         {
             //if no claimable reward in campaign - no give away missions
             var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
@@ -224,7 +224,7 @@ namespace Monetizr.Campaigns
                 rewardType = rt,
                 startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = mt,
-                reward = reward,
+                //reward = reward,
                 progress = 0.0f,
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
@@ -234,7 +234,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareVideoGiveawayMission(MissionType mt, string campaign, int reward)
+        Mission prepareVideoGiveawayMission(MissionType mt, string campaign)
         {
             bool hasHtml = MonetizrManager.Instance.HasAsset(campaign, AssetsType.Html5PathString);
             bool hasVideo = MonetizrManager.Instance.HasAsset(campaign, AssetsType.VideoFilePathString);
@@ -261,7 +261,7 @@ namespace Monetizr.Campaigns
                 rewardType = rt,
                 startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = mt,
-                reward = reward,
+                //reward = reward,
                 progress = 1.0f,
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
@@ -271,7 +271,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareMinigameMission(MissionType mt, string campaign, int reward)
+        Mission prepareMinigameMission(MissionType mt, string campaign)
         {            
             RewardType rt = RewardType.Coins;
 
@@ -280,7 +280,7 @@ namespace Monetizr.Campaigns
                 rewardType = rt,
                 startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = mt,
-                reward = reward,
+                //reward = reward,
                 progress = 1.0f,
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
@@ -294,26 +294,25 @@ namespace Monetizr.Campaigns
         Mission prepareNewMission(int id, string campaign, MissionDescription md)
         {
             MissionType mt = md.missionType;
-            int reward = md.reward;
-            
             Mission m = null;
 
             switch (mt)
             {
-                case MissionType.MutiplyReward: m = prepareDoubleMission(mt, campaign, reward); break;
-                case MissionType.VideoReward: m = prepareVideoMission(mt, campaign, reward); break;
-                case MissionType.SurveyReward: m = PrepareSurveyMission(mt, campaign, reward); break;
-                case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign, reward); break;
+                case MissionType.MutiplyReward: m = prepareDoubleMission(mt, campaign); break;
+                case MissionType.VideoReward: m = prepareVideoMission(mt, campaign); break;
+                case MissionType.SurveyReward: m = PrepareSurveyMission(mt, campaign); break;
+                case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign); break;
                 // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
-                case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign, reward); break;
+                case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign); break;
                 case MissionType.MinigameReward: 
-                case MissionType.MemoryMinigameReward: m = prepareMinigameMission(mt, campaign, reward); break;
+                case MissionType.MemoryMinigameReward: m = prepareMinigameMission(mt, campaign); break;
 
             }
 
             if (m == null)
                 return null;
-                        
+
+            m.reward = md.reward;
             m.state = MissionUIState.Visible;
             m.id = id;
             m.isSponsored = true;
@@ -323,6 +322,7 @@ namespace Monetizr.Campaigns
             m.sdkVersion = MonetizrManager.SDKVersion;
             m.surveyUrl = md.surveyUrl;
             m.serverId = md.id;
+            m.rewardPercent = md.rewardPercent;
 
 
             return m;
@@ -485,6 +485,18 @@ namespace Monetizr.Campaigns
             }
         }
 
+        internal void UpdateMissionsRewards(RewardType rt, MonetizrManager.GameReward reward)
+        {
+            foreach (var m in missions)
+            {
+                if (m.rewardType == rt)
+                {
+                    m.reward = (ulong)(reward.maximumAmount * (m.rewardPercent / 100.0f));
+                }
+            }
+            
+        }
+
         internal Mission GetFirstUnactiveMission()
         {
             foreach (var m in missions)
@@ -539,7 +551,7 @@ namespace Monetizr.Campaigns
                     if (rewardAmount > 100.0f)
                         return;
 
-                    rewardAmount = (int)(gr.maximumAmount * (rewardAmount / 100.0f));
+                    ulong rewardAmount2 = (ulong)(gr.maximumAmount * (rewardAmount / 100.0f));
                     //}
 
                     //activateAfter = _m.GetActivateRange();
@@ -548,10 +560,11 @@ namespace Monetizr.Campaigns
 
                     m.Add(new MissionDescription {
                             missionType = _m.GetMissionType(),
-                            reward = rewardAmount,
+                            reward = rewardAmount2,
                             rewardCurrency = _m.GetRewardType(),
                             activateAfter = _m.GetActivateRange(),
                             surveyUrl = serverSettings.GetParam(_m.survey),
+                            rewardPercent = rewardAmount,
                             id = _m.getId() });
 
                 });
@@ -891,13 +904,19 @@ namespace Monetizr.Campaigns
             });
         }
 
-        internal List<Mission> GetMissionsForRewardCenter()
+        internal List<Mission> GetMissionsForRewardCenter(bool includeDisabled = false)
         {
+
             return missions.FindAll((Mission m) => {
+
+                bool disabled = m.isDisabled;
+
+                if(includeDisabled)
+                    disabled = false;
 
                 return m.isSponsored &&
                         m.isClaimed != ClaimState.Claimed &&
-                        !m.isDisabled &&
+                        !disabled &&
                         IsActiveByTime(m) &&
                         m.isServerCampaignActive;
                    

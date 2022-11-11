@@ -44,8 +44,8 @@ namespace Monetizr.Campaigns
 
                 string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
-                t = t.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
-                t = t.Replace("%reward_amount%", $"{m.reward}");
+                t = t.Replace("%ingame_reward%", $"{MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}");
+                t = t.Replace("%reward_amount%", $"{MonetizrRewardedItem.ScoreShow(m.reward)}");
                 t = t.Replace("%reward_title%", $"{rewardTitle}");
                 t = t.Replace("<br/>", "\n");
 
@@ -58,8 +58,8 @@ namespace Monetizr.Campaigns
 
                 string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
-                t = t.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
-                t = t.Replace("%reward_amount%", $"{m.reward}");
+                t = t.Replace("%ingame_reward%", $"{MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}");
+                t = t.Replace("%reward_amount%", $"{MonetizrRewardedItem.ScoreShow(m.reward)}");
                 t = t.Replace("%reward_title%", $"{rewardTitle}");
                 t = t.Replace("<br/>", "\n");
 

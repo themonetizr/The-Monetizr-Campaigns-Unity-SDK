@@ -37,11 +37,30 @@ namespace Monetizr.Campaigns
         DateTime lastUpdateTime;
 
         [HideInInspector]
-        public int currectProgress;
-        public int maxProgress;
+        public ulong currectProgress;
+        public ulong maxProgress;
         public bool showGift = false;
 
         public RectTransform rect;
+
+        public GameObject hideOverlay;
+
+        internal static string ScoreShow(double Score)
+        {
+            string result;
+            string[] ScoreNames = new string[] { "", "k", "M", "B", "T", "aa", "ab", "ac", "ad", "ae", "af", "ag", "ah", "ai", "aj", "ak", "al", "am", "an", "ao", "ap", "aq", "ar", "as", "at", "au", "av", "aw", "ax", "ay", "az", "ba", "bb", "bc", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bk", "bl", "bm", "bn", "bo", "bp", "bq", "br", "bs", "bt", "bu", "bv", "bw", "bx", "by", "bz", };
+            int i;
+
+            for (i = 0; i < ScoreNames.Length; i++)
+                if (Score < 900)
+                    break;
+                else Score = System.Math.Floor(Score / 100f) / 10f;
+
+            if (Score == System.Math.Floor(Score))
+                result = Score.ToString() + ScoreNames[i];
+            else result = Score.ToString("F1") + ScoreNames[i];
+            return result;
+        }
 
         internal void UpdateWithDescription(RewardCenterPanel panel, Mission m)
         {
@@ -102,6 +121,10 @@ namespace Monetizr.Campaigns
 
             }*/
 
+            //if (m.showHidden)
+
+                hideOverlay.SetActive(m.showHidden);
+
             UIController.PrepareCustomColors(backgroundImage, borderImage, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
 
 
@@ -129,7 +152,7 @@ namespace Monetizr.Campaigns
 
             //actionButton.onClick.AddListener( ()=> { md.onClaimButtonPress.Invoke(); });
 
-            boosterNumber.text = $"+{m.reward}";
+            boosterNumber.text = $"+{ScoreShow(m.reward)}";
 
             Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
 

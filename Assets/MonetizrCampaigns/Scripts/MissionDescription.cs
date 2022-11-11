@@ -24,7 +24,8 @@ namespace Monetizr.Campaigns
     public class MissionDescription
     {
         internal MissionType missionType;
-        internal int reward;
+        internal ulong reward;
+        internal int rewardPercent;
         internal RewardType rewardCurrency;
         internal List<int> activateAfter = new List<int>();
         internal string surveyUrl;
@@ -35,27 +36,29 @@ namespace Monetizr.Campaigns
 
         }
 
-        public MissionDescription(int reward, RewardType rewardCurrency)
+        public MissionDescription(ulong reward, RewardType rewardCurrency)
         {
             this.missionType = MissionType.VideoWithEmailGiveaway;
             this.reward = reward;
             this.rewardCurrency = rewardCurrency;
         }
 
-        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency)
+        public MissionDescription(MissionType missionType, ulong reward, int rewardPercent, RewardType rewardCurrency)
         {
             this.missionType = missionType;
             this.reward = reward;
             this.rewardCurrency = rewardCurrency;
+            this.rewardPercent = rewardPercent;
         }
 
-        public MissionDescription(MissionType missionType, int reward, RewardType rewardCurrency, List<int> activateAfter, string surveyUrl)
+        public MissionDescription(MissionType missionType, ulong reward, int rewardPercent, RewardType rewardCurrency, List<int> activateAfter, string surveyUrl)
         {
             this.missionType = missionType;
             this.reward = reward;
             this.rewardCurrency = rewardCurrency;
             this.activateAfter = activateAfter;
             this.surveyUrl = surveyUrl;
+            this.rewardPercent = rewardPercent;
         }
     }
 
@@ -246,13 +249,14 @@ namespace Monetizr.Campaigns
         [SerializeField] internal string apiKey;
 
         [SerializeField] internal MissionType type;
-        [SerializeField] internal int startMoney;
+        [SerializeField] internal ulong startMoney;
    
         
 
         [SerializeField] internal bool isSponsored;
         [SerializeField] internal string brandName;
-        [SerializeField] internal int reward;
+        [SerializeField] internal ulong reward;
+        [SerializeField] internal int rewardPercent;
 
         [NonSerialized] internal int sponsoredId;
         [NonSerialized] internal Sprite brandBanner;
@@ -333,6 +337,8 @@ namespace Monetizr.Campaigns
         [NonSerialized] internal bool isToBeRemoved;
 
         [SerializeField] internal bool isRewardIngame;
+
+        [NonSerialized] internal bool showHidden;
     }
 
     /*internal class  SurveyMission : Mission

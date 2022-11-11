@@ -25,6 +25,7 @@ namespace Monetizr.Campaigns
         private List<Item> gameItems;
         private Mission currentMission;
         public GameObject[] items;
+        public Image minigameBackground;
 
         public void OnButtonClick()
         {
@@ -54,6 +55,26 @@ namespace Monetizr.Campaigns
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
+
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite1))
+            {
+                mapSprites[0] = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.MinigameSprite1);
+            }
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite2))
+            {
+                mapSprites[1] = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.MinigameSprite2);
+            }
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite3))
+            {
+                mapSprites[2] = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.MinigameSprite3);
+            }
+
+            UIController.SetColorForElement(minigameBackground, m.campaignServerSettings.dictionary, "MemoryGame.bg_color");
+
+            //---------------
 
             gameItems = new List<Item>(9);
 

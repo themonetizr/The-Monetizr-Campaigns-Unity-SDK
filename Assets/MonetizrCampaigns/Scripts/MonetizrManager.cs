@@ -72,6 +72,11 @@ namespace Monetizr.Campaigns
         RewardSprite,
         IngameRewardSprite,
         UnknownRewardSprite,
+
+        MinigameSprite1,
+        MinigameSprite2,
+        MinigameSprite3,
+
     }
 
     internal class ServerCampaignWithAssets
@@ -214,7 +219,7 @@ namespace Monetizr.Campaigns
         [SerializeField] internal UDateTime lastTimeShowNotification;
         [SerializeField] internal int amountNotificationsShown;
         [SerializeField] internal int amountTeasersShown;
-        
+
         //[SerializeField] internal SerializableDictionary<string,string> settings = new SerializableDictionary<string, string>();
     }
 
@@ -222,8 +227,9 @@ namespace Monetizr.Campaigns
     internal class CampaignsCollection : BaseCollection
     {
         //campaign id and settings
-         [SerializeField] internal List<LocalCampaignSettings> campaigns = 
-            new List<LocalCampaignSettings>();
+        [SerializeField]
+        internal List<LocalCampaignSettings> campaigns =
+           new List<LocalCampaignSettings>();
 
         internal override void Clear()
         {
@@ -287,7 +293,7 @@ namespace Monetizr.Campaigns
             var camp = data.GetCampaign(campaign);
 
             Debug.Assert(camp != null);
-                        
+
             return camp;
         }
 
@@ -332,7 +338,7 @@ namespace Monetizr.Campaigns
 
             //check if campaign is missing - remove it from data
             data.campaigns.RemoveAll((LocalCampaignSettings c) => !challenges.ContainsKey(c.campId));
-                        
+
             //add empty campaign into settings
             challenges.Values.ToList().ForEach(c => AddCampaign(c.campaign));
 
@@ -427,9 +433,9 @@ namespace Monetizr.Campaigns
         {
             internal Sprite icon;
             internal string title;
-            internal Func<int> GetCurrencyFunc;
-            internal Action<int> AddCurrencyAction;
-            internal int maximumAmount;
+            internal Func<ulong> GetCurrencyFunc;
+            internal Action<ulong> AddCurrencyAction;
+            internal ulong maximumAmount;
         }
 
         public static string temporaryEmail = "";
@@ -449,7 +455,7 @@ namespace Monetizr.Campaigns
         private static int debugAttempt = 0;
         internal static int abTestSegment = 0;
 
-        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<int> GetCurrencyFunc, Action<int> AddCurrencyAction, int maxAmount)
+        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
         {
             GameReward gr = new GameReward()
             {
@@ -463,6 +469,20 @@ namespace Monetizr.Campaigns
             gameRewards[rt] = gr;
         }
 
+        public static void SetGameCoinMaximumReward(RewardType rt, ulong maxAmount)
+        {
+            GameReward reward = GetGameReward(rt);
+
+            if (reward != null)
+            {
+                reward.maximumAmount = maxAmount;
+
+                Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+
+                MonetizrManager.instance.missionsManager.UpdateMissionsRewards(rt, reward);
+            }
+        }
+
         internal static GameReward GetGameReward(RewardType rt)
         {
             if (gameRewards.ContainsKey(rt))
@@ -473,8 +493,8 @@ namespace Monetizr.Campaigns
 
 
         public static MonetizrManager Initialize(string apiKey,
-            List<MissionDescription> sponsoredMissions, 
-            Action onRequestComplete, 
+            List<MissionDescription> sponsoredMissions,
+            Action onRequestComplete,
             Action<bool> soundSwitch,
             Action<bool> onUIVisible,
             UserDefinedEvent userEvent = null)
@@ -910,7 +930,7 @@ namespace Monetizr.Campaigns
             Mission mission = missions[0];
 
             //manual notification calls, no limis
-            if(placement == 2)
+            if (placement == 2)
             {
                 FillInfo(mission);
                 ShowNotification(onComplete, mission, PanelId.StartNotification);
@@ -929,11 +949,11 @@ namespace Monetizr.Campaigns
             {
                 forceSkip = mission.campaignServerSettings.GetParam("no_main_menu_notifications") == "true";
 
-                if(forceSkip)
+                if (forceSkip)
                     Debug.Log($"No notifications in main menu defined on serverside");
             }
 
-           // Debug.Log($"------ShowStartupNotification 3 {placement}");
+            // Debug.Log($"------ShowStartupNotification 3 {placement}");
 
             //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
 
@@ -944,7 +964,7 @@ namespace Monetizr.Campaigns
             }
 
             //Debug.Log($"Notifications sk {mission.amountOfNotificationsSkipped} shown {mission.amountOfNotificationsShown}");
-            
+
             mission.amountOfNotificationsSkipped++;
 
             if (mission.amountOfNotificationsSkipped <= mission.campaignServerSettings.GetIntParam("amount_of_skipped_notifications"))
@@ -1131,7 +1151,7 @@ namespace Monetizr.Campaigns
         }
 
 
-        public static void RegisterUserDefinedMission(string missionTitle, string missionDescription, Sprite missionIcon, RewardType rt, int reward, float progress, Action onClaimButtonPress)
+        public static void RegisterUserDefinedMission(string missionTitle, string missionDescription, Sprite missionIcon, RewardType rt, ulong reward, float progress, Action onClaimButtonPress)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
@@ -1153,7 +1173,7 @@ namespace Monetizr.Campaigns
 
         //TODO: need to connect now this mission and campaign from the server
         //next time once we register the mission it should connect with the same campaign
-        public static void RegisterSponsoredMission(RewardType rt, int rewardAmount)
+        public static void RegisterSponsoredMission(RewardType rt, ulong rewardAmount)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
@@ -1181,7 +1201,7 @@ namespace Monetizr.Campaigns
         /// <param name="rewardTitle">Coins</param>
         /// <param name="GetNormalCurrencyFunc">Get coins func</param>
         /// <param name="AddNormalCurrencyAction">Add coins to user account</param>
-        public static void RegisterSponsoredMission2(RewardType rt, int goalAmount)
+        public static void RegisterSponsoredMission2(RewardType rt, ulong goalAmount)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
@@ -1213,7 +1233,7 @@ namespace Monetizr.Campaigns
         public enum OnCompleteStatus
         {
             //if player rejected the offer or haven't seen anything
-            Skipped, 
+            Skipped,
 
             //if player completed the offer
             Completed
@@ -1233,7 +1253,7 @@ namespace Monetizr.Campaigns
         {
             var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
 
-            if(missions != null && missions.Count > 0)
+            if (missions != null && missions.Count > 0)
             {
                 //no more offers, skipping
                 if (missions[0].amountOfRVOffersShown == 0)
@@ -1328,8 +1348,8 @@ namespace Monetizr.Campaigns
             {
                 {MissionType.MinigameReward, new Tuple<PanelId, string>(PanelId.CarMemoryGame,"MonetizrCarGamePanel")},
                 {MissionType.MemoryMinigameReward, new Tuple<PanelId, string>(PanelId.MemoryGame,"MonetizrGamePanel")},
-            };           
-            
+            };
+
             instance.uiController.ShowPanelFromPrefab(panelNames[m.type].Item2, panelNames[m.type].Item1, onComplete, false, m);
         }
 
@@ -1423,7 +1443,7 @@ namespace Monetizr.Campaigns
 
             if (instance == null)
                 return;
-                       
+
 
             if (!Instance.HasCampaignsAndActive())
                 return;
@@ -1482,15 +1502,15 @@ namespace Monetizr.Campaigns
                      //If notification isn't closed
                      else
                      {
-                         ShowRewardCenter(null, (bool isRCSkipped) => 
+                         ShowRewardCenter(null, (bool isRCSkipped) =>
                             {
                                 //Does player complete the task?
                                 onComplete?.Invoke(isRCSkipped ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
                             });
                      }
-                });
-            
-           
+                 });
+
+
 
         }
 
@@ -1550,10 +1570,10 @@ namespace Monetizr.Campaigns
             instance.localSettings.GetSetting(campaign.id).amountTeasersShown++;
             instance.localSettings.SaveData();
 
-            int uiVersion = campaign.serverSettings.GetIntParam("teaser_design_version",2);
+            int uiVersion = campaign.serverSettings.GetIntParam("teaser_design_version", 2);
 
-            instance.uiController.ShowTinyMenuTeaser(teaserRoot,tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
-            
+            instance.uiController.ShowTinyMenuTeaser(teaserRoot, tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
+
         }
 
         public static void HideTinyMenuTeaser(bool checkIfSomeMissionsAvailable = false)
@@ -1598,7 +1618,7 @@ namespace Monetizr.Campaigns
 
                 ClaimMissionData(mission);
 
-                if(missionsManager.UpdateMissionsActivity(mission))
+                if (missionsManager.UpdateMissionsActivity(mission))
                 {
                     updateUI = true;
                 }
@@ -1870,15 +1890,15 @@ namespace Monetizr.Campaigns
             {
                 _challengesClient.InitializeMixpanel(_challenges[0].testmode, _challenges[0].panel_key);
 
-                _challengesClient.analytics.TrackEvent("Get List Started",_challenges[0]);
+                _challengesClient.analytics.TrackEvent("Get List Started", _challenges[0]);
                 _challengesClient.analytics.StartTimedEvent("Get List Finished");
             }
             else
             {
                 _challengesClient.InitializeMixpanel(false, null);
             }
-                                    
-           
+
+
 
 #if TEST_SLOW_LATENCY
             await Task.Delay(10000);
@@ -2013,6 +2033,25 @@ namespace Monetizr.Campaigns
 
                             break;
 
+
+                        case "minigame_asset1":
+
+                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.MinigameSprite1, true);
+
+                            break;
+
+                        case "minigame_asset2":
+
+                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.MinigameSprite2, true);
+
+                            break;
+
+                        case "minigame_asset3":
+
+                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.MinigameSprite3, true);
+
+                            break;
+
                     }
 
                 }
@@ -2057,7 +2096,7 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                if(_challenges.Count > 0)
+                if (_challenges.Count > 0)
                 {
                     _challengesClient.analytics.TrackEvent("Get List Load Failed", _challenges[0]);
                 }
