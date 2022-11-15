@@ -30,6 +30,9 @@ namespace Monetizr.Campaigns
         internal List<int> activateAfter = new List<int>();
         internal string surveyUrl;
         internal int id;
+        internal int autoStartAfter;
+        internal bool alwaysHiddenInRC;
+
 
         public MissionDescription()
         {
@@ -341,6 +344,9 @@ namespace Monetizr.Campaigns
         [NonSerialized] internal bool showHidden;
 
         [NonSerialized] internal MonetizrRewardedItem rewardCenterItem;
+
+        [SerializeField] internal int autoStartAfter;
+        [SerializeField] internal bool alwaysHiddenInRC;
     }
 
     /*internal class  SurveyMission : Mission

@@ -323,6 +323,8 @@ namespace Monetizr.Campaigns
             m.surveyUrl = md.surveyUrl;
             m.serverId = md.id;
             m.rewardPercent = md.rewardPercent;
+            m.autoStartAfter = md.autoStartAfter;
+            m.alwaysHiddenInRC = md.alwaysHiddenInRC;
 
 
             return m;
@@ -330,8 +332,28 @@ namespace Monetizr.Campaigns
 
         
 
-        internal Action ClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        internal Action ClaimAction(Mission m, Action<bool> __onComplete, Action updateUIDelegate)
         {
+            var onComplete = __onComplete;
+
+            
+            if(m.autoStartAfter >= 0)
+            {
+                var nextMission = missions.Find(_m => _m.serverId == m.autoStartAfter);
+
+                if (nextMission != null && nextMission != m)
+                {
+                    onComplete = (bool skipped) =>
+                    {
+                    //launch previous on complete
+                    if (!skipped)
+                        {
+                            ClaimAction(nextMission, __onComplete, updateUIDelegate).Invoke();
+                        }
+                    };
+                }
+            }
+
             switch (m.type)
             {
                 case MissionType.SurveyReward: return SurveyClaimAction(m, onComplete, updateUIDelegate);
@@ -370,7 +392,7 @@ namespace Monetizr.Campaigns
 
 #if UNITY_EDITOR
             return () => onSurveyComplete.Invoke(false);
-#endif
+#else
                      
 
             return () =>
@@ -381,6 +403,7 @@ namespace Monetizr.Campaigns
                            m,
                            PanelId.SurveyNotification);*/
             };
+#endif
         }
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
@@ -565,7 +588,9 @@ namespace Monetizr.Campaigns
                             activateAfter = _m.GetActivateRange(),
                             surveyUrl = serverSettings.GetParam(_m.survey),
                             rewardPercent = rewardAmount,
-                            id = _m.getId() });
+                            id = _m.getId(),
+                            alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
+                            autoStartAfter = _m.GetAutoStartId()});
 
                 });
 
@@ -591,8 +616,37 @@ namespace Monetizr.Campaigns
             //Survey link
             public string survey;
 
-            //Survey link
+            //Server id
             public string id;
+
+            //Always hidden in reward center
+            public string hidden_in_rc;
+
+            //Auto start after completing 
+            public string auto_start_after;
+                        
+            public int GetAutoStartId()
+            {
+                int res = -1;
+
+                if (auto_start_after == null)
+                    return res;
+
+                if (int.TryParse(auto_start_after, out res))
+                    return res;
+
+                return res;
+            }
+
+            public bool IsAlwaysHiddenInRC()
+            {
+                bool res = false;
+
+                if (bool.TryParse(hidden_in_rc, out res))
+                    return res;
+
+                return res;
+            }
 
             public int getId()
             {
@@ -623,6 +677,7 @@ namespace Monetizr.Campaigns
 
                 return result;
             }
+
 
             public RewardType GetRewardType()
             {

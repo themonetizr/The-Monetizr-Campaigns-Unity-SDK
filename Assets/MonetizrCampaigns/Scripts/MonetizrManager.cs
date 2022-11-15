@@ -546,7 +546,7 @@ namespace Monetizr.Campaigns
             instance.userDefinedEvent = userEvent;
             instance.onUIVisible = onUIVisible;
 
-            monetizrManager.Initalize(apiKey, onRequestComplete, soundSwitch);
+            monetizrManager.Initialize(apiKey, onRequestComplete, soundSwitch);
 
 
 
@@ -577,7 +577,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Initialize
         /// </summary>
-        private void Initalize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
+        private void Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
         {
 #if USING_WEBVIEW
             if (!UniWebView.IsWebViewSupported)
