@@ -1598,7 +1598,7 @@ namespace Monetizr.Campaigns
             instance.uiController.HidePanel(PanelId.TinyMenuTeaser);
         }
 
-        internal void OnClaimRewardComplete(Mission mission, bool isSkipped, Action updateUIDelegate)
+        internal void OnClaimRewardComplete(Mission mission, bool isSkipped, Action<bool> onComplete, Action updateUIDelegate)
         {
             if (claimForSkippedCampaigns)
                 isSkipped = false;
@@ -1648,6 +1648,8 @@ namespace Monetizr.Campaigns
                 }
 
                 MonetizrManager.HideTinyMenuTeaser(true);
+
+                onComplete?.Invoke(isSkipped);
 
                 if (!updateUI)
                     return;

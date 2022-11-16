@@ -196,14 +196,17 @@ namespace Monetizr.Campaigns
             m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
             m.claimButtonText = "Watch video";
 
-            Action<bool> onVideoComplete = (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped, AddNewUIMissions); };
+           /* Action<bool> onVideoComplete = (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped, AddNewUIMissions); };
 
             //show video, then claim rewards if it's completed
             m.onClaimButtonPress = () =>
             {
                 OnVideoPlayPress(m, onVideoComplete);
 
-            };
+            };*/
+
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
+
 
             //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
 
@@ -250,7 +253,9 @@ namespace Monetizr.Campaigns
             m.claimButtonText = "Claim reward";
 
             //show video, then claim rewards if it's completed
-            m.onClaimButtonPress = () => { OnClaimRewardComplete(m, false, AddNewUIMissions); };
+            //m.onClaimButtonPress = () => { OnClaimRewardComplete(m, false, AddNewUIMissions); };
+
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
 
             //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
 
@@ -438,7 +443,7 @@ namespace Monetizr.Campaigns
             m.claimButtonText = needToPlayVideo ? "Watch video!" : "Claim reward!";
 
 
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m,null,AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m,null,AddNewUIMissions);
 
            
 
@@ -588,7 +593,7 @@ namespace Monetizr.Campaigns
 
         public void OnClaimRewardComplete(Mission mission, bool isSkipped, Action updateUIDelegate)
         {
-            MonetizrManager.Instance.OnClaimRewardComplete(mission, isSkipped, updateUIDelegate);
+            MonetizrManager.Instance.OnClaimRewardComplete(mission, isSkipped, null, updateUIDelegate);
         }
 
         public void AddNewUIMissions()

@@ -96,14 +96,14 @@ namespace Monetizr.Campaigns
             GameObject panel = null;
 
             Action<bool> complete = (bool isSkipped) =>
-            {
-                onComplete?.Invoke(isSkipped);
+            {                
                 GameObject.Destroy(panel.gameObject);
-
                 panels.Remove(id);
 
+                onComplete?.Invoke(isSkipped);
+
                 //nothing, but teaser
-                if(panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser))
+                if (panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser))
                 {
                     MonetizrManager.Instance?.onUIVisible?.Invoke(false);
                 }

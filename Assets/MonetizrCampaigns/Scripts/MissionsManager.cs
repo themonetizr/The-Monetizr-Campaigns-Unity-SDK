@@ -87,9 +87,9 @@ namespace Monetizr.Campaigns
         {
             foreach (var m in missions)
             {
-                if (m.type == mt && 
-                    m.campaignId == ch && 
-                    m.id == id && 
+                if (m.type == mt &&
+                    m.campaignId == ch &&
+                    m.id == id &&
                     m.apiKey == MonetizrManager.Instance.GetCurrentAPIkey() &&
                     m.reward == reward)
                     return m;
@@ -252,7 +252,7 @@ namespace Monetizr.Campaigns
             //if (claimableReward == null)
             //    return null;
 
-            
+
 
             RewardType rt = RewardType.Coins;
 
@@ -272,7 +272,7 @@ namespace Monetizr.Campaigns
         }
 
         Mission prepareMinigameMission(MissionType mt, string campaign)
-        {            
+        {
             RewardType rt = RewardType.Coins;
 
             return new Mission()
@@ -304,7 +304,7 @@ namespace Monetizr.Campaigns
                 case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign); break;
                 // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
                 case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign); break;
-                case MissionType.MinigameReward: 
+                case MissionType.MinigameReward:
                 case MissionType.MemoryMinigameReward: m = prepareMinigameMission(mt, campaign); break;
 
             }
@@ -330,28 +330,30 @@ namespace Monetizr.Campaigns
             return m;
         }
 
-        
+
 
         internal Action ClaimAction(Mission m, Action<bool> __onComplete, Action updateUIDelegate)
         {
             var onComplete = __onComplete;
 
-            
-            if(m.autoStartAfter >= 0)
-            {
-                var nextMission = missions.Find(_m => _m.serverId == m.autoStartAfter);
 
-                if (nextMission != null && nextMission != m)
+            var nextMission = missions.Find(_m => m.serverId == _m.autoStartAfter);
+
+            if (nextMission != null && nextMission != m)
+            {
+                Debug.Log($"======{nextMission.serverId}");
+
+                onComplete = (bool skipped) =>
                 {
-                    onComplete = (bool skipped) =>
-                    {
+
+                    Debug.Log($"======{nextMission.serverId} {skipped}");
+
                     //launch previous on complete
                     if (!skipped)
-                        {
-                            ClaimAction(nextMission, __onComplete, updateUIDelegate).Invoke();
-                        }
-                    };
-                }
+                    {
+                        ClaimAction(nextMission, __onComplete, updateUIDelegate).Invoke();
+                    }
+                };
             }
 
             switch (m.type)
@@ -360,25 +362,62 @@ namespace Monetizr.Campaigns
                 case MissionType.MinigameReward:
                 case MissionType.MemoryMinigameReward: return MinigameClaimAction(m, onComplete, updateUIDelegate);
                 case MissionType.VideoWithEmailGiveaway: return GetEmailGiveawayClaimAction(m, onComplete, updateUIDelegate);
+                case MissionType.VideoReward: return VideoClaimAction(m, onComplete, updateUIDelegate);
+                case MissionType.MutiplyReward: return MutiplyRewardClaimAction(m, onComplete, updateUIDelegate);
             }
 
             return null;
         }
 
-        internal Action MinigameClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        internal Action MutiplyRewardClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
         {
-            Action<bool> onMinigameComplete = (bool isSkipped) =>
+            return () =>
             {
-                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
+                MonetizrManager.Instance.OnClaimRewardComplete(m, false, onComplete, updateUIDelegate);
+
+                //MonetizrManager.ShowSurvey(onSurveyComplete, m);
+
+                //MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.CarMemoryGame, m);
+
+                //MonetizrManager.ShowMinigame(onMinigameComplete, m);
+                //OnVideoPlayPress(m, onVideoComplete);
+
+            };
+        }
+
+        internal Action VideoClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        {
+            Action<bool> onVideoComplete = (bool isSkipped) =>
+            {
+                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
             return () =>
             {
                 //MonetizrManager.ShowSurvey(onSurveyComplete, m);
 
-               //MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.CarMemoryGame, m);
-               
-               MonetizrManager.ShowMinigame(onMinigameComplete, m);
+                //MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.CarMemoryGame, m);
+
+                //MonetizrManager.ShowMinigame(onMinigameComplete, m);
+                OnVideoPlayPress(m, onVideoComplete);
+
+            };
+        }
+
+        internal Action MinigameClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        {
+            Action<bool> onMinigameComplete = (bool isSkipped) =>
+            {
+                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
+            };
+
+            return () =>
+            {
+                //MonetizrManager.ShowSurvey(onSurveyComplete, m);
+
+                //MonetizrManager.ShowMinigame(onMinigameComplete, PanelId.CarMemoryGame, m);
+
+                MonetizrManager.ShowMinigame(onMinigameComplete, m);
 
             };
         }
@@ -387,7 +426,7 @@ namespace Monetizr.Campaigns
         {
             Action<bool> onSurveyComplete = (bool isSkipped) =>
             {
-                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
+                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
 #if UNITY_EDITOR
@@ -416,7 +455,7 @@ namespace Monetizr.Campaigns
             needToPlayVideo = false;
 #endif
 
-            if(m.isVideoShown)
+            if (m.isVideoShown)
                 needToPlayVideo = false;
 
             /*Action<bool> onComplete = (bool isSkipped) =>
@@ -442,7 +481,7 @@ namespace Monetizr.Campaigns
                     return;
                 }
 
-                if(m.campaignServerSettings.GetParam("watch_video_only_once") == "true")
+                if (m.campaignServerSettings.GetParam("watch_video_only_once") == "true")
                     m.isVideoShown = true;
 
                 MonetizrManager.ShowEnterEmailPanel(
@@ -489,7 +528,7 @@ namespace Monetizr.Campaigns
 
 #if UNITY_EDITOR_WIN
             onComplete?.Invoke(false);
-            return; 
+            return;
 #endif
 
             var htmlPath = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.Html5PathString);
@@ -517,7 +556,7 @@ namespace Monetizr.Campaigns
                     m.reward = (ulong)(reward.maximumAmount * (m.rewardPercent / 100.0f));
                 }
             }
-            
+
         }
 
         internal Mission GetFirstUnactiveMission()
@@ -581,16 +620,18 @@ namespace Monetizr.Campaigns
 
                     //string surveyUrl = serverSettings.GetParam(_m.survey);
 
-                    m.Add(new MissionDescription {
-                            missionType = _m.GetMissionType(),
-                            reward = rewardAmount2,
-                            rewardCurrency = _m.GetRewardType(),
-                            activateAfter = _m.GetActivateRange(),
-                            surveyUrl = serverSettings.GetParam(_m.survey),
-                            rewardPercent = rewardAmount,
-                            id = _m.getId(),
-                            alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
-                            autoStartAfter = _m.GetAutoStartId()});
+                    m.Add(new MissionDescription
+                    {
+                        missionType = _m.GetMissionType(),
+                        reward = rewardAmount2,
+                        rewardCurrency = _m.GetRewardType(),
+                        activateAfter = _m.GetActivateRange(),
+                        surveyUrl = serverSettings.GetParam(_m.survey),
+                        rewardPercent = rewardAmount,
+                        id = _m.getId(),
+                        alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
+                        autoStartAfter = _m.GetAutoStartId()
+                    });
 
                 });
 
@@ -624,7 +665,7 @@ namespace Monetizr.Campaigns
 
             //Auto start after completing 
             public string auto_start_after;
-                        
+
             public int GetAutoStartId()
             {
                 int res = -1;
@@ -667,9 +708,10 @@ namespace Monetizr.Campaigns
 
                 string[] p = activate_after.Split(';');
 
-                Array.ForEach(p, (string s) => {
+                Array.ForEach(p, (string s) =>
+                {
                     int res = 0;
-                    if(int.TryParse(s,out res))
+                    if (int.TryParse(s, out res))
                     {
                         result.Add(res);
                     }
@@ -694,7 +736,7 @@ namespace Monetizr.Campaigns
                 int reward = 0;
 
                 if (int.TryParse(percent_amount, out reward))
-                    return Mathf.Clamp(reward,0,100);
+                    return Mathf.Clamp(reward, 0, 100);
 
                 return 0;
             }
@@ -713,7 +755,7 @@ namespace Monetizr.Campaigns
 
         internal void AddMissionsToCampaigns()
         {
-            
+
 
             //bind to server campagns
             var campaigns = MonetizrManager.Instance.GetAvailableCampaigns();
@@ -737,7 +779,7 @@ namespace Monetizr.Campaigns
 
                     try
                     {
-                       ic = JsonUtility.FromJson<ServerMissionsHelper>(serverMissionsJson);
+                        ic = JsonUtility.FromJson<ServerMissionsHelper>(serverMissionsJson);
 
                     }
                     catch (Exception e)
@@ -760,7 +802,7 @@ namespace Monetizr.Campaigns
             serializedMissions.Load();
 
             //check if campaign is alive for current mission
-            foreach(var m in missions)
+            foreach (var m in missions)
             {
                 m.isServerCampaignActive = MonetizrManager.Instance.HasCampaign(m.campaignId);
 
@@ -768,13 +810,13 @@ namespace Monetizr.Campaigns
                 m.isToBeRemoved = true;
             }
 
-            
+
             //search unbinded campaign
             for (int c = 0; c < campaigns.Count; c++)
             {
                 string ch = campaigns[c];
 
-                if(c >= MonetizrManager.maximumCampaignAmount)
+                if (c >= MonetizrManager.maximumCampaignAmount)
                 {
                     break;
                 }
@@ -825,7 +867,7 @@ namespace Monetizr.Campaigns
                     //rewrite these parameters here, because otherwise it will be saved in cache
                     //m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
 
-                    
+
                     m.amountOfRVOffersShown = m.campaignServerSettings.GetIntParam("amount_of_rv_offers", -1);
                     //m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
                     m.amountOfNotificationsSkipped = m.campaignServerSettings.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
@@ -836,7 +878,7 @@ namespace Monetizr.Campaigns
                     InitializeNonSerializedFields(m);
                 }
 
-                
+
 
             }
 
@@ -912,7 +954,7 @@ namespace Monetizr.Campaigns
         {
             var surveyMission = missions.Find((Mission _m) => { return _m.type == MissionType.SurveyReward && _m.campaignId == m.campaignId && _m.isDisabled; });
 
-            if(surveyMission != null)
+            if (surveyMission != null)
             {
                 Log.Print("Survey activated!");
 
@@ -931,7 +973,7 @@ namespace Monetizr.Campaigns
 
             return false;
         }
-              
+
         internal Mission GetMission(string campaignId)
         {
             return missions.Find((Mission m) => { return m.campaignId == campaignId; });
@@ -948,7 +990,7 @@ namespace Monetizr.Campaigns
             return missions.Find((Mission m) =>
             {
                 return m.type == MissionType.SurveyReward && m.isClaimed == ClaimState.NotClaimed && !m.isDisabled && IsActiveByTime(m);
-            });      
+            });
         }
 
         internal Mission FindMissionForStartNotify()
@@ -960,18 +1002,19 @@ namespace Monetizr.Campaigns
                         !m.isDisabled &&
                         IsActiveByTime(m)
                         && m.isServerCampaignActive;
-                        
+
             });
         }
 
         internal List<Mission> GetMissionsForRewardCenter(bool includeDisabled = false)
         {
 
-            return missions.FindAll((Mission m) => {
+            return missions.FindAll((Mission m) =>
+            {
 
                 bool disabled = m.isDisabled;
 
-                if(includeDisabled)
+                if (includeDisabled)
                     disabled = false;
 
                 return m.isSponsored &&
@@ -979,7 +1022,7 @@ namespace Monetizr.Campaigns
                         !disabled &&
                         IsActiveByTime(m) &&
                         m.isServerCampaignActive;
-                   
+
             });
         }
 
@@ -1016,16 +1059,16 @@ namespace Monetizr.Campaigns
 
                 bool shouldBeDisabled = false;
 
-                foreach(var id in m.activateAfter)
+                foreach (var id in m.activateAfter)
                 {
                     Mission _m = missions.Find(x => x.serverId == id);
 
-                    if(_m != null && _m.isClaimed != ClaimState.Claimed)
+                    if (_m != null && _m.isClaimed != ClaimState.Claimed)
                     {
                         shouldBeDisabled = true;
                     }
                 }
-                                
+
 
                 /*for(int i = r.start;; i++)
                 {
