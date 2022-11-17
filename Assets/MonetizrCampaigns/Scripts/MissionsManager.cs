@@ -1021,7 +1021,8 @@ namespace Monetizr.Campaigns
                         m.isClaimed != ClaimState.Claimed &&
                         !disabled &&
                         IsActiveByTime(m) &&
-                        m.isServerCampaignActive;
+                        m.isServerCampaignActive &&
+                        m.autoStartAfter == -1;
 
             });
         }

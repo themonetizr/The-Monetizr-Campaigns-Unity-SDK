@@ -1549,7 +1549,8 @@ namespace Monetizr.Campaigns
             }
 
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
-            if (!instance.HasAsset(challengeId, AssetsType.TinyTeaserTexture))
+            if (!instance.HasAsset(challengeId, AssetsType.TinyTeaserSprite) &&
+                !instance.HasAsset(challengeId, AssetsType.TeaserGifPathString))
             {
                 Log.Print("No texture for tiny teaser!");
                 return;

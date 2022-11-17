@@ -180,14 +180,6 @@ namespace Monetizr.Campaigns
                 Array.ForEach(gameObject.GetComponentsInChildren<RectTransform>(),
                     (RectTransform r) => { if (r.gameObject != gameObject) r.gameObject.SetActive(false); });
 
-                
-
-                /*foreach (RectTransform o in gameObject.GetComponentsInChildren<RectTransform>())
-                {
-                    o.gameObject.SetActive(false);
-                }*/
-
-                //gameObject.SetActive(true);
 
                 singleBackgroundImage.enabled = true;
 
@@ -262,121 +254,16 @@ namespace Monetizr.Campaigns
 
                 rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
                 rewardImage.gameObject.SetActive(true);
-                //rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
-                //rewardText.text = $"+{m.reward}";
             }
                         
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
             rewardText.text = rewardText.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
-            //if (!showReward)
-            //{
-            //    teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(challengeId, AssetsType.TinyTeaserTexture);
-            //}
-            //else
-            //{
-
-            //string header = m.additionalParams.GetParam("TinyMenuTeaser.header");
-
-            //if(header.Length > 0)
-            //{
-            //    earnText.text = header;
-            //}
-
-            //rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
-            //rewardText.text = $"Watch {m.brandName} video &\nget $3 coupon!";
-            //}
-
- 
-
-
-            /*MonetizrManager.Analytics.TrackEvent("Reward center opened", m);
-            MonetizrManager.Analytics.TrackEvent("Html5 completed", m);
-            MonetizrManager.Analytics.TrackEvent("Html5 skipped", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 1 shown", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 2 shown", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 3 shown", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 4 shown", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 5 shown", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 6 shown", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 7 shown", m);
-            
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 1 pressed", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 2 pressed", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 3 pressed", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 4 pressed", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 5 pressed", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 6 pressed", m);
-            MonetizrManager.Analytics.TrackEvent("Branded Mission 7 pressed", m);
-            
-            MonetizrManager.Analytics.TrackEvent("Minigame started", m);
-            MonetizrManager.Analytics.TrackEvent("Minigame skipped", m);
-            MonetizrManager.Analytics.TrackEvent("Minigame completed", m);
-            MonetizrManager.Analytics.TrackEvent("Survey started", m);
-            MonetizrManager.Analytics.TrackEvent("Survey skipped", m);
-            MonetizrManager.Analytics.TrackEvent("Survey completed", m);
-            MonetizrManager.Analytics.TrackEvent("Enter email submitted", m);
-            MonetizrManager.Analytics.TrackEvent("Email enter skipped", m);
-            MonetizrManager.Analytics.TrackEvent("Email congrats shown", m);
-
-            MonetizrManager.Analytics.TrackEvent("Custom event shown", m);
-            MonetizrManager.Analytics.TrackEvent("Custom event pressed", m);*/
-
-
+           
         }
 
-        /*internal void PreparePanelDefaultVersion(PanelId id, Action<bool> onComplete, Mission m)
-        {
-            
-            //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
-
-            if (m.additionalParams.GetParam("teaser_no_texture_animation") == "true")
-            {
-                hasTextureAnimation = false;
-            }
-
-            if(m.additionalParams.GetParam("teaser_no_animation") == "true")
-            {
-                hasAnimation = false;
-            }
-
-            bool showReward = false;
-
-            if(m.additionalParams.GetParam("show_reward_on_teaser") == "true")
-            {
-                hasTextureAnimation = false;
-                showReward = true;
-            }
-
-            if (!hasTextureAnimation)
-            {
-                teaserImage.uvRect = new Rect(0, 0, 1, 1);
-            }
-
-            if (!hasAnimation)
-            {
-                scaleAnimator.speed = 0;
-                scaleAnimator.enabled = false;
-            }
-
-            earnText.gameObject.SetActive(showReward);
-            rewardImage.gameObject.SetActive(showReward);
-            rewardText.gameObject.SetActive(showReward);
-
-            if (!showReward)
-            {
-                teaserImage.texture = MonetizrManager.Instance.GetAsset<Texture2D>(m.campaignId, AssetsType.TinyTeaserTexture);
-            }
-            else
-            {
-                rewardImage.sprite = MonetizrManager.gameRewards[m.rewardType].icon;
-                rewardText.text = $"+{m.reward}";
-            }
-
-            
-
-        }*/
+        
 
         internal override void FinalizePanel(PanelId id)
         {
