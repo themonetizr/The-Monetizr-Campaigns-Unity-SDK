@@ -1047,8 +1047,17 @@ namespace Monetizr.Campaigns
                 if (m.isClaimed == ClaimState.Claimed)
                     continue;
 
+                bool hasActivateAfter = m.activateAfter.Count > 0;
+
+                //check if mission self referenced in activate after
+                if (hasActivateAfter && m.activateAfter.FindIndex(_id => _id == m.serverId) > 0)
+                {
+                    Debug.LogWarning($"Mission id {m.serverId} activate after itself!");
+                    hasActivateAfter = false;
+                }
+                
                 //no activate_after here
-                if (m.activateAfter.Count == 0)
+                if (!hasActivateAfter)
                 {
                     if (m.isDisabled)
                         isUpdateNeeded = true;

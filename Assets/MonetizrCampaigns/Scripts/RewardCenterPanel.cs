@@ -319,7 +319,7 @@ namespace Monetizr.Campaigns
 
             };*/
 
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, onComplete, AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
             
                 //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
 
