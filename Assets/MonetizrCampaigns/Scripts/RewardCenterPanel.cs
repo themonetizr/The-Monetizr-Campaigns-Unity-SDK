@@ -144,9 +144,8 @@ namespace Monetizr.Campaigns
             {
                 var ch = m.campaignId;
 
-                if(showNotClaimedDisabled && m.isDisabled && m.isClaimed != ClaimState.Claimed)
-                    m.showHidden = true;
-
+                m.showHidden = showNotClaimedDisabled && m.isDisabled && m.isClaimed != ClaimState.Claimed;
+                    
                 if (ch == missions[0].campaignId)
                 //if (ch == activeChallenge)
                 {

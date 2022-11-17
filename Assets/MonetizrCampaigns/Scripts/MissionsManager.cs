@@ -1007,8 +1007,7 @@ namespace Monetizr.Campaigns
         }
 
         internal List<Mission> GetMissionsForRewardCenter(bool includeDisabled = false)
-        {
-
+        {           
             return missions.FindAll((Mission m) =>
             {
 
@@ -1042,6 +1041,9 @@ namespace Monetizr.Campaigns
             foreach (var m in missions)
             {
                 if (m == finishedMission)
+                    continue;
+
+                if (!m.isDisabled)
                     continue;
 
                 if (m.isClaimed == ClaimState.Claimed)
@@ -1106,6 +1108,9 @@ namespace Monetizr.Campaigns
                     m.state = MissionUIState.ToBeShown;
                 }
             }
+
+            if(isUpdateNeeded)
+                serializedMissions.SaveAll();
 
             return isUpdateNeeded;
         }
