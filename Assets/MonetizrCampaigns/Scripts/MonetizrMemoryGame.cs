@@ -101,6 +101,14 @@ namespace Monetizr.Campaigns
             //MonetizrManager.Analytics.BeginShowAdAsset(AdType.MinigameScreen, m);
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
+
+            var adType = AdType.Minigame;
+
+            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
+
+            MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
         }
 
         int amountOpened = 0;

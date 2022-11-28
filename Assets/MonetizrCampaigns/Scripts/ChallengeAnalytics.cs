@@ -108,6 +108,7 @@ namespace Monetizr.Campaigns
                 case AdType.EmailEnterSelectionRewardScreen: return "EmailEnterScreen";
                 case AdType.CongratsNotificationScreen:
                 case AdType.EmailCongratsNotificationScreen: return "CongratsScreen";
+                case AdType.Minigame: return "MiniGameScreen";
 
                 default:
                     return null;

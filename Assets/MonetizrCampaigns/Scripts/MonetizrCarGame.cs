@@ -135,7 +135,11 @@ namespace Monetizr.Campaigns
             movesLeftText.text = "MOVES LEFT: 4";
 
             //Log.PrintWarning($"{m.campaignId} {m}");
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.Minigame, m);
+            var adType = AdType.Minigame;
+
+            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
 
             MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
 
