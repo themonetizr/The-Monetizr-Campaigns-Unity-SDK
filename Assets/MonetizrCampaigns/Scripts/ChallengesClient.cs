@@ -162,7 +162,7 @@ namespace Monetizr.Campaigns
                     //{"age", playerInfo.age.ToString()},
                     //{"game-type", playerInfo.gameType},
                     {"player-id", analytics.GetUserId()},
-                    { "app-bundle-id", Application.identifier },
+                    { "app-bundle-id", MonetizrManager.bundleId },
                     { "sdk-version", MonetizrManager.SDKVersion },
                     
                 }
@@ -360,7 +360,7 @@ namespace Monetizr.Campaigns
                 Headers =
                 {
                     {"player-id", analytics.GetUserId()},
-                    {"app-bundle-id", Application.identifier },
+                    {"app-bundle-id", MonetizrManager.bundleId },
                     {"sdk-version", MonetizrManager.SDKVersion },
                     
                 }
@@ -399,7 +399,7 @@ namespace Monetizr.Campaigns
                     {"player-id", analytics.GetUserId()},
                     //{"duration", analytics.GetElapsedTime(challenge).ToString()}
 
-                    { "app-bundle-id", Application.identifier },
+                    { "app-bundle-id", MonetizrManager.bundleId },
                     { "sdk-version", MonetizrManager.SDKVersion },
                   
                 }

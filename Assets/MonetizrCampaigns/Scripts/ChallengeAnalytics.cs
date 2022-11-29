@@ -524,9 +524,9 @@ namespace Monetizr.Campaigns
         }
 
         private void AddDefaultMixpanelValues(Value props, ServerCampaign campaign, string brandName)
-        {
+        {            
             props["application_id"] = campaign.application_id;
-            props["bundle_id"] = Application.identifier;
+            props["bundle_id"] = MonetizrManager.bundleId;
             props["player_id"] = GetUserId();
 
             props["application_name"] = Application.productName;

@@ -19,6 +19,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using System.Linq;
+using mixpanel;
 
 namespace Monetizr.Campaigns
 {
@@ -457,6 +458,7 @@ namespace Monetizr.Campaigns
         internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
         private static int debugAttempt = 0;
         internal static int abTestSegment = 0;
+        internal static String bundleId;
 
         public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
         {
@@ -536,6 +538,8 @@ namespace Monetizr.Campaigns
 
 
             Log.Print($"MonetizrManager Initialize: {apiKey} {SDKVersion}");
+
+            bundleId = Application.identifier;
 
             var monetizrObject = new GameObject("MonetizrManager");
             var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
@@ -671,6 +675,8 @@ namespace Monetizr.Campaigns
         {
             if (apiKey == _challengesClient.currentApiKey)
                 return;
+
+            Debug.Log($"Changing api key to {apiKey}");
 
             _challengesClient.Close();
 
