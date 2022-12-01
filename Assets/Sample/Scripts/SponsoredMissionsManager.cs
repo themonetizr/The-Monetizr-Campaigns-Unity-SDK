@@ -36,7 +36,7 @@ public class SponsoredMissionsManager : MonoBehaviour
             (bool soundOn) =>
             {
                 //SoundManager.I.SetSoundAllowed(soundOn);
-            });
+            }, null);
 
         //good default placement for teaser
         MonetizrManager.SetTeaserPosition(new Vector2(-230, -765));
@@ -47,11 +47,11 @@ public class SponsoredMissionsManager : MonoBehaviour
                     //return current amount of coins
                     return 0;// GameController.I.GetCoinsTotal();
                 },
-                (int reward) =>
+                (ulong reward) =>
                 {
                     //add coins
                     //GameController.I.AddCoinsTotal(reward);
-                });
+                }, 10000);
 
 
 
