@@ -537,7 +537,7 @@ namespace Monetizr.Campaigns
 #endif
 
 
-            Log.Print($"MonetizrManager Initialize: {apiKey} {SDKVersion}");
+            Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {SDKVersion}");
 
             bundleId = Application.identifier;
 
