@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.0.15] - 2022-12-01
+
+### Fixed
+
+- Fixed analytics in minigames
+- Test API keys removed from SDK
+- Sample script updated according SDK changes
+
+### Added
+
+- New terms and conditions for Email Enter Screen
+
 ## [0.0.14] - 2022-11-21
 
 ### Added
