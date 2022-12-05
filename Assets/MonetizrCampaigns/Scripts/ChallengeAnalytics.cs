@@ -97,21 +97,25 @@ namespace Monetizr.Campaigns
 
         internal static string GetPlacementName(AdType t)
         {
-            switch (t)
+             switch (t)
             {
                 case AdType.TinyTeaser: return "TinyTeaser";
                 case AdType.Video:
                 case AdType.Html5: return "Html5VideoScreen";
-                case AdType.NotificationScreen: return "NotificationScreen";
+                case AdType.NotificationScreen:
+                case AdType.SurveyNotificationScreen:
+                    return "NotificationScreen";
                 case AdType.EmailEnterInGameRewardScreen:
                 case AdType.EmailEnterCouponRewardScreen:
                 case AdType.EmailEnterSelectionRewardScreen: return "EmailEnterScreen";
                 case AdType.CongratsNotificationScreen:
                 case AdType.EmailCongratsNotificationScreen: return "CongratsScreen";
                 case AdType.Minigame: return "MiniGameScreen";
+                case AdType.Survey: return "SurveyScreen";
+                case AdType.HtmlPage: return "HtmlPageScreen";
 
                 default:
-                    return null;
+                    return "";
        
             }
         }
