@@ -412,7 +412,14 @@ namespace Monetizr.Campaigns
 
         static internal void CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
         {
-            instance?.userDefinedEvent?.Invoke(campaignId, placement, eventType);
+            try
+            {
+                instance?.userDefinedEvent?.Invoke(campaignId, placement, eventType);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"Exception in userDefinedEvent {ex.ToString()}");
+            }
         }
 
 
