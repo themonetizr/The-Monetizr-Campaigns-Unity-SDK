@@ -155,7 +155,7 @@ namespace Monetizr.Campaigns
             HttpRequestMessage requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri(k_BaseUri + "api/challenges"),
+                RequestUri = new Uri(k_BaseUri + "api/campaigns"),
                 Headers =
                 {
                     //{"location", playerInfo.location},
@@ -167,6 +167,8 @@ namespace Monetizr.Campaigns
                     
                 }
             };
+
+            Log.Print($"Sent request: {requestMessage.ToString()}");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
 
