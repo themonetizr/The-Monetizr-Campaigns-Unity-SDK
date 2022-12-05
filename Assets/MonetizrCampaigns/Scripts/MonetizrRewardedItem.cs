@@ -95,44 +95,10 @@ namespace Monetizr.Campaigns
             rewardTitle.text = m.missionTitle;
             rewardDescription.text = m.missionDescription;
 
-            //custom colors
-            /*var ch = MonetizrManager.Instance.GetActiveCampaign();
+          
+            hideOverlay.SetActive(m.showHidden);
 
-            if (ch != null)
-            {
-
-                var color = MonetizrManager.Instance.GetAsset<Color>(ch, AssetsType.CampaignHeaderTextColor);
-
-                if (color != default(Color))
-                    rewardTitle.color = color;
-
-                color = MonetizrManager.Instance.GetAsset<Color>(ch, AssetsType.CampaignTextColor);
-
-                if (color != default(Color))
-                {
-                    rewardDescription.color = color;
-                    boosterNumber.color = color;
-                }
-
-                color = MonetizrManager.Instance.GetAsset<Color>(ch, AssetsType.CampaignBackgroundColor);
-
-                if (color != default(Color))
-                    backgroundImage.color = color;
-
-            }*/
-
-            //if (m.showHidden)
-
-                hideOverlay.SetActive(m.showHidden);
-
-            UIController.PrepareCustomColors(backgroundImage, borderImage, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
-
-
-            UIController.PrepareCustomColors(null, backgroundImage2, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
-
-
-            foreach (var t in gameObject.GetComponents<PanelTextItem>())
-                t.InitializeByParent(PanelId.RewardCenter, m);
+            
 
             //active-deactive
             if(m.activateTime != DateTime.MinValue && m.deactivateTime != DateTime.MaxValue)
@@ -194,6 +160,15 @@ namespace Monetizr.Campaigns
                 progressBar.SetActive(false);
                 actionButton.gameObject.SetActive(true);
             }
+
+            //----
+
+            UIController.PrepareCustomColors(backgroundImage, borderImage, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
+            UIController.PrepareCustomColors(null, backgroundImage2, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
+
+
+            foreach (var t in gameObject.GetComponents<PanelTextItem>())
+                t.InitializeByParent(PanelId.RewardCenter, m);
         }
 
         internal void ButtonPressed(ButtonController buttonController)
