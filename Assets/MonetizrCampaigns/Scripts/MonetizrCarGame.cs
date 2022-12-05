@@ -63,6 +63,7 @@ namespace Monetizr.Campaigns
             //MonetizrManager.ShowRewardCenter(null);
             MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
 
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressSkip);
 
             isSkipped = true;
 
@@ -309,6 +310,7 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
 
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressOk);
             //MonetizrManager.ShowCongratsNotification(null, m);
         }
 
