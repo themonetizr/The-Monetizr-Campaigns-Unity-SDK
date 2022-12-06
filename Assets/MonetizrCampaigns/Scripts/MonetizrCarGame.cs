@@ -63,6 +63,7 @@ namespace Monetizr.Campaigns
             //MonetizrManager.ShowRewardCenter(null);
             MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
 
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressSkip);
 
             isSkipped = true;
 
@@ -135,7 +136,11 @@ namespace Monetizr.Campaigns
             movesLeftText.text = "MOVES LEFT: 4";
 
             //Log.PrintWarning($"{m.campaignId} {m}");
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.Minigame, m);
+            var adType = AdType.Minigame;
+
+            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
 
             MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
 
@@ -305,6 +310,7 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
 
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressOk);
             //MonetizrManager.ShowCongratsNotification(null, m);
         }
 

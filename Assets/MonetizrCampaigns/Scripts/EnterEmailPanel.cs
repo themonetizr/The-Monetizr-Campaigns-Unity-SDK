@@ -47,6 +47,8 @@ namespace Monetizr.Campaigns
         private MonetizrManager.RewardSelectionType selection;
         private AdType adType;
 
+        public Toggle termsToggle;
+        private bool termsTogglePressed;
         //private Action onComplete;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -69,7 +71,7 @@ namespace Monetizr.Campaigns
 
             PreparePanel(m);
 
-
+            UpdateEnterFieldVisibility(false);
         }
 
         IEnumerator ShowCloseButton(float time)
@@ -81,10 +83,16 @@ namespace Monetizr.Campaigns
 
         internal void OnInputFieldChanged(string s)
         {
-            string lowerCaseMail = s.ToLower();
+            var isValid = false;
+            string lowerCaseMail = null;
 
-            //check email with regex
-            var isValid = validateEmailRegex.IsMatch(lowerCaseMail);
+            if (s != null && s.Length > 0)
+            {
+                lowerCaseMail = s.ToLower();
+
+                //check email with regex
+                isValid = validateEmailRegex.IsMatch(lowerCaseMail);
+            }
 
             //double check with MailAddress
             if (isValid)
@@ -102,12 +110,19 @@ namespace Monetizr.Campaigns
             }
 
             //email valid, but country code is too short
-            if (lowerCaseMail.Length - lowerCaseMail.LastIndexOf('.') <= 2)
+            if (isValid && lowerCaseMail.Length - lowerCaseMail.LastIndexOf('.') <= 2)
                 isValid = false;
 
-            closeButton.interactable = isValid;
+            UpdateEnterFieldVisibility(isValid);
 
             result = s;
+        }
+
+        internal void UpdateEnterFieldVisibility(bool isTextValid)
+        {
+            bool isOn = termsToggle.gameObject.activeSelf ? termsToggle.isOn : true;
+
+            closeButton.interactable = isTextValid && isOn;
         }
 
         internal override void FinalizePanel(PanelId id)
@@ -149,6 +164,11 @@ namespace Monetizr.Campaigns
         public void OnSecondToggle(bool v)
         {
             if(v) selection = MonetizrManager.RewardSelectionType.Product;
+        }
+
+        public void OnTermsToggle(bool v)
+        {
+            OnInputFieldChanged(result);
         }
 
         private void PreparePanel(Mission m)
@@ -213,7 +233,12 @@ namespace Monetizr.Campaigns
             //buttonText.text = "Learn More";
             //buttonText.text = "Claim!";
 
-            
+            string url = MonetizrManager.Instance.GetCampaign(m.campaignId).serverSettings.GetParam("GiveawayEmailEnterNotification.terms_url_text");
+
+            if (url == null)
+                termsToggle.gameObject.SetActive(false);
+
+
 
             text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
 

@@ -356,7 +356,7 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
-        public static readonly string SDKVersion = "0.0.12";
+        public static readonly string SDKVersion = "0.0.16";
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
@@ -413,7 +413,14 @@ namespace Monetizr.Campaigns
 
         static internal void CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
         {
-            instance?.userDefinedEvent?.Invoke(campaignId, placement, eventType);
+            try
+            {
+                instance?.userDefinedEvent?.Invoke(campaignId, placement, eventType);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"Exception in userDefinedEvent {ex.ToString()}");
+            }
         }
 
 
@@ -459,6 +466,7 @@ namespace Monetizr.Campaigns
         internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
         private static int debugAttempt = 0;
         internal static int abTestSegment = 0;
+        internal static String bundleId = null;
 
         public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
         {
@@ -544,7 +552,10 @@ namespace Monetizr.Campaigns
                 };
             }
 
-            Log.Print($"MonetizrManager Initialize: {apiKey} {SDKVersion}");
+            Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {SDKVersion}");
+
+            if(bundleId == null)
+                bundleId = Application.identifier;
 
             var monetizrObject = new GameObject("MonetizrManager");
             var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
@@ -616,6 +627,12 @@ namespace Monetizr.Campaigns
                     return;
                 }
 
+                if(MonetizrManager.gameRewards.Count == 0)
+                {
+                    Log.PrintError($"ERROR: No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
+                    return;
+                }
+
                 Log.Print("MonetizrManager initialization okay!");
 
                 isActive = true;
@@ -680,6 +697,8 @@ namespace Monetizr.Campaigns
         {
             if (apiKey == _challengesClient.currentApiKey)
                 return;
+
+            Debug.Log($"Changing api key to {apiKey}");
 
             _challengesClient.Close();
 

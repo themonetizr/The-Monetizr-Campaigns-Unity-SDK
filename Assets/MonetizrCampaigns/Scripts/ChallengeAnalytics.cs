@@ -97,20 +97,25 @@ namespace Monetizr.Campaigns
 
         internal static string GetPlacementName(AdType t)
         {
-            switch (t)
+             switch (t)
             {
                 case AdType.TinyTeaser: return "TinyTeaser";
                 case AdType.Video:
                 case AdType.Html5: return "Html5VideoScreen";
-                case AdType.NotificationScreen: return "NotificationScreen";
+                case AdType.NotificationScreen:
+                case AdType.SurveyNotificationScreen:
+                    return "NotificationScreen";
                 case AdType.EmailEnterInGameRewardScreen:
                 case AdType.EmailEnterCouponRewardScreen:
                 case AdType.EmailEnterSelectionRewardScreen: return "EmailEnterScreen";
                 case AdType.CongratsNotificationScreen:
                 case AdType.EmailCongratsNotificationScreen: return "CongratsScreen";
+                case AdType.Minigame: return "MiniGameScreen";
+                case AdType.Survey: return "SurveyScreen";
+                case AdType.HtmlPage: return "HtmlPageScreen";
 
                 default:
-                    return null;
+                    return "";
        
             }
         }
@@ -523,9 +528,9 @@ namespace Monetizr.Campaigns
         }
 
         private void AddDefaultMixpanelValues(Value props, ServerCampaign campaign, string brandName)
-        {
+        {            
             props["application_id"] = campaign.application_id;
-            props["bundle_id"] = Application.identifier;
+            props["bundle_id"] = MonetizrManager.bundleId;
             props["player_id"] = GetUserId();
 
             props["application_name"] = Application.productName;

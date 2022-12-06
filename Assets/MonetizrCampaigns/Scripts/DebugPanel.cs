@@ -19,34 +19,9 @@ namespace Monetizr.Campaigns
         public Toggle claimIfSkipped;
 
         public Text versionText;
-      
-        static public readonly List<string> keys = new List<string>()
-        {
-            "zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE", //slice game
-            "EAWHUSfOUrNhJA2HuAZNmXdd0UWfRP13hKx5RLCslOc", //kaspars
-            "XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta@themonetizr.com
-            "4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU", //design@monetizr.io ?
 
-            //"9-JosxHvT8ds9H0A3SOcOSSQl25yab5vSBItAlY6ags", //andris
-            //"PUHzF8UQLXJUuaW0vX0D0lTAFlWU2G0J2NaN2SHk6AA", //martins.jansevskis@themonetizr.com 
-            //"oRE6-DIXqfHgoU5TEohXycVkthRv2Tt3pG8hG8q8O9U", 
-
-            //"XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg", //monta@themonetizr.com
-            //"e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo",  //martins.jansevskis@gmail.com 
-            //"mnfie-kWEAzhor9sUeOk5ohlnSCDKTefer2IarKd7zs"   //artem
-            //"1BKIRvztaZFq0cklZfY7W-_yIGuSWgj2AHKfFTntzBU", // nauris@themonetizr.com
-            //"jZrNLvD9pSWZ-oU7nrIivaIHW_PLnZX-KDWx1Ks8NnY" // gita@themonetizr.com
-            //"zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE", //slice game
-        };
-
-        static public readonly Dictionary<string, string> keyNames = new Dictionary<string, string>()
-        {
-            {"zcJgPFt_Pe4XIs7aqbZbbN2KRcJziAWkRFzYYo7qVdE","SLICE GAME" },
-            {"EAWHUSfOUrNhJA2HuAZNmXdd0UWfRP13hKx5RLCslOc","KASPARS" },
-            {"XgmYrf0Hki-slLhzYyIbfAoDaYDt-6MMOeyTJNk3dYg","FEBREZE" },
-            {"4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU","TIDE" },
-            
-        };
+        static public List<string> keys = null;
+        static public Dictionary<string, string> keyNames = null;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
@@ -141,6 +116,11 @@ namespace Monetizr.Campaigns
             PlayerPrefs.Save();
 
             //MonetizrManager.Instance.CleanRewardsClaims();
+
+            var bundleId = keyNames[keys[apiKeysList.value]];
+
+            if (bundleId.Contains("."))
+                MonetizrManager.bundleId = bundleId;
 
             MonetizrManager.Instance.ChangeAPIKey(keys[apiKeysList.value]);
         }
