@@ -51,7 +51,9 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+
             
+
             //string uiItemPrefab = "MonetizrRewardedItem";
 
             //if (uiVersion == 2)
@@ -113,6 +115,21 @@ namespace Monetizr.Campaigns
                 Debug.LogWarning("No active campaigns for RC!");
                 return;
             }
+
+
+            var r = campaign.serverSettings.GetRectParam("RewardCenter.transform", new List<float>{ 35,0,35,0});
+
+            /*Left*/ 
+            scrollView.offsetMin = new Vector2(r[0], r[3]);
+            /*Bottom*/ 
+            //scrollView.offsetMin.y = r[3];
+
+            /*Right*/ 
+            scrollView.offsetMax = new Vector2(-r[2], r[1]);
+                /*Top*/ 
+           // scrollView.offsetMax.y = r[1];
+           
+
 
             showNotClaimedDisabled = campaign.serverSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
 

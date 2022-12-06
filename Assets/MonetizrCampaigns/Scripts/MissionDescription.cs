@@ -225,6 +225,39 @@ namespace Monetizr.Campaigns
             return result;
         }
 
+        public List<float> GetRectParam(TKey p, List<float> defaultParam)
+        {
+            if (p == null)
+                return defaultParam;
+
+            if (!dictionary.ContainsKey(p))
+                return defaultParam;
+
+            List<float> result = defaultParam;
+            string val = dictionary[p].ToString();
+
+            var svals = val.Split(new char[] {';',','});
+
+            var v = new List<float>(0);
+
+            Array.ForEach(svals, s =>
+            {
+                float f = 0;
+
+                if (!float.TryParse(s, out f))
+                    return;
+
+                v.Add(f);
+            });
+
+            if (v.Count == 4)
+            {
+                return v;
+            }
+                       
+            return result;
+        }
+
         public int GetIntParam(TKey p, int defaultParam = 0)
         {
             if (p == null)

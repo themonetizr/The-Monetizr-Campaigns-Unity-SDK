@@ -60,7 +60,7 @@ namespace Monetizr.Campaigns
             }
 
 #if UNITY_EDITOR
-            webView.Frame = new Rect(0,0, 1080.0f*0.9f, 1920.0f*0.9f);
+            webView.Frame = new Rect(0,0, 600, 800);
 #else
             if (fullScreen)
             {
@@ -81,6 +81,7 @@ namespace Monetizr.Campaigns
 
             webView.Alpha = 0;
         }
+#endif
 
 
         internal void PrepareSurveyPanel(Mission m)
@@ -121,248 +122,7 @@ namespace Monetizr.Campaigns
 
             webView.Load(webUrl);
         }
-
-        private void PrepareVideoPanel()
-        {
-            webUrl = "file://" + MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.VideoFilePathString);
-
-            var htmlFile = MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.VideoFilePathString);
-
-            var videoName = Path.GetFileName(htmlFile);
-
-            var page = $@"
-
-<html>
-<head>
-
-<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no'>
-
-<style type='text/css'>
-html, body {{
-  overflow-x: hidden;
-  overflow-y: hidden;
-}}
-body {{
-        overflow: hidden;
-        position: relative;
-        margin: 0;
-        padding: 0;
-        background-color: black;
-    }}
-.video {{
-        margin: 0;
-        padding: 0;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-        min-width: 100%;
-    }}
-.videoBg {{
-        display: flex;  
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 10;
-    }}
-.skipButton
-{{
-    position: absolute;
-    top: 15px;
-    left: 15px;
-
-    /*background-color: rgba(0,255, 255, 0.5);*/
-    
-    /*background-image: url('zzz.png');*/
-    width: 40px;
-    height: 40px;
-    z-index:500;
-    border-radius: 50%;
-    opacity: 0.5;
-}}
-.countdown
-{{
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background-color: rgba(255,255, 255, 0.5);
-    border: none;
-    color: rgba(0,0, 0, 0.5);
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 20px;
-    border-radius: 50%;
-    z-index:500;
-    font-family: Verdana, sans-serif;
-}}
-
-.toastInfo
-{{
-    position: absolute;
-    bottom: 0px;
-    left: 0;
-    right: 0;
-    margin: auto;
-    background-color: rgba(255, 255, 255, 0.5);
-    border: none;
-    
-    width: 100%;
-    height: 28px;
-    text-align: center;
-    display: inline-block;
-    font-size: 18px;
-    padding-top: 4px;
-    color: rgba(128,128, 128, 0.75);
-    font-family: Verdana, sans-serif;
-    
-    z-index:500;
-}}
-
-.text
-{{
-    display: none;
-}}
-
-</style>
-
-</head>
-
-<body>
-
-    <img src='close_button.png' draggable='false' onclick='skipHandler()' type='button' class='skipButton'>x</button>
-    <div class='countdown' id='videoTimer'></div>
-    <div class='toastInfo'>Watch a full video to get a reward!</div>
-<div class='videoBg'>
-    <video poster='noposter' class='video' playsinline autoplay webkit-playsinline disablePictureInPicture controlsList='nodownload nofullscreen noremoteplayback' id='myVideo' onEnded='endHandler()'>
-        <source src = '{videoName}' type = 'video/mp4'/>
-        Your browser does not support the video tag.
-    </video>
-</div>
-
-<script>
-
-    var counter = {{
-        // HELPER - CREATE MIN/SEC CELL
-        // txt : text for the cell (all small letters)
-        square : (txt) => {{
-            let cell = document.createElement('div');
-            cell.className = `cell ${{txt}}`;
-            cell.innerHTML = `<div class=""digits"">0</div><div class=""text""></div>`;
-            return cell;
-        }},
-
-        // INITIALIZE COUNTDOWN TIMER
-        //  target : target html container
-        //  remain : seconds to countdown
-        //  after : function, do this when countdown end (optional)
-        attach : (instance) => {{
-            // (B1) GENERATE HTML
-            instance.target.className = 'countdown';
-            if (instance.remain >= 60) {{
-                instance.target.appendChild(counter.square('mins'));
-                instance.mins = instance.target.querySelector('.mins .digits');
-            }}
-instance.target.appendChild(counter.square('secs'));
-instance.secs = instance.target.querySelector('.secs .digits');
-
-// TIMER
-instance.timer = setInterval(() => {{ counter.ticker(instance); }}, 1000);
-        }},
-
-        // COUNTDOWN TICKER
-        ticker: (instance) => {{
-            // TIMER STOP
-            instance.remain--;
-            if (instance.remain <= 0)
-            {{
-                clearInterval(instance.timer);
-                instance.remain = 0;
-                if (typeof instance.after == 'function') {{ instance.after(); }}
-            }}
-
-            // CALCULATE REMAINING MINS/SECS
-            // 1 min = 60 secs
-            let secs = instance.remain;
-            let mins = Math.floor(secs / 60);
-            secs -= mins * 60;
-
-            // (C3) UPDATE HTML
-            instance.secs.innerHTML = secs;
-            if (instance.mins !== undefined) {{ instance.mins.innerHTML = mins; }}
-        }},
-
-        // CONVERT DATE/TIME TO REMAINING SECONDS
-        toSecs: (till) => {{
-            till = Math.floor(till / 1000);
-            let remain = till - Math.floor(Date.now() / 1000);
-            return remain < 0 ? 0 : remain;
-        }}
-    }};
-
-
-function endHandler()
-{{
-    location.href = 'uniwebview://action?key=close';
-}}
-
-function skipHandler()
-{{
-    location.href = 'uniwebview://action?key=skip';
-}}
-
-document.addEventListener('DOMContentLoaded', function(){{
-    var video = document.getElementById('myVideo');
-
-    // Assume 'video' is the video node
-    var i = setInterval(function() {{
-        if (video.readyState > 0)
-        {{
-            var seconds = Math.round(video.duration % 60);
-
-            // (Put the minutes and seconds in the display)
-            counter.attach({{
-            target: document.getElementById('videoTimer'),
-                    remain: seconds
-                }});
-            clearInterval(i);
-        }}
-    }}, 200);
-
-}});
-
-</script>
-</body>";
-
-
-            htmlFile = Path.GetDirectoryName(htmlFile) + "/" + Path.GetFileNameWithoutExtension(htmlFile) + ".html";
-
-            Debug.Log("----------------" + htmlFile);
-
-            if (File.Exists(htmlFile))
-                File.Delete(htmlFile);
-
-            File.WriteAllBytes(htmlFile, Encoding.ASCII.GetBytes(page));
-
-            var closeButtonFileName = Path.GetDirectoryName(htmlFile) + "/" + "close_button.png";
-
-            if (!File.Exists(closeButtonFileName))
-            {
-                File.WriteAllBytes(closeButtonFileName, closeButtonImageAsset.bytes);
-            }
-
-
-            webView.Load("file://"+htmlFile);
-
-           // eventsPrefix = "Video";
-        }
-#endif
+               
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
@@ -378,7 +138,10 @@ document.addEventListener('DOMContentLoaded', function(){{
                 fullScreen = false;
 
             if (id == PanelId.SurveyWebView)
+            {
+                fullScreen = false;
                 useSafeFrame = true;
+            }
 
             PrepareWebViewComponent(fullScreen, useSafeFrame);
 
@@ -392,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function(){{
             switch (id)
             {
                 case PanelId.SurveyWebView: adType = AdType.Survey; PrepareSurveyPanel(m); break;
-                case PanelId.VideoWebView: adType = AdType.Video; PrepareVideoPanel(); break;
+                //case PanelId.VideoWebView: adType = AdType.Video; PrepareVideoPanel(); break;
                 case PanelId.Html5WebView: adType = AdType.Html5; PrepareHtml5Panel(); break;
                 case PanelId.HtmlWebPageView: adType = AdType.HtmlPage; PrepareWebViewPanel(m); break;
             }
@@ -530,7 +293,38 @@ document.addEventListener('DOMContentLoaded', function(){{
 
         }
 
+       
+
         public void OnSkipPress()
+        {
+            if (panelId != PanelId.SurveyWebView)
+            {
+                _OnSkipPress();
+                return;
+            }
+
+
+            webView.Hide(true, UniWebViewTransitionEdge.Top, 0.4f, () =>
+            {
+                MonetizrManager.ShowMessage((bool _isSkipped) =>
+                {
+                    if (!_isSkipped)
+                    {
+                        _OnSkipPress();
+                    }
+                    else
+                    {
+                        webView.Show(true, UniWebViewTransitionEdge.Top, 0.4f);
+                    }
+                },
+                    this.currentMissionDesc,
+                    PanelId.SurveyCloseConfirmation);
+
+            });
+            
+        }
+
+        public void _OnSkipPress()
         {
             isSkipped = true;
 

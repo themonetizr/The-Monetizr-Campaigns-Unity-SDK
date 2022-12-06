@@ -19,6 +19,8 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using System.Linq;
+using mixpanel;
+
 
 namespace Monetizr.Campaigns
 {
@@ -533,7 +535,14 @@ namespace Monetizr.Campaigns
             serverClaimForCampaigns = true;
             claimForSkippedCampaigns = false;
 #endif
-
+            if(soundSwitch == null)
+            {
+                soundSwitch = (bool isOn) =>
+                {
+                    Debug.Log($"Audio listener pause state {!isOn}");
+                    AudioListener.pause = !isOn;
+                };
+            }
 
             Log.Print($"MonetizrManager Initialize: {apiKey} {SDKVersion}");
 

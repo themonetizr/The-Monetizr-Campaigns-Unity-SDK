@@ -429,10 +429,10 @@ namespace Monetizr.Campaigns
                 MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR_WIN
             return () => onSurveyComplete.Invoke(false);
 #else
-                     
+
 
             return () =>
             {
