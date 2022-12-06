@@ -33,6 +33,7 @@ namespace Monetizr.Campaigns
             //MonetizrManager.ShowRewardCenter(null);
             MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
 
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressSkip);
 
             isSkipped = true;
 
@@ -101,6 +102,14 @@ namespace Monetizr.Campaigns
             //MonetizrManager.Analytics.BeginShowAdAsset(AdType.MinigameScreen, m);
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
+
+            var adType = AdType.Minigame;
+
+            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+
+            MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
+
+            MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
         }
 
         int amountOpened = 0;
@@ -235,6 +244,8 @@ namespace Monetizr.Campaigns
             isSkipped = false;
 
             SetActive(false);
+
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressOk);
 
             MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
         }
