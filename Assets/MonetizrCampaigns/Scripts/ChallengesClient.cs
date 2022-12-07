@@ -422,6 +422,8 @@ namespace Monetizr.Campaigns
 
                 if(reward == null)
                 {
+                    Debug.Log($"Product reward doesn't found for campaign {ingame}");
+
                     onFailure?.Invoke();
                     return;
                 }
@@ -436,7 +438,7 @@ namespace Monetizr.Campaigns
             requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
 
             
-            Debug.Log($"Request: {requestMessage}");
+            Debug.Log($"Request:\n[{requestMessage}] content:\n[{content}]");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage,ct);
 
