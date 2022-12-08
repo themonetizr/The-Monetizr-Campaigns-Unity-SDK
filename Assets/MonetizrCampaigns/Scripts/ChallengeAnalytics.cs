@@ -113,6 +113,7 @@ namespace Monetizr.Campaigns
                 case AdType.Minigame: return "MiniGameScreen";
                 case AdType.Survey: return "SurveyScreen";
                 case AdType.HtmlPage: return "HtmlPageScreen";
+                case AdType.RewardsCenterScreen: return "RewardsCenterScreen";
 
                 default:
                     return "";
@@ -253,6 +254,7 @@ namespace Monetizr.Campaigns
         Survey,
         SurveyNotificationScreen,
         Minigame,
+        RewardsCenterScreen,
     }
 
     internal enum DeviceSizeGroup
