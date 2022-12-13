@@ -26,6 +26,9 @@ namespace Monetizr.Campaigns
 
         private bool showNotClaimedDisabled = false;
 
+        private string currentCampaign;
+        private Mission currentMission;
+
         //public List<MissionUIDescription> missionsDescriptions;
 
         private new void Awake()
@@ -51,8 +54,12 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            currentMission = m;
+            currentCampaign =  MonetizrManager.Instance.GetActiveCampaign();
 
-            
+            MonetizrManager.CallUserDefinedEvent(currentCampaign,
+                  NielsenDar.GetPlacementName(AdType.RewardsCenterScreen),
+                  MonetizrManager.EventType.ButtonPressSkip);
 
             //string uiItemPrefab = "MonetizrRewardedItem";
 
@@ -65,7 +72,8 @@ namespace Monetizr.Campaigns
             hasSponsoredChallenges = false;
 
             //this.missionsDescriptions = missionsDescriptions;
-                        
+
+            MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardsCenterScreen, m);
             MonetizrManager.Analytics.TrackEvent("Reward center opened",m);
 
             //MonetizrManager.HideTinyMenuTeaser();
@@ -586,6 +594,10 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
+            MonetizrManager.CallUserDefinedEvent(currentCampaign,
+              NielsenDar.GetPlacementName(AdType.RewardsCenterScreen),
+              MonetizrManager.EventType.ButtonPressSkip);
+
             SetActive(false);
         }
 
@@ -598,6 +610,10 @@ namespace Monetizr.Campaigns
         {
             if (!missionDescription.isSponsored)
                 MonetizrManager.CleanUserDefinedMissions();
+
+            MonetizrManager.CallUserDefinedEvent(currentCampaign,
+              NielsenDar.GetPlacementName(AdType.RewardsCenterScreen),
+              MonetizrManager.EventType.ButtonPressOk);
 
             //play video or claim ready user-defined mission
             missionDescription.onClaimButtonPress.Invoke();
@@ -645,6 +661,8 @@ namespace Monetizr.Campaigns
         //TODO: not sure if everything correct here
         internal override void FinalizePanel(PanelId id)
         {
+            MonetizrManager.Analytics.EndShowAdAsset(AdType.RewardsCenterScreen, currentMission);
+
             //if(MonetizrManager.tinyTeaserCanBeVisible)
             //MonetizrManager.ShowTinyMenuTeaser(null);
 
