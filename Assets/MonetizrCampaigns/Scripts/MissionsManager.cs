@@ -139,7 +139,7 @@ namespace Monetizr.Campaigns
 
             return new Mission()
             {
-                rewardType = RewardType.Coins,
+                //rewardType = RewardType.Coins,
                 type = MissionType.VideoReward,
                 //reward = reward,
                 progress = 1.0f,
@@ -155,7 +155,7 @@ namespace Monetizr.Campaigns
         {
             return new Mission()
             {
-                rewardType = RewardType.Coins,
+                //rewardType = RewardType.Coins,
                 type = MissionType.TwitterReward,
                 //reward = reward,
                 progress = 1.0f,
@@ -173,7 +173,7 @@ namespace Monetizr.Campaigns
 
             return new Mission()
             {
-                rewardType = rt,
+                //rewardType = rt,
                 startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = MissionType.MutiplyReward,
                 //reward = reward,
@@ -195,7 +195,7 @@ namespace Monetizr.Campaigns
 
             return new Mission()
             {
-                rewardType = RewardType.Coins,
+                //rewardType = RewardType.Coins,
                 type = mt,
                 //reward = reward,
                 isDisabled = false, //survey is disabled from start
@@ -221,7 +221,7 @@ namespace Monetizr.Campaigns
 
             return new Mission()
             {
-                rewardType = rt,
+                //rewardType = rt,
                 startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = mt,
                 //reward = reward,
@@ -258,7 +258,7 @@ namespace Monetizr.Campaigns
 
             return new Mission()
             {
-                rewardType = rt,
+                //rewardType = rt,
                 startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = mt,
                 //reward = reward,
@@ -277,7 +277,7 @@ namespace Monetizr.Campaigns
 
             return new Mission()
             {
-                rewardType = rt,
+                //rewardType = rt,
                 startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = mt,
                 //reward = reward,
@@ -312,6 +312,7 @@ namespace Monetizr.Campaigns
             if (m == null)
                 return null;
 
+            m.rewardType = md.rewardCurrency;
             m.reward = md.reward;
             m.state = MissionUIState.Visible;
             m.id = id;

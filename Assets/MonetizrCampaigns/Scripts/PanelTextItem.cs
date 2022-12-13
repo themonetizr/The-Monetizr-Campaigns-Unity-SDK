@@ -24,12 +24,12 @@ namespace Monetizr.Campaigns
             var param_with_type_and_id = $"{parentId.ToString()}.{m.type.ToString()}.{m.serverId}.{textContent}";
 
             UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, "text_color");
+
             UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{param}_color");
             UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{param_with_type}_color");
             UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{param_with_type_and_id}_color");
 
-
-
+            
             if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
             {
                 var param2 = $"{parentId.ToString()}.{textContent}2";
@@ -40,50 +40,32 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            if (m.campaignServerSettings.dictionary.ContainsKey(param))
+            string []prm = {param, param_with_type, param_with_type_and_id};
+
+            System.Array.ForEach(prm, s =>
             {
-                string t = m.campaignServerSettings.GetParam(param);
-
-                string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
-
-                t = t.Replace("%ingame_reward%", $"{MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}");
-                t = t.Replace("%reward_amount%", $"{MonetizrRewardedItem.ScoreShow(m.reward)}");
-                t = t.Replace("%reward_title%", $"{rewardTitle}");
-                t = t.Replace("<br/>", "\n");
-
-                textElement.text = t;
-            }
-
-            if (m.campaignServerSettings.dictionary.ContainsKey(param_with_type))
-            {
-                string t = m.campaignServerSettings.GetParam(param_with_type);
-
-                string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
-
-                t = t.Replace("%ingame_reward%", $"{MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}");
-                t = t.Replace("%reward_amount%", $"{MonetizrRewardedItem.ScoreShow(m.reward)}");
-                t = t.Replace("%reward_title%", $"{rewardTitle}");
-                t = t.Replace("<br/>", "\n");
-
-                textElement.text = t;
-            }
-
-            if (m.campaignServerSettings.dictionary.ContainsKey(param_with_type_and_id))
-            {
-                string t = m.campaignServerSettings.GetParam(param_with_type_and_id);
-
-                string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
-
-                t = t.Replace("%ingame_reward%", $"{MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}");
-                t = t.Replace("%reward_amount%", $"{MonetizrRewardedItem.ScoreShow(m.reward)}");
-                t = t.Replace("%reward_title%", $"{rewardTitle}");
-                t = t.Replace("<br/>", "\n");
-
-                textElement.text = t;
-            }
+                if (m.campaignServerSettings.dictionary.ContainsKey(s))
+                {
+                    UpdateRewardText(m, s);
+                }
+            });
+            
         }
 
-        
+        private void UpdateRewardText(Mission m, string param_with_type_and_id)
+        {
+            string t = m.campaignServerSettings.GetParam(param_with_type_and_id);
+
+            string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
+
+            t = t.Replace("%ingame_reward%", $"{MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}");
+            t = t.Replace("%reward_amount%", $"{MonetizrRewardedItem.ScoreShow(m.reward)}");
+            t = t.Replace("%reward_title%", $"{rewardTitle}");
+            t = t.Replace("<br/>", "\n");
+
+            textElement.text = t;
+        }
+
     }
 
 }

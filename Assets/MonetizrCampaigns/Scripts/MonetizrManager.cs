@@ -209,10 +209,12 @@ namespace Monetizr.Campaigns
     public enum RewardType
     {
         Undefined = 0,
-        Coins,
-        AdditionalCoins,
-        PremiumCurrency
-
+        Coins = 1,
+        Reward1 = 1,
+        AdditionalCoins = 2,
+        Reward2 = 2,
+        PremiumCurrency = 3,
+        Reward3 = 3,
     }
 
     [Serializable]
