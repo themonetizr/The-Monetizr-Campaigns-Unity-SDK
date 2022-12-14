@@ -360,7 +360,16 @@ namespace Monetizr.Campaigns
 
         }
 
-
+        internal static string GetOsGroup()
+        {
+#if UNITY_IOS
+            return "ios";
+#elif UNITY_ANDROID
+            return "android";
+#else
+            return "";
+#endif
+        }
 
         public MonetizrAnalytics()
         {

@@ -108,7 +108,11 @@ namespace Monetizr.Campaigns
             Client.Timeout = TimeSpan.FromSeconds(timeout);
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-       
+                        
+            Client.DefaultRequestHeaders.Add("player-id", analytics.GetUserId());
+            Client.DefaultRequestHeaders.Add("app-bundle-id", MonetizrManager.bundleId);
+            Client.DefaultRequestHeaders.Add("sdk-version", MonetizrManager.SDKVersion);
+            Client.DefaultRequestHeaders.Add("os-group", MonetizrAnalytics.GetOsGroup());
         }
 
         public void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey)
@@ -146,6 +150,7 @@ namespace Monetizr.Campaigns
         {
             public ServerCampaign[] challenges;
         }
+               
 
         /// <summary>
         /// Returns a list of challenges available to the player.
@@ -156,16 +161,6 @@ namespace Monetizr.Campaigns
             {
                 Method = HttpMethod.Get,
                 RequestUri = new Uri(k_BaseUri + "api/campaigns"),
-                Headers =
-                {
-                    //{"location", playerInfo.location},
-                    //{"age", playerInfo.age.ToString()},
-                    //{"game-type", playerInfo.gameType},
-                    {"player-id", analytics.GetUserId()},
-                    { "app-bundle-id", MonetizrManager.bundleId },
-                    { "sdk-version", MonetizrManager.SDKVersion },
-                    
-                }
             };
 
             Log.Print($"Sent request: {requestMessage.ToString()}");
@@ -359,13 +354,6 @@ namespace Monetizr.Campaigns
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri(k_BaseUri + "api/campaigns/" + campaignId + "/reset"),
-                Headers =
-                {
-                    {"player-id", analytics.GetUserId()},
-                    {"app-bundle-id", MonetizrManager.bundleId },
-                    {"sdk-version", MonetizrManager.SDKVersion },
-                    
-                }
             };
                         
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
@@ -393,18 +381,6 @@ namespace Monetizr.Campaigns
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri(k_BaseUri + "api/campaigns/" + challenge.id + "/claim"),
-                Headers =
-                {
-                    //{"location", playerInfo.location},
-                    //{"age", playerInfo.age.ToString()},
-                    //{"game-type", playerInfo.gameType},
-                    {"player-id", analytics.GetUserId()},
-                    //{"duration", analytics.GetElapsedTime(challenge).ToString()}
-
-                    { "app-bundle-id", MonetizrManager.bundleId },
-                    { "sdk-version", MonetizrManager.SDKVersion },
-                  
-                }
             };
 
             
