@@ -41,6 +41,7 @@ namespace Monetizr.Campaigns
         public List<Reward> rewards = new List<Reward>();
         public List<Asset> assets = new List<Asset>();
         public List<Location> locations = new List<Location>();
+        
 
         [System.NonSerialized] public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
 
@@ -87,6 +88,7 @@ namespace Monetizr.Campaigns
             public string type;
             public string title;
             public string url;
+            public string survey_content;
         }
 
         internal bool IsCampaignInsideLocation(IpApiData locData)

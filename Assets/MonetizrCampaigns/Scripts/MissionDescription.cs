@@ -29,12 +29,13 @@ namespace Monetizr.Campaigns
         internal RewardType rewardCurrency;
         internal List<int> activateAfter = new List<int>();
         internal string surveyUrl;
+        internal string surveyId;
         internal int id;
         internal int autoStartAfter;
         internal bool alwaysHiddenInRC;
 
 
-        public MissionDescription()
+        /*public MissionDescription()
         {
 
         }
@@ -62,7 +63,7 @@ namespace Monetizr.Campaigns
             this.activateAfter = activateAfter;
             this.surveyUrl = surveyUrl;
             this.rewardPercent = rewardPercent;
-        }
+        }*/
     }
 
     internal enum MissionUIState
@@ -310,6 +311,7 @@ namespace Monetizr.Campaigns
 
         //Survey url
         [SerializeField] internal string surveyUrl;
+        [SerializeField] internal string surveyId;
 
         //Time, when campaign was claimed and this mission could be active
         [SerializeField] internal string claimedTime;

@@ -28,6 +28,7 @@ namespace Monetizr.Campaigns
         CarMemoryGame,
         MemoryGame,
         SurveyCloseConfirmation,
+        SurveyUnityView,
     }
     
     internal class UIController

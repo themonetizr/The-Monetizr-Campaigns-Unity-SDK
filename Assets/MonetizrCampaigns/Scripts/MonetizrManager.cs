@@ -849,7 +849,7 @@ namespace Monetizr.Campaigns
 
                     instance.ClaimMissionData(m);
 
-                    instance.missionsManager.TryToActivateSurvey(m);
+                    //instance.missionsManager.TryToActivateSurvey(m);
 
 
                     MonetizrManager.HideTinyMenuTeaser(true);
@@ -1161,10 +1161,10 @@ namespace Monetizr.Campaigns
 
             ClaimMissionData(m);
 
-            if (Instance.missionsManager.TryToActivateSurvey(m))
+            /*if (Instance.missionsManager.TryToActivateSurvey(m))
             {
                 //UpdateUI();
-            }
+            }*/
 
             if (!showCongratsScreen)
             {
@@ -1206,7 +1206,7 @@ namespace Monetizr.Campaigns
 
         //TODO: need to connect now this mission and campaign from the server
         //next time once we register the mission it should connect with the same campaign
-        public static void RegisterSponsoredMission(RewardType rt, ulong rewardAmount)
+        /*public static void RegisterSponsoredMission(RewardType rt, ulong rewardAmount)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
@@ -1224,7 +1224,7 @@ namespace Monetizr.Campaigns
 
             //
             instance.missionsManager.AddMissionAndBindToCampaign(m);
-        }
+        }*/
 
         /// <summary>
         /// You need to earn goal amount of money to double it
@@ -1234,7 +1234,7 @@ namespace Monetizr.Campaigns
         /// <param name="rewardTitle">Coins</param>
         /// <param name="GetNormalCurrencyFunc">Get coins func</param>
         /// <param name="AddNormalCurrencyAction">Add coins to user account</param>
-        public static void RegisterSponsoredMission2(RewardType rt, ulong goalAmount)
+        /*public static void RegisterSponsoredMission2(RewardType rt, ulong goalAmount)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
@@ -1254,7 +1254,7 @@ namespace Monetizr.Campaigns
 
             //
             instance.missionsManager.AddMissionAndBindToCampaign(m);
-        }
+        }*/
 
 
         internal static void CleanUserDefinedMissions()
@@ -1384,6 +1384,16 @@ namespace Monetizr.Campaigns
             };
 
             instance.uiController.ShowPanelFromPrefab(panelNames[m.type].Item2, panelNames[m.type].Item1, onComplete, false, m);
+        }
+
+        internal static void ShowUnitySurvey(Action<bool> onComplete, Mission m)
+        {
+            Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+
+            if (!instance.isActive)
+                return;
+
+            instance.uiController.ShowPanelFromPrefab("MonetizrUnitySurveyPanel", PanelId.SurveyUnityView, onComplete, false, m);
         }
 
 
@@ -1983,7 +1993,11 @@ namespace Monetizr.Campaigns
                             break;
 
                         case "survey":
-                            ech.SetAsset<string>(AssetsType.SurveyURLString, asset.url);
+
+                            if(asset.survey_content != null && asset.survey_content.Length != 0)
+                                ech.SetAsset<string>(AssetsType.SurveyURLString, asset.survey_content);
+                            else
+                                ech.SetAsset<string>(AssetsType.SurveyURLString, asset.url);
 
                             break;
                         case "video":

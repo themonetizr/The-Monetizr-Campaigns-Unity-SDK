@@ -56,7 +56,7 @@ namespace Monetizr.Campaigns
             missions.Add(m);
         }
 
-        internal Mission getCampaignReadyForSurvey()
+       /*internal Mission getCampaignReadyForSurvey()
         {
             //Load();
 
@@ -80,7 +80,7 @@ namespace Monetizr.Campaigns
             }
 
             return claimed;
-        }
+        }*/
 
         //TODO: add currency
         internal Mission FindMissionInCache(int id, MissionType mt, string ch, ulong reward)
@@ -190,7 +190,7 @@ namespace Monetizr.Campaigns
         {
             string url = MonetizrManager.Instance.GetAsset<string>(campaign, AssetsType.SurveyURLString);
 
-            if (url == null || url.Length == 0)
+            if (string.IsNullOrEmpty(url))
                 return null;
 
             return new Mission()
@@ -321,7 +321,12 @@ namespace Monetizr.Campaigns
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
             m.sdkVersion = MonetizrManager.SDKVersion;
-            m.surveyUrl = md.surveyUrl;
+
+            if(string.IsNullOrEmpty(m.surveyUrl))
+                m.surveyUrl = md.surveyUrl;
+
+            m.surveyId = md.surveyId;
+
             m.serverId = md.id;
             m.rewardPercent = md.rewardPercent;
             m.autoStartAfter = md.autoStartAfter;
@@ -437,7 +442,10 @@ namespace Monetizr.Campaigns
 
             return () =>
             {
-                MonetizrManager.ShowSurvey(onSurveyComplete, m);
+                if(m.surveyUrl.Contains("https:"))
+                    MonetizrManager.ShowSurvey(onSurveyComplete, m);
+                else
+                    MonetizrManager.ShowUnitySurvey(onSurveyComplete, m);
 
                 /*MonetizrManager.ShowNotification((bool isSkipped) => { if(!isSkipped) MonetizrManager.ShowSurvey(onSurveyComplete, m); },
                            m,
@@ -621,6 +629,8 @@ namespace Monetizr.Campaigns
 
                     //string surveyUrl = serverSettings.GetParam(_m.survey);
 
+                    Debug.Log($"----------------- {_m.survey} : {_m.surveyUnity}");
+
                     m.Add(new MissionDescription
                     {
                         missionType = _m.GetMissionType(),
@@ -628,6 +638,7 @@ namespace Monetizr.Campaigns
                         rewardCurrency = _m.GetRewardType(),
                         activateAfter = _m.GetActivateRange(),
                         surveyUrl = serverSettings.GetParam(_m.survey),
+                        surveyId = string.IsNullOrEmpty(_m.surveyUnity) ? _m.survey : _m.surveyUnity,
                         rewardPercent = rewardAmount,
                         id = _m.getId(),
                         alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
@@ -657,6 +668,9 @@ namespace Monetizr.Campaigns
 
             //Survey link
             public string survey;
+
+            //Survey link
+            public string surveyUnity;
 
             //Server id
             public string id;
@@ -909,7 +923,7 @@ namespace Monetizr.Campaigns
 
         //------------------------
 
-        internal void AddMissionAndBindToCampaign(Mission sponsoredMission)
+        /*internal void AddMissionAndBindToCampaign(Mission sponsoredMission)
         {
             //bind to server campagns
             var challenges = MonetizrManager.Instance.GetAvailableCampaigns();
@@ -973,7 +987,7 @@ namespace Monetizr.Campaigns
             }
 
             return false;
-        }
+        }*/
 
         internal Mission GetMission(string campaignId)
         {
