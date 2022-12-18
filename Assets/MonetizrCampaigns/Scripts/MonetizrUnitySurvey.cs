@@ -12,6 +12,10 @@ namespace Monetizr.Campaigns
 
         public Button closeButton;
         public Image logo;
+        public ScrollRect scroll;
+        public MonetizrSurveyQuestionRoot monetizrQuestionRoot;
+        public RectTransform contentRoot;
+        public MonetizrSurveyAnswer answerRadioButtonPrefab;
 
         AdType adType;
 
@@ -112,6 +116,15 @@ namespace Monetizr.Campaigns
 
         //{'survey': [{'settings': {'id': 'FebrezePreSurvey1'}, 'questions': [{'id': '1', 'text': 'are you ok?', 'type': 'one', 'answers': [{'id': '1', 'text': 'yes'}, {'id': '2', 'text': 'no'}], 'picture': ''}, {'id': '2', 'text': 'are you ok?', 'type': 'multiple', 'answers': [{'id': '1', 'text': 'yes'}, {'id': '2', 'text': 'no'}], 'picture': ''}, {'id': '3', 'text': 'are you ok?', 'type': 'editable', 'answers': [{'id': '1', 'text': 'could be better'}], 'picture': ''}]}]}
 
+
+        //TODO list
+        //- moving list back and forward
+        //- create layout grid for position questions
+        //
+        //- create prefabs for questions
+        //- create prefabs for different type of answers
+        //- clone elements into question layout
+        //
         private void LoadSurvey(Mission m)
         {
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
@@ -121,19 +134,62 @@ namespace Monetizr.Campaigns
 
             var surveys = JsonUtility.FromJson<Surveys>(surveysContent);
 
-            currentSurvey = surveys.surveys.Find(s => s.settings.id == m.surveyId);
+            if (surveys.surveys.Count == 1)
+                currentSurvey = surveys.surveys[0];
+            else
+                currentSurvey = surveys.surveys.Find(s => s.settings.id == m.surveyId);
 
             if(currentSurvey == null)
             {
                 Log.PrintWarning($"{m.surveyId} not found in surveys!");
                 OnButtonClick();
+                return;
             }
+
+            float width = 0;
+            int id = 0;
+            currentSurvey.questions.ForEach(q =>
+            {
+                var qObj = GameObject.Instantiate<GameObject>(monetizrQuestionRoot.gameObject, contentRoot);
+
+                var questionRoot = qObj.GetComponent<MonetizrSurveyQuestionRoot>();
+
+                questionRoot.question.text = currentSurvey.questions[0].text;
+                questionRoot.id = currentSurvey.questions[0].id;
+                //width += questionRoot.rectTransform.sizeDelta.x;
+
+                q.answers.ForEach(a =>
+                {
+                    var aObj = GameObject.Instantiate<GameObject>(answerRadioButtonPrefab.gameObject, questionRoot.rectTransform);
+
+                    var answerRoot = aObj.GetComponent<MonetizrSurveyAnswer>();
+
+                    answerRoot.answer.text = a.text;
+                    answerRoot.id = a.id;
+                });
+
+                width += 700;
+            });
+
+            contentRoot.sizeDelta = new Vector2(width,0);
+            
+                
 
             print(currentSurvey.settings.id);
             print(currentSurvey.questions[0].text);
             print(currentSurvey.questions[0].id);
             print(currentSurvey.questions[0].answers[0].text);
 
+        }
+
+        public void OnBackButton()
+        {
+            scroll.horizontalNormalizedPosition = 0.0f;
+        }
+
+        public void OnNextButton()
+        {
+            scroll.horizontalNormalizedPosition = 0.2f;
         }
 
         internal void Complete()
