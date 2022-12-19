@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -186,7 +187,7 @@ namespace Monetizr.Campaigns
 
             contentRoot.sizeDelta = new Vector2(width,0);
 
-            backButton.gameObject.SetActive(false);
+            backButton.interactable = false;
             nextButton.interactable = false;
 
             state = State.Idle;
@@ -219,7 +220,7 @@ namespace Monetizr.Campaigns
             if (state == State.Moving)
                 return;
 
-            nextQuestion = Mathf.Clamp(currentQuestion--,0, currentSurvey.questions.Count);
+            nextQuestion = Mathf.Clamp(currentQuestion-1,0, currentSurvey.questions.Count);
 
             state = State.Moving;
 
@@ -240,6 +241,21 @@ namespace Monetizr.Campaigns
                 return;
             }
 
+
+            nextQuestion = currentQuestion+1;
+
+            state = State.Moving;
+
+            progress = 0.0f;
+
+            Log.Print("----------------ON NEXT");
+            //scroll.horizontalNormalizedPosition = 0.2f;
+        }
+
+        public void UpdateButtons()
+        {
+            Log.Print($"----------------UpdateButtons {currentQuestion}");
+
             //almost finished - change next to submit
             if (currentQuestion == currentSurvey.questions.Count-1)
             {
@@ -250,14 +266,11 @@ namespace Monetizr.Campaigns
                 nextButtonText.text = "Next";
             }
 
-            nextQuestion = currentQuestion++;
+           
+            backButton.interactable = currentQuestion != 0;
+            nextButton.interactable = false;
 
-            state = State.Moving;
 
-            progress = 0.0f;
-
-            Debug.Log("----------------ON NEXT");
-            //scroll.horizontalNormalizedPosition = 0.2f;
         }
 
         public void Update()
@@ -265,15 +278,24 @@ namespace Monetizr.Campaigns
             if (state != State.Moving)
                 return;
 
-            progress += 1.0f/Time.deltaTime;
+            progress += Time.deltaTime/1.0f;
 
-            Debug.Log($"----------------PROGRESS {progress}");
+            //Debug.Log($"----------------PROGRESS {progress} {Time.deltaTime}");
 
             float p1 = (float)currentQuestion / (float)currentSurvey.questions.Count;
             float p2 = (float)nextQuestion / (float)currentSurvey.questions.Count;
 
-            scroll.horizontalNormalizedPosition = Mathf.Lerp(p1,p2,progress);
+            scroll.horizontalNormalizedPosition = Mathf.Lerp(p1,p2,Tween(progress));
 
+            if(progress > 1.0f)
+            {
+                progress = 0;
+                scroll.horizontalNormalizedPosition = p2;
+                state = State.Idle;
+                currentQuestion = nextQuestion;
+
+                UpdateButtons();
+            }
         }
 
         public void OnSkipButton()
