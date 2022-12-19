@@ -295,7 +295,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93febbcae28224cf1a429464f2a5b36e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  id: 
   answer: {fileID: 5200652247700584386}
+  toggle: {fileID: 2955452655643482131}
 --- !u!1 &8485631635543316545
 GameObject:
   m_ObjectHideFlags: 0

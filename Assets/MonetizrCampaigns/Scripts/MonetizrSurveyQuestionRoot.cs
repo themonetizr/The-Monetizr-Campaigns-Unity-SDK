@@ -10,6 +10,7 @@ namespace Monetizr.Campaigns
         public RectTransform rectTransform;
         public Text question;
         public string id;
+        public ToggleGroup toggleGroup;
     }
 
 }

@@ -92,6 +92,7 @@ GameObject:
   - component: {fileID: 438670725962131499}
   - component: {fileID: 2182194530562182397}
   - component: {fileID: 6862135625409464192}
+  - component: {fileID: 3697780730324166670}
   m_Layer: 5
   m_Name: MonetizrQuestionRoot
   m_TagString: Untagged
@@ -142,6 +143,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 4158907231137449024}
   question: {fileID: 6590809765798169195}
+  id: 
+  toggleGroup: {fileID: 3697780730324166670}
 --- !u!114 &2182194530562182397
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198,6 +201,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &3697780730324166670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5017462572367627875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AllowSwitchOff: 1
 --- !u!1001 &4344056548614233764
 PrefabInstance:
   m_ObjectHideFlags: 0

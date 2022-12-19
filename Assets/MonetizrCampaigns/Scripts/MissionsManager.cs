@@ -435,15 +435,18 @@ namespace Monetizr.Campaigns
                 MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
-#if UNITY_EDITOR_WIN
-            return () => onSurveyComplete.Invoke(false);
-#else
-
+//#if UNITY_EDITOR_WIN
+//            return () => onSurveyComplete.Invoke(false);
+//#else
 
             return () =>
             {
                 if(m.surveyUrl.Contains("https:"))
+#if UNITY_EDITOR_WIN
+                    onSurveyComplete.Invoke(false);
+#else
                     MonetizrManager.ShowSurvey(onSurveyComplete, m);
+#endif
                 else
                     MonetizrManager.ShowUnitySurvey(onSurveyComplete, m);
 
@@ -451,7 +454,7 @@ namespace Monetizr.Campaigns
                            m,
                            PanelId.SurveyNotification);*/
             };
-#endif
+//#endif
         }
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)

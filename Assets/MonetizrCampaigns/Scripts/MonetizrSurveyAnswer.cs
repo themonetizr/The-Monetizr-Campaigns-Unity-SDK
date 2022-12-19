@@ -9,6 +9,7 @@ namespace Monetizr.Campaigns
     {
         public string id;
         public Text answer;
+        public Toggle toggle;
     }
 }
     

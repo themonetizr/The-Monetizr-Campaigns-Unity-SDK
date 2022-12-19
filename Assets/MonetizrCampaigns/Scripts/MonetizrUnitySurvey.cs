@@ -17,31 +17,50 @@ namespace Monetizr.Campaigns
         public RectTransform contentRoot;
         public MonetizrSurveyAnswer answerRadioButtonPrefab;
 
-        AdType adType;
+        public Button backButton;
+        public Button nextButton;
 
-        Survey currentSurvey;
+        public Text nextButtonText;
+
+        private int currentQuestion = 0;
+        private int nextQuestion = 1;
+
+        private AdType adType;
+
+        private Surveys surveys;
+        private Survey currentSurvey;
+
+        private enum State
+        {
+            Idle,
+            Moving
+        }
+
+        private State state = State.Idle;
+        private float progress = 0.0f;
+
 
         [Serializable]
-        class Surveys
+        internal class Surveys
         {
             public List<Survey> surveys = new List<Survey>();
         }
 
         [Serializable]
-        class Survey
+        internal class Survey
         {
             public Settings settings = new Settings();
             public List<Question> questions = new List<Question>();
         }
 
         [Serializable]
-        class Settings
+        internal class Settings
         {
             public string id;
         }
 
         [Serializable]
-        class Question
+        internal class Question
         {
             public string id;
             public string text;
@@ -50,22 +69,20 @@ namespace Monetizr.Campaigns
             public bool randomOrder;
 
             public List<Answer> answers = new List<Answer>();
+            
+            [NonSerialized] internal MonetizrSurveyQuestionRoot questionRoot;
         }
 
         [Serializable]
-        class Answer
+        internal class Answer
         {
             public string id;
             public string text;
+
+            [NonSerialized] internal MonetizrSurveyAnswer answerRoot;
+            [NonSerialized] internal Question question;
         }
-
-        
-        void Update()
-        {
-            
-
-        }
-
+               
         void SetProgress(float a)
         {
             //uvRect.y = 0.5f * (1.0f - Tween(a));
@@ -101,18 +118,7 @@ namespace Monetizr.Campaigns
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
         }
-
-        //{'survey': [{'settings': {'id': 'FebrezePreSurvey1'}, 'questions': [{'id': '1', 'text': 'are you ok?', 'type': 'one', 'answers': [{'id': '1', 'text': 'yes'}, {'id': '2', 'text': 'no'}], 'picture': ''}, {'id': '2', 'text': 'are you ok?', 'type': 'multiple', 'answers': [{'id': '1', 'text': 'yes'}, {'id': '2', 'text': 'no'}], 'picture': ''}, {'id': '3', 'text': 'are you ok?', 'type': 'editable', 'answers': [{'id': '1', 'text': 'could be better'}], 'picture': ''}]}]}
-
-
-        //TODO list
-        //- moving list back and forward
-        //- create layout grid for position questions
-        //
-        //- create prefabs for questions
-        //- create prefabs for different type of answers
-        //- clone elements into question layout
-        //
+             
         private void LoadSurvey(Mission m)
         {
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
@@ -120,7 +126,7 @@ namespace Monetizr.Campaigns
             Log.PrintWarning($"{m.surveyId}");
             Log.PrintWarning($"{surveysContent}");
 
-            var surveys = JsonUtility.FromJson<Surveys>(surveysContent);
+            surveys = JsonUtility.FromJson<Surveys>(surveysContent);
 
             if (surveys.surveys.Count == 1)
                 currentSurvey = surveys.surveys[0];
@@ -144,7 +150,13 @@ namespace Monetizr.Campaigns
 
                 questionRoot.question.text = currentSurvey.questions[0].text;
                 questionRoot.id = currentSurvey.questions[0].id;
+                q.questionRoot = questionRoot;
                 //width += questionRoot.rectTransform.sizeDelta.x;
+
+                if (q.randomOrder)
+                {
+                    ShuffleAnswersList(q);
+                }
 
                 q.answers.ForEach(a =>
                 {
@@ -154,14 +166,30 @@ namespace Monetizr.Campaigns
 
                     answerRoot.answer.text = a.text;
                     answerRoot.id = a.id;
+                    answerRoot.toggle.isOn = false;
+                    
+                    a.answerRoot = answerRoot;
+                    a.question = q;
+
+                    answerRoot.toggle.onValueChanged.AddListener(delegate {
+                        OnAnswerButton(a);
+                    });
+
+                    if (q.type == "one")
+                    {
+                        answerRoot.toggle.group = questionRoot.toggleGroup;
+                    }
                 });
 
                 width += 700;
             });
 
             contentRoot.sizeDelta = new Vector2(width,0);
-            
-                
+
+            backButton.gameObject.SetActive(false);
+            nextButton.interactable = false;
+
+            state = State.Idle;
 
             print(currentSurvey.settings.id);
             print(currentSurvey.questions[0].text);
@@ -170,14 +198,82 @@ namespace Monetizr.Campaigns
 
         }
 
+        private static void ShuffleAnswersList(Question q)
+        {
+            for (int i = 0; i < q.answers.Count; i++)
+            {
+                var temp = q.answers[i];
+                int randomIndex = UnityEngine.Random.Range(i, q.answers.Count);
+                q.answers[i] = q.answers[randomIndex];
+                q.answers[randomIndex] = temp;
+            }
+        }
+
+        internal void OnAnswerButton(Answer a)
+        {
+            nextButton.interactable = true;
+        }
+
         public void OnBackButton()
         {
-            scroll.horizontalNormalizedPosition = 0.0f;
+            if (state == State.Moving)
+                return;
+
+            nextQuestion = Mathf.Clamp(currentQuestion--,0, currentSurvey.questions.Count);
+
+            state = State.Moving;
+
+            progress = 0.0f;
+
+            
         }
 
         public void OnNextButton()
         {
-            scroll.horizontalNormalizedPosition = 0.2f;
+            if (state == State.Moving)
+                return;
+                        
+            //submit
+            if(currentQuestion == currentSurvey.questions.Count-1)
+            {
+
+                return;
+            }
+
+            //almost finished - change next to submit
+            if (currentQuestion == currentSurvey.questions.Count-1)
+            {
+                nextButtonText.text = "Submit";
+            }
+            else
+            {
+                nextButtonText.text = "Next";
+            }
+
+            nextQuestion = currentQuestion++;
+
+            state = State.Moving;
+
+            progress = 0.0f;
+
+            Debug.Log("----------------ON NEXT");
+            //scroll.horizontalNormalizedPosition = 0.2f;
+        }
+
+        public void Update()
+        {
+            if (state != State.Moving)
+                return;
+
+            progress += 1.0f/Time.deltaTime;
+
+            Debug.Log($"----------------PROGRESS {progress}");
+
+            float p1 = (float)currentQuestion / (float)currentSurvey.questions.Count;
+            float p2 = (float)nextQuestion / (float)currentSurvey.questions.Count;
+
+            scroll.horizontalNormalizedPosition = Mathf.Lerp(p1,p2,progress);
+
         }
 
         public void OnSkipButton()
