@@ -77,19 +77,7 @@ namespace Monetizr.Campaigns
             return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
         }
 
-        public void OnButtonClick()
-        {
-            //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
-            //MonetizrManager.ShowRewardCenter(null);
-            MonetizrManager.Analytics.TrackEvent("Survey skipped", currentMission);
-
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Survey), MonetizrManager.EventType.ButtonPressSkip);
-
-            isSkipped = true;
-
-            SetActive(false);
-        }
-
+      
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             this.onComplete = onComplete;
@@ -142,7 +130,7 @@ namespace Monetizr.Campaigns
             if(currentSurvey == null)
             {
                 Log.PrintWarning($"{m.surveyId} not found in surveys!");
-                OnButtonClick();
+                OnSkipButton();
                 return;
             }
 
@@ -190,6 +178,20 @@ namespace Monetizr.Campaigns
         public void OnNextButton()
         {
             scroll.horizontalNormalizedPosition = 0.2f;
+        }
+
+        public void OnSkipButton()
+        {
+
+            //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
+            //MonetizrManager.ShowRewardCenter(null);
+            MonetizrManager.Analytics.TrackEvent("Survey skipped", currentMission);
+
+            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Survey), MonetizrManager.EventType.ButtonPressSkip);
+
+            isSkipped = true;
+
+            SetActive(false);
         }
 
         internal void Complete()
