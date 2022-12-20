@@ -17,11 +17,14 @@ namespace Monetizr.Campaigns
         public MonetizrSurveyQuestionRoot monetizrQuestionRoot;
         public RectTransform contentRoot;
         public MonetizrSurveyAnswer answerRadioButtonPrefab;
+        public MonetizrSurveyAnswer answerEditablePrefab;
 
         public Button backButton;
         public Button nextButton;
 
         public Text nextButtonText;
+
+        public Text progressText;
 
         private int currentQuestion = 0;
         private int nextQuestion = 1;
@@ -30,6 +33,8 @@ namespace Monetizr.Campaigns
 
         private Surveys surveys;
         private Survey currentSurvey;
+
+        
 
         private enum State
         {
@@ -143,14 +148,16 @@ namespace Monetizr.Campaigns
 
             float width = 0;
             int id = 0;
+            bool isFirstQuestionEmpty = false;
+
             currentSurvey.questions.ForEach(q =>
             {
                 var qObj = GameObject.Instantiate<GameObject>(monetizrQuestionRoot.gameObject, contentRoot);
 
                 var questionRoot = qObj.GetComponent<MonetizrSurveyQuestionRoot>();
 
-                questionRoot.question.text = currentSurvey.questions[0].text;
-                questionRoot.id = currentSurvey.questions[0].id;
+                questionRoot.question.text = q.text;
+                questionRoot.id = q.id;
                 q.questionRoot = questionRoot;
                 //width += questionRoot.rectTransform.sizeDelta.x;
 
@@ -159,24 +166,45 @@ namespace Monetizr.Campaigns
                     ShuffleAnswersList(q);
                 }
 
+                //no vertical truncate and upper left aligment
+                if (id == 0 && q.answers.Count == 0)
+                {
+                    q.questionRoot.question.verticalOverflow = VerticalWrapMode.Overflow;
+                    q.questionRoot.question.alignment = TextAnchor.UpperLeft;
+                    isFirstQuestionEmpty = true;
+                }
+
                 q.answers.ForEach(a =>
                 {
-                    var aObj = GameObject.Instantiate<GameObject>(answerRadioButtonPrefab.gameObject, questionRoot.rectTransform);
+                    GameObject aObj = null;
+
+                    if (q.answers.Count > 1 && q.type == "editable")
+                        q.type = "one";
+
+                    if (q.type == "editable")
+                        aObj = GameObject.Instantiate<GameObject>(answerEditablePrefab.gameObject, questionRoot.rectTransform);
+                    else
+                        aObj = GameObject.Instantiate<GameObject>(answerRadioButtonPrefab.gameObject, questionRoot.rectTransform);
 
                     var answerRoot = aObj.GetComponent<MonetizrSurveyAnswer>();
 
                     answerRoot.answer.text = a.text;
                     answerRoot.id = a.id;
-                    answerRoot.toggle.isOn = false;
-                    answerRoot.toggle.gameObject.name = $"Q:{q.id}:A:{a.id}";
 
+                    if (answerRoot.toggle != null)
+                    {
+                        answerRoot.toggle.isOn = false;
+                        answerRoot.toggle.gameObject.name = $"Q:{q.id}:A:{a.id}";
+                        answerRoot.toggle.onValueChanged.AddListener(delegate
+                        {
+                            OnAnswerButton(a);
+                        });
+                    }
 
                     a.answerRoot = answerRoot;
                     a.question = q;
 
-                    answerRoot.toggle.onValueChanged.AddListener(delegate {
-                        OnAnswerButton(a);
-                    });
+                    
 
                     if (q.type == "one")
                     {
@@ -185,19 +213,18 @@ namespace Monetizr.Campaigns
                 });
 
                 width += 740;
+                id++;
             });
 
             contentRoot.sizeDelta = new Vector2(width,0);
 
             backButton.interactable = false;
-            nextButton.interactable = false;
+
+            nextButton.interactable = isFirstQuestionEmpty;
 
             state = State.Idle;
 
-            print(currentSurvey.settings.id);
-            print(currentSurvey.questions[0].text);
-            print(currentSurvey.questions[0].id);
-            print(currentSurvey.questions[0].answers[0].text);
+            
 
         }
 
@@ -214,7 +241,7 @@ namespace Monetizr.Campaigns
 
         internal void OnAnswerButton(Answer pressedAnswer)
         {
-            Log.Print($"------>>>>>>>{pressedAnswer.answerRoot.toggle.isOn} {pressedAnswer.answerRoot.toggle.gameObject.name}");
+            //Log.Print($"------>>>>>>>{pressedAnswer.answerRoot.toggle.isOn} {pressedAnswer.answerRoot.toggle.gameObject.name}");
 
             //nextButton.interactable = true;
 
@@ -232,7 +259,9 @@ namespace Monetizr.Campaigns
 
             progress = 0.0f;
 
-            
+            backButton.interactable = false;
+            nextButton.interactable = false;
+
         }
 
         public void OnNextButton()
@@ -243,24 +272,27 @@ namespace Monetizr.Campaigns
             //submit
             if(currentQuestion == currentSurvey.questions.Count-1)
             {
-
+                Complete();
                 return;
             }
 
 
             nextQuestion = currentQuestion+1;
-
+                        
             state = State.Moving;
 
             progress = 0.0f;
 
-            Log.Print("----------------ON NEXT");
-            //scroll.horizontalNormalizedPosition = 0.2f;
+            //Log.Print("----------------ON NEXT");
+
+            backButton.interactable = false;
+            nextButton.interactable = false;
+
         }
 
         public void UpdateButtons()
         {
-            Log.Print($"----------------UpdateButtons {currentQuestion}");
+            //Log.Print($"----------------UpdateButtons {currentQuestion}");
 
             //almost finished - change next to submit
             if (currentQuestion == currentSurvey.questions.Count-1)
@@ -280,30 +312,45 @@ namespace Monetizr.Campaigns
 
             bool isSelected = false;
 
-            question.answers.ForEach(a =>
+            if (question.type != "editable")
             {
-                Log.Print($"------{a.answerRoot.toggle.isOn} {a.answerRoot.toggle.gameObject.name}");
-
-                if (a.answerRoot.toggle.isOn)
+                question.answers.ForEach(a =>
                 {
+                    //Log.Print($"------{a.answerRoot.toggle.isOn} {a.answerRoot.toggle.gameObject.name}");
+
+                    if (a.answerRoot.toggle.isOn)
+                    {
+                        isSelected = true;
+                    }
+                });
+
+                if (question.answers.Count == 0)
                     isSelected = true;
-                }
-            });
+            }
+            else
+            {
+                isSelected = true;
+            }
 
             nextButton.interactable = isSelected;
+
+            progressText.text = $"{currentQuestion + 1} / {currentSurvey.questions.Count}";
         }
 
         public void Update()
         {
+           
             if (state != State.Moving)
                 return;
 
-            progress += Time.deltaTime/1.0f;
+            progress += Time.deltaTime/0.4f;
 
             //Debug.Log($"----------------PROGRESS {progress} {Time.deltaTime}");
 
-            float p1 = (float)currentQuestion / (float)currentSurvey.questions.Count;
-            float p2 = (float)nextQuestion / (float)currentSurvey.questions.Count;
+            float p1 = (float)currentQuestion /(currentSurvey.questions.Count-1);
+            float p2 = (float)nextQuestion / (currentSurvey.questions.Count-1);
+
+            //Log.Print($"----------------PROGRESS {p1} {p2}");
 
             scroll.horizontalNormalizedPosition = Mathf.Lerp(p1,p2,Tween(progress));
 
@@ -318,7 +365,7 @@ namespace Monetizr.Campaigns
             }
         }
 
-        public void OnSkipButton()
+        public void _OnSkipButton()
         {
 
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
@@ -330,6 +377,20 @@ namespace Monetizr.Campaigns
             isSkipped = true;
 
             SetActive(false);
+        }
+
+        public void OnSkipButton()
+        {
+            MonetizrManager.ShowMessage((bool _isSkipped) =>
+            {
+                if (!_isSkipped)
+                {
+                    _OnSkipButton();
+                }
+                
+            },
+                    currentMission,
+                    PanelId.SurveyCloseConfirmation);
         }
 
         internal void Complete()
