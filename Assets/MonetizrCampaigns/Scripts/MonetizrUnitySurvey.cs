@@ -168,7 +168,9 @@ namespace Monetizr.Campaigns
                     answerRoot.answer.text = a.text;
                     answerRoot.id = a.id;
                     answerRoot.toggle.isOn = false;
-                    
+                    answerRoot.toggle.gameObject.name = $"Q:{q.id}:A:{a.id}";
+
+
                     a.answerRoot = answerRoot;
                     a.question = q;
 
@@ -182,7 +184,7 @@ namespace Monetizr.Campaigns
                     }
                 });
 
-                width += 700;
+                width += 740;
             });
 
             contentRoot.sizeDelta = new Vector2(width,0);
@@ -210,9 +212,13 @@ namespace Monetizr.Campaigns
             }
         }
 
-        internal void OnAnswerButton(Answer a)
+        internal void OnAnswerButton(Answer pressedAnswer)
         {
-            nextButton.interactable = true;
+            Log.Print($"------>>>>>>>{pressedAnswer.answerRoot.toggle.isOn} {pressedAnswer.answerRoot.toggle.gameObject.name}");
+
+            //nextButton.interactable = true;
+
+            UpdateButtons();
         }
 
         public void OnBackButton()
@@ -270,7 +276,21 @@ namespace Monetizr.Campaigns
             backButton.interactable = currentQuestion != 0;
             nextButton.interactable = false;
 
+            var question = currentSurvey.questions[currentQuestion];
 
+            bool isSelected = false;
+
+            question.answers.ForEach(a =>
+            {
+                Log.Print($"------{a.answerRoot.toggle.isOn} {a.answerRoot.toggle.gameObject.name}");
+
+                if (a.answerRoot.toggle.isOn)
+                {
+                    isSelected = true;
+                }
+            });
+
+            nextButton.interactable = isSelected;
         }
 
         public void Update()
