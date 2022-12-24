@@ -65,6 +65,14 @@ namespace Monetizr.Campaigns
             public string id;
         }
 
+        internal enum Type
+        {
+            One,
+            Multiple,
+            Editable,
+
+        }
+
         [Serializable]
         internal class Question
         {
@@ -73,10 +81,28 @@ namespace Monetizr.Campaigns
             public string type;
             public string picture;
             public bool randomOrder;
+            public Type enumType;
 
             public List<Answer> answers = new List<Answer>();
             
             [NonSerialized] internal MonetizrSurveyQuestionRoot questionRoot;
+
+            internal Type ParseType(string type)
+            {
+                Dictionary<string, Type> types = new Dictionary<string, Type>()
+                {
+                    { "intro", Type.One },
+                    { "one", Type.One },
+                    { "multiple", Type.Multiple },
+                    { "editable", Type.Editable },
+                    { "sumbit", Type.One },
+                };
+
+                if (types.ContainsKey(type))
+                    return types[type];
+
+                return Type.One;
+            }
         }
 
         [Serializable]
@@ -124,6 +150,8 @@ namespace Monetizr.Campaigns
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
         }
+
+        
              
         private void LoadSurvey(Mission m)
         {
@@ -161,6 +189,8 @@ namespace Monetizr.Campaigns
                 q.questionRoot = questionRoot;
                 //width += questionRoot.rectTransform.sizeDelta.x;
 
+                q.enumType = q.ParseType(q.type);
+
                 if (q.randomOrder)
                 {
                     ShuffleAnswersList(q);
@@ -178,10 +208,10 @@ namespace Monetizr.Campaigns
                 {
                     GameObject aObj = null;
 
-                    if (q.answers.Count > 1 && q.type == "editable")
-                        q.type = "one";
+                    if (q.answers.Count > 1 && q.enumType == Type.Editable)
+                        q.enumType = Type.One;
 
-                    if (q.type == "editable")
+                    if (q.enumType == Type.Editable)
                         aObj = GameObject.Instantiate<GameObject>(answerEditablePrefab.gameObject, questionRoot.rectTransform);
                     else
                         aObj = GameObject.Instantiate<GameObject>(answerRadioButtonPrefab.gameObject, questionRoot.rectTransform);
@@ -206,7 +236,7 @@ namespace Monetizr.Campaigns
 
                     
 
-                    if (q.type == "one")
+                    if (q.enumType == Type.One)
                     {
                         answerRoot.toggle.group = questionRoot.toggleGroup;
                     }
@@ -312,7 +342,7 @@ namespace Monetizr.Campaigns
 
             bool isSelected = false;
 
-            if (question.type != "editable")
+            if (question.enumType != Type.Editable)
             {
                 question.answers.ForEach(a =>
                 {
