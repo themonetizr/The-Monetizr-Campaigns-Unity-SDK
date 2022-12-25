@@ -12,6 +12,7 @@ namespace Monetizr.Campaigns
         public Toggle toggle;
         public Text enteredAnswer;
         public InputField inputField;
+        public Image greenBackground;
     }
 }
     

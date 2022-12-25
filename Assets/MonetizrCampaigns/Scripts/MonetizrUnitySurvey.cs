@@ -38,7 +38,8 @@ namespace Monetizr.Campaigns
         private Surveys surveys;
         private Survey currentSurvey;
 
-
+        private string submitText;
+        private string nextText;
         
 
         private enum State
@@ -171,6 +172,9 @@ namespace Monetizr.Campaigns
 
     private void LoadSurvey(Mission m)
         {
+            nextText = m.campaignServerSettings.GetParam("Survey.next_text","Next");
+            submitText = m.campaignServerSettings.GetParam("Survey.submit_text", "Submit");
+
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
 
             Log.PrintWarning($"{m.surveyId}");
@@ -298,15 +302,14 @@ namespace Monetizr.Campaigns
             var qType = pressedAnswer.question.enumType;
 
             if (qType == Type.Editable)
-            {
                 pressedAnswer.response = pressedAnswer.answerRoot.enteredAnswer.text;
-            }
             else if (pressedAnswer.answerRoot.toggle.isOn)
                 pressedAnswer.response = "true";
             else
                 pressedAnswer.response = "";
 
-            Log.Print($"!!!!!!!!!!!{pressedAnswer.response}");
+            if (qType != Type.Editable)
+                pressedAnswer.answerRoot.greenBackground.enabled = pressedAnswer.answerRoot.toggle.isOn;
 
             if (qType == Type.One)
                 OnNextButton();
@@ -324,9 +327,6 @@ namespace Monetizr.Campaigns
             state = State.Moving;
 
             progress = 0.0f;
-
-            //backButton.interactable = false;
-            //nextButton.interactable = false;
 
         }
 
@@ -351,30 +351,16 @@ namespace Monetizr.Campaigns
             state = State.Moving;
 
             progress = 0.0f;
-
-            //Log.Print("----------------ON NEXT");
-
-            //backButton.interactable = false;
-            //nextButton.interactable = false;
-
         }
 
         public void UpdateButtons()
         {
             //almost finished - change next to submit
-            if (currentQuestion == currentSurvey.questions.Count-1)
-            {
-                nextButtonText.text = "Submit";
-            }
-            else
-            {
-                nextButtonText.text = "Next";
-            }
+            
+            nextButtonText.text = currentQuestion == currentSurvey.questions.Count - 1 ? submitText : nextText;
 
-           
             backButton.interactable = currentQuestion != 0;
-            //nextButton.interactable = false;
-
+           
             var question = currentSurvey.questions[currentQuestion];
 
             bool isSelected = false;
@@ -383,11 +369,10 @@ namespace Monetizr.Campaigns
             {
                 question.answers.ForEach(a =>
                 {
-                    //Log.Print($"------{a.answerRoot.toggle.isOn} {a.answerRoot.toggle.gameObject.name}");
-
                     if (a.answerRoot.toggle.isOn)
                     {
                         isSelected = true;
+                        return;
                     }
                 });
 

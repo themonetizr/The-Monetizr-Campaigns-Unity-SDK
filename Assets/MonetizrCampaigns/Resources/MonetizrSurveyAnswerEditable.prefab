@@ -265,10 +265,10 @@ RectTransform:
   m_Father: {fileID: 6311936815161107167}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.00020957, y: -18.7057}
-  m_SizeDelta: {x: 740, y: 133.8913}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7198578342675716620
 CanvasRenderer:
@@ -298,7 +298,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 25a0e1d6d7a3943e08f44c236b050638, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9df70c1db5bab4a44ba2de97b00d39fd, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -351,13 +351,13 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 448932330696829619}
   m_TextComponent: {fileID: 1750994570307058277}
   m_Placeholder: {fileID: 5614942124941664548}
-  m_ContentType: 6
-  m_InputType: 0
+  m_ContentType: 1
+  m_InputType: 1
   m_AsteriskChar: 42
-  m_KeyboardType: 7
+  m_KeyboardType: 0
   m_LineType: 0
   m_HideMobileInput: 0
-  m_CharacterValidation: 5
+  m_CharacterValidation: 0
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
@@ -602,6 +602,7 @@ MonoBehaviour:
   toggle: {fileID: 0}
   enteredAnswer: {fileID: 1750994570307058277}
   inputField: {fileID: 5985255971184301839}
+  greenBackground: {fileID: 0}
 --- !u!1 &8485631635543316545
 GameObject:
   m_ObjectHideFlags: 0

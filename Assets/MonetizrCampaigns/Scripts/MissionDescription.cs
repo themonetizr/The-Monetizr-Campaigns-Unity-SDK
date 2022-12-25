@@ -196,13 +196,13 @@ namespace Monetizr.Campaigns
             dictionary = d;
         }
 
-        public TValue GetParam(TKey p)
+        public TValue GetParam(TKey p, TValue def = default(TValue))
         {
             if(p == null)
-                return default(TValue);
+                return def;
 
             if (!dictionary.ContainsKey(p))
-                return default(TValue);
+                return def;
 
             return dictionary[p];
         }
