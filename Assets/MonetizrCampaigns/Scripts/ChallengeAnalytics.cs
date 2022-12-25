@@ -371,7 +371,7 @@ namespace Monetizr.Campaigns
 #endif
         }
 
-        public MonetizrAnalytics()
+        internal MonetizrAnalytics()
         {
             Log.Print($"MonetizrAnalytics initialized with user id: {GetUserId()}");
 
@@ -431,7 +431,7 @@ namespace Monetizr.Campaigns
 #endif
         }
 
-        public void InitializeMixpanel(string apikey)
+        internal void InitializeMixpanel(string apikey)
         {
             if (isMixpanelInitialized)
                 return;
@@ -444,12 +444,12 @@ namespace Monetizr.Campaigns
         }
 
 
-        public void BeginShowAdAsset(AdType type, Mission m)
+        internal void BeginShowAdAsset(AdType type, Mission m)
         {
             BeginShowAdAsset(type, m.campaignId);
         }
 
-        public void BeginShowAdAsset(AdType type, string campaignId)
+        internal void BeginShowAdAsset(AdType type, string campaignId)
         {
             if (campaignId == null)
             {
@@ -485,18 +485,18 @@ namespace Monetizr.Campaigns
             //Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {type.ToString()}");
         }
 
-        public void StartTimedEvent(string eventName)
+        internal void StartTimedEvent(string eventName)
         {
             Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {eventName}");
         }
 
-        public void EndShowAdAsset(AdType type, Mission m, bool removeElement = true)
+        internal void EndShowAdAsset(AdType type, Mission m, bool removeElement = true)
         {
             EndShowAdAsset(type, m.campaignId, removeElement);
         }
 
         //if challengeId is define, end only specified ad types, if not - end all
-        public void EndShowAdAsset(AdType type, string campaignId = null, bool removeElement = true)
+        internal void EndShowAdAsset(AdType type, string campaignId = null, bool removeElement = true)
         {
             Log.Print($"MonetizrAnalytics EndShowAdAsset: {type} {campaignId}");
 
@@ -602,34 +602,11 @@ namespace Monetizr.Campaigns
             }
 
             var props = new Value();
-            /*props["application_id"] = challenge.application_id;
-            props["bundle_id"] = Application.identifier;
-            props["player_id"] = GetUserId();
-            
-            props["application_name"] = Application.productName;
-            props["application_version"] = Application.version;
-            props["impressions"] = "1";
-            //props["campaign_id"] = visibleAdAsset[adAsset].challengeId;
-            props["camp_id"] = challenge.id;
-            props["brand_id"] = challenge.brand_id;
-            props["brand_name"] = brandName;
-            //props["type"] = adTypeNames[adAsset.Key];
-            props["type"] = adAsset.Key.ToString();
-            props["ab_segment"] = MonetizrManager.abTestSegment;
-            props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
-
-            props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
-            props["sdk_version"] = MonetizrManager.SDKVersion;
-
-            props["ad_id"] = MonetizrAnalytics.advertisingID;
-
-            props["camp_title"] = challenge.title;*/
+           
 
             AddDefaultMixpanelValues(props, challenge, brandName);
 
             props["type"] = adAsset.Key.ToString();
-
-            
 
             string eventName = $"[UNITY_SDK] [TIMED] {adAsset.Key.ToString()}";
 
@@ -668,12 +645,12 @@ namespace Monetizr.Campaigns
             return result;
         }
 
-        public string GetUserId()
+        internal string GetUserId()
         {
             return SystemInfo.deviceUniqueIdentifier;
         }
 
-        public void TrackEvent(string name, Mission currentMissionDesc)
+        internal void TrackEvent(string name, Mission currentMissionDesc)
         {
             if (currentMissionDesc.campaignId == null)
                 return;
@@ -682,14 +659,14 @@ namespace Monetizr.Campaigns
         }
 
 
-        public void TrackEvent(string name, string campaign, bool timed = false)
+        internal void TrackEvent(string name, string campaign, bool timed = false)
         {
             var campaignName = MonetizrManager.Instance.GetCampaign(campaign);
 
             TrackEvent(name, campaignName, timed);
         }
 
-        public void TrackEvent(string name, ServerCampaign campaign, bool timed = false)
+        internal void TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string,string> additionalValues = null)
         {
             Debug.Assert(isMixpanelInitialized);
 
@@ -702,63 +679,32 @@ namespace Monetizr.Campaigns
                 eventName = $"[UNITY_SDK] [TIMED] {name}";
             }
 
-            string campaign_id = "none";
-            string brand_id = "none";
-            string app_id = "none";
             string brand_name = "none";
 
             if (campaign == null)
             {
-                Log.Print($"MonetizrAnalytics TrackEvent: MissionUIDescription shouldn't be null");
+                Log.Print($"MonetizrAnalytics TrackEvent: ServerCampaign shouldn't be null");
                 return;
             }
 
 
             var ch = campaign.id;
 
-            brand_id = campaign.brand_id;// MonetizrManager.Instance.GetChallenge(ch).brand_id;
-            app_id = campaign.application_id;// MonetizrManager.Instance.GetChallenge(ch).application_id;
-
             if(MonetizrManager.Instance.HasAsset(ch, AssetsType.BrandTitleString))
                 brand_name = MonetizrManager.Instance.GetAsset<string>(ch, AssetsType.BrandTitleString);
 
-            campaign_id = ch;
-
-            //}
-
-
+           
             var props = new Value();
 
 
-            /*props["application_id"] = app_id;
-            props["bundle_id"] = Application.identifier;
-            props["player_id"] = SystemInfo.deviceUniqueIdentifier;
-            props["application_name"] = Application.productName;
-            props["application_version"] = Application.version;
-            //props["campaign_id"] = campaign_id;
-            props["camp_id"] = campaign_id;
-            props["brand_id"] = brand_id;
-            props["brand_name"] = brand_name;
-            props["ab_segment"] = MonetizrManager.abTestSegment;
-            props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
-            props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
-            props["sdk_version"] = MonetizrManager.SDKVersion;
-
-            props["ad_id"] = MonetizrAnalytics.advertisingID;
-
-            props["camp_title"] = campaign.title;
-
-            foreach (var s in campaign.serverSettings.dictionary)
-            {
-                string key = s.Key;
-
-                if (!key.EndsWith("_text") && key != "custom_missions")
-                {
-                    props[$"cs_{s.Key}"] = s.Value;
-                }
-            }*/
-
             AddDefaultMixpanelValues(props, campaign, brand_name);
+
+            if (additionalValues != null)
+            {
+                foreach (var s in additionalValues)
+                    props[$"{s.Key}"] = s.Value;
+            }
+               
 
             Mixpanel.Identify(campaign.brand_id);
             Mixpanel.Track(eventName, props);

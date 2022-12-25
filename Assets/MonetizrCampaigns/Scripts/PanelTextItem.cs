@@ -52,9 +52,9 @@ namespace Monetizr.Campaigns
             
         }
 
-        private void UpdateRewardText(Mission m, string param_with_type_and_id)
+        internal static string ReplacePredefinedItemsInText(Mission m, in string str)
         {
-            string t = m.campaignServerSettings.GetParam(param_with_type_and_id);
+            string t = str;
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
@@ -62,6 +62,15 @@ namespace Monetizr.Campaigns
             t = t.Replace("%reward_amount%", $"{MonetizrRewardedItem.ScoreShow(m.reward)}");
             t = t.Replace("%reward_title%", $"{rewardTitle}");
             t = t.Replace("<br/>", "\n");
+
+            return t;
+        }
+
+        private void UpdateRewardText(Mission m, string param_with_type_and_id)
+        {
+            string t = m.campaignServerSettings.GetParam(param_with_type_and_id);
+
+            t = PanelTextItem.ReplacePredefinedItemsInText(m, t);
 
             textElement.text = t;
         }

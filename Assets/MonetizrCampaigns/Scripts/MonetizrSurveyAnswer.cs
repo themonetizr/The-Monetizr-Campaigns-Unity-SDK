@@ -10,6 +10,8 @@ namespace Monetizr.Campaigns
         public string id;
         public Text answer;
         public Toggle toggle;
+        public Text enteredAnswer;
+        public InputField inputField;
     }
 }
     
