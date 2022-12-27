@@ -8,7 +8,7 @@ using UnityEngine.UI;
 namespace Monetizr.Campaigns
 {
     internal class MonetizrUnitySurvey : PanelController
-    {        
+    {
         private Mission currentMission;
 
         public Button closeButton;
@@ -40,7 +40,7 @@ namespace Monetizr.Campaigns
 
         private string submitText;
         private string nextText;
-        
+
 
         private enum State
         {
@@ -91,7 +91,7 @@ namespace Monetizr.Campaigns
             public Type enumType;
 
             public List<Answer> answers = new List<Answer>();
-            
+
             [NonSerialized] internal MonetizrSurveyQuestionRoot questionRoot;
 
             internal Type ParseType(string type)
@@ -122,7 +122,7 @@ namespace Monetizr.Campaigns
             [NonSerialized] internal Question question;
             [NonSerialized] internal string response;
         }
-               
+
         void SetProgress(float a)
         {
             //uvRect.y = 0.5f * (1.0f - Tween(a));
@@ -134,7 +134,7 @@ namespace Monetizr.Campaigns
             return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
         }
 
-      
+
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             this.onComplete = onComplete;
@@ -167,12 +167,12 @@ namespace Monetizr.Campaigns
             yield return new WaitForSeconds(time);
 
             crossButtonAnimator.enabled = true;
-        }       
+        }
 
 
-    private void LoadSurvey(Mission m)
+        private void LoadSurvey(Mission m)
         {
-            nextText = m.campaignServerSettings.GetParam("Survey.next_text","Next");
+            nextText = m.campaignServerSettings.GetParam("Survey.next_text", "Next");
             submitText = m.campaignServerSettings.GetParam("Survey.submit_text", "Submit");
 
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
@@ -187,7 +187,7 @@ namespace Monetizr.Campaigns
             else
                 currentSurvey = surveys.surveys.Find(s => s.settings.id == m.surveyId);
 
-            if(currentSurvey == null)
+            if (currentSurvey == null)
             {
                 Log.PrintWarning($"{m.surveyId} not found in surveys!");
                 OnSkipButton();
@@ -204,7 +204,7 @@ namespace Monetizr.Campaigns
 
                 var questionRoot = qObj.GetComponent<MonetizrSurveyQuestionRoot>();
 
-                questionRoot.question.text = $"{id+1}. {PanelTextItem.ReplacePredefinedItemsInText(m,q.text)}";
+                questionRoot.question.text = $"{id + 1}. {PanelTextItem.ReplacePredefinedItemsInText(m, q.text)}";
                 questionRoot.id = q.id;
                 q.questionRoot = questionRoot;
                 //width += questionRoot.rectTransform.sizeDelta.x;
@@ -262,7 +262,7 @@ namespace Monetizr.Campaigns
                     a.answerRoot = answerRoot;
                     a.question = q;
 
-                    
+
 
                     if (q.enumType == Type.One)
                     {
@@ -274,7 +274,7 @@ namespace Monetizr.Campaigns
                 id++;
             });
 
-            contentRoot.sizeDelta = new Vector2(width,0);
+            contentRoot.sizeDelta = new Vector2(width, 0);
 
             backButton.interactable = false;
 
@@ -282,7 +282,7 @@ namespace Monetizr.Campaigns
 
             state = State.Idle;
 
-            
+
 
         }
 
@@ -311,7 +311,7 @@ namespace Monetizr.Campaigns
             if (qType != Type.Editable)
                 pressedAnswer.answerRoot.greenBackground.enabled = pressedAnswer.answerRoot.toggle.isOn;
 
-            if (qType == Type.One)
+            if (qType == Type.One && CanMoveForward(pressedAnswer.question))
                 OnNextButton();
             else
                 UpdateButtons();
@@ -322,7 +322,7 @@ namespace Monetizr.Campaigns
             if (state == State.Moving)
                 return;
 
-            nextQuestion = Mathf.Clamp(currentQuestion-1,0, currentSurvey.questions.Count);
+            nextQuestion = Mathf.Clamp(currentQuestion - 1, 0, currentSurvey.questions.Count);
 
             state = State.Moving;
 
@@ -334,9 +334,9 @@ namespace Monetizr.Campaigns
         {
             if (state == State.Moving)
                 return;
-                        
+
             //submit
-            if(currentQuestion == currentSurvey.questions.Count-1)
+            if (currentQuestion == currentSurvey.questions.Count - 1)
             {
                 Complete();
                 return;
@@ -344,63 +344,66 @@ namespace Monetizr.Campaigns
 
             var question = currentSurvey.questions[currentQuestion];
 
-           
 
-            nextQuestion = currentQuestion+1;
-                        
+
+            nextQuestion = currentQuestion + 1;
+
             state = State.Moving;
 
             progress = 0.0f;
         }
 
+        internal bool CanMoveForward(Question question)
+        {
+            bool result = false;
+
+            if (question.enumType == Type.Editable)
+                return true;
+
+            if (question.answers.Count == 0)
+                return true;
+
+            question.answers.ForEach(a =>
+            {
+                if (a.answerRoot.toggle.isOn)
+                {
+                    result = true;
+                    return;
+                }
+            });
+
+            return result;
+        }
+
         public void UpdateButtons()
         {
             //almost finished - change next to submit
-            
+
             nextButtonText.text = currentQuestion == currentSurvey.questions.Count - 1 ? submitText : nextText;
 
             backButton.interactable = currentQuestion != 0;
-           
+
             var question = currentSurvey.questions[currentQuestion];
 
-            bool isSelected = false;
 
-            if (question.enumType != Type.Editable)
-            {
-                question.answers.ForEach(a =>
-                {
-                    if (a.answerRoot.toggle.isOn)
-                    {
-                        isSelected = true;
-                        return;
-                    }
-                });
 
-                if (question.answers.Count == 0)
-                    isSelected = true;
-            }
-            else
-            {
-                isSelected = true;
-            }
-
-            nextButton.interactable = isSelected;
+            nextButton.interactable = CanMoveForward(question);
 
             progressText.text = $"{currentQuestion + 1} / {currentSurvey.questions.Count}";
         }
 
         public void Update()
         {
-           
+
             if (state != State.Moving)
                 return;
 
-            progress += Time.deltaTime/0.4f;
+            progress += Time.deltaTime / 0.4f;
 
-            float p1 = (float)currentQuestion /(currentSurvey.questions.Count-1);
-            float p2 = (float)nextQuestion / (currentSurvey.questions.Count-1);
+            float p1 = (float)currentQuestion / (currentSurvey.questions.Count - 1);
+            float p2 = (float)nextQuestion / (currentSurvey.questions.Count - 1);
 
-            scroll.horizontalNormalizedPosition = Mathf.Lerp(p1,p2,Tween(progress));
+            scroll.horizontalNormalizedPosition = Mathf.Lerp(p1, p2, Tween(progress));
 
             progressImage.fillAmount = scroll.horizontalNormalizedPosition;
 
@@ -437,8 +440,8 @@ namespace Monetizr.Campaigns
                 {
                     _OnSkipButton();
                 }
-                
-            },currentMission,PanelId.SurveyCloseConfirmation);
+
+            }, currentMission, PanelId.SurveyCloseConfirmation);
         }
 
         internal void Complete()
@@ -465,18 +468,18 @@ namespace Monetizr.Campaigns
                 {
                     if (string.IsNullOrEmpty(a.response))
                         return;
-                    
-                        Dictionary<string, string> p = new Dictionary<string, string>();
 
-                        p.Add("question_id", q.id);
-                        p.Add("answer_id", a.id);
-                        p.Add("answer_response", a.response);
-                        p.Add("answer_text", a.text);
-                        p.Add("question_text", q.text);
-                        MonetizrManager.Analytics.TrackEvent("Survey answer", campaign, false, p);
+                    Dictionary<string, string> p = new Dictionary<string, string>();
 
-                        Log.Print($"-------Survey answer {a.response}");
-                    
+                    p.Add("question_id", q.id);
+                    p.Add("answer_id", a.id);
+                    p.Add("answer_response", a.response);
+                    p.Add("answer_text", a.text);
+                    p.Add("question_text", q.text);
+                    MonetizrManager.Analytics.TrackEvent("Survey answer", campaign, false, p);
+
+                    Log.Print($"-------Survey answer {a.response}");
+
                 });
             });
         }
