@@ -320,6 +320,7 @@ namespace Monetizr.Campaigns
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
+
             m.sdkVersion = MonetizrManager.SDKVersion;
 
             if(string.IsNullOrEmpty(m.surveyUrl))
@@ -845,7 +846,9 @@ namespace Monetizr.Campaigns
                 //TODO: use prefefinedSponsoredMissions for all cases
                 for (int i = 0; i < prefefinedSponsoredMissions.Count; i++)
                 {
-                    Mission m = FindMissionInCache(i, prefefinedSponsoredMissions[i].missionType, ch, prefefinedSponsoredMissions[i].reward);
+                    MissionDescription md = prefefinedSponsoredMissions[i];
+
+                    Mission m = FindMissionInCache(i, md.missionType, ch, prefefinedSponsoredMissions[i].reward);
 
                     if (m == null)
                     {
@@ -869,6 +872,15 @@ namespace Monetizr.Campaigns
                     if (m == null)
                         continue;
 
+                    m.sdkVersion = MonetizrManager.SDKVersion;
+
+                    if (string.IsNullOrEmpty(m.surveyUrl))
+                        m.surveyUrl = md.surveyUrl;
+
+                    m.surveyId = md.surveyId;
+
+
+                   
                     m.isServerCampaignActive = true;
 
 

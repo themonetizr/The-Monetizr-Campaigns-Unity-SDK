@@ -20,6 +20,7 @@ namespace Monetizr.Campaigns
         public MonetizrSurveyAnswer answerRadioButtonPrefab;
         public MonetizrSurveyAnswer answerEditablePrefab;
         public MonetizrSurveyAnswer answerCheckButtonPrefab;
+        public Image rewardImage;
 
         public Button backButton;
         public Button nextButton;
@@ -72,6 +73,7 @@ namespace Monetizr.Campaigns
         {
             public string id;
             public bool showLogo;
+            public bool hideReward;
         }
 
         internal enum Type
@@ -144,7 +146,8 @@ namespace Monetizr.Campaigns
             this.panelId = id;
             this.currentMission = m;
 
-            LoadSurvey(m);
+            if (!LoadSurvey(m))
+                return;
 
             logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null && currentSurvey.settings.showLogo);
@@ -173,7 +176,7 @@ namespace Monetizr.Campaigns
         }
 
 
-        private void LoadSurvey(Mission m)
+        private bool LoadSurvey(Mission m)
         {
             nextText = m.campaignServerSettings.GetParam("SurveyUnityView.next_text", "Next");
             submitText = m.campaignServerSettings.GetParam("SurveyUnityView.submit_text", "Submit");
@@ -193,8 +196,8 @@ namespace Monetizr.Campaigns
             if (currentSurvey == null)
             {
                 Log.PrintWarning($"{m.surveyId} not found in surveys!");
-                OnSkipButton();
-                return;
+                _OnSkipButton();
+                return false;
             }
 
             float width = 0;
@@ -232,7 +235,7 @@ namespace Monetizr.Campaigns
                 q.answers.ForEach(a =>
                 {
                     answerNum++;
-                    if (answerNum >= 10)
+                    if (answerNum >= 7)
                     {
                         a.disabled = true;
                         return;
@@ -285,7 +288,7 @@ namespace Monetizr.Campaigns
                     }
                 });
 
-                width += 850;
+                width += 1000;
                 id++;
             });
 
@@ -297,8 +300,25 @@ namespace Monetizr.Campaigns
 
             state = State.Idle;
 
+            float step = 1.0f / (currentSurvey.questions.Count);
+
+            progressImage.fillAmount = step;
+
+
+            //-----
+
+            rewardImage.enabled = !currentSurvey.settings.hideReward;
+
+            Sprite rewardSprite = MonetizrManager.gameRewards[m.rewardType].icon;
+
+            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite))
+                rewardSprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
+
+            rewardImage.sprite = rewardSprite;
+
             UpdateButtons();
 
+            return true;
         }
 
         private static void ShuffleAnswersList(Question q)
@@ -420,7 +440,9 @@ namespace Monetizr.Campaigns
 
             scroll.horizontalNormalizedPosition = Mathf.Lerp(p1, p2, Tween(progress));
 
-            progressImage.fillAmount = scroll.horizontalNormalizedPosition;
+            float step = 1.0f / (currentSurvey.questions.Count);
+
+            progressImage.fillAmount = Mathf.Lerp(step, 1.0f, scroll.horizontalNormalizedPosition);
 
             if (progress > 1.0f)
             {
@@ -486,6 +508,7 @@ namespace Monetizr.Campaigns
 
                     Dictionary<string, string> p = new Dictionary<string, string>();
 
+                    p.Add("survey_id", currentSurvey.settings.id);
                     p.Add("question_id", q.id);
                     p.Add("answer_id", a.id);
                     p.Add("answer_response", a.response);
@@ -493,7 +516,7 @@ namespace Monetizr.Campaigns
                     p.Add("question_text", q.text);
                     MonetizrManager.Analytics.TrackEvent("Survey answer", campaign, false, p);
 
-                    Log.Print($"-------Survey answer {a.response}");
+                    Log.Print($"-------Survey answer {a.response} {currentSurvey.settings.id}");
 
                 });
             });
