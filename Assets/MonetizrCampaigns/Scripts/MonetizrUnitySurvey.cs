@@ -14,10 +14,12 @@ namespace Monetizr.Campaigns
         public Button closeButton;
         public Image logo;
         public ScrollRect scroll;
+        public RectTransform scrollRect;
         public MonetizrSurveyQuestionRoot monetizrQuestionRoot;
         public RectTransform contentRoot;
         public MonetizrSurveyAnswer answerRadioButtonPrefab;
         public MonetizrSurveyAnswer answerEditablePrefab;
+        public MonetizrSurveyAnswer answerCheckButtonPrefab;
 
         public Button backButton;
         public Button nextButton;
@@ -117,6 +119,7 @@ namespace Monetizr.Campaigns
         {
             public string id;
             public string text;
+            public bool disabled;
 
             [NonSerialized] internal MonetizrSurveyAnswer answerRoot;
             [NonSerialized] internal Question question;
@@ -157,7 +160,7 @@ namespace Monetizr.Campaigns
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
 
-            int closeButtonDelay = m.campaignServerSettings.GetIntParam("Survey.close_button_delay", 0);
+            int closeButtonDelay = m.campaignServerSettings.GetIntParam("SurveyUnityView.close_button_delay", 0);
 
             StartCoroutine(ShowCloseButton(closeButtonDelay));
         }
@@ -172,8 +175,8 @@ namespace Monetizr.Campaigns
 
         private void LoadSurvey(Mission m)
         {
-            nextText = m.campaignServerSettings.GetParam("Survey.next_text", "Next");
-            submitText = m.campaignServerSettings.GetParam("Survey.submit_text", "Submit");
+            nextText = m.campaignServerSettings.GetParam("SurveyUnityView.next_text", "Next");
+            submitText = m.campaignServerSettings.GetParam("SurveyUnityView.submit_text", "Submit");
 
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
 
@@ -204,7 +207,7 @@ namespace Monetizr.Campaigns
 
                 var questionRoot = qObj.GetComponent<MonetizrSurveyQuestionRoot>();
 
-                questionRoot.question.text = $"{id + 1}. {PanelTextItem.ReplacePredefinedItemsInText(m, q.text)}";
+                questionRoot.question.text = $"{PanelTextItem.ReplacePredefinedItemsInText(m, q.text)}";
                 questionRoot.id = q.id;
                 q.questionRoot = questionRoot;
                 //width += questionRoot.rectTransform.sizeDelta.x;
@@ -224,8 +227,17 @@ namespace Monetizr.Campaigns
                     isFirstQuestionEmpty = true;
                 }
 
+                int answerNum = 0;
+
                 q.answers.ForEach(a =>
                 {
+                    answerNum++;
+                    if (answerNum >= 10)
+                    {
+                        a.disabled = true;
+                        return;
+                    }
+
                     GameObject aObj = null;
 
                     if (q.answers.Count > 1 && q.enumType == Type.Editable)
@@ -233,6 +245,8 @@ namespace Monetizr.Campaigns
 
                     if (q.enumType == Type.Editable)
                         aObj = GameObject.Instantiate<GameObject>(answerEditablePrefab.gameObject, questionRoot.rectTransform);
+                    else if(q.enumType == Type.Multiple)
+                        aObj = GameObject.Instantiate<GameObject>(answerCheckButtonPrefab.gameObject, questionRoot.rectTransform);
                     else
                         aObj = GameObject.Instantiate<GameObject>(answerRadioButtonPrefab.gameObject, questionRoot.rectTransform);
 
@@ -261,6 +275,7 @@ namespace Monetizr.Campaigns
 
                     a.answerRoot = answerRoot;
                     a.question = q;
+                    a.disabled = false;
 
 
 
@@ -270,7 +285,7 @@ namespace Monetizr.Campaigns
                     }
                 });
 
-                width += 740;
+                width += 850;
                 id++;
             });
 
@@ -282,7 +297,7 @@ namespace Monetizr.Campaigns
 
             state = State.Idle;
 
-
+            UpdateButtons();
 
         }
 
@@ -365,7 +380,7 @@ namespace Monetizr.Campaigns
 
             question.answers.ForEach(a =>
             {
-                if (a.answerRoot.toggle.isOn)
+                if (!a.disabled && a.answerRoot.toggle.isOn)
                 {
                     result = true;
                     return;
