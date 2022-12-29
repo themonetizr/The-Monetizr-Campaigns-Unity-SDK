@@ -74,6 +74,7 @@ namespace Monetizr.Campaigns
             public string id;
             public bool showLogo;
             public bool hideReward;
+            public bool editableFieldIsMandatory;
         }
 
         internal enum Type
@@ -142,6 +143,8 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            //MonetizrManager.HideRewardCenter();
+
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
@@ -153,7 +156,7 @@ namespace Monetizr.Campaigns
             logo.gameObject.SetActive(logo.sprite != null && currentSurvey.settings.showLogo);
 
 
-            adType = AdType.Minigame;
+            adType = AdType.Survey;
 
             MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
@@ -274,6 +277,11 @@ namespace Monetizr.Campaigns
                         {
                             OnAnswerButton(a);
                         });
+
+                        answerRoot.inputField.onValueChanged.AddListener(delegate
+                        {
+                            OnAnswerButton(a);
+                        });
                     }
 
                     a.answerRoot = answerRoot;
@@ -294,9 +302,9 @@ namespace Monetizr.Campaigns
 
             contentRoot.sizeDelta = new Vector2(width, 0);
 
-            backButton.interactable = false;
+            //backButton.interactable = false;
 
-            nextButton.interactable = isFirstQuestionEmpty;
+            //nextButton.interactable = isFirstQuestionEmpty;
 
             state = State.Idle;
 
@@ -340,7 +348,7 @@ namespace Monetizr.Campaigns
             var qType = pressedAnswer.question.enumType;
 
             if (qType == Type.Editable)
-                pressedAnswer.response = pressedAnswer.answerRoot.enteredAnswer.text;
+                pressedAnswer.response = pressedAnswer.answerRoot.inputField.text;
             else if (pressedAnswer.answerRoot.toggle.isOn)
                 pressedAnswer.response = "true";
             else
@@ -396,7 +404,16 @@ namespace Monetizr.Campaigns
             bool result = false;
 
             if (question.enumType == Type.Editable)
-                return true;
+            {
+                if (currentSurvey.settings.editableFieldIsMandatory && question.answers.Count > 0)
+                {
+                    return question.answers[0].answerRoot.inputField.text.Length > 0;
+                }
+                else
+                {
+                    return true;
+                }
+            }
 
             if (question.answers.Count == 0)
                 return true;
@@ -469,7 +486,7 @@ namespace Monetizr.Campaigns
 
             isSkipped = true;
 
-            SetActive(false);
+            HideSelf();
         }
 
         public void OnSkipButton()
@@ -484,11 +501,18 @@ namespace Monetizr.Campaigns
             }, currentMission, PanelId.SurveyCloseConfirmation);
         }
 
+        private void HideSelf()
+        {
+            SetActive(false);
+
+            //MonetizrManager.ShowRewardCenter(null);
+        }
+
         internal void Complete()
         {
             isSkipped = false;
 
-            SetActive(false);
+            HideSelf();
 
             SubmitResponses();
 
@@ -528,6 +552,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
+            
             MonetizrManager.Analytics.EndShowAdAsset(adType);
         }
     }
