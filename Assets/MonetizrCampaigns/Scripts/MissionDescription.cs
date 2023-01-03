@@ -33,37 +33,7 @@ namespace Monetizr.Campaigns
         internal int id;
         internal int autoStartAfter;
         internal bool alwaysHiddenInRC;
-
-
-        /*public MissionDescription()
-        {
-
-        }
-
-        public MissionDescription(ulong reward, RewardType rewardCurrency)
-        {
-            this.missionType = MissionType.VideoWithEmailGiveaway;
-            this.reward = reward;
-            this.rewardCurrency = rewardCurrency;
-        }
-
-        public MissionDescription(MissionType missionType, ulong reward, int rewardPercent, RewardType rewardCurrency)
-        {
-            this.missionType = missionType;
-            this.reward = reward;
-            this.rewardCurrency = rewardCurrency;
-            this.rewardPercent = rewardPercent;
-        }
-
-        public MissionDescription(MissionType missionType, ulong reward, int rewardPercent, RewardType rewardCurrency, List<int> activateAfter, string surveyUrl)
-        {
-            this.missionType = missionType;
-            this.reward = reward;
-            this.rewardCurrency = rewardCurrency;
-            this.activateAfter = activateAfter;
-            this.surveyUrl = surveyUrl;
-            this.rewardPercent = rewardPercent;
-        }*/
+        internal bool hasUnitySurvey;
     }
 
     internal enum MissionUIState
@@ -382,6 +352,7 @@ namespace Monetizr.Campaigns
 
         [SerializeField] internal int autoStartAfter;
         [SerializeField] internal bool alwaysHiddenInRC;
+        [SerializeField] internal bool hasUnitySurvey;
     }
 
     /*internal class  SurveyMission : Mission

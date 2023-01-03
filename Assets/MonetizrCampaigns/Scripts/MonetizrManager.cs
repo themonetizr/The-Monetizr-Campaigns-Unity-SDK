@@ -1994,7 +1994,7 @@ namespace Monetizr.Campaigns
 
                         case "survey":
 
-                            if(asset.survey_content != null && asset.survey_content.Length != 0)
+                            if(!string.IsNullOrEmpty(asset.survey_content))
                                 ech.SetAsset<string>(AssetsType.SurveyURLString, asset.survey_content);
                             else
                                 ech.SetAsset<string>(AssetsType.SurveyURLString, asset.url);

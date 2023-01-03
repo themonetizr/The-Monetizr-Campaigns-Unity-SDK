@@ -91,8 +91,10 @@ namespace Monetizr.Campaigns
             TrackEvent("Survey started");
 
             Debug.Log($"currentMissionDesc: {currentMissionDesc == null}");
-            webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
-                                 // eventsPrefix = "Survey";
+            //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
+            // eventsPrefix = "Survey";
+
+            webUrl = m.campaignServerSettings.GetParam(m.surveyId);
 
             webView.Load(webUrl);
 

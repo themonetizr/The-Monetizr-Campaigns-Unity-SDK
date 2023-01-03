@@ -190,8 +190,8 @@ namespace Monetizr.Campaigns
         {
             string url = MonetizrManager.Instance.GetAsset<string>(campaign, AssetsType.SurveyURLString);
 
-            if (string.IsNullOrEmpty(url))
-                return null;
+            //if (string.IsNullOrEmpty(url))
+            //    return null;
 
             return new Mission()
             {
@@ -323,7 +323,9 @@ namespace Monetizr.Campaigns
 
             m.sdkVersion = MonetizrManager.SDKVersion;
 
-            if(string.IsNullOrEmpty(m.surveyUrl))
+            //if(string.IsNullOrEmpty(m.surveyUrl))
+
+            if(!md.hasUnitySurvey)
                 m.surveyUrl = md.surveyUrl;
 
             m.surveyId = md.surveyId;
@@ -442,7 +444,7 @@ namespace Monetizr.Campaigns
 
             return () =>
             {
-                if(m.surveyUrl.Contains("https:"))
+                 if(!m.hasUnitySurvey)
 #if UNITY_EDITOR_WIN
                     onSurveyComplete.Invoke(false);
 #else
@@ -643,11 +645,12 @@ namespace Monetizr.Campaigns
                         activateAfter = _m.GetActivateRange(),
                         surveyUrl = serverSettings.GetParam(_m.survey),
                         surveyId = string.IsNullOrEmpty(_m.surveyUnity) ? _m.survey : _m.surveyUnity,
+                        hasUnitySurvey = !string.IsNullOrEmpty(_m.surveyUnity),
                         rewardPercent = rewardAmount,
                         id = _m.getId(),
                         alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
                         autoStartAfter = _m.GetAutoStartId()
-                    });
+                    }); ;
 
                 });
 
@@ -874,13 +877,17 @@ namespace Monetizr.Campaigns
 
                     m.sdkVersion = MonetizrManager.SDKVersion;
 
-                    if (string.IsNullOrEmpty(m.surveyUrl))
+                    //if (string.IsNullOrEmpty(m.surveyUrl))
+
+                    if(!md.hasUnitySurvey)
                         m.surveyUrl = md.surveyUrl;
+                    else
+                        m.surveyUrl = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.SurveyURLString);
+
+                    m.hasUnitySurvey = md.hasUnitySurvey;
 
                     m.surveyId = md.surveyId;
-
-
-                   
+                                       
                     m.isServerCampaignActive = true;
 
 
