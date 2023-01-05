@@ -11,6 +11,11 @@ using System.Text.RegularExpressions;
 using System.Net;
 using static System.Net.WebRequestMethods;
 using UnityEngine.Networking;
+using System.Xml;
+using System.Xml.Serialization;
+using Schemas;
+using System.IO;
+using System.Runtime.ConstrainedExecution;
 
 namespace Monetizr.Campaigns
 {
@@ -25,6 +30,12 @@ namespace Monetizr.Campaigns
         {
             return JsonUtility.FromJson<IpApiData>(jsonString);
         }
+    }
+
+    [Serializable]
+    internal class VastCampaign
+    {
+
     }
 
     internal class ChallengesClient
@@ -53,6 +64,53 @@ namespace Monetizr.Campaigns
                 }
                 await Task.Yield();
             }
+
+
+            
+        }
+
+
+
+        internal async Task<VastCampaign> GetVastCampaign()
+        {
+            VastCampaign result = null;
+
+            string uri = $"https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154";
+
+            XmlDocument xmlDoc = new XmlDocument(); // Create an XML document object
+
+            string res = null;
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
+            {
+                await webRequest.SendWebRequest();
+
+                Debug.Log(webRequest.downloadHandler.text);
+
+                xmlDoc.LoadXml(webRequest.downloadHandler.text);
+
+                res = webRequest.downloadHandler.text;
+            }
+
+            /*XmlNodeList elemList = xmlDoc.GetElementsByTagName("*");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                Debug.Log("------" + elemList[i].InnerXml);
+            }*/
+
+            VAST v;
+
+            var ser = new XmlSerializer(typeof(VAST));
+
+            using (var reader = new StringReader(res))
+            {
+                 v = (VAST)ser.Deserialize(reader);
+            }
+
+           
+            Debug.Log(v.version);
+            
+
+            return result;
         }
 
 
@@ -157,6 +215,8 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async Task<List<ServerCampaign>> GetList()
         {
+            await GetVastCampaign();
+
             HttpRequestMessage requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
@@ -224,8 +284,11 @@ namespace Monetizr.Campaigns
                     return false;
                 });
 
+
+                
+
                 //if there's some campaigns, filter them by location
-                if(result.Count > 0)
+                if (result.Count > 0)
                 {
                     bool needFilter = result[0].serverSettings.GetBoolParam("filter_campaigns_by_location", false);
 
