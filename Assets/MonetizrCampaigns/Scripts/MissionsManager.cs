@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace Monetizr.Campaigns
@@ -786,17 +787,25 @@ namespace Monetizr.Campaigns
 
             int serverDefinedMission = 0;
 
+
+            Debug.LogWarning($"AddMissionsToCampaigns count: {campaigns.Count}");
+
             if (campaigns.Count > 0)
             {
                 ServerCampaign sc = MonetizrManager.Instance.GetCampaign(campaigns[0]);
 
                 serverDefinedMission = sc.serverSettings.GetIntParam("server_defined_mission", 0);
 
+                
 
                 string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).serverSettings.GetParam("custom_missions");
+                                
+                Debug.LogWarning($"Predefined missions from settings: {serverMissionsJson}");
 
                 if (serverMissionsJson?.Length > 0)
                 {
+                    serverMissionsJson = serverMissionsJson.Replace('\'', '\"');
+
                     ServerMissionsHelper ic = null;
 
                     try

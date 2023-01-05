@@ -89,6 +89,11 @@ namespace Monetizr.Campaigns
             public string title;
             public string url;
             public string survey_content;
+
+            public override string ToString()
+            {
+                return $"Id: {id}, Type: {type}, Title: {title}, URL: {url}, Survey Content: {survey_content}";
+            }
         }
 
         internal bool IsCampaignInsideLocation(IpApiData locData)
