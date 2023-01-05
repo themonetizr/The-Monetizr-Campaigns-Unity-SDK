@@ -21,7 +21,7 @@ public class LinkButton : MonoBehaviour
 
         if (campaign != null)
         {
-            url = MonetizrManager.Instance.GetCampaign(campaign).serverSettings.GetParam("_GiveawayEmailEnterNotification.terms_url_text");
+            url = MonetizrManager.Instance.GetCampaign(campaign).serverSettings.GetParam("GiveawayEmailEnterNotification.terms_url_text");
         }
                         
 
