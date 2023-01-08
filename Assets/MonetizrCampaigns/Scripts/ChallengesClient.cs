@@ -34,13 +34,7 @@ namespace Monetizr.Campaigns
             return JsonUtility.FromJson<IpApiData>(jsonString);
         }
     }
-
-    [Serializable]
-    internal class VastCampaign
-    {
-
-    }
-
+    
     internal class ChallengesClient
     {
         //public PlayerInfo playerInfo { get; set; }
@@ -50,6 +44,7 @@ namespace Monetizr.Campaigns
         
         public MonetizrAnalytics analytics { get; private set; }
         public string currentApiKey;
+                
 
         private CancellationTokenSource downloadCancellationTokenSource;
               
@@ -71,17 +66,39 @@ namespace Monetizr.Campaigns
 
             
         }
+                
+        internal class VastParams
+        {
+            internal int setID;
+            internal int id;
+            internal int pid;
+        }
 
-       
+        public VastParams GetVastParams()
+        {
+            if (string.IsNullOrEmpty(currentApiKey))
+                return null;
 
+            if (currentApiKey.Length == 43)
+                return null;
+                        
+            var p = Array.ConvertAll(currentApiKey.Split('-'), int.Parse);
 
-        internal async Task<List<ServerCampaign>> GetVastCampaign()
+            if (p.Length != 3)
+                return null;
+
+            return new VastParams() { setID = p[0], id = p[1], pid = p[2] };
+        }
+
+        internal async Task<List<ServerCampaign>> GetVastCampaign(VastParams vp)
         {
             List<ServerCampaign> result = new List<ServerCampaign>();
 
             //string uri = $"https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154";
 
-            string uri = $"https://servedbyadbutler.com/vast.spark?setID=31256&ID=184897&pid=164753";
+            string uri = $"https://servedbyadbutler.com/vast.spark?setID={vp.setID}&ID={vp.id}&pid={vp.pid}";
+
+            Debug.Log($"Requesting VAST campaign with url {uri}");
 
             XmlDocument xmlDoc = new XmlDocument(); // Create an XML document object
 
@@ -90,7 +107,7 @@ namespace Monetizr.Campaigns
             {
                 await webRequest.SendWebRequest();
 
-                Debug.Log(webRequest.downloadHandler.text);
+                //Debug.Log(webRequest.downloadHandler.text);
 
                 xmlDoc.LoadXml(webRequest.downloadHandler.text);
 
@@ -113,7 +130,7 @@ namespace Monetizr.Campaigns
             }
 
 
-            Debug.Log(v.Ad[0].Item.GetType());
+            //Debug.Log(v.Ad[0].Item.GetType());
 
             ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
        
@@ -139,7 +156,7 @@ namespace Monetizr.Campaigns
                             {
                                 NonLinear_typeStaticResource staticRes = (NonLinear_typeStaticResource)nl.Item;
 
-                                Debug.Log($"{staticRes.Value}");
+                                //Debug.Log($"{staticRes.Value}");
 
                                 asset = new ServerCampaign.Asset()
                                 {
@@ -148,7 +165,7 @@ namespace Monetizr.Campaigns
                                     type = nl.AdParameters
                                 };
 
-                                Debug.Log(asset.ToString());
+                                //Debug.Log(asset.ToString());
 
                                 serverCampaign.assets.Add(asset);
                             }
@@ -177,7 +194,7 @@ namespace Monetizr.Campaigns
                         var dict = AmplitudeNS.MiniJSON.Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
 
                         
-                        Debug.Log("------" + dict);
+                        //Debug.Log("------" + dict);
 
                         serverCampaign.serverSettings = new SettingsDictionary<string, string>(ParseContentString(it.AdParameters,dict));
                     }
@@ -299,10 +316,15 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async Task<List<ServerCampaign>> GetList()
         {
-            List<ServerCampaign> campList = await GetVastCampaign();
+            VastParams v = GetVastParams();
 
-            if(campList != null)
-                return campList;
+            if (v != null)
+            {
+                List<ServerCampaign> campList = await GetVastCampaign(v);
+
+                if (campList != null)
+                    return campList;
+            }
 
             HttpRequestMessage requestMessage = new HttpRequestMessage
             {
