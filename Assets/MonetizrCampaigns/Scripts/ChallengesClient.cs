@@ -334,7 +334,8 @@ namespace Monetizr.Campaigns
                     {"player-id", analytics.GetUserId()},
                     { "app-bundle-id", MonetizrManager.bundleId },
                     { "sdk-version", MonetizrManager.SDKVersion },
-                    {"os-group", MonetizrAnalytics.GetOsGroup() }
+                    {"os-group", MonetizrAnalytics.GetOsGroup() },
+                    {"ad-id",MonetizrAnalytics.advertisingID }
                 }
             };
         
@@ -553,7 +554,8 @@ namespace Monetizr.Campaigns
                     {"player-id", analytics.GetUserId()},
                     { "app-bundle-id", MonetizrManager.bundleId },
                     { "sdk-version", MonetizrManager.SDKVersion },
-                    {"os-group", MonetizrAnalytics.GetOsGroup() }
+                    {"os-group", MonetizrAnalytics.GetOsGroup() },
+                    {"ad-id",MonetizrAnalytics.advertisingID }
                 }
             };
                         
@@ -585,9 +587,10 @@ namespace Monetizr.Campaigns
                 Headers =
                 {
                     {"player-id", analytics.GetUserId()},
-                    { "app-bundle-id", MonetizrManager.bundleId },
-                    { "sdk-version", MonetizrManager.SDKVersion },
-                    {"os-group", MonetizrAnalytics.GetOsGroup() }
+                    {"app-bundle-id", MonetizrManager.bundleId },
+                    {"sdk-version", MonetizrManager.SDKVersion },
+                    {"os-group", MonetizrAnalytics.GetOsGroup() },
+                    {"ad-id",MonetizrAnalytics.advertisingID }
                 }
             };
 

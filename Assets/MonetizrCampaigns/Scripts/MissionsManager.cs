@@ -445,9 +445,12 @@ namespace Monetizr.Campaigns
 
             return () =>
             {
-                 if(!m.hasUnitySurvey)
+                if (!m.hasUnitySurvey)
 #if UNITY_EDITOR_WIN
+                {
+                    Debug.Log($"Completing survey {m.surveyUrl} on windows");
                     onSurveyComplete.Invoke(false);
+                }
 #else
                     MonetizrManager.ShowSurvey(onSurveyComplete, m);
 #endif
@@ -636,7 +639,7 @@ namespace Monetizr.Campaigns
 
                     //string surveyUrl = serverSettings.GetParam(_m.survey);
 
-                    Debug.Log($"----------------- {_m.survey} : {_m.surveyUnity}");
+                   // Debug.Log($"----------------- {_m.survey} : {_m.surveyUnity}");
 
                     m.Add(new MissionDescription
                     {
@@ -949,7 +952,7 @@ namespace Monetizr.Campaigns
             m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardBannerSprite);
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
             m.brandName = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.BrandTitleString);
-            m.surveyUrl = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.SurveyURLString);
+            //m.surveyUrl = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.SurveyURLString);
         }
 
         //------------------------

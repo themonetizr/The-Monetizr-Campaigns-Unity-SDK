@@ -214,7 +214,7 @@ namespace Monetizr.Campaigns
 
             if (statusCode >= 300)
             {
-                TrackEvent($"{eventsPrefix} error");
+                TrackEvent($"{eventsPrefix} error", statusCode);
 
                 ClosePanel();
 
@@ -228,7 +228,7 @@ namespace Monetizr.Campaigns
         {
             Debug.Log($"OnPageErrorReceived: {url} code: {errorCode}");
 
-            TrackEvent($"{eventsPrefix} error");
+            TrackEvent($"{eventsPrefix} error", errorCode);
 
             ClosePanel();
         }
@@ -339,12 +339,26 @@ namespace Monetizr.Campaigns
 
 
 #endif
-        private void TrackEvent(string eventName)
+        private void TrackEvent(string eventName, int statusCode = 0)
         {
             if (!isAnalyticsNeeded)
                 return;
 
-            MonetizrManager.Analytics.TrackEvent(eventName, currentMissionDesc);
+            if (currentMissionDesc.campaignId == null)
+                return;
+
+            Dictionary<string, string> p = new Dictionary<string, string>();
+
+            p.Add("url", webUrl);
+            
+            if(statusCode > 0)
+                p.Add("url_status_code", statusCode.ToString());
+
+            var campaign = MonetizrManager.Instance.GetCampaign(currentMissionDesc.campaignId);
+
+            MonetizrManager.Analytics.TrackEvent(eventName, campaign, false, p);
+
+            //MonetizrManager.Analytics.TrackEvent(eventName, currentMissionDesc);
         }
 
 
