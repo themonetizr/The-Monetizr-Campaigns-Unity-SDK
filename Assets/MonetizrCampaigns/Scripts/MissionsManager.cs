@@ -444,9 +444,12 @@ namespace Monetizr.Campaigns
 
             return () =>
             {
-                 if(!m.hasUnitySurvey)
+                if (!m.hasUnitySurvey)
 #if UNITY_EDITOR_WIN
+                {
+                    Debug.Log($"Completing survey {m.surveyUrl} on windows");
                     onSurveyComplete.Invoke(false);
+                }
 #else
                     MonetizrManager.ShowSurvey(onSurveyComplete, m);
 #endif
