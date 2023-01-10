@@ -2169,6 +2169,9 @@ namespace Monetizr.Campaigns
         /// <returns></returns>
         internal ServerCampaign GetCampaign(String chId)
         {
+            if (string.IsNullOrEmpty(chId))
+                return null;
+
             if (!challenges.ContainsKey(chId))
             {
                 Debug.LogWarning($"You're trying to get campaign {chId} which is not exist!");

@@ -344,6 +344,9 @@ namespace Monetizr.Campaigns
             if (!isAnalyticsNeeded)
                 return;
 
+            if (currentMissionDesc.campaignId == null)
+                return;
+
             Dictionary<string, string> p = new Dictionary<string, string>();
 
             p.Add("url", webUrl);

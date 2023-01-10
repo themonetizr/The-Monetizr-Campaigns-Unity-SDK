@@ -27,6 +27,7 @@ public class LinkButton : MonoBehaviour
 
         MonetizrManager.ShowWebPage(null, new Mission
         {
+                campaignId = campaign,
                 surveyUrl = url ?? id,
                 campaignServerSettings = new SettingsDictionary<string, string>()
         });

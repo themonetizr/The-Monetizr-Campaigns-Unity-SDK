@@ -638,7 +638,7 @@ namespace Monetizr.Campaigns
 
                     //string surveyUrl = serverSettings.GetParam(_m.survey);
 
-                    Debug.Log($"----------------- {_m.survey} : {_m.surveyUnity}");
+                   // Debug.Log($"----------------- {_m.survey} : {_m.surveyUnity}");
 
                     m.Add(new MissionDescription
                     {
