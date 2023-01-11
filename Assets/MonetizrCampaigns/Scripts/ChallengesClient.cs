@@ -87,14 +87,94 @@ namespace Monetizr.Campaigns
             if (p.Length != 3)
                 return null;
 
-            return new VastParams() { setID = p[0], id = p[1], pid = p[2] };
+            return new VastParams() { id = p[0], setID = p[1], pid = p[2] };
         }
 
-        internal async Task<List<ServerCampaign>> GetVastCampaign(VastParams vp)
+        internal ServerCampaign PrepareServerCampaign(VAST v)
+        {
+            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
+            
+            if (!(v.Ad[0].Item is VASTADInLine))
+                return null;
+
+            VASTADInLine inLine = (VASTADInLine)v.Ad[0].Item;
+
+            serverCampaign.id = v.Ad[0].id;
+            
+            foreach (var c in inLine.Creatives)
+            {
+                ServerCampaign.Asset asset = null;
+
+                if (c.Item is VASTADInLineCreativeNonLinearAds)
+                {
+                    VASTADInLineCreativeNonLinearAds it = (VASTADInLineCreativeNonLinearAds)c.Item;
+
+                    foreach (var nl in it.NonLinear)
+                    {
+                        if (nl.Item is NonLinear_typeStaticResource)
+                        {
+                            NonLinear_typeStaticResource staticRes = (NonLinear_typeStaticResource)nl.Item;
+
+                            //Debug.Log($"{staticRes.Value}");
+
+                            asset = new ServerCampaign.Asset()
+                            {
+                                id = $"{c.id} {nl.id}",
+                                url = staticRes.Value,
+                                type = nl.AdParameters
+                            };
+
+                            //Debug.Log(asset.ToString());
+
+                            serverCampaign.assets.Add(asset);
+                        }
+                    }
+
+                }
+                else if (c.Item is VASTADInLineCreativeLinear)
+                {
+                    VASTADInLineCreativeLinear it = (VASTADInLineCreativeLinear)c.Item;
+
+                    Debug.Log(it.MediaFiles[0].Value);
+
+                    Debug.Log(it.AdParameters);
+
+                    asset = new ServerCampaign.Asset()
+                    {
+                        id = c.id,
+                        url = it.MediaFiles[0].Value,
+                        type = "video"
+                    };
+
+                    Debug.Log(asset.ToString());
+
+                    if (it.AdParameters != null)
+                    {
+                        it.AdParameters = it.AdParameters.Replace("\n", "   ");
+
+                        var dict = AmplitudeNS.MiniJSON.Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
+
+                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(ParseContentString(it.AdParameters, dict));
+                    }
+                }
+                else if (c.Item is VASTADInLineCreativeCompanionAds)
+                {
+
+                }
+
+
+            }
+
+
+            return serverCampaign;
+    }
+
+    internal async Task<List<ServerCampaign>> GetVastCampaign(VastParams vp)
         {
             List<ServerCampaign> result = new List<ServerCampaign>();
 
             //string uri = $"https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154";
+            //https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154
 
             string uri = $"https://servedbyadbutler.com/vast.spark?setID={vp.setID}&ID={vp.id}&pid={vp.pid}";
 
@@ -132,82 +212,7 @@ namespace Monetizr.Campaigns
 
             //Debug.Log(v.Ad[0].Item.GetType());
 
-            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
-       
-
-            if (v.Ad[0].Item is VASTADInLine)
-            {
-                VASTADInLine inLine = (VASTADInLine)v.Ad[0].Item;
-
-                serverCampaign.id = v.Ad[0].id;
-                                
-
-                foreach (var c in inLine.Creatives)
-                {
-                    ServerCampaign.Asset asset = null;
-
-                    if (c.Item is VASTADInLineCreativeNonLinearAds)
-                    {
-                        VASTADInLineCreativeNonLinearAds it = (VASTADInLineCreativeNonLinearAds)c.Item;
-
-                        foreach (var nl in it.NonLinear)
-                        {
-                            if (nl.Item is NonLinear_typeStaticResource)
-                            {
-                                NonLinear_typeStaticResource staticRes = (NonLinear_typeStaticResource)nl.Item;
-
-                                //Debug.Log($"{staticRes.Value}");
-
-                                asset = new ServerCampaign.Asset()
-                                {
-                                    id = $"{c.id} {nl.id}",
-                                    url = staticRes.Value,
-                                    type = nl.AdParameters
-                                };
-
-                                //Debug.Log(asset.ToString());
-
-                                serverCampaign.assets.Add(asset);
-                            }
-                        }
-                        
-                    }
-                    else if(c.Item is VASTADInLineCreativeLinear)
-                    {
-                        VASTADInLineCreativeLinear it = (VASTADInLineCreativeLinear)c.Item;
-                                                
-                        Debug.Log(it.MediaFiles[0].Value);
-
-                        Debug.Log(it.AdParameters);
-
-                        asset = new ServerCampaign.Asset()
-                        {
-                            id = c.id,
-                            url = it.MediaFiles[0].Value,
-                            type = "video"
-                        };
-
-                        Debug.Log(asset.ToString());
-
-                        it.AdParameters = it.AdParameters.Replace("\n", "   ");
-
-                        var dict = AmplitudeNS.MiniJSON.Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
-
-                        
-                        //Debug.Log("------" + dict);
-
-                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(ParseContentString(it.AdParameters,dict));
-                    }
-                    else if (c.Item is VASTADInLineCreativeCompanionAds)
-                    {
-
-                    }
-
-                    
-                }
-
-
-            }
+            var serverCampaign = PrepareServerCampaign(v);
 
             result.Add(serverCampaign);
 
