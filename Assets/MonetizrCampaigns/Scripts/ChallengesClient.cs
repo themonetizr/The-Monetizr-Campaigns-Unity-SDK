@@ -232,7 +232,7 @@ namespace Monetizr.Campaigns
 
                 //MonetizrAnalytics.advertisingID = "dbdf5873-750a-41a9-a1d4-adf7bb77d9fb";
 
-#if UNITY_EDITOR
+#if !UNITY_EDITOR
                 //keep campaigns only for allowed devices
 
                 if (!string.IsNullOrEmpty(MonetizrAnalytics.advertisingID))
@@ -243,6 +243,7 @@ namespace Monetizr.Campaigns
                         
                         if (allowed_device_id.Length == 0)
                         {
+                            Debug.Log($"Campaign {e.id} has no allowed list");
                             return false;
                         }
                         else
