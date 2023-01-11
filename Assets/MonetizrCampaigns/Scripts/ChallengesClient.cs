@@ -202,8 +202,13 @@ namespace Monetizr.Campaigns
 
                     //foreach(var v in ch.additional_params)
                     //    Debug.Log($"!!!! {v.Key}={v.Value}");
+
+                    Log.Print($"Loaded campaign: {ch.id}");
+
                 }
+
                 
+
                 var result = new List<ServerCampaign>(challenges.challenges);
 
                 //remove all campaigns without assets
@@ -224,6 +229,52 @@ namespace Monetizr.Campaigns
 
                     return false;
                 });
+
+                //MonetizrAnalytics.advertisingID = "dbdf5873-750a-41a9-a1d4-adf7bb77d9fb";
+
+#if UNITY_EDITOR
+                //keep campaigns only for allowed devices
+
+                if (!string.IsNullOrEmpty(MonetizrAnalytics.advertisingID))
+                {
+                    result.RemoveAll(e =>
+                    {
+                        string allowed_device_id = e.serverSettings.GetParam("allowed_ad_id", "");
+                        
+                        if (allowed_device_id.Length == 0)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            Debug.Log($"Campaign {e.id} has allowed list: {allowed_device_id}");
+
+                            bool isKeyFound = false;
+
+                            Array.ForEach(allowed_device_id.Split(';'), id =>
+                                {
+                                    if (id == MonetizrAnalytics.advertisingID)
+                                        isKeyFound = true;
+                                });
+
+                        //if (!allowed_device_id.Contains(MonetizrAnalytics.advertisingID))
+                        if (!isKeyFound)
+                            {
+                                Debug.Log($"Device {MonetizrAnalytics.advertisingID} isn't allowed for campaign {e.id}");
+                                return true;
+                            }
+                            else
+                            {
+                                Debug.Log($"Device {MonetizrAnalytics.advertisingID} is OK for campaign {e.id}");
+                                return false;
+                            }
+
+                        //return !allowed_device_id.Contains(MonetizrAnalytics.advertisingID);
+                    }
+
+                    });
+                }
+#endif
 
                 //if there's some campaigns, filter them by location
                 if(result.Count > 0)
@@ -256,7 +307,10 @@ namespace Monetizr.Campaigns
                         Debug.Log($"Geo-filtering disabled");
                     }
                 }
-                
+
+                foreach (var ch in result)
+                    Log.Print($"Campaign passed filters: {ch.id}");
+
                 return result;
             }
             else
