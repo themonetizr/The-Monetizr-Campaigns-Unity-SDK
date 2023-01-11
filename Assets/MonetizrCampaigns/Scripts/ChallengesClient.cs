@@ -274,10 +274,14 @@ namespace Monetizr.Campaigns
 
                     });
                 }
+                else
+                {
+                    Debug.Log($"No ad id defined to filter campaigns. Please allow ad tracking!");
+                }
 #endif
 
                 //if there's some campaigns, filter them by location
-                if(result.Count > 0)
+                if (result.Count > 0)
                 {
                     bool needFilter = result[0].serverSettings.GetBoolParam("filter_campaigns_by_location", false);
 
