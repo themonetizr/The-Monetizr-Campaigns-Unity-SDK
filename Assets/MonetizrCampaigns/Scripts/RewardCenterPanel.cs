@@ -59,7 +59,7 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.CallUserDefinedEvent(currentCampaign,
                   NielsenDar.GetPlacementName(AdType.RewardsCenterScreen),
-                  MonetizrManager.EventType.ButtonPressSkip);
+                  MonetizrManager.EventType.Impression);
 
             //string uiItemPrefab = "MonetizrRewardedItem";
 
