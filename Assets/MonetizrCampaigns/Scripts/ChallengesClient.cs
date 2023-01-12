@@ -93,9 +93,15 @@ namespace Monetizr.Campaigns
         internal ServerCampaign PrepareServerCampaign(VAST v)
         {
             ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
+
+            if (v.Ad == null || v.Ad.Length == 0)
+                return null;
             
             if (!(v.Ad[0].Item is VASTADInLine))
                 return null;
+
+            bool hasSettings = false;
+            bool hasVideo = false;
 
             VASTADInLine inLine = (VASTADInLine)v.Ad[0].Item;
 
@@ -146,11 +152,15 @@ namespace Monetizr.Campaigns
                         type = "video"
                     };
 
+                    serverCampaign.assets.Add(asset);
+
+                    hasVideo = true;
+
                     Debug.Log(asset.ToString());
 
                     if (it.AdParameters != null)
                     {
-                        it.AdParameters = it.AdParameters.Replace("\n", "   ");
+                        it.AdParameters = it.AdParameters.Replace("\n", "");
 
                         var dict = AmplitudeNS.MiniJSON.Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
 
@@ -165,6 +175,19 @@ namespace Monetizr.Campaigns
 
             }
 
+            if(!hasSettings && hasVideo)
+            {
+                serverCampaign.serverSettings = new SettingsDictionary<string, string>();
+
+                serverCampaign.serverSettings.dictionary.Add("custom_missions", "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
+                serverCampaign.serverSettings.dictionary.Add("design_version","2");
+                serverCampaign.serverSettings.dictionary.Add("amount_of_teasers", "100");
+                serverCampaign.serverSettings.dictionary.Add("teaser_design_version", "3");
+                serverCampaign.serverSettings.dictionary.Add("amount_of_notifications", "100");
+
+                //download videoplayer
+                
+            }
 
             return serverCampaign;
     }
@@ -321,7 +344,7 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async Task<List<ServerCampaign>> GetList()
         {
-            VastParams v = GetVastParams();
+            VastParams v = null;// GetVastParams();
 
             if (v != null)
             {
