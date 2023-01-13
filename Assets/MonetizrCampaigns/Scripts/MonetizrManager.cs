@@ -1821,8 +1821,8 @@ namespace Monetizr.Campaigns
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
-            string fname = Path.GetFileName(asset.url);
-            string fpath = path + "/" + fname;
+            string fname = string.IsNullOrEmpty(asset.fname) ? Path.GetFileName(asset.url) : $"{asset.fname}.{asset.fext}";
+            string fpath = string.IsNullOrEmpty(asset.fpath) ? $"{path}/{fname}" : $"{path}/{asset.fpath}/{fname}";
             string zipFolder = null;
             string fileToCheck = fpath;
 
@@ -1835,7 +1835,7 @@ namespace Monetizr.Campaigns
 
                 Log.Print($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
             }
-
+                        
             byte[] data = null;
 
             if (!File.Exists(fileToCheck))
@@ -1879,6 +1879,11 @@ namespace Monetizr.Campaigns
 
             if (zipFolder != null)
                 fpath = fileToCheck;
+
+            if(!string.IsNullOrEmpty(asset.mainAssetName))
+            {
+                fpath = $"{path}/{asset.mainAssetName}";
+            }
 
             Log.Print($"Resource {fileString} {fpath}");
 

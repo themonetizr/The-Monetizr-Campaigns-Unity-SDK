@@ -89,6 +89,10 @@ namespace Monetizr.Campaigns
             public string title;
             public string url;
             public string survey_content;
+            public string fname;
+            public string fext;
+            public string fpath;
+            public string mainAssetName;
 
             public override string ToString()
             {

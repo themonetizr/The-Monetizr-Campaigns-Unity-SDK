@@ -9,16 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using System.Net;
-using static System.Net.WebRequestMethods;
 using UnityEngine.Networking;
-using System.Xml;
-using System.Xml.Serialization;
-using Schemas;
-using System.IO;
-using System.Runtime.ConstrainedExecution;
-using mixpanel;
-using System.Collections;
-using static UnityEngine.Networking.UnityWebRequest;
 
 namespace Monetizr.Campaigns
 {
@@ -66,183 +57,7 @@ namespace Monetizr.Campaigns
 
             
         }
-                
-        internal class VastParams
-        {
-            internal int setID;
-            internal int id;
-            internal int pid;
-        }
-
-        public VastParams GetVastParams()
-        {
-            if (string.IsNullOrEmpty(currentApiKey))
-                return null;
-
-            if (currentApiKey.Length == 43)
-                return null;
-                        
-            var p = Array.ConvertAll(currentApiKey.Split('-'), int.Parse);
-
-            if (p.Length != 3)
-                return null;
-
-            return new VastParams() { id = p[0], setID = p[1], pid = p[2] };
-        }
-
-        internal ServerCampaign PrepareServerCampaign(VAST v)
-        {
-            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
-
-            if (v.Ad == null || v.Ad.Length == 0)
-                return null;
-            
-            if (!(v.Ad[0].Item is VASTADInLine))
-                return null;
-
-            bool hasSettings = false;
-            bool hasVideo = false;
-
-            VASTADInLine inLine = (VASTADInLine)v.Ad[0].Item;
-
-            serverCampaign.id = v.Ad[0].id;
-            
-            foreach (var c in inLine.Creatives)
-            {
-                ServerCampaign.Asset asset = null;
-
-                if (c.Item is VASTADInLineCreativeNonLinearAds)
-                {
-                    VASTADInLineCreativeNonLinearAds it = (VASTADInLineCreativeNonLinearAds)c.Item;
-
-                    foreach (var nl in it.NonLinear)
-                    {
-                        if (nl.Item is NonLinear_typeStaticResource)
-                        {
-                            NonLinear_typeStaticResource staticRes = (NonLinear_typeStaticResource)nl.Item;
-
-                            //Debug.Log($"{staticRes.Value}");
-
-                            asset = new ServerCampaign.Asset()
-                            {
-                                id = $"{c.id} {nl.id}",
-                                url = staticRes.Value,
-                                type = nl.AdParameters
-                            };
-
-                            //Debug.Log(asset.ToString());
-
-                            serverCampaign.assets.Add(asset);
-                        }
-                    }
-
-                }
-                else if (c.Item is VASTADInLineCreativeLinear)
-                {
-                    VASTADInLineCreativeLinear it = (VASTADInLineCreativeLinear)c.Item;
-
-                    Debug.Log(it.MediaFiles[0].Value);
-
-                    Debug.Log(it.AdParameters);
-
-                    asset = new ServerCampaign.Asset()
-                    {
-                        id = c.id,
-                        url = it.MediaFiles[0].Value,
-                        type = "video"
-                    };
-
-                    serverCampaign.assets.Add(asset);
-
-                    hasVideo = true;
-
-                    Debug.Log(asset.ToString());
-
-                    if (it.AdParameters != null)
-                    {
-                        it.AdParameters = it.AdParameters.Replace("\n", "");
-
-                        var dict = AmplitudeNS.MiniJSON.Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
-
-                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(ParseContentString(it.AdParameters, dict));
-                    }
-                }
-                else if (c.Item is VASTADInLineCreativeCompanionAds)
-                {
-
-                }
-
-
-            }
-
-            if(!hasSettings && hasVideo)
-            {
-                serverCampaign.serverSettings = new SettingsDictionary<string, string>();
-
-                serverCampaign.serverSettings.dictionary.Add("custom_missions", "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
-                serverCampaign.serverSettings.dictionary.Add("design_version","2");
-                serverCampaign.serverSettings.dictionary.Add("amount_of_teasers", "100");
-                serverCampaign.serverSettings.dictionary.Add("teaser_design_version", "3");
-                serverCampaign.serverSettings.dictionary.Add("amount_of_notifications", "100");
-
-                //download videoplayer
-                
-            }
-
-            return serverCampaign;
-    }
-
-    internal async Task<List<ServerCampaign>> GetVastCampaign(VastParams vp)
-        {
-            List<ServerCampaign> result = new List<ServerCampaign>();
-
-            //string uri = $"https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154";
-            //https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154
-
-            string uri = $"https://servedbyadbutler.com/vast.spark?setID={vp.setID}&ID={vp.id}&pid={vp.pid}";
-
-            Debug.Log($"Requesting VAST campaign with url {uri}");
-
-            XmlDocument xmlDoc = new XmlDocument(); // Create an XML document object
-
-            string res = null;
-            using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
-            {
-                await webRequest.SendWebRequest();
-
-                //Debug.Log(webRequest.downloadHandler.text);
-
-                xmlDoc.LoadXml(webRequest.downloadHandler.text);
-
-                res = webRequest.downloadHandler.text;
-            }
-
-            /*XmlNodeList elemList = xmlDoc.GetElementsByTagName("Creative");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                Debug.Log($"{i}------{elemList[i].InnerXml}");
-            }*/
-
-            VAST v;
-
-            var ser = new XmlSerializer(typeof(VAST));
-
-            using (var reader = new StringReader(res))
-            {
-                 v = (VAST)ser.Deserialize(reader);
-            }
-
-
-            //Debug.Log(v.Ad[0].Item.GetType());
-
-            var serverCampaign = PrepareServerCampaign(v);
-
-            result.Add(serverCampaign);
-
-            return result;
-        }
-
-
+        
         internal async Task<IpApiData> GetIpApiData()
         {
             IpApiData ipApiData = null;
@@ -344,11 +159,11 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async Task<List<ServerCampaign>> GetList()
         {
-            VastParams v = null;// GetVastParams();
+            VastHelper v = new VastHelper(this);
 
             if (v != null)
             {
-                List<ServerCampaign> campList = await GetVastCampaign(v);
+                List<ServerCampaign> campList = await v.GetVastCampaign();
 
                 if (campList != null)
                     return campList;
@@ -550,7 +365,7 @@ namespace Monetizr.Campaigns
             return 0;
         }
 
-        private Dictionary<string, string> ParseJson(string content)
+        internal static Dictionary<string, string> ParseJson(string content)
         {
             content = content.Trim(new[] { '{', '}' }).Replace('\'', '\"');
 
@@ -567,7 +382,7 @@ namespace Monetizr.Campaigns
         }
 
         //Unity FromJson doesn't support Dictionaries
-        private Dictionary<string, string> ParseContentString(string content, Dictionary<string, object> dict = null)
+        internal static Dictionary<string, string> ParseContentString(string content, Dictionary<string, object> dict = null)
         {
             Dictionary<string, string> res = null;
 
