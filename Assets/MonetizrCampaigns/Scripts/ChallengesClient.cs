@@ -517,7 +517,7 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                return null;
+                return new List<ServerCampaign>();
             }
 
         }
