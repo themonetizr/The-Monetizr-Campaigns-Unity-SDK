@@ -367,6 +367,8 @@ namespace Monetizr.Campaigns
         internal static int maximumCampaignAmount = 1;
         internal static int maximumMissionsAmount = 1;
 
+        internal static bool isVastActive = false;
+               
 
         //position relative to center with 1080x1920 screen resolution
         private static Vector2? tinyTeaserPosition = null;
@@ -2123,11 +2125,11 @@ namespace Monetizr.Campaigns
                     ech.isChallengeLoaded = false;
                 }*/
 
-                if (ech.HasAsset(AssetsType.SurveyURLString) && ech.GetAsset<string>(AssetsType.SurveyURLString).Length == 0)
+               /* if (ech.HasAsset(AssetsType.SurveyURLString) && ech.GetAsset<string>(AssetsType.SurveyURLString).Length == 0)
                 {
                     Log.Print($"ERROR: Campaign {ch.id} has survey asset, but url is empty");
                     ech.isChallengeLoaded = false;
-                }
+                }*/
 
                 Debug.Log($"Loadind finished {ech.isChallengeLoaded}");
 

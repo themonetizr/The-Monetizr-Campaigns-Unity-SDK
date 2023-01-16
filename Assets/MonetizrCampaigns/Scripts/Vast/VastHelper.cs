@@ -49,7 +49,7 @@ namespace Monetizr.Campaigns
             if (v.Ad == null || v.Ad.Length == 0)
                 return null;
 
-            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
+            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
                        
 
             if (!(v.Ad[0].Item is VASTADInLine))
@@ -62,7 +62,7 @@ namespace Monetizr.Campaigns
 
             VASTADInLine inLine = (VASTADInLine)v.Ad[0].Item;
 
-            serverCampaign.id = v.Ad[0].id;
+            //serverCampaign.id = v.Ad[0].id;
 
             foreach (var c in inLine.Creatives)
             {
@@ -215,14 +215,12 @@ namespace Monetizr.Campaigns
             return url.Substring(url.LastIndexOf('=') + 1);
         }
 
-        internal async Task<List<ServerCampaign>> GetVastCampaign()
+        internal async Task GetVastCampaign(List<ServerCampaign> campList)
         {
             VastParams vp = GetVastParams();
             
-            List<ServerCampaign> result = new List<ServerCampaign>();
-
             if (vp == null)
-                return result;
+                return;
 
             //string uri = $"https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154";
             //https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154
@@ -266,9 +264,8 @@ namespace Monetizr.Campaigns
             ServerCampaign serverCampaign = await PrepareServerCampaign(vastData);
 
             if(serverCampaign != null)
-                result.Add(serverCampaign);
-
-            return result;
+                campList.Add(serverCampaign);
+         
         }
     }
 }

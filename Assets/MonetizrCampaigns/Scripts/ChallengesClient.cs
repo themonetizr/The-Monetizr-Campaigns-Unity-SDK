@@ -153,20 +153,30 @@ namespace Monetizr.Campaigns
         {
             public ServerCampaign[] challenges;
         }
-        
+
         /// <summary>
         /// Returns a list of challenges available to the player.
         /// </summary>
         public async Task<List<ServerCampaign>> GetList()
         {
+            MonetizrManager.isVastActive = false;
+            List<ServerCampaign> result = new List<ServerCampaign>();
+
             VastHelper v = new VastHelper(this);
 
             if (v != null)
             {
-                List<ServerCampaign> campList = await v.GetVastCampaign();
+                await v.GetVastCampaign(result);
 
-                if (campList != null)
-                    return campList;
+                await v.GetVastCampaign(result);
+
+                if (result.Count != 0)
+                {
+                    MonetizrManager.isVastActive = true;
+                    MonetizrManager.maximumCampaignAmount = result.Count;
+
+                    return result;
+                }
             }
 
             HttpRequestMessage requestMessage = new HttpRequestMessage
@@ -181,7 +191,7 @@ namespace Monetizr.Campaigns
                     {"ad-id",MonetizrAnalytics.advertisingID }
                 }
             };
-        
+
             Log.Print($"Sent request: {requestMessage.ToString()}");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
@@ -191,58 +201,56 @@ namespace Monetizr.Campaigns
             string responseOk = response.IsSuccessStatusCode == true ? "OK" : "Not OK";
 
             //---
-            
+
 
             Log.Print($"Response is: {responseOk} {response.StatusCode}");
             Log.Print(challengesString);
 
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
+                return result;
+
+            if (challengesString.Length == 0)
+                return result;
+
+
+            var challenges = JsonUtility.FromJson<Challenges>("{\"challenges\":" + challengesString + "}");
+
+            //analytics.Update(new List<Challenge>(challenges.challenges));
+
+
+            foreach (var ch in challenges.challenges)
             {
-                if(challengesString.Length == 0)
+                ch.serverSettings = new SettingsDictionary<string, string>(ParseContentString(ch.content));
+
+                //foreach(var v in ch.additional_params)
+                //    Debug.Log($"!!!! {v.Key}={v.Value}");
+
+                Log.Print($"Loaded campaign: {ch.id}");
+
+            }
+
+            result = new List<ServerCampaign>(challenges.challenges);
+
+            //remove all campaigns without assets
+            result.RemoveAll(e =>
+            {
+                return e.assets.Count == 0;
+            });
+
+            //remove all campaign with SDK version lower than current
+            result.RemoveAll(e =>
+            {
+                string minSdkVersion = e.serverSettings.GetParam("min_sdk_version");
+
+                if (minSdkVersion != null)
                 {
-                    return new List<ServerCampaign>();
+                    return CompareVersions(MonetizrManager.SDKVersion, minSdkVersion) < 0;
                 }
 
-                var challenges = JsonUtility.FromJson<Challenges>("{\"challenges\":" + challengesString + "}");
+                return false;
+            });
 
-                //analytics.Update(new List<Challenge>(challenges.challenges));
-
-
-                foreach (var ch in challenges.challenges)
-                {
-                    ch.serverSettings = new SettingsDictionary<string,string>(ParseContentString(ch.content));
-
-                    //foreach(var v in ch.additional_params)
-                    //    Debug.Log($"!!!! {v.Key}={v.Value}");
-
-                    Log.Print($"Loaded campaign: {ch.id}");
-
-                }
-
-                
-
-                var result = new List<ServerCampaign>(challenges.challenges);
-
-                //remove all campaigns without assets
-                result.RemoveAll(e =>
-                {
-                    return e.assets.Count == 0;
-                });
-
-                //remove all campaign with SDK version lower than current
-                result.RemoveAll(e =>
-                {
-                    string minSdkVersion = e.serverSettings.GetParam("min_sdk_version");
-                    
-                    if (minSdkVersion != null)
-                    {
-                        return CompareVersions(MonetizrManager.SDKVersion, minSdkVersion) < 0;
-                    }
-
-                    return false;
-                });
-
-                //MonetizrAnalytics.advertisingID = "dbdf5873-750a-41a9-a1d4-adf7bb77d9fb";
+            //MonetizrAnalytics.advertisingID = "dbdf5873-750a-41a9-a1d4-adf7bb77d9fb";
 
 #if !UNITY_EDITOR
                 //keep campaigns only for allowed devices
@@ -293,51 +301,47 @@ namespace Monetizr.Campaigns
                 }
 #endif
 
-                //if there's some campaigns, filter them by location
-                if (result.Count > 0)
+            //if there's some campaigns, filter them by location
+            if (result.Count > 0)
+            {
+                bool needFilter = result[0].serverSettings.GetBoolParam("filter_campaigns_by_location", false);
+
+                if (needFilter)
                 {
-                    bool needFilter = result[0].serverSettings.GetBoolParam("filter_campaigns_by_location", false);
+                    analytics.locationData = await GetIpApiData();
 
-                    if (needFilter)
+                    if (analytics.locationData != null)
                     {
-                        analytics.locationData = await GetIpApiData();
-
-                        if (analytics.locationData != null)
+                        result.RemoveAll(e =>
                         {
-                            result.RemoveAll(e =>
-                            {
-                                return !e.IsCampaignInsideLocation(analytics.locationData);
-                            });
+                            return !e.IsCampaignInsideLocation(analytics.locationData);
+                        });
 
-                            if (result.Count > 0)
-                            {
-                                Debug.Log($"{result.Count} campaigns passed location filter");
-                            }
-                        }
-                        else
+                        if (result.Count > 0)
                         {
-                            Debug.Log($"No location data");
+                            Debug.Log($"{result.Count} campaigns passed location filter");
                         }
                     }
                     else
                     {
-                        Debug.Log($"Geo-filtering disabled");
+                        Debug.Log($"No location data");
                     }
                 }
-
-                foreach (var ch in result)
-                    Log.Print($"Campaign passed filters: {ch.id}");
-
-                return result;
+                else
+                {
+                    Debug.Log($"Geo-filtering disabled");
+                }
             }
-            else
-            {
-                return new List<ServerCampaign>();
-            }
+
+            foreach (var ch in result)
+                Log.Print($"Campaign passed filters: {ch.id}");
+
+            return result;
+
 
         }
 
-       
+
         private int CompareVersions(string First, string Second)
         {
             var f = Array.ConvertAll(First.Split('.'), (v) => { int k = 0; return int.TryParse(v, out k) ? k : 0; });
