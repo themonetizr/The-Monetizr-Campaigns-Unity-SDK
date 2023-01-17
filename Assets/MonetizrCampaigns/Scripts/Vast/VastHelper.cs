@@ -49,7 +49,8 @@ namespace Monetizr.Campaigns
             if (v.Ad == null || v.Ad.Length == 0)
                 return null;
 
-            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
+            //ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
+            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}}", dar_tag = "" };
                        
 
             if (!(v.Ad[0].Item is VASTADInLine))
@@ -149,6 +150,13 @@ namespace Monetizr.Campaigns
                 serverCampaign.serverSettings.dictionary.Add("amount_of_notifications", "100");
                 serverCampaign.serverSettings.dictionary.Add("RewardCenter.show_for_one_mission", "true");
 
+                serverCampaign.serverSettings.dictionary.Add("bg_color", "#124674");
+                serverCampaign.serverSettings.dictionary.Add("bg_color2","#124674");
+                serverCampaign.serverSettings.dictionary.Add("link_color","#AAAAFF");
+                serverCampaign.serverSettings.dictionary.Add("text_color","#FFFFFF");
+                serverCampaign.serverSettings.dictionary.Add("bg_border_color","#FFFFFF");
+                serverCampaign.serverSettings.dictionary.Add("RewardCenter.reward_text_color","#2196F3");
+
                 //create folder with video name
 
                 //dowload video and video player into that folder
@@ -178,24 +186,21 @@ namespace Monetizr.Campaigns
        
                 serverCampaign.assets.Add(new ServerCampaign.Asset()
                 {
-                    id = "af79d5f8-b83c-4f4b-a4cc-f9755c0b86be",
-                    url = "https://storage.googleapis.com/middleware-media-files/challenge_asset/af79d5f8-b83c-4f4b-a4cc-f9755c0b86be.gif",
+                    url = "https://image.themonetizr.com/default_assets/monetizr_teaser.gif",
                     type = "tiny_teaser_gif",
 
                 });
 
                 serverCampaign.assets.Add(new ServerCampaign.Asset()
                 {
-                    id = "37273e17-ae66-4116-83c7-3a484e5691fb",
-                    url = "https://storage.googleapis.com/middleware-media-files/challenge_asset/37273e17-ae66-4116-83c7-3a484e5691fb.jpg",
+                    url = "https://image.themonetizr.com/default_assets/monetizr_banner.jpg",
                     type = "banner",
 
                 });
 
                 serverCampaign.assets.Add(new ServerCampaign.Asset()
                 {
-                    id = "37273e17-ae66-4116-83c7-3a484e5691fb",
-                    url = "https://storage.googleapis.com/middleware-media-files/challenge_asset/0d74bc6f-7bd8-4a28-ac50-a735fc918d47.png",
+                    url = "https://image.themonetizr.com/default_assets/monetizr_logo.png",
                     type = "logo",
 
                 });

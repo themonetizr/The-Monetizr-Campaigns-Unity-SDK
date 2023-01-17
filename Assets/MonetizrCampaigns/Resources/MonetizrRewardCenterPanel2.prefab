@@ -1200,6 +1200,8 @@ MonoBehaviour:
   mainBanner: {fileID: 0}
   banner: {fileID: 1383274709014281344, guid: c9f4a2021bceb744284ecbd7e72dca32, type: 3}
   scrollView: {fileID: 6763667137942680006}
+  termsAndCondPrefab: {fileID: 5818141197687585262, guid: 0a3b4f9c4d18fc64ebcc76dff65211be,
+    type: 3}
 --- !u!1 &6493706186174401916
 GameObject:
   m_ObjectHideFlags: 0

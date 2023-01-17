@@ -19,6 +19,11 @@ namespace Monetizr.Campaigns
         public GameObject banner;
         public RectTransform scrollView;
 
+        public GameObject termsAndCondPrefab;
+
+
+        private RectTransform termsAndCondRect;
+
         private List<MonetizrRewardedItem> missionItems = new List<MonetizrRewardedItem>();
 
         private int amountOfItems = 0;
@@ -195,6 +200,11 @@ namespace Monetizr.Campaigns
                 //if (challenges.Count == curChallenge)
                 //    break;
             }
+
+
+            var t = GameObject.Instantiate<GameObject>(termsAndCondPrefab, contentRoot);
+
+            termsAndCondRect = t.GetComponent<RectTransform>();
         }
 
         private void AddRewardedVideoChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -719,6 +729,9 @@ namespace Monetizr.Campaigns
 
                 pos.y -= it.rect.sizeDelta.y;
             }
+
+            termsAndCondRect.anchoredPosition = pos;
+            pos.y -= termsAndCondRect.sizeDelta.y;
 
             contentRect.sizeDelta = -pos;
 
