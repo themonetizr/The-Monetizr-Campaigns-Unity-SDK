@@ -266,14 +266,14 @@ namespace Monetizr.Campaigns
         [SerializeField] internal int rewardPercent;
 
         [NonSerialized] internal int sponsoredId;
-        [NonSerialized] internal Sprite brandBanner;
+       // [NonSerialized] internal Sprite brandBanner;
         [NonSerialized] internal string missionTitle;
         [NonSerialized] internal string missionDescription;
-        [NonSerialized] internal Sprite missionIcon;
+        //[NonSerialized] internal Sprite missionIcon;
         [NonSerialized] internal float progress;
         [NonSerialized] internal Action onClaimButtonPress;
-        [NonSerialized] internal Sprite brandLogo;
-        [NonSerialized] internal Sprite brandRewardBanner;
+        //[NonSerialized] internal Sprite brandLogo;
+        //[NonSerialized] internal Sprite brandRewardBanner;
         [NonSerialized] internal string claimButtonText;
 
         //Campaign id

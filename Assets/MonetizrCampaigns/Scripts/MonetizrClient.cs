@@ -26,7 +26,7 @@ namespace Monetizr.Campaigns
         }
     }
     
-    internal class ChallengesClient
+    internal class MonetizrClient
     {
         //public PlayerInfo playerInfo { get; set; }
 
@@ -53,9 +53,6 @@ namespace Monetizr.Campaigns
                 }
                 await Task.Yield();
             }
-
-
-            
         }
         
         internal async Task<IpApiData> GetIpApiData()
@@ -99,7 +96,7 @@ namespace Monetizr.Campaigns
             return ipApiData;
         }
 
-        public ChallengesClient(string apiKey, int timeout = 30)
+        public MonetizrClient(string apiKey, int timeout = 30)
         {
             System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
                       

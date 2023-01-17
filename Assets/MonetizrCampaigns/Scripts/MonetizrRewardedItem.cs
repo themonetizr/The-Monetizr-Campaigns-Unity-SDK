@@ -44,6 +44,8 @@ namespace Monetizr.Campaigns
         public RectTransform rect;
 
         public GameObject hideOverlay;
+        private Sprite brandBanner;
+        private Sprite missionIcon;
 
         internal static string ScoreShow(double Score)
         {
@@ -67,14 +69,15 @@ namespace Monetizr.Campaigns
             rewardCenterPanel = panel;
             mission = m;
 
-            m.brandBanner = null;
+            //brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
+            missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite);
 
-            banner.gameObject.SetActive(m.brandBanner != null);
-            banner.sprite = m.brandBanner;
+            brandBanner = null;
 
-            
-
-            if (m.brandBanner == null)
+            banner.gameObject.SetActive(brandBanner != null);
+            banner.sprite = brandBanner;
+                        
+            if (brandBanner == null)
             {
                 var rect = GetComponent<RectTransform>();
 
@@ -91,7 +94,7 @@ namespace Monetizr.Campaigns
             }
 
 
-            brandIcon.sprite = m.missionIcon;
+            brandIcon.sprite = missionIcon;
             rewardTitle.text = m.missionTitle;
             rewardDescription.text = m.missionDescription;
 

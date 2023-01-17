@@ -14,7 +14,7 @@ namespace Monetizr.Campaigns
 {
     class VastHelper
     {
-        ChallengesClient client;
+        MonetizrClient client;
 
         internal class VastParams
         {
@@ -23,7 +23,7 @@ namespace Monetizr.Campaigns
             internal int pid;
         }
 
-        internal VastHelper(ChallengesClient client)
+        internal VastHelper(MonetizrClient client)
         {
             this.client = client;
         }
@@ -50,7 +50,7 @@ namespace Monetizr.Campaigns
                 return null;
 
             //ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
-            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}}", dar_tag = "" };
+            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
                        
 
             if (!(v.Ad[0].Item is VASTADInLine))
@@ -128,7 +128,7 @@ namespace Monetizr.Campaigns
 
                         var dict = AmplitudeNS.MiniJSON.Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
 
-                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(ChallengesClient.ParseContentString(it.AdParameters, dict));
+                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(MonetizrClient.ParseContentString(it.AdParameters, dict));
                     }
                 }
                 else if (c.Item is VASTADInLineCreativeCompanionAds)
@@ -170,7 +170,7 @@ namespace Monetizr.Campaigns
                 string zipFolder = campPath + "/" + videoAsset.fpath;
 
                 if (Directory.Exists(zipFolder))
-                    MonetizrManager.DeleteDirectory(zipFolder);
+                    ServerCampaign.DeleteDirectory(zipFolder);
                                                                 
                 Directory.CreateDirectory(zipFolder);
 

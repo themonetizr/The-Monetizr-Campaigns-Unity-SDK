@@ -179,10 +179,10 @@ namespace Monetizr.Campaigns
                 if (ch == missions[0].campaignId)
                 //if (ch == activeChallenge)
                 {
-                    var color = MonetizrManager.Instance.GetAsset<Color>(ch, AssetsType.HeaderTextColor);
+                   /* var color = MonetizrManager.Instance.GetAsset<Color>(ch, AssetsType.HeaderTextColor);
 
                     if (color != default(Color))
-                        headerText.color = color;
+                        headerText.color = color;*/
 
 
                     var bgSprite = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.TiledBackgroundSprite);
@@ -219,42 +219,14 @@ namespace Monetizr.Campaigns
                 rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
             }
 
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
+            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} video";
             m.missionDescription = $"Watch video by {brandName} and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}";
-            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
             m.progress = 1;
             m.brandName = brandName;
-            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
             m.claimButtonText = "Watch video";
 
-           /* Action<bool> onVideoComplete = (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped, AddNewUIMissions); };
-
-            //show video, then claim rewards if it's completed
-            m.onClaimButtonPress = () =>
-            {
-                OnVideoPlayPress(m, onVideoComplete);
-
-            };*/
-
             m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
-
-
-            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
-
-            //var item = go.GetComponent<MonetizrRewardedItem>();
-
-            if (missionId != 0)
-                m.brandBanner = null;
-
-            Log.Print(m.missionTitle);
-
-            item.UpdateWithDescription(this, m);
-
-            //if(m.brandBanner != null)
-            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
         private void AddMultiplyCoinsChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -273,39 +245,15 @@ namespace Monetizr.Campaigns
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} multiply";
             m.missionDescription = $"Earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} and double it with {brandName}";
-            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
-
             m.progress = ((float)(getCurrencyFunc() - m.startMoney))/(float)m.reward;
-
             m.brandName = brandName;
-            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
             m.claimButtonText = "Claim reward";
-
-            //show video, then claim rewards if it's completed
-            //m.onClaimButtonPress = () => { OnClaimRewardComplete(m, false, AddNewUIMissions); };
-
             m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
-
-            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
-
-            //var item = go.GetComponent<MonetizrRewardedItem>();
-
-            if (missionId != 0)
-                m.brandBanner = null;
-            
-            Log.Print(m.missionTitle);
 
             item.currectProgress = getCurrencyFunc() - m.startMoney;
             item.maxProgress = m.reward;
-            item.UpdateWithDescription(this, m);
-
-            //if (m.brandBanner != null)
-            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
         private void AddSurveyChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -324,50 +272,12 @@ namespace Monetizr.Campaigns
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} survey";
             m.missionDescription = $"Complete survey and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} with {brandName}";
-            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
-
             m.progress = 1.0f;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
-
             m.brandName = brandName;
-            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
             m.claimButtonText = "Start survey";
-
-
-           /* Action<bool> onSurveyComplete = (bool isSkipped) =>
-            {
-               OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
-            };*/
-
-            //show video, then claim rewards if it's completed
-            /*m.onClaimButtonPress = () => {
-                
-
-                MonetizrManager.ShowNotification((bool _) => { MonetizrManager.ShowSurvey(onSurveyComplete, m); },
-                        m,
-                        PanelId.SurveyNotification);
-
-            };*/
-
             m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
-            
-                //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
-
-                //var item = go.GetComponent<MonetizrRewardedItem>();
-
-            if (missionId != 0)
-                m.brandBanner = null;
-
-            Log.Print(m.missionTitle);
-
-            item.UpdateWithDescription(this, m);
-
-            //if (m.brandBanner != null)
-            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
         private void AddTwitterChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -386,19 +296,11 @@ namespace Monetizr.Campaigns
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} twitter";
             m.missionDescription = $"Follow twitter and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} with {brandName}";
-            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
-
             m.progress = 1.0f; // ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
-
             m.brandName = brandName;
-            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
             m.claimButtonText = "Follow twitter";
-
 
             Action<bool> onSurveyComplete = (bool isSkipped) =>
             {
@@ -415,19 +317,6 @@ namespace Monetizr.Campaigns
 
             };
 
-            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
-
-            //var item = go.GetComponent<MonetizrRewardedItem>();
-
-            if (missionId != 0)
-                m.brandBanner = null;
-
-            Log.Print(m.missionTitle);
-
-            item.UpdateWithDescription(this, m);
-
-            //if (m.brandBanner != null)
-            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
           
 
@@ -447,9 +336,6 @@ namespace Monetizr.Campaigns
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
-            //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
-
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} giveaway";
 
             bool needToPlayVideo = !(m.campaignServerSettings.GetParam("email_giveaway_mission_without_video") == "true");
@@ -464,31 +350,10 @@ namespace Monetizr.Campaigns
             else
                 m.missionDescription = $"Get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
 
-            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
-
             m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
-
             m.brandName = brandName;
-            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
-
-
             m.claimButtonText = needToPlayVideo ? "Watch video!" : "Claim reward!";
-
-
             m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m,null,AddNewUIMissions);
-
-           
-
-            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
-
-            //var item = go.GetComponent<MonetizrRewardedItem>();
-
-            if (missionId != 0)
-                m.brandBanner = null;
-
-            Log.Print(m.missionTitle);
 
             item.showGift = true;
             item.currectProgress = getCurrencyFunc() - m.startMoney;
@@ -499,10 +364,6 @@ namespace Monetizr.Campaigns
                 item.giftIcon.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             }
 
-            item.UpdateWithDescription(this, m);
-
-            //if (m.brandBanner != null)
-            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
         private void AddMinigameChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -521,49 +382,13 @@ namespace Monetizr.Campaigns
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
-            //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
-
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} minigame";
-
-                        
             m.missionDescription = $"Play minigame and get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
-            
-
-            m.missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardLogoSprite);
-
             m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
-
             m.brandName = brandName;
-            //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandLogoSprite); ;
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandRewardBannerSprite);
-
-
             m.claimButtonText = "Play!";
-
-
             m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
 
-
-
-            //var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
-
-            //var item = go.GetComponent<MonetizrRewardedItem>();
-
-            if (missionId != 0)
-                m.brandBanner = null;
-
-            Log.Print(m.missionTitle);
-
-            //item.showGift = true;
-            //item.currectProgress = getCurrencyFunc() - m.startMoney;
-            //item.maxProgress = m.reward;
-
-            item.UpdateWithDescription(this, m);
-
-            //if (m.brandBanner != null)
-            //    MonetizrManager.Analytics.BeginShowAdAsset(AdType.IntroBanner, m);
         }
 
 
@@ -588,6 +413,10 @@ namespace Monetizr.Campaigns
                 case MissionType.MemoryMinigameReward:
                     AddMinigameChallenge(item, m, missionId); break;
             }
+
+            Log.Print(m.missionTitle);
+
+            item.UpdateWithDescription(this, m);
 
         }
 

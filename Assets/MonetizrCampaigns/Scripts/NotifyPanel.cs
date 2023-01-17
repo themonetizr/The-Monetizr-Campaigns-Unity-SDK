@@ -26,6 +26,9 @@ namespace Monetizr.Campaigns
         private AdType adType;
 
         private string eventPrefix = null;
+        private Sprite brandBanner;
+        private Sprite brandRewardBanner;
+        private Sprite brandLogo;
 
         //private Action onComplete;
 
@@ -36,9 +39,13 @@ namespace Monetizr.Campaigns
             this.currentMission = m;
             this.eventPrefix = null;
            
-
             closeButton.onClick.AddListener(OnButtonPress);
             noThanksButton?.onClick.AddListener(OnNoThanksPress);
+
+            brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandLogoSprite);
+            brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardBannerSprite);
+            brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
+
 
             switch (id)
             {
@@ -78,7 +85,7 @@ namespace Monetizr.Campaigns
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
-            banner.sprite = m.brandBanner;
+            banner.sprite = brandBanner;
             logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null);
 
@@ -171,13 +178,13 @@ namespace Monetizr.Campaigns
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
-            if (m.brandRewardBanner != null)
-                banner.sprite = m.brandRewardBanner;
+            if (brandRewardBanner != null)
+                banner.sprite = brandRewardBanner;
             else
-                banner.sprite = m.brandBanner;
+                banner.sprite = brandBanner;
 
-            if (m.brandLogo != null)
-                logo.sprite = m.brandLogo;
+            if (brandLogo != null)
+                logo.sprite = brandLogo;
             else
                 logo.gameObject.SetActive(false);
 
@@ -264,7 +271,7 @@ namespace Monetizr.Campaigns
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
-            banner.sprite = m.brandRewardBanner;
+            banner.sprite = brandRewardBanner;
             logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null);
             rewardAmount.text = m.reward.ToString();
@@ -322,7 +329,7 @@ namespace Monetizr.Campaigns
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
-            banner.sprite = m.brandBanner;
+            banner.sprite = brandBanner;
 
             //logo.sprite = m.brandLogo;
 
@@ -380,15 +387,15 @@ namespace Monetizr.Campaigns
         {
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
-            if (m.brandRewardBanner != null)
-                banner.sprite = m.brandRewardBanner;
+            if (brandRewardBanner != null)
+                banner.sprite = brandRewardBanner;
             else
-                banner.sprite = m.brandBanner;
+                banner.sprite = brandBanner;
 
             banner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
 
-            if (m.brandLogo != null)
-                logo.sprite = m.brandLogo;
+            if (brandLogo != null)
+                logo.sprite = brandLogo;
             else
                 logo.gameObject.SetActive(false);
 

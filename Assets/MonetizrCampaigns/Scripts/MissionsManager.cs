@@ -924,7 +924,9 @@ namespace Monetizr.Campaigns
                     m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity
                     m.activateAfter = prefefinedSponsoredMissions[i].activateAfter;
 
-                    InitializeNonSerializedFields(m);
+                    m.brandName = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.BrandTitleString);
+
+                    //InitializeNonSerializedFields(m);
                 }
 
 
@@ -946,14 +948,14 @@ namespace Monetizr.Campaigns
 
 
 
-        private void InitializeNonSerializedFields(Mission m)
+       /* private void InitializeNonSerializedFields(Mission m)
         {
             m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandLogoSprite);
             m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardBannerSprite);
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
             m.brandName = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.BrandTitleString);
             //m.surveyUrl = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.SurveyURLString);
-        }
+        }*/
 
         //------------------------
 

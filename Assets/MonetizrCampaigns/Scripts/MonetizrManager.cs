@@ -63,10 +63,10 @@ namespace Monetizr.Campaigns
         //Html5ZipURLString,
         Html5PathString,
         TiledBackgroundSprite,
-        CampaignHeaderTextColor,
-        CampaignTextColor,
-        HeaderTextColor,
-        CampaignBackgroundColor,
+        //CampaignHeaderTextColor,
+        //CampaignTextColor,
+        //HeaderTextColor,
+        //CampaignBackgroundColor,
         CustomCoinSprite,
         CustomCoinString,
         LoadingScreenSprite,
@@ -81,7 +81,7 @@ namespace Monetizr.Campaigns
 
     }
 
-    internal class ServerCampaignWithAssets
+    /*internal class ServerCampaignWithAssets
     {
         private static readonly Dictionary<AssetsType, System.Type> AssetsSystemTypes = new Dictionary<AssetsType, System.Type>()
         {
@@ -169,7 +169,7 @@ namespace Monetizr.Campaigns
         {
             assetsUrl.Add(t, url);
         }
-    }
+    }*/
 
     /// <summary>
     /// Extention to support async/await in the DownloadAssetData
@@ -337,7 +337,7 @@ namespace Monetizr.Campaigns
             return camp.settings[param]; 
         }*/
 
-        internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaignWithAssets> challenges)
+        internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaign> challenges)
         {
             //load old settings
             //сheck if apikey/sdkversion is old
@@ -347,7 +347,7 @@ namespace Monetizr.Campaigns
             data.campaigns.RemoveAll((LocalCampaignSettings c) => !challenges.ContainsKey(c.campId));
 
             //add empty campaign into settings
-            challenges.Values.ToList().ForEach(c => AddCampaign(c.campaign));
+            challenges.Values.ToList().ForEach(c => AddCampaign(c));
 
             SaveData();
         }
@@ -375,7 +375,7 @@ namespace Monetizr.Campaigns
 
         private static Transform teaserRoot;
 
-        internal ChallengesClient _challengesClient { get; private set; }
+        internal MonetizrClient _challengesClient { get; private set; }
 
         private static MonetizrManager instance = null;
 
@@ -394,7 +394,7 @@ namespace Monetizr.Campaigns
 
         //Storing ids in separate list to get faster access (the same as Keys in challenges dictionary below)
         private List<string> campaignIds = new List<string>();
-        private Dictionary<String, ServerCampaignWithAssets> challenges = new Dictionary<String, ServerCampaignWithAssets>();
+        private Dictionary<String, ServerCampaign> campaigns = new Dictionary<String, ServerCampaign>();
         internal static bool tinyTeaserCanBeVisible;
 
         internal MissionsManager missionsManager = null;
@@ -618,7 +618,7 @@ namespace Monetizr.Campaigns
 
             this.soundSwitch = soundSwitch;
 
-            _challengesClient = new ChallengesClient(apiKey);
+            _challengesClient = new MonetizrClient(apiKey);
 
             InitializeUI();
 
@@ -706,7 +706,7 @@ namespace Monetizr.Campaigns
 
             _challengesClient.Close();
 
-            _challengesClient = new ChallengesClient(apiKey);
+            _challengesClient = new MonetizrClient(apiKey);
 
             RequestCampaigns();
         }
@@ -719,7 +719,7 @@ namespace Monetizr.Campaigns
 
             missionsManager.CleanUp();
 
-            challenges.Clear();
+            campaigns.Clear();
             campaignIds.Clear();
 
             RequestChallenges(callRequestComplete ? onRequestComplete : null);
@@ -739,7 +739,7 @@ namespace Monetizr.Campaigns
         {
             var ch = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
-            if (!MonetizrManager.Instance.HasCampaign(ch))
+            /*if (!MonetizrManager.Instance.HasCampaign(ch))
             {
                 m.brandBanner = MonetizrManager.Instance.LoadSpriteFromCache(m.campaignId, m.brandBannerUrl);
                 m.brandLogo = MonetizrManager.Instance.LoadSpriteFromCache(m.campaignId, m.brandLogoUrl);
@@ -750,7 +750,7 @@ namespace Monetizr.Campaigns
             m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandBannerSprite);
             m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandLogoSprite);
             m.brandName = MonetizrManager.Instance.GetAsset<string>(ch, AssetsType.BrandTitleString);
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandRewardBannerSprite);
+            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandRewardBannerSprite);*/
         }
 
         internal static void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
@@ -1194,13 +1194,13 @@ namespace Monetizr.Campaigns
             {
                 missionTitle = missionTitle,
                 missionDescription = missionDescription,
-                missionIcon = missionIcon,
+                //missionIcon = missionIcon,
                 rewardType = rt,
                 reward = reward,
                 progress = progress,
                 isSponsored = false,
                 onClaimButtonPress = onClaimButtonPress,
-                brandBanner = null,
+                //brandBanner = null,
             };
 
             instance.missionsManager.AddMission(m);
@@ -1711,219 +1711,18 @@ namespace Monetizr.Campaigns
         }*/
 
 
-        public Sprite LoadSpriteFromCache(string campaignId, string assetUrl)
-        {
-            string fname = Path.GetFileName(assetUrl);
-            string fpath = Application.persistentDataPath + "/" + campaignId + "/" + fname;
-
-            if (!File.Exists(fpath))
-                return null;
-
-            byte[] data = File.ReadAllBytes(fpath);
-
-            Texture2D tex = new Texture2D(0, 0);
-            tex.LoadImage(data);
-            tex.wrapMode = TextureWrapMode.Clamp;
-
-            return Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-        }
-
-        /// <summary>
-        /// Helper function to download and assign graphics assets
-        /// </summary>
-        private async Task AssignAssetTextures(ServerCampaignWithAssets ech, ServerCampaign.Asset asset, AssetsType texture, AssetsType sprite, bool isOptional = false)
-        {
-            if (asset.url == null || asset.url.Length == 0)
-            {
-                Debug.LogWarning($"Resource {texture} {sprite} has no url in path!");
-                ech.isChallengeLoaded = false;
-                return;
-            }
-
-            string path = Application.persistentDataPath + "/" + ech.campaign.id;
-
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-
-            string fname = Path.GetFileName(asset.url);
-            string fpath = path + "/" + fname;
-
-            //Debug.Log(fpath);
-
-            byte[] data = null;
-
-            if (!File.Exists(fpath))
-            {
-                data = await DownloadHelper.DownloadAssetData(asset.url);
-
-                if (data == null)
-                {
-                    if (!isOptional)
-                        ech.isChallengeLoaded = false;
-
-                    return;
-                }
-
-                File.WriteAllBytes(fpath, data);
-
-                //Log.Print("saving: " + fpath);
-            }
-            else
-            {
-                data = File.ReadAllBytes(fpath);
-
-                if (data == null)
-                {
-                    if (!isOptional)
-                        ech.isChallengeLoaded = false;
-
-                    return;
-                }
-
-                //Log.Print("reading: " + fpath);
-            }
-
-#if TEST_SLOW_LATENCY
-            await Task.Delay(1000);
-#endif
-
-            Texture2D tex = new Texture2D(0, 0);
-            tex.LoadImage(data);
-            tex.wrapMode = TextureWrapMode.Clamp;
-
-            if (texture != AssetsType.Unknown)
-                ech.SetAsset<Texture2D>(texture, tex);
-
-            Sprite s = null;
-            if (sprite != AssetsType.Unknown)
-            {
-                s = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-
-                ech.SetAsset<Sprite>(sprite, s);
-            }
-
-            ech.SetAssetUrl(sprite, asset.url);
-
-            bool texStatus = tex != null;
-            bool spriteStatus = s != null;
-
-            //Debug.Log($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
-        }
-
-        private async Task PreloadAssetToCache(ServerCampaignWithAssets ech, ServerCampaign.Asset asset, /*AssetsType urlString,*/ AssetsType fileString, bool required = true)
-        {
-            if (asset.url == null || asset.url.Length == 0)
-            {
-                Debug.LogWarning($"Malformed URL for {fileString} {ech.campaign.id}");
-                return;
-            }
-
-            string path = Application.persistentDataPath + "/" + ech.campaign.id;
-
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-
-            string fname = string.IsNullOrEmpty(asset.fname) ? Path.GetFileName(asset.url) : $"{asset.fname}.{asset.fext}";
-            string fpath = string.IsNullOrEmpty(asset.fpath) ? $"{path}/{fname}" : $"{path}/{asset.fpath}/{fname}";
-            string zipFolder = null;
-            string fileToCheck = fpath;
-
-            Log.Print("PreloadAssetToCache: " + fname);
-
-            if (fname.Contains("zip"))
-            {
-                zipFolder = path + "/" + fname.Replace(".zip", "");
-                fileToCheck = zipFolder + "/index.html";
-
-                Log.Print($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
-            }
-                        
-            byte[] data = null;
-
-            if (!File.Exists(fileToCheck))
-            {
-                Log.Print($"Downloading archive {asset.url}");
-
-                data = await DownloadHelper.DownloadAssetData(asset.url);
-
-                if (data == null)
-                {
-                    Log.Print("Nothing downloaded! Data == null");
-
-                    if (required)
-                        ech.isChallengeLoaded = false;
-
-                    return;
-                }
-
-                Log.Print($"WriteAllBytes to {fpath} size: {data.Length}");
-
-                File.WriteAllBytes(fpath, data);
-
-                if (zipFolder != null)
-                {
-                    Log.Print("Extracting to: " + zipFolder);
-
-                    if (Directory.Exists(zipFolder))
-                        DeleteDirectory(zipFolder);
-
-                    //if (!Directory.Exists(zipFolder))
-                    Directory.CreateDirectory(zipFolder);
-
-                    ZipFile.ExtractToDirectory(fpath, zipFolder);
-
-                    File.Delete(fpath);
-                }
-
-
-                //Log.Print("saving: " + fpath);
-            }
-
-            if (zipFolder != null)
-                fpath = fileToCheck;
-
-            if(!string.IsNullOrEmpty(asset.mainAssetName))
-            {
-                fpath = $"{path}/{asset.mainAssetName}";
-            }
-
-            Log.Print($"Resource {fileString} {fpath}");
-
-            //Log.Print("zip path to: " + fpath);
-
-            //ech.SetAsset<string>(urlString, asset.url);
-            ech.SetAsset<string>(fileString, fpath);
-        }
-
-        public static void DeleteDirectory(string target_dir)
-        {
-            string[] files = Directory.GetFiles(target_dir);
-            string[] dirs = Directory.GetDirectories(target_dir);
-
-            foreach (string file in files)
-            {
-                //File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
-            }
-
-            foreach (string dir in dirs)
-            {
-                DeleteDirectory(dir);
-            }
-
-            Directory.Delete(target_dir, false);
-        }
+     
 
         /// <summary>
         /// Request challenges from the server
         /// </summary>
         public async void RequestChallenges(Action<bool> onRequestComplete)
         {
-            List<ServerCampaign> _challenges = new List<ServerCampaign>();
+            List<ServerCampaign> campaigns = new List<ServerCampaign>();
 
             try
             {
-                _challenges = await _challengesClient.GetList();
+                campaigns = await _challengesClient.GetList();
             }
             catch (Exception e)
             {
@@ -1931,7 +1730,7 @@ namespace Monetizr.Campaigns
                 onRequestComplete?.Invoke(false);
             }
 
-            if (_challenges == null)
+            if (campaigns == null)
             {
                 Log.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
                 onRequestComplete?.Invoke(false);
@@ -1939,11 +1738,11 @@ namespace Monetizr.Campaigns
 
             campaignIds.Clear();
 
-            if (_challenges.Count > 0)
+            if (campaigns.Count > 0)
             {
-                _challengesClient.InitializeMixpanel(_challenges[0].testmode, _challenges[0].panel_key);
+                _challengesClient.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
 
-                _challengesClient.analytics.TrackEvent("Get List Started", _challenges[0]);
+                _challengesClient.analytics.TrackEvent("Get List Started", campaigns[0]);
                 _challengesClient.analytics.StartTimedEvent("Get List Finished");
             }
             else
@@ -1959,185 +1758,23 @@ namespace Monetizr.Campaigns
 #endif
             Color c;
 
-            foreach (var ch in _challenges)
+            foreach (var campaign in campaigns)
             {
-                
-                var ech = new ServerCampaignWithAssets(ch);
-
-                if (this.challenges.ContainsKey(ch.id))
+                if (this.campaigns.ContainsKey(campaign.id))
                     continue;
 
-                string path = Application.persistentDataPath + "/" + ech.campaign.id;
+                string path = Application.persistentDataPath + "/" + campaign.id;
 
                 Debug.Log($"Campaign path: {path}");
 
-                foreach (var asset in ch.assets)
+                await campaign.LoadCampaignAssets();               
+
+                Debug.Log($"Loading finished {campaign.isLoaded}");
+
+                if (campaign.isLoaded)
                 {
-                    Debug.Log($"Loading {asset.type}");
-
-                    switch (asset.type)
-                    {
-                        case "icon":
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.BrandLogoSprite);
-
-                            break;
-                        case "banner":
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.BrandBannerSprite);
-
-                            break;
-                        case "logo":
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.BrandRewardLogoSprite);
-
-                            break;
-                        case "reward_banner":
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.BrandRewardBannerSprite);
-
-                            break;
-
-                        case "tiny_teaser":
-                            await AssignAssetTextures(ech, asset, AssetsType.TinyTeaserTexture, AssetsType.TinyTeaserSprite);
-
-                            break;
-
-                        case "survey":
-
-                            if(!string.IsNullOrEmpty(asset.survey_content))
-                                ech.SetAsset<string>(AssetsType.SurveyURLString, asset.survey_content);
-                            else
-                                ech.SetAsset<string>(AssetsType.SurveyURLString, asset.url);
-
-                            break;
-                        case "video":
-                            await PreloadAssetToCache(ech, asset, AssetsType.VideoFilePathString, true);
-
-                            break;
-                        case "text":
-                            ech.SetAsset<string>(AssetsType.BrandTitleString, asset.title);
-
-                            break;
-
-                        case "html":
-                            await PreloadAssetToCache(ech, asset, AssetsType.Html5PathString, false);
-
-                            break;
-
-                        case "tiny_teaser_gif":
-                            await PreloadAssetToCache(ech, asset, AssetsType.TeaserGifPathString, false);
-
-                            break;
-
-                        case "campaign_text_color":
-
-                            if (ColorUtility.TryParseHtmlString(asset.title, out c))
-                                ech.SetAsset<Color>(AssetsType.CampaignTextColor, c);
-
-                            break;
-
-                        case "campaign_header_text_color":
-
-                            if (ColorUtility.TryParseHtmlString(asset.title, out c))
-                                ech.SetAsset<Color>(AssetsType.CampaignHeaderTextColor, c);
-
-                            break;
-
-                        case "header_text_color":
-
-                            if (ColorUtility.TryParseHtmlString(asset.title, out c))
-                                ech.SetAsset<Color>(AssetsType.HeaderTextColor, c);
-
-                            break;
-
-                        case "campaign_background_color":
-
-                            if (ColorUtility.TryParseHtmlString(asset.title, out c))
-                                ech.SetAsset<Color>(AssetsType.CampaignBackgroundColor, c);
-
-                            break;
-
-                        case "tiled_background":
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.TiledBackgroundSprite, true);
-
-                            break;
-
-                        case "custom_coin_title":
-                            ech.SetAsset<string>(AssetsType.CustomCoinString, asset.title);
-
-                            break;
-
-                        case "custom_coin_icon":
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.CustomCoinSprite, true);
-
-                            break;
-
-                        case "loading_screen":
-
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.LoadingScreenSprite, true);
-
-                            break;
-
-                        case "reward_image":
-
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.RewardSprite, true);
-
-                            break;
-
-                        case "ingame_reward_image":
-
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.IngameRewardSprite, true);
-
-                            break;
-
-                        case "unknown_reward_image":
-
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.UnknownRewardSprite, true);
-
-                            break;
-
-
-                        case "minigame_asset1":
-
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.MinigameSprite1, true);
-
-                            break;
-
-                        case "minigame_asset2":
-
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.MinigameSprite2, true);
-
-                            break;
-
-                        case "minigame_asset3":
-
-                            await AssignAssetTextures(ech, asset, AssetsType.Unknown, AssetsType.MinigameSprite3, true);
-
-                            break;
-
-                    }
-
-                }
-
-
-                //TODO: check if all resources available
-
-                /*if (!ech.HasAsset(AssetsType.VideoFilePathString) && !ech.HasAsset(AssetsType.Html5PathString))
-                {
-                    Log.Print($"ERROR: Campaign {ch.id} has neither video, nor html5 asset");
-                    ech.isChallengeLoaded = false;
-                }*/
-
-               /* if (ech.HasAsset(AssetsType.SurveyURLString) && ech.GetAsset<string>(AssetsType.SurveyURLString).Length == 0)
-                {
-                    Log.Print($"ERROR: Campaign {ch.id} has survey asset, but url is empty");
-                    ech.isChallengeLoaded = false;
-                }*/
-
-                Debug.Log($"Loadind finished {ech.isChallengeLoaded}");
-
-                if (ech.isChallengeLoaded)
-                {
-
-                    this.challenges.Add(ch.id, ech);
-                    campaignIds.Add(ch.id);
+                    this.campaigns.Add(campaign.id, campaign);
+                    campaignIds.Add(campaign.id);
                 }
             }
 
@@ -2150,7 +1787,7 @@ namespace Monetizr.Campaigns
 #if TEST_SLOW_LATENCY
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
-            localSettings.LoadOldAndUpdateNew(challenges);
+            localSettings.LoadOldAndUpdateNew(this.campaigns);
 
             Log.Print($"RequestChallenges completed with count: {campaignIds.Count} active: {activeChallengeId}");
 
@@ -2160,9 +1797,9 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                if (_challenges.Count > 0)
+                if (campaigns.Count > 0)
                 {
-                    _challengesClient.analytics.TrackEvent("Get List Load Failed", _challenges[0]);
+                    _challengesClient.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
                 }
             }
 
@@ -2179,13 +1816,13 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(chId))
                 return null;
 
-            if (!challenges.ContainsKey(chId))
+            if (!campaigns.ContainsKey(chId))
             {
                 Debug.LogWarning($"You're trying to get campaign {chId} which is not exist!");
                 return null;
             }
 
-            return challenges[chId].campaign;
+            return campaigns[chId];
         }
 
         /// <summary>
@@ -2236,7 +1873,7 @@ namespace Monetizr.Campaigns
                 return default(T);
             }
 
-            if (!challenges.ContainsKey(challengeId))
+            if (!campaigns.ContainsKey(challengeId))
             {
                 Log.Print($"You requesting asset for challenge {challengeId} that not exist!");
                 return default(T);
@@ -2248,28 +1885,28 @@ namespace Monetizr.Campaigns
                 return default(T);
             }
 
-            return challenges[challengeId].GetAsset<T>(t);
+            return campaigns[challengeId].GetAsset<T>(t);
         }
 
-        public string GetAssetUrl(String challengeId, AssetsType t)
+        /*public string GetAssetUrl(String challengeId, AssetsType t)
         {
-            return challenges[challengeId].GetAssetUrl(t);
-        }
+            return campaigns[challengeId].GetAssetUrl(t);
+        }*/
 
         public bool HasCampaign(String challengeId)
         {
-            return challenges.ContainsKey(challengeId);
+            return campaigns.ContainsKey(challengeId);
         }
 
         public bool HasAsset(String challengeId, AssetsType t)
         {
-            if (challenges == null)
+            if (campaigns == null)
                 return false;
 
-            if (!challenges.ContainsKey(challengeId))
+            if (!campaigns.ContainsKey(challengeId))
                 return false;
 
-            return challenges[challengeId].HasAsset(t);
+            return campaigns[challengeId].HasAsset(t);
         }
 
         /// <summary>
@@ -2277,7 +1914,7 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async Task ClaimReward(String challengeId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            var challenge = challenges[challengeId].campaign;
+            var challenge = campaigns[challengeId];
 
             try
             {
