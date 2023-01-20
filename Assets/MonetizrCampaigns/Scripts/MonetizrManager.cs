@@ -697,10 +697,19 @@ namespace Monetizr.Campaigns
             return _challengesClient.currentApiKey;
         }
 
-        internal void ChangeAPIKey(string apiKey)
+        internal void RestartClient()
+        {
+            _challengesClient.Close();
+
+            _challengesClient = new MonetizrClient(_challengesClient.currentApiKey);
+
+            RequestCampaigns();
+        }
+
+        internal bool ChangeAPIKey(string apiKey)
         {
             if (apiKey == _challengesClient.currentApiKey)
-                return;
+                return true;
 
             Debug.Log($"Changing api key to {apiKey}");
 
@@ -709,6 +718,8 @@ namespace Monetizr.Campaigns
             _challengesClient = new MonetizrClient(apiKey);
 
             RequestCampaigns();
+
+            return false;
         }
 
         internal void RequestCampaigns(bool callRequestComplete = true)

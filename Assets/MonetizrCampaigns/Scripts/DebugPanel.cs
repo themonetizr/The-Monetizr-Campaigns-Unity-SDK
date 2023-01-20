@@ -22,6 +22,7 @@ namespace Monetizr.Campaigns
 
         static public List<string> keys = null;
         static public Dictionary<string, string> keyNames = null;
+        private bool isIDChanged;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
@@ -45,11 +46,7 @@ namespace Monetizr.Campaigns
 
             apiKeysList.AddOptions(new List<string>(keyNames.Values));
 
-            versionText.text = $"App version: {Application.version} " +
-                $"OS: {MonetizrAnalytics.osVersion}\n" +
-                $"ADID: {MonetizrAnalytics.advertisingID}\n" +
-                $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +
-                $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()}";
+            UpdateVersionText();
 
             var k = new List<string>(keyNames.Values);
 
@@ -60,6 +57,16 @@ namespace Monetizr.Campaigns
 
                     return v == keyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
                 });
+        }
+
+        public void UpdateVersionText()
+        {
+            versionText.text = $"App version: {Application.version} " +
+             $"OS: {MonetizrAnalytics.osVersion}\n" +
+             $"ADID: {MonetizrAnalytics.advertisingID}\n" +
+             $"UserId: {MonetizrManager.Instance._challengesClient.analytics.GetUserId()}\n" +
+             $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +
+             $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()}";
         }
 
         public void OnToggleChanged(bool _)
@@ -83,6 +90,15 @@ namespace Monetizr.Campaigns
         public void ResetCampaigns()
         {
             MonetizrManager.ResetCampaign();
+        }
+
+        public void ResetId()
+        {
+            MonetizrManager.Instance._challengesClient.analytics.RandomizeUserId();
+
+            UpdateVersionText();
+
+            isIDChanged = true;
         }
 
         public void OpenGame()
@@ -122,7 +138,10 @@ namespace Monetizr.Campaigns
             if (bundleId.Contains("."))
                 MonetizrManager.bundleId = bundleId;
 
-            MonetizrManager.Instance.ChangeAPIKey(keys[apiKeysList.value]);
+            var changed = MonetizrManager.Instance.ChangeAPIKey(keys[apiKeysList.value]);
+
+            if (isIDChanged && !changed)
+                MonetizrManager.Instance.RestartClient();
         }
 
         //// Start is called before the first frame update

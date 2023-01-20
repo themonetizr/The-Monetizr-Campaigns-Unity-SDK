@@ -312,6 +312,7 @@ namespace Monetizr.Campaigns
 
             //AdType and ChallengeId
         private Dictionary<KeyValuePair<AdType, string>, VisibleAdAsset> visibleAdAsset = new Dictionary<KeyValuePair<AdType, string>, VisibleAdAsset>();
+        private string deviceIdentifier;
 
 #if USING_AMPLITUDE
         private Amplitude amplitude;
@@ -412,7 +413,7 @@ namespace Monetizr.Campaigns
             isMixpanelInitialized = false;
 
             //Mixpanel.SetToken("cda45517ed8266e804d4966a0e693d0d");
-                        
+            LoadUserId();
 
 #if USING_FACEBOOK
             if (FB.IsInitialized)
@@ -645,9 +646,39 @@ namespace Monetizr.Campaigns
             return result;
         }
 
+        internal void LoadUserId()
+        {
+            if(PlayerPrefs.HasKey("Monetizr.user_id"))
+                deviceIdentifier = PlayerPrefs.GetString("Monetizr.user_id");
+
+            deviceIdentifier = SystemInfo.deviceUniqueIdentifier;
+            PlayerPrefs.SetString("Monetizr.user_id", deviceIdentifier);
+
+            PlayerPrefs.Save();
+        }
+                
+        internal void RandomizeUserId()
+        {
+            var _deviceIdentifier = deviceIdentifier.ToCharArray();
+
+            for (int i = 0; i < _deviceIdentifier.Length; i++)
+            {
+                var temp = _deviceIdentifier[i];
+                var randomIndex = UnityEngine.Random.Range(i, deviceIdentifier.Length);
+                _deviceIdentifier[i] = _deviceIdentifier[randomIndex];
+                _deviceIdentifier[randomIndex] = temp;
+            }
+
+            deviceIdentifier = new string(_deviceIdentifier);
+            PlayerPrefs.SetString("Monetizr.user_id", deviceIdentifier);
+
+            PlayerPrefs.Save();
+        }
+
         internal string GetUserId()
         {
-            return SystemInfo.deviceUniqueIdentifier;
+            return deviceIdentifier;
+            //return SystemInfo.deviceUniqueIdentifier;
         }
 
         internal void TrackEvent(string name, Mission currentMissionDesc)
