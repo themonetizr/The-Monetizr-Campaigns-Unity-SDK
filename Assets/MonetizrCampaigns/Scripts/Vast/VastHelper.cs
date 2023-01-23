@@ -126,7 +126,7 @@ namespace Monetizr.Campaigns
                     {
                         it.AdParameters = it.AdParameters.Replace("\n", "");
 
-                        var dict = AmplitudeNS.MiniJSON.Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
+                        var dict = Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
 
                         serverCampaign.serverSettings = new SettingsDictionary<string, string>(MonetizrClient.ParseContentString(it.AdParameters, dict));
                     }
