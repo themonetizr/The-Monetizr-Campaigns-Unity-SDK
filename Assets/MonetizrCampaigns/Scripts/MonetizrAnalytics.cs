@@ -374,6 +374,8 @@ namespace Monetizr.Campaigns
 
         internal MonetizrAnalytics()
         {
+            LoadUserId();
+
             Log.Print($"MonetizrAnalytics initialized with user id: {GetUserId()}");
 
             
@@ -413,7 +415,7 @@ namespace Monetizr.Campaigns
             isMixpanelInitialized = false;
 
             //Mixpanel.SetToken("cda45517ed8266e804d4966a0e693d0d");
-            LoadUserId();
+            
 
 #if USING_FACEBOOK
             if (FB.IsInitialized)
@@ -650,8 +652,9 @@ namespace Monetizr.Campaigns
         {
             if(PlayerPrefs.HasKey("Monetizr.user_id"))
                 deviceIdentifier = PlayerPrefs.GetString("Monetizr.user_id");
+            else
+                deviceIdentifier = SystemInfo.deviceUniqueIdentifier;
 
-            deviceIdentifier = SystemInfo.deviceUniqueIdentifier;
             PlayerPrefs.SetString("Monetizr.user_id", deviceIdentifier);
 
             PlayerPrefs.Save();
@@ -665,6 +668,10 @@ namespace Monetizr.Campaigns
             {
                 var temp = _deviceIdentifier[i];
                 var randomIndex = UnityEngine.Random.Range(i, deviceIdentifier.Length);
+
+                if (temp == randomIndex && randomIndex == '-')
+                    continue;
+
                 _deviceIdentifier[i] = _deviceIdentifier[randomIndex];
                 _deviceIdentifier[randomIndex] = temp;
             }
