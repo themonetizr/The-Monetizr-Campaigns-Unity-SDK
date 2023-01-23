@@ -14,14 +14,9 @@ public class SponsoredMissionsManager : MonoBehaviour
         //temporary API key for testing
         var key = "e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo";
 
-        //define sponsored mission (you can change amount of reward here)
-        var sponsoredMissions = new List<MissionDescription>()
-        {
-           new MissionDescription(20, RewardType.Coins),
-        };
-
+        
         //initialize SDK
-        MonetizrManager.Initialize(key, sponsoredMissions, () =>
+        MonetizrManager.Initialize(key, null, () =>
             {
                 if(MonetizrManager.Instance.HasCampaignsAndActive())
                 {
