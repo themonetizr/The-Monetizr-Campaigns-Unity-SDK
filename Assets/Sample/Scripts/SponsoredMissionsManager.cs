@@ -12,7 +12,7 @@ public class SponsoredMissionsManager : MonoBehaviour
     private void Start()
     {
         //temporary API key for testing
-        var key = "e_ESSXx8PK_aVFr8wwW2Sur31yjQKLtaNIUDS5X9rKo";
+        var key = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
 
         
         //initialize SDK
