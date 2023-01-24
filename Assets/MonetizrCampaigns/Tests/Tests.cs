@@ -18,16 +18,40 @@ public class Tests
         string ints = "1.2.3";
         Assert.AreEqual(Utils.ConvertToIntArray(ints)[2], 3);
     }
-    
-    // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-    // `yield return null;` to skip a frame.
+
     [UnityTest]
-    public IEnumerator TestsWithEnumeratorPasses()
+    public IEnumerator SDKInitializationTest()
     {
-        object o = null;
+        int loadSuccess = 0;
 
-        Assert.IsNotNull(o);
+        Sprite img = UnityEditor.AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
 
+        MonetizrManager.SetGameCoinAsset(RewardType.Coins, img, "Coins", 
+            () => { return 0; },  
+            (ulong reward) => { }, 
+            10000);
+
+        MonetizrManager.Initialize("t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo", null, () =>
+        {
+            if (MonetizrManager.Instance.HasCampaignsAndActive())
+            {
+                //we can show teaser manually, but better to use TeaserHelper script
+                //see DummyMainUI object in SampleScene
+                //dummyUI.SetActive(true);
+
+                //MonetizrManager.ShowTinyMenuTeaser();
+                //Do something
+
+                loadSuccess = 1;
+            }
+        },null, null);
+
+        while(loadSuccess == 0)
+            yield return null;
+
+        //Assert.IsNotNull(o);
+
+        Debug.Log("done");
 
         yield return null;
     }
