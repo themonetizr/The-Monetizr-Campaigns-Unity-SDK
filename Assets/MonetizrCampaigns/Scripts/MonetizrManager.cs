@@ -511,10 +511,10 @@ namespace Monetizr.Campaigns
 
 
         public static MonetizrManager Initialize(string apiKey,
-            List<MissionDescription> sponsoredMissions,
-            Action onRequestComplete,
-            Action<bool> soundSwitch,
-            Action<bool> onUIVisible,
+            List<MissionDescription> sponsoredMissions = null,
+            Action onRequestComplete = null,
+            Action<bool> soundSwitch = null,
+            Action<bool> onUIVisible = null,
             UserDefinedEvent userEvent = null)
         {
             if (instance != null)
