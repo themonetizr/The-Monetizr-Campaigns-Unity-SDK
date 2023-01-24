@@ -469,8 +469,9 @@ namespace Monetizr.Campaigns
 
         internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
         private static int debugAttempt = 0;
-        internal static int abTestSegment = 0;
-        internal static String bundleId = null;
+        public static int abTestSegment = 0;
+
+        public static string bundleId = null;
 
         public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
         {
@@ -926,7 +927,7 @@ namespace Monetizr.Campaigns
 
         }
 
-        internal static void ShowDebug()
+        public static void ShowDebug()
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
@@ -1314,7 +1315,7 @@ namespace Monetizr.Campaigns
         }
 
 
-        internal static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
+        public static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
