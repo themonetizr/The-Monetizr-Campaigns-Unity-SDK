@@ -8,6 +8,11 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
+    public static class DebugSettings
+    {
+        static public List<string> keys = null;
+        static public Dictionary<string, string> keyNames = null;
+    }
 
     internal class DebugPanel : PanelController
     {   
@@ -20,8 +25,8 @@ namespace Monetizr.Campaigns
 
         public Text versionText;
 
-        static public List<string> keys = null;
-        static public Dictionary<string, string> keyNames = null;
+        
+        
         private bool isIDChanged;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -44,18 +49,18 @@ namespace Monetizr.Campaigns
             //for (int i = 0; i < keys.Count; i++)
             //    k2.Add($"{(i+1).ToString()}. {keys[i]}");
 
-            apiKeysList.AddOptions(new List<string>(keyNames.Values));
+            apiKeysList.AddOptions(new List<string>(DebugSettings.keyNames.Values));
 
             UpdateVersionText();
 
-            var k = new List<string>(keyNames.Values);
+            var k = new List<string>(DebugSettings.keyNames.Values);
 
             apiKeysList.value = k.FindIndex(0, (string v)=>
                 {
-                    if (!keyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
+                    if (!DebugSettings.keyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
                         return false;
 
-                    return v == keyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
+                    return v == DebugSettings.keyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
                 });
         }
 
@@ -128,17 +133,17 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            PlayerPrefs.SetString("api_key", keys[apiKeysList.value]);
+            PlayerPrefs.SetString("api_key", DebugSettings.keys[apiKeysList.value]);
             PlayerPrefs.Save();
 
             //MonetizrManager.Instance.CleanRewardsClaims();
 
-            var bundleId = keyNames[keys[apiKeysList.value]];
+            var bundleId = DebugSettings.keyNames[DebugSettings.keys[apiKeysList.value]];
 
             if (bundleId.Contains("."))
                 MonetizrManager.bundleId = bundleId;
 
-            var changed = MonetizrManager.Instance.ChangeAPIKey(keys[apiKeysList.value]);
+            var changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.keys[apiKeysList.value]);
 
             if (isIDChanged && !changed)
                 MonetizrManager.Instance.RestartClient();
