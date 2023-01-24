@@ -128,7 +128,7 @@ namespace Monetizr.Campaigns
 
                         var dict = Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
 
-                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(MonetizrClient.ParseContentString(it.AdParameters, dict));
+                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(it.AdParameters, dict));
                     }
                 }
                 else if (c.Item is VASTADInLineCreativeCompanionAds)
