@@ -1,5 +1,5 @@
 //#define USING_FACEBOOK
-//#define USING_AMPLITUDE
+#define USING_AMPLITUDE
 
 using System.Collections;
 using System.Collections.Generic;
@@ -9,11 +9,14 @@ using System;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using System.Linq;
+using UnityEngine.UIElements;
+
+using System.Reflection;
 
 
 #if UNITY_IOS
     using UnityEngine.iOS;
-    using Unity.Advertisement.IosSupport;
+//    using Unity.Advertisement.IosSupport;
 #endif
 
 #if UNITY_ANDROID
@@ -26,6 +29,17 @@ using Facebook.Unity;
 
 namespace Monetizr.Campaigns
 {
+    public static class ReflectionExtensions
+    {
+        public static T GetFieldValue<T>(this object obj, string name)
+        {
+            // Set the flags so that private and public fields from instances will be found
+            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            var field = obj.GetType().GetField(name, bindingFlags);
+            return (T)field?.GetValue(obj);
+        }
+
+    }
     internal static class NielsenDar
     {
         internal static readonly Dictionary<DeviceSizeGroup, string> sizeGroupsDict = new Dictionary<DeviceSizeGroup, string>()
@@ -443,7 +457,8 @@ namespace Monetizr.Campaigns
 
             Mixpanel.Init();
             Mixpanel.SetToken(apikey);
-            
+
+            Debug.Log("Mixpanel init called");
         }
 
 
@@ -584,6 +599,32 @@ namespace Monetizr.Campaigns
             }
         }
 
+        
+
+        private void MixpanelTrackAndMaybeFlush(ServerCampaign camp, string eventName, Value props)
+        {
+            Mixpanel.Identify(camp.brand_id);
+            Mixpanel.Track(eventName, props);
+
+            if (camp.serverSettings.GetBoolParam("mixpanel_fast_flush",true))
+                Mixpanel.Flush();
+
+#if USING_AMPLITUDE
+            Dictionary<string, object> eventProps = new Dictionary<string, object>();
+
+            foreach(var v in props.GetFieldValue<Dictionary<string, Value>>("_container"))
+            {
+                var value = v.Value.GetFieldValue<string>("_string");
+
+                eventProps.Add(v.Key, value);
+
+                //Debug.Log($"params: {v.Key} {value}");
+            }
+            
+            amplitude.logEvent(eventName, eventProps);
+#endif
+        }
+
         private void _EndShowAdAsset(KeyValuePair<AdType, string> adAsset)
         {
             Debug.Assert(isMixpanelInitialized);
@@ -613,26 +654,13 @@ namespace Monetizr.Campaigns
 
             string eventName = $"[UNITY_SDK] [TIMED] {adAsset.Key.ToString()}";
 
-            Mixpanel.Identify(challenge.brand_id);
-            Mixpanel.Track(eventName, props);
+            //Mixpanel.Identify(challenge.brand_id);
+            //Mixpanel.Track(eventName, props);
+
+            MixpanelTrackAndMaybeFlush(challenge, eventName, props);
 
 
             NielsenDar.Track(challenge.id, adAsset.Key);
-
-
-#if USING_AMPLITUDE
-            Dictionary<string, object> eventProps = new Dictionary<string, object>();
-            eventProps.Add("camp_id", challenge.id);
-            eventProps.Add("brand_id", challenge.brand_id);
-            eventProps.Add("brand_name", brandName);
-            eventProps.Add("type", adTypeNames[adAsset.Key]);
-            eventProps.Add("duration", (DateTime.Now - visibleAdAsset[adAsset].activateTime).TotalSeconds);
-            eventProps.Add("apiKey", MonetizrManager.Instance.GetCurrentAPIkey());
-            eventProps.Add("ab_segment", MonetizrManager.abTestSegment);
-            eventProps.Add("device_size", deviceSizeGroupNames[deviceSizeGroup]);
-
-            amplitude.logEvent(eventName, eventProps);
-#endif
 
             //if (removeElement)
             //    visibleAdAsset.Remove(adAsset);
@@ -733,8 +761,7 @@ namespace Monetizr.Campaigns
 
            
             var props = new Value();
-
-
+            
             AddDefaultMixpanelValues(props, campaign, brand_name);
 
             if (additionalValues != null)
@@ -742,22 +769,12 @@ namespace Monetizr.Campaigns
                 foreach (var s in additionalValues)
                     props[$"{s.Key}"] = s.Value;
             }
-               
 
-            Mixpanel.Identify(campaign.brand_id);
-            Mixpanel.Track(eventName, props);
 
-#if USING_AMPLITUDE
-            Dictionary<string, object> eventProps = new Dictionary<string, object>();
-            eventProps.Add("camp_id", campaign_id);
-            eventProps.Add("brand_id", brand_id);
-            eventProps.Add("brand_name", brand_name);
-            eventProps.Add("apiKey", MonetizrManager.Instance.GetCurrentAPIkey());
-            eventProps.Add("ab_segment", MonetizrManager.abTestSegment);
-            eventProps.Add("device_size", deviceSizeGroupNames[deviceSizeGroup]);
+            //Mixpanel.Identify(campaign.brand_id);
+            //Mixpanel.Track(eventName, props);
 
-            amplitude.logEvent(eventName, eventProps);
-#endif
+            MixpanelTrackAndMaybeFlush(campaign, eventName, props);
         }
 
         public void OnApplicationQuit()
