@@ -26,6 +26,8 @@ public class Tests
 
         Sprite img = UnityEditor.AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
 
+        MonetizrManager.bundleId = "com.monetizer.sample";
+
         MonetizrManager.SetGameCoinAsset(RewardType.Coins, img, "Coins", 
             () => { return 0; },  
             (ulong reward) => { }, 
