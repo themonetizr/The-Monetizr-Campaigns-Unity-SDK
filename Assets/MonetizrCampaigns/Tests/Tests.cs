@@ -8,9 +8,10 @@ using Monetizr.Campaigns;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEngine.UI;
+using System;
 
 public class Tests
-{    
+{
     [Test]
     public void UtilsTests()
     {
@@ -18,8 +19,10 @@ public class Tests
         Assert.AreEqual(Utils.CompareVersions("0.0.11", "0.0.11"), 0);
         Assert.AreEqual(Utils.CompareVersions("0.0.1", "0.0.11"), -1);
 
-        string ints = "1.2.3";
-        Assert.AreEqual(Utils.ConvertToIntArray(ints)[2], 3);
+        
+        Assert.AreEqual(Utils.ConvertToIntArray("1.2.3")[2], 3);
+
+        Assert.AreEqual(Utils.ConvertToIntArray("1,2,3",',')[2], 3);
     }
 
     [SetUp]
@@ -34,7 +37,7 @@ public class Tests
     [TearDown]
     public void Teardown()
     {
-        
+
     }
 
     GameObject FindObjectByName(string name)
@@ -43,13 +46,18 @@ public class Tests
 
         for (int i = 0; i < gos.Length; i++)
             if (gos[i].name.Contains(name))
-               return gos[i];
+                return gos[i];
 
         return null;
     }
 
+    private void UserDefinedEvent(string campaignId, string placement, MonetizrManager.EventType eventType)
+    {
+        throw new NotImplementedException();
+    }
+
     [UnityTest]
-    public IEnumerator SDKInitializationTest()
+    public IEnumerator SDKTest()
     {
         PlayerPrefs.SetString("campaigns", "");
         PlayerPrefs.SetString("missions", "");
@@ -61,7 +69,8 @@ public class Tests
         Sprite img = UnityEditor.AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
 
         MonetizrManager.bundleId = "com.monetizr.sample";
-                
+
+        var eventsAmount = new Dictionary<string, int>();
 
         MonetizrManager.SetGameCoinAsset(RewardType.Coins, img, "Coins", 
             () => { return 0; },  
@@ -83,29 +92,63 @@ public class Tests
 
                 loadSuccess = 1;
             }
-        },null, null);
+        },null, null,
+        (string campaignId, string placement, MonetizrManager.EventType eventType) =>
+        {
+            if (eventType == MonetizrManager.EventType.Impression)
+            {
+                if(eventsAmount.ContainsKey(placement))
+                    eventsAmount[placement]++;
+                else
+                    eventsAmount[placement]=1;
+            }
+        });
 
         while(loadSuccess == 0)
             yield return null;
 
-        //clicking teaser button
+        
+        yield return new WaitForSeconds(1);
 
         FindButtonAndClickIt("MonetizrMenuTeaser");
 
-        //closing RC
+        yield return new WaitForSeconds(1);
+        
+        FindButtonAndClickIt("CloseButton");
+
+        yield return new WaitForSeconds(1);
+
+        FindButtonAndClickIt("MonetizrMenuTeaser");
+
+        yield return new WaitForSeconds(1);
 
         FindButtonAndClickIt("CloseButton");
 
+        yield return new WaitForSeconds(1);
 
+        MonetizrManager.HideTinyMenuTeaser();
+
+        yield return new WaitForSeconds(1);
+
+        MonetizrManager.ShowTinyMenuTeaser();
+
+        yield return new WaitForSeconds(1);
+
+        //foreach (var v in eventsAmount)
+        //   Debug.Log($"-----------impr {v.Key} {v.Value}");
         //while (!isTestDone)
         //    yield return null;
         //Assert.IsNotNull(o);
 
+        Assert.AreEqual(eventsAmount["TinyTeaser"], 2);
+        Assert.AreEqual(eventsAmount["RewardsCenterScreen"], 2);
+        
         Debug.Log("done");
 
         //yield return null;
     }
 
+ 
     void FindButtonAndClickIt(string name)
     {        
         var buttonObject = FindObjectByName(name);
