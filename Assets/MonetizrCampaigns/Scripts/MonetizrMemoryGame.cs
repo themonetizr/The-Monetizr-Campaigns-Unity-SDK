@@ -8,6 +8,44 @@ namespace Monetizr.Campaigns
 {
     internal class MonetizrMemoryGame : MonetizrGameParentBase
     {
+        internal class Stats
+        {
+            public DateTime gameStartTime;
+            public DateTime lastTapTime;
+            public int amountOfTotalTaps;
+            public int amountOfTapsOnKnownCells;
+            public int amountOfTapsOnDisabledCells;
+            public double totalTime;
+            public double avarageTimeBetweenTaps;
+            public double timeBeforeFirstTap;
+            public int firstTapPiece;
+            public bool isSkipped;
+
+            public Dictionary<string, string> GetDictionary()
+            {
+                var result = new Dictionary<string, string>();
+                                
+                result.Add("amount_of_total_taps", amountOfTotalTaps.ToString());
+                result.Add("amount_of_taps_on_known_cells", amountOfTapsOnKnownCells.ToString());
+                result.Add("amount_of_taps_on_disabled_cells", amountOfTapsOnDisabledCells.ToString());
+                result.Add("total_time", totalTime.ToString());
+                result.Add("avarage_time_between_taps", avarageTimeBetweenTaps.ToString());
+                result.Add("time_beforefirsttap", timeBeforeFirstTap.ToString());
+                result.Add("first_tap_piece", firstTapPiece.ToString());
+                result.Add("is_skipped", isSkipped ? "true" : "false");
+
+                return result;
+            }
+
+            public override string ToString()
+            {
+                return $"GameStartTime: {gameStartTime}, LastTapTime: {lastTapTime}, AmountOfTotalTaps: {amountOfTotalTaps}," +
+                       $"AmountOfTapsOnOpenedCells: {amountOfTapsOnKnownCells}, AmountOfTapsOnDisabledCells: {amountOfTapsOnDisabledCells}, TotalTime: {totalTime}, Avarage TimeBetween Taps:" +
+                        $"{avarageTimeBetweenTaps}, TimeBeforeFirstTap:{timeBeforeFirstTap}, FirstTapPiece:{firstTapPiece}," +
+                        $"IsSkipped:{isSkipped}";
+            }
+        }
+
         internal class Item
         {
             public GameObject go;
@@ -21,11 +59,26 @@ namespace Monetizr.Campaigns
             internal bool isFullyOpened;
         }
 
+        public Stats stats = new Stats();
+
         public Sprite[] mapSprites;
         private List<Item> gameItems;
         private Mission currentMission;
         public GameObject[] items;
         public Image minigameBackground;
+
+        public void SendStatsEvent()
+        {
+            stats.isSkipped = isSkipped;
+            stats.totalTime = (DateTime.Now - stats.gameStartTime).TotalSeconds;
+
+            if (currentMission.campaignServerSettings.GetBoolParam("more_memory_stats",true))
+            {
+                var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
+
+                MonetizrManager.Analytics.TrackEvent("Minigame stats", campaign, false, stats.GetDictionary());
+            }
+        }
 
         public void OnButtonClick()
         {
@@ -36,6 +89,8 @@ namespace Monetizr.Campaigns
             MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressSkip);
 
             isSkipped = true;
+
+            SendStatsEvent();
 
             SetActive(false);
         }
@@ -53,6 +108,9 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            stats.gameStartTime = DateTime.Now;
+            stats.lastTapTime = DateTime.Now;
+
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
@@ -121,6 +179,30 @@ namespace Monetizr.Campaigns
        
         internal void OnItemClick(int item)
         {
+            
+
+            stats.amountOfTotalTaps++;
+
+            double tapTime = (DateTime.Now - stats.lastTapTime).TotalSeconds;
+
+            stats.lastTapTime = DateTime.Now;
+
+            if (stats.amountOfTotalTaps == 1)
+            {
+                stats.timeBeforeFirstTap = (stats.lastTapTime - stats.gameStartTime).TotalSeconds;
+                stats.firstTapPiece = item;
+                stats.avarageTimeBetweenTaps = tapTime;
+            }
+            else
+            {
+                stats.avarageTimeBetweenTaps = (stats.avarageTimeBetweenTaps + tapTime) / 2;
+            }
+
+            if (disabledClick || gameItems[item].isOpened)
+                stats.amountOfTapsOnDisabledCells++;
+
+            Debug.Log(stats.ToString());
+
             if (disabledClick)
                 return;
 
@@ -128,6 +210,9 @@ namespace Monetizr.Campaigns
                 return;
 
             Debug.Log("click" + item);
+
+            if (gameItems[item].value != 0)
+                stats.amountOfTapsOnKnownCells++;
 
             if (gameItems[item].value == 0)
             {
@@ -248,6 +333,8 @@ namespace Monetizr.Campaigns
             MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressOk);
 
             MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
+
+            SendStatsEvent();
         }
 
         internal override void OnCloseDone(int item)
