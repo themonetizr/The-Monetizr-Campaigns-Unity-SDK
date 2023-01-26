@@ -602,8 +602,10 @@ namespace Monetizr.Campaigns
 
         
 
-        private void MixpanelTrackAndMaybeFlush(ServerCampaign camp, string eventName, Value props)
+        private void MixpanelTrackAndMaybeFlush(ServerCampaign camp, string eventName, Value props, bool darTag = false)
         {
+            props["dar_tag_sent"] = darTag.ToString();
+
             Mixpanel.Identify(camp.brand_id);
             Mixpanel.Track(eventName, props);
 
@@ -658,7 +660,7 @@ namespace Monetizr.Campaigns
             //Mixpanel.Identify(challenge.brand_id);
             //Mixpanel.Track(eventName, props);
 
-            MixpanelTrackAndMaybeFlush(challenge, eventName, props);
+            MixpanelTrackAndMaybeFlush(challenge, eventName, props, true);
 
 
             NielsenDar.Track(challenge.id, adAsset.Key);
