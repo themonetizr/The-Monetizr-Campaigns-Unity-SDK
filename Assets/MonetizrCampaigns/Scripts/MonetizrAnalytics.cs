@@ -69,6 +69,7 @@ namespace Monetizr.Campaigns
                     { "${APP_VERSION}", GetAppVersion },
                     { "${OS_VERSION}", GetOsVersion },
                     { "${OPT_OUT}", GetOptOut },
+                    { "${VENDOR_ID}", (AdType at) => { return MonetizrAnalytics.deviceIdentifier; } },
 
                    // { "${PLACEMENT_ID}", GetPlacementId },
                     { "${CY}", GetCY },
@@ -326,7 +327,7 @@ namespace Monetizr.Campaigns
 
             //AdType and ChallengeId
         private Dictionary<KeyValuePair<AdType, string>, VisibleAdAsset> visibleAdAsset = new Dictionary<KeyValuePair<AdType, string>, VisibleAdAsset>();
-        private string deviceIdentifier;
+        internal static string deviceIdentifier = "";
 
 #if USING_AMPLITUDE
         private Amplitude amplitude;
