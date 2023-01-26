@@ -606,7 +606,7 @@ namespace Monetizr.Campaigns
             Mixpanel.Identify(camp.brand_id);
             Mixpanel.Track(eventName, props);
 
-            if (camp.serverSettings.GetBoolParam("mixpanel_fast_flush",true))
+            if (camp.serverSettings.GetBoolParam("mixpanel_fast_flush",false))
                 Mixpanel.Flush();
 
 #if USING_AMPLITUDE

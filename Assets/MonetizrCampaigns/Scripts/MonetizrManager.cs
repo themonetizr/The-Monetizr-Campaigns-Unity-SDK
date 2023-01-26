@@ -931,14 +931,14 @@ namespace Monetizr.Campaigns
         {
             Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
-            /*debugAttempt++;
+            debugAttempt++;
 
 #if !UNITY_EDITOR
             if (debugAttempt != 10)
                 return;
 #endif
 
-            debugAttempt = 0;*/
+            debugAttempt = 0;
 
             instance.uiController.ShowPanelFromPrefab("MonetizrDebugPanel", PanelId.DebugPanel);
         }
