@@ -101,6 +101,9 @@ namespace Monetizr.Campaigns
 
             internal Type ParseType(string type)
             {
+                if (type == null)
+                    return Type.One;
+
                 Dictionary<string, Type> types = new Dictionary<string, Type>()
                 {
                     { "intro", Type.One },
