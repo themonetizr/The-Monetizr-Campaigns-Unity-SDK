@@ -66,13 +66,14 @@ namespace Monetizr.Campaigns
         private Mission currentMission;
         public GameObject[] items;
         public Image minigameBackground;
+        public Image logo;
 
         public void SendStatsEvent()
         {
             stats.isSkipped = isSkipped;
             stats.totalTime = (DateTime.Now - stats.gameStartTime).TotalSeconds;
 
-            if (currentMission.campaignServerSettings.GetBoolParam("more_memory_stats",true))
+            if (currentMission.campaignServerSettings.GetBoolParam("more_memory_stats",false))
             {
                 var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
 
@@ -108,6 +109,9 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
+            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.gameObject.SetActive(logo.sprite != null);
+
             stats.gameStartTime = DateTime.Now;
             stats.lastTapTime = DateTime.Now;
 
@@ -176,7 +180,8 @@ namespace Monetizr.Campaigns
         int totalUnknownOpened = 0;
         int correctCreated = 0;
         int numTapped = 0;
-       
+        
+
         internal void OnItemClick(int item)
         {
             
