@@ -159,11 +159,12 @@ namespace Monetizr.Campaigns
             MonetizrManager.isVastActive = false;
             List<ServerCampaign> result = new List<ServerCampaign>();
 
-            VastHelper v = new VastHelper(this);
+            //VastHelper v = new VastHelper(this);
+            KevelHelper v = new KevelHelper(this);
 
             if (v != null)
             {
-                await v.GetVastCampaign(result);
+                await v.GetCampaign(result);
 
                 //await v.GetVastCampaign(result);
 
@@ -175,6 +176,23 @@ namespace Monetizr.Campaigns
                     return result;
                 }
             }
+
+            /*KevelHelper v = new KevelHelper(this);
+
+            if (v != null)
+            {
+                await v.GetCampaign(result);
+
+                //await v.GetVastCampaign(result);
+
+                if (result.Count != 0)
+                {
+                    MonetizrManager.isVastActive = true;
+                    MonetizrManager.maximumCampaignAmount = result.Count;
+
+                    return result;
+                }
+            }*/
 
             HttpRequestMessage requestMessage = new HttpRequestMessage
             {

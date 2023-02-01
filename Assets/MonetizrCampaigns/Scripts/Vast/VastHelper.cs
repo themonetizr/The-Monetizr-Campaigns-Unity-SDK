@@ -220,7 +220,7 @@ namespace Monetizr.Campaigns
             return url.Substring(url.LastIndexOf('=') + 1);
         }
 
-        internal async Task GetVastCampaign(List<ServerCampaign> campList)
+        internal async Task GetCampaign(List<ServerCampaign> campList)
         {
             VastParams vp = GetVastParams();
             
