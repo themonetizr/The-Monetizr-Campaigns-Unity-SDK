@@ -59,6 +59,7 @@ namespace Monetizr.Campaigns
                    // { "${PLACEMENT_ID}", GetPlacementId },
                     { "${CY}", GetCY },
                     { "${CACHEBUSTER}", GetTimeStamp },
+                    { "${CAMP_ID}", (AdType at) => { return m; } },
 
              };
                         
