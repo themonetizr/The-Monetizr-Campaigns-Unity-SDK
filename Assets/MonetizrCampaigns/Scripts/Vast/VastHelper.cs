@@ -200,7 +200,8 @@ namespace Monetizr.Campaigns
 
                 serverCampaign.assets.Add(new ServerCampaign.Asset()
                 {
-                    url = "https://image.themonetizr.com/default_assets/monetizr_logo.png",
+                    //url = "https://image.themonetizr.com/default_assets/monetizr_logo.png",
+                    url = "https://storage.googleapis.com/middleware-media-files/challenge_asset/64072ae1-4d45-4037-b704-f68b6411caf9.png",
                     type = "logo",
 
                 });
