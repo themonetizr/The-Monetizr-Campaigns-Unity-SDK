@@ -9,7 +9,7 @@ using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
 {
-    public class KevelHelper
+    internal class KevelHelper : VastHelper
     {
         [Serializable]
         public class JsonData
@@ -75,11 +75,12 @@ namespace Monetizr.Campaigns
         }
 
 
-        internal KevelHelper(MonetizrClient monetizrClient)
+        internal KevelHelper(MonetizrClient client) : base(client)
         {
+
         }
 
-        internal async Task GetCampaign(List<ServerCampaign> campList)
+        internal new async Task GetCampaign(List<ServerCampaign> campList)
         {
             string content = "{ \"placements\": [ { \"divName\": \"div1\", \"networkId\": \"11272\", \"siteId\": \"1240593\", \"adTypes\": [16, 3] }]}";
 
@@ -110,28 +111,21 @@ namespace Monetizr.Campaigns
             //var dict = Json.Deserialize(res) as JsonData;
 
             var data = JsonUtility.FromJson<JsonData>(res);
-            /*XmlNodeList elemList = xmlDoc.GetElementsByTagName("Creative");
-            for (int i = 0; i < elemList.Count; i++)
+
+            Debug.Log($"html: {data.decisions.div1.contents[0].body}");
+
+            VAST vastData = CreateVastFromXml(data.decisions.div1.contents[0].body);
+
+            if(vastData == null)
             {
-                Debug.Log($"{i}------{elemList[i].InnerXml}");
-            }*/
-
-            /*VAST vastData = null;
-
-            var ser = new XmlSerializer(typeof(VAST));
-
-            using (var reader = new StringReader(res))
-            {
-                vastData = (VAST)ser.Deserialize(reader);
+                Debug.Log("Vast is not okay!");
+                return;
             }
-
-
-            //Debug.Log(v.Ad[0].Item.GetType());
 
             ServerCampaign serverCampaign = await PrepareServerCampaign(vastData);
 
             if (serverCampaign != null)
-                campList.Add(serverCampaign);*/
+                campList.Add(serverCampaign);
 
         }
     }

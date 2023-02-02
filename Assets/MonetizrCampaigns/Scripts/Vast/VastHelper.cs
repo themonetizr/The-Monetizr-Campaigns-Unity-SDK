@@ -12,7 +12,7 @@ using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
 {
-    class VastHelper
+    internal class VastHelper
     {
         MonetizrClient client;
 
@@ -45,13 +45,13 @@ namespace Monetizr.Campaigns
         }
 
         internal async Task<ServerCampaign> PrepareServerCampaign(VAST v)
-        {            
+        {
             if (v.Ad == null || v.Ad.Length == 0)
                 return null;
 
             //ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
             ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
-                       
+
 
             if (!(v.Ad[0].Item is VASTADInLine))
                 return null;
@@ -87,7 +87,7 @@ namespace Monetizr.Campaigns
                                 url = staticRes.Value,
                                 type = nl.AdParameters,
                                 fname = ConvertCreativeToFname(staticRes.Value),
-                                fext = ConvertCreativeToExt(staticRes.creativeType),
+                                fext = ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
                             };
 
                             //Debug.Log(asset.ToString());
@@ -111,7 +111,7 @@ namespace Monetizr.Campaigns
                         url = it.MediaFiles[0].Value,
                         fpath = ConvertCreativeToFname(it.MediaFiles[0].Value),
                         fname = "video",
-                        fext = ConvertCreativeToExt(it.MediaFiles[0].type),
+                        fext = ConvertCreativeToExt(it.MediaFiles[0].type, it.MediaFiles[0].Value),
                         type = "html",
                         mainAssetName = $"{ConvertCreativeToFname(it.MediaFiles[0].Value)}/index.html"
                     };
@@ -151,11 +151,11 @@ namespace Monetizr.Campaigns
                 serverCampaign.serverSettings.dictionary.Add("RewardCenter.show_for_one_mission", "true");
 
                 serverCampaign.serverSettings.dictionary.Add("bg_color", "#124674");
-                serverCampaign.serverSettings.dictionary.Add("bg_color2","#124674");
-                serverCampaign.serverSettings.dictionary.Add("link_color","#AAAAFF");
-                serverCampaign.serverSettings.dictionary.Add("text_color","#FFFFFF");
-                serverCampaign.serverSettings.dictionary.Add("bg_border_color","#FFFFFF");
-                serverCampaign.serverSettings.dictionary.Add("RewardCenter.reward_text_color","#2196F3");
+                serverCampaign.serverSettings.dictionary.Add("bg_color2", "#124674");
+                serverCampaign.serverSettings.dictionary.Add("link_color", "#AAAAFF");
+                serverCampaign.serverSettings.dictionary.Add("text_color", "#FFFFFF");
+                serverCampaign.serverSettings.dictionary.Add("bg_border_color", "#FFFFFF");
+                serverCampaign.serverSettings.dictionary.Add("RewardCenter.reward_text_color", "#2196F3");
 
                 //create folder with video name
 
@@ -166,12 +166,12 @@ namespace Monetizr.Campaigns
 
                 if (!Directory.Exists(campPath))
                     Directory.CreateDirectory(campPath);
-                
+
                 string zipFolder = campPath + "/" + videoAsset.fpath;
 
                 if (Directory.Exists(zipFolder))
                     ServerCampaign.DeleteDirectory(zipFolder);
-                                                                
+
                 Directory.CreateDirectory(zipFolder);
 
                 byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
@@ -183,7 +183,7 @@ namespace Monetizr.Campaigns
                 File.Delete(zipFolder + "/html.zip");
 
                 //--------------
-       
+
                 serverCampaign.assets.Add(new ServerCampaign.Asset()
                 {
                     url = "https://image.themonetizr.com/default_assets/monetizr_teaser.gif",
@@ -210,20 +210,57 @@ namespace Monetizr.Campaigns
             return serverCampaign;
         }
 
-        private string ConvertCreativeToExt(string type)
+        private string ConvertCreativeToExt(string type, string url)
         {
-           return type.Substring(type.LastIndexOf('/') + 1);
+            if (Path.HasExtension(url))
+            {
+                return Path.GetExtension(url);
+            }
+
+            int i = type.LastIndexOf('/');
+
+            return type.Substring(i + 1);
         }
 
         private string ConvertCreativeToFname(string url)
         {
-            return url.Substring(url.LastIndexOf('=') + 1);
+            int i = url.LastIndexOf('=');
+
+            if (i <= 0)
+                return Path.GetFileNameWithoutExtension(url);
+
+            return url.Substring(i + 1);
+        }
+
+        internal VAST CreateVastFromXml(string xml)
+        {
+            //XmlDocument xmlDoc = new XmlDocument(); // Create an XML document object
+
+            //xmlDoc.LoadXml(webRequest.downloadHandler.text);
+
+            VAST vastData = null;
+
+            try
+            {
+                var ser = new XmlSerializer(typeof(VAST));
+
+                using (var reader = new StringReader(xml))
+                {
+                    vastData = (VAST)ser.Deserialize(reader);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            return vastData;
         }
 
         internal async Task GetCampaign(List<ServerCampaign> campList)
         {
             VastParams vp = GetVastParams();
-            
+
             if (vp == null)
                 return;
 
@@ -234,7 +271,7 @@ namespace Monetizr.Campaigns
 
             Debug.Log($"Requesting VAST campaign with url {uri}");
 
-            XmlDocument xmlDoc = new XmlDocument(); // Create an XML document object
+
 
             string res = null;
             using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
@@ -243,7 +280,7 @@ namespace Monetizr.Campaigns
 
                 //Debug.Log(webRequest.downloadHandler.text);
 
-                xmlDoc.LoadXml(webRequest.downloadHandler.text);
+
 
                 res = webRequest.downloadHandler.text;
             }
@@ -254,23 +291,16 @@ namespace Monetizr.Campaigns
                 Debug.Log($"{i}------{elemList[i].InnerXml}");
             }*/
 
-            VAST vastData = null;
-
-            var ser = new XmlSerializer(typeof(VAST));
-
-            using (var reader = new StringReader(res))
-            {
-                vastData = (VAST)ser.Deserialize(reader);
-            }
+            VAST vastData = CreateVastFromXml(res);
 
 
             //Debug.Log(v.Ad[0].Item.GetType());
 
             ServerCampaign serverCampaign = await PrepareServerCampaign(vastData);
 
-            if(serverCampaign != null)
+            if (serverCampaign != null)
                 campList.Add(serverCampaign);
-         
+
         }
     }
 }
