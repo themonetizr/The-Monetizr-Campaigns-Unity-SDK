@@ -157,6 +157,17 @@ namespace Monetizr.Campaigns
                 serverCampaign.serverSettings.dictionary.Add("bg_border_color", "#FFFFFF");
                 serverCampaign.serverSettings.dictionary.Add("RewardCenter.reward_text_color", "#2196F3");
 
+                serverCampaign.serverSettings.dictionary.Add("CongratsNotification.button_text", "Awesome!");
+                serverCampaign.serverSettings.dictionary.Add("CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr");
+                serverCampaign.serverSettings.dictionary.Add("CongratsNotification.header_text", "Get your awesome reward!");
+
+                serverCampaign.serverSettings.dictionary.Add("StartNotification.SurveyReward.header_text","<b>Survey by Monetizr</b>");
+                serverCampaign.serverSettings.dictionary.Add("StartNotification.button_text","Learn more!");
+                serverCampaign.serverSettings.dictionary.Add("StartNotification.content_text","Join Monetizr<br/>to get game rewards");
+                serverCampaign.serverSettings.dictionary.Add("StartNotification.header_text","<b>Rewards by Monetizr</b>");
+
+                serverCampaign.serverSettings.dictionary.Add("RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%");
+
                 //create folder with video name
 
                 //dowload video and video player into that folder
@@ -184,12 +195,15 @@ namespace Monetizr.Campaigns
 
                 //--------------
 
-                serverCampaign.assets.Add(new ServerCampaign.Asset()
+                if (!serverCampaign.HasAssetInList("tiny_teaser"))
                 {
-                    url = "https://image.themonetizr.com/default_assets/monetizr_teaser.gif",
-                    type = "tiny_teaser_gif",
+                    serverCampaign.assets.Add(new ServerCampaign.Asset()
+                    {
+                        url = "https://image.themonetizr.com/default_assets/monetizr_teaser.gif",
+                        type = "tiny_teaser_gif",
 
-                });
+                    });
+                }
 
                 serverCampaign.assets.Add(new ServerCampaign.Asset()
                 {
@@ -198,13 +212,16 @@ namespace Monetizr.Campaigns
 
                 });
 
-                serverCampaign.assets.Add(new ServerCampaign.Asset()
+                if (!serverCampaign.HasAssetInList("logo"))
                 {
-                    //url = "https://image.themonetizr.com/default_assets/monetizr_logo.png",
-                    url = "https://storage.googleapis.com/middleware-media-files/challenge_asset/64072ae1-4d45-4037-b704-f68b6411caf9.png",
-                    type = "logo",
+                    serverCampaign.assets.Add(new ServerCampaign.Asset()
+                    {
+                        //url = "https://image.themonetizr.com/default_assets/monetizr_logo.png",
+                        url = "https://storage.googleapis.com/middleware-media-files/challenge_asset/64072ae1-4d45-4037-b704-f68b6411caf9.png",
+                        type = "logo",
 
-                });
+                    });
+                }
 
             }
 

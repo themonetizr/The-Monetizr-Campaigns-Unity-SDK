@@ -82,6 +82,9 @@ namespace Monetizr.Campaigns
 
         internal new async Task GetCampaign(List<ServerCampaign> campList)
         {
+            if (GetVastParams() == null)
+                return;
+
             string content = "{ \"placements\": [ { \"divName\": \"div1\", \"networkId\": \"11272\", \"siteId\": \"1240593\", \"adTypes\": [16, 3] }]}";
 
                         
