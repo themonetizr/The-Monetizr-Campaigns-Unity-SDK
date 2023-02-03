@@ -522,6 +522,7 @@ MonoBehaviour:
     autoStartAfter: 0
     alwaysHiddenInRC: 0
     hasUnitySurvey: 0
+  leaderboardImage: {fileID: 5788864503576455431}
 --- !u!114 &6572120955561666976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -721,7 +722,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1.09
-  m_Text: You Tide coupon is waiting...
+  m_Text: "Your reward \nis waiting..."
 --- !u!1 &5623353844154648438
 GameObject:
   m_ObjectHideFlags: 0
@@ -940,6 +941,81 @@ MonoBehaviour:
   m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!1 &6939382680345406093
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4937255409374052019}
+  - component: {fileID: 6071720616360027580}
+  - component: {fileID: 5788864503576455431}
+  m_Layer: 5
+  m_Name: LeaderboardBanner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &4937255409374052019
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6939382680345406093}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 3120377805127941726}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -783.31}
+  m_SizeDelta: {x: 720, y: 90}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &6071720616360027580
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6939382680345406093}
+  m_CullTransparentMesh: 0
+--- !u!114 &5788864503576455431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6939382680345406093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -1207,6 +1283,7 @@ RectTransform:
   - {fileID: 9180046616946791375}
   - {fileID: 4915836517811398500}
   - {fileID: 8992927847034401607}
+  - {fileID: 4937255409374052019}
   - {fileID: 4016120789635526682}
   - {fileID: 399195218464420729}
   m_Father: {fileID: 7387828556660539595}
@@ -1505,7 +1582,7 @@ GameObject:
   - component: {fileID: 5344945013802130261}
   - component: {fileID: 4344017537882115212}
   m_Layer: 5
-  m_Name: CloseButton
+  m_Name: NotifyCloseButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1524,7 +1601,7 @@ RectTransform:
   m_Children:
   - {fileID: 5812090091289563816}
   m_Father: {fileID: 3120377805127941726}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1633,7 +1710,7 @@ PrefabInstance:
     - target: {fileID: 3600710049765397721, guid: 0a3b4f9c4d18fc64ebcc76dff65211be,
         type: 3}
       propertyPath: m_RootOrder
-      value: 8
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 3600710049765397721, guid: 0a3b4f9c4d18fc64ebcc76dff65211be,
         type: 3}

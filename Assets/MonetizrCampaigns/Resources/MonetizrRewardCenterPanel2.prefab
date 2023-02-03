@@ -1477,7 +1477,7 @@ GameObject:
   - component: {fileID: 6646474134457730132}
   - component: {fileID: 8430880231275444263}
   m_Layer: 5
-  m_Name: CloseButton
+  m_Name: RewardCenterCloseButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

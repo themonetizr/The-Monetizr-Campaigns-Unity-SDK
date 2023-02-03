@@ -438,6 +438,7 @@ MonoBehaviour:
     isRewardIngame: 0
     autoStartAfter: 0
     alwaysHiddenInRC: 0
+    hasUnitySurvey: 0
 --- !u!114 &6572120955561666976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -687,7 +688,7 @@ GameObject:
   - component: {fileID: 1715095924489840407}
   - component: {fileID: 3046868277876281524}
   m_Layer: 5
-  m_Name: CrossButton
+  m_Name: MessageBackButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -883,7 +884,7 @@ GameObject:
   - component: {fileID: 5344945013802130261}
   - component: {fileID: 4344017537882115212}
   m_Layer: 5
-  m_Name: CloseButton
+  m_Name: MessageCloseButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
