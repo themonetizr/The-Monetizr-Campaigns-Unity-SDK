@@ -78,6 +78,7 @@ namespace Monetizr.Campaigns
         MinigameSprite1,
         MinigameSprite2,
         MinigameSprite3,
+        LeaderboardBannerSprite,
 
     }
 
@@ -110,7 +111,7 @@ namespace Monetizr.Campaigns
             { AssetsType.IngameRewardSprite, typeof(Sprite) },
             { AssetsType.UnknownRewardSprite, typeof(Sprite) },
             { AssetsType.MinigameSprite1, typeof(Sprite) },
-            { AssetsType.MinigameSprite2, typeof(Sprite) },
+            { AssetsType.   , typeof(Sprite) },
             { AssetsType.MinigameSprite3, typeof(Sprite) },
 
         };
@@ -362,7 +363,7 @@ namespace Monetizr.Campaigns
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
-        internal static bool claimForSkippedCampaigns;
+        public static bool claimForSkippedCampaigns;
 
         internal static int maximumCampaignAmount = 1;
         internal static int maximumMissionsAmount = 1;

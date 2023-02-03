@@ -12,6 +12,9 @@ using System;
 
 public class Tests
 {
+    int loadSuccess = 0;
+    Dictionary<string, int> eventsAmount = new Dictionary<string, int>();
+
     [Test]
     public void UtilsTests()
     {
@@ -32,6 +35,48 @@ public class Tests
         SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
         go.transform.SetAsFirstSibling();
 
+        PlayerPrefs.SetString("campaigns", "");
+        PlayerPrefs.SetString("missions", "");
+
+        Sprite img = UnityEditor.AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+
+        MonetizrManager.bundleId = "com.monetizr.sample";
+
+        MonetizrManager.claimForSkippedCampaigns = true;
+
+
+
+        MonetizrManager.SetGameCoinAsset(RewardType.Coins, img, "Coins",
+            () => { return 0; },
+            (ulong reward) => { },
+            10000);
+
+        MonetizrManager.Initialize("t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo", null, () =>
+        {
+            Assert.IsTrue(MonetizrManager.Instance.HasCampaignsAndActive(), "Campaign should have active campaigns");
+
+            if (MonetizrManager.Instance.HasCampaignsAndActive())
+            {
+                //we can show teaser manually, but better to use TeaserHelper script
+                //see DummyMainUI object in SampleScene
+                //dummyUI.SetActive(true);
+
+                MonetizrManager.ShowTinyMenuTeaser();
+                //Do something
+
+                loadSuccess = 1;
+            }
+        }, null, null,
+        (string campaignId, string placement, MonetizrManager.EventType eventType) =>
+        {
+            if (eventType == MonetizrManager.EventType.Impression)
+            {
+                if (eventsAmount.ContainsKey(placement))
+                    eventsAmount[placement]++;
+                else
+                    eventsAmount[placement] = 1;
+            }
+        });
     }
 
     [TearDown]
@@ -59,51 +104,7 @@ public class Tests
     [UnityTest]
     public IEnumerator SDKTest()
     {
-        PlayerPrefs.SetString("campaigns", "");
-        PlayerPrefs.SetString("missions", "");
-
-        bool isTestDone = false;
-
-        int loadSuccess = 0;
-
-        Sprite img = UnityEditor.AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
-
-        MonetizrManager.bundleId = "com.monetizr.sample";
-
-        var eventsAmount = new Dictionary<string, int>();
-
-        MonetizrManager.SetGameCoinAsset(RewardType.Coins, img, "Coins", 
-            () => { return 0; },  
-            (ulong reward) => { }, 
-            10000);
-
-        MonetizrManager.Initialize("t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo", null, () =>
-        {
-            Assert.IsTrue(MonetizrManager.Instance.HasCampaignsAndActive(),"Campaign should have active campaigns");
-
-            if (MonetizrManager.Instance.HasCampaignsAndActive())
-            {
-                //we can show teaser manually, but better to use TeaserHelper script
-                //see DummyMainUI object in SampleScene
-                //dummyUI.SetActive(true);
-
-                MonetizrManager.ShowTinyMenuTeaser();
-                //Do something
-
-                loadSuccess = 1;
-            }
-        },null, null,
-        (string campaignId, string placement, MonetizrManager.EventType eventType) =>
-        {
-            if (eventType == MonetizrManager.EventType.Impression)
-            {
-                if(eventsAmount.ContainsKey(placement))
-                    eventsAmount[placement]++;
-                else
-                    eventsAmount[placement]=1;
-            }
-        });
-
+       
         while(loadSuccess == 0)
             yield return null;
 
@@ -114,7 +115,7 @@ public class Tests
 
         yield return new WaitForSeconds(1);
         
-        FindButtonAndClickIt("CloseButton");
+        FindButtonAndClickIt("RewardCenterCloseButton");
 
         yield return new WaitForSeconds(1);
 
@@ -122,7 +123,7 @@ public class Tests
 
         yield return new WaitForSeconds(1);
 
-        FindButtonAndClickIt("CloseButton");
+        FindButtonAndClickIt("RewardCenterCloseButton");
 
         yield return new WaitForSeconds(1);
 
@@ -142,13 +143,73 @@ public class Tests
 
         Assert.AreEqual(eventsAmount["TinyTeaser"], 2);
         Assert.AreEqual(eventsAmount["RewardsCenterScreen"], 2);
+
+        //------
+
         
+
+
+
         Debug.Log("done");
 
         //yield return null;
     }
 
- 
+    internal class ClickTask
+    {
+        public string button;
+        public int delay;
+
+        public ClickTask(string button, int delay)
+        {
+            this.button = button;
+            this.delay = delay;
+        }
+    }
+
+
+    [UnityTest]
+    public IEnumerator RewardCenterItemsTest()
+    {
+        while (loadSuccess == 0)
+            yield return null;
+
+        yield return new WaitForSeconds(1);
+
+
+        var tasks = new List<ClickTask>() {
+            new ClickTask("MonetizrMenuTeaser",2),
+
+            new ClickTask("RewardCenterButtonClaim0",3),
+            new ClickTask("PanelCloseButton",2),
+            new ClickTask("MessageCloseButton",2),
+            new ClickTask("NotifyCloseButton",2),
+
+            new ClickTask("RewardCenterButtonClaim1",3),
+            new ClickTask("PanelCloseButton",2),
+            new ClickTask("NotifyCloseButton",2),
+
+            new ClickTask("RewardCenterButtonClaim2",3),
+            new ClickTask("PanelCloseButton",2),
+            new ClickTask("NotifyCloseButton",2),
+
+            new ClickTask("RewardCenterButtonClaim3",3),
+            new ClickTask("PanelCloseButton",2),
+            new ClickTask("MessageCloseButton",2),
+            new ClickTask("NotifyCloseButton",2),
+        };
+
+
+        foreach(var t in tasks)
+        {
+            FindButtonAndClickIt(t.button);
+
+            yield return new WaitForSeconds(t.delay);
+        };
+
+    }
+
+
     void FindButtonAndClickIt(string name)
     {        
         var buttonObject = FindObjectByName(name);
