@@ -30,6 +30,8 @@ namespace Monetizr.Campaigns
         private Sprite brandRewardBanner;
         private Sprite brandLogo;
 
+        public Image leaderboardImage;
+
         //private Action onComplete;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -46,6 +48,8 @@ namespace Monetizr.Campaigns
             brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardBannerSprite);
             brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
 
+            leaderboardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.LeaderboardBannerSprite); ;
+            leaderboardImage.gameObject.SetActive(leaderboardImage.sprite != null);
 
             switch (id)
             {

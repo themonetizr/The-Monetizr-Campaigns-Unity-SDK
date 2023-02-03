@@ -61,6 +61,7 @@ namespace Monetizr.Campaigns
             { AssetsType.MinigameSprite1, typeof(Sprite) },
             { AssetsType.MinigameSprite2, typeof(Sprite) },
             { AssetsType.MinigameSprite3, typeof(Sprite) },
+            { AssetsType.LeaderboardBannerSprite, typeof(Sprite) },
 
         };
 
@@ -141,6 +142,11 @@ namespace Monetizr.Campaigns
             {
                 return $"Id: {id}, Type: {type}, Title: {title}, URL: {url}, Survey Content: {survey_content}";
             }
+        }
+
+        internal bool HasAssetInList(string type)
+        {
+            return assets.Find(a => { return a.type == type; }) != null;
         }
 
         internal void SetAsset<T>(AssetsType t, object asset)
@@ -438,6 +444,12 @@ namespace Monetizr.Campaigns
                     case "minigame_asset3":
 
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.MinigameSprite3, true);
+
+                        break;
+
+                    case "leaderboard_banner":
+
+                        await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.LeaderboardBannerSprite, true);
 
                         break;
 
