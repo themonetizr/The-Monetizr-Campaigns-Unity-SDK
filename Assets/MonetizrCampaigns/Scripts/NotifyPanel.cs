@@ -21,11 +21,11 @@ namespace Monetizr.Campaigns
         public Button noThanksButton;
         public Image gift;
 
-        [HideInInspector]
-        public Mission currentMission;
-        private AdType adType;
+        //[HideInInspector]
+        //public Mission currentMission;
+        private AdPlacement adType;
 
-        private string eventPrefix = null;
+        //private string eventPrefix = null;
         private Sprite brandBanner;
         private Sprite brandRewardBanner;
         private Sprite brandLogo;
@@ -34,12 +34,17 @@ namespace Monetizr.Campaigns
 
         //private Action onComplete;
 
+        internal override AdPlacement? GetAdPlacement()
+        {
+            return adType;
+        }
+
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
-            this.eventPrefix = null;
+            //this.eventPrefix = null;
            
             closeButton.onClick.AddListener(OnButtonPress);
             noThanksButton?.onClick.AddListener(OnNoThanksPress);
@@ -48,7 +53,7 @@ namespace Monetizr.Campaigns
             brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardBannerSprite);
             brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
 
-            leaderboardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.LeaderboardBannerSprite); ;
+            leaderboardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.LeaderboardBannerSprite);
             leaderboardImage.gameObject.SetActive(leaderboardImage.sprite != null);
 
             switch (id)
@@ -73,17 +78,17 @@ namespace Monetizr.Campaigns
                 
             }
 
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
         }
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(adType, currentMission);
+            //MonetizrManager.Analytics.EndShowAdAsset(adType, currentMission);
         }
                
         private void PrepareNotificationPanel(Mission m)
         {
-            eventPrefix = "Notification";
+            //eventPrefix = "Notification";
 
             //----
 
@@ -154,9 +159,9 @@ namespace Monetizr.Campaigns
 
             text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
 
-            adType = AdType.NotificationScreen;
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
-            MonetizrManager.Analytics.TrackEvent("Notification shown", m);
+            adType = AdPlacement.NotificationScreen;
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Notification shown", m);
             
 
         }
@@ -258,9 +263,9 @@ namespace Monetizr.Campaigns
             rewardAmount.gameObject.SetActive(false);
 
 
-            adType = AdType.CongratsNotificationScreen;
-            MonetizrManager.Analytics.TrackEvent("Congrats screen shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
+            adType = AdPlacement.CongratsNotificationScreen;
+            //MonetizrManager.Analytics.TrackEvent("Congrats screen shown", m);
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
 
 
             //MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
@@ -269,7 +274,7 @@ namespace Monetizr.Campaigns
 
         private void PrepareSurveyNotificationPanel(Mission m)
         {
-            eventPrefix = "Survey notification";
+            //eventPrefix = "Survey notification";
 
             //----
 
@@ -319,10 +324,10 @@ namespace Monetizr.Campaigns
             rewardImage.sprite = rewardIcon;
 
 
-            adType = AdType.SurveyNotificationScreen;
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
+            adType = AdPlacement.SurveyNotificationScreen;
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
 
-            MonetizrManager.Analytics.TrackEvent("Survey notification shown", m);
+            //MonetizrManager.Analytics.TrackEvent("Survey notification shown", m);
             //MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardBanner, currentMission);
 
         }
@@ -450,9 +455,9 @@ namespace Monetizr.Campaigns
             gift?.gameObject.SetActive(false);
 
 
-            adType = AdType.EmailCongratsNotificationScreen;
-            MonetizrManager.Analytics.TrackEvent("Email congrats shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
+            adType = AdPlacement.EmailCongratsNotificationScreen;
+            //MonetizrManager.Analytics.TrackEvent("Email congrats shown", m);
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
                         
         }
 
@@ -465,7 +470,7 @@ namespace Monetizr.Campaigns
 
         public void OnNoThanksPress()
         {
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
 
             //MonetizrManager.
             //
@@ -477,10 +482,10 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
 
-            if (eventPrefix != null)
-                MonetizrManager.Analytics.TrackEvent($"{eventPrefix} pressed", currentMission);
+            //if (eventPrefix != null)
+            //    MonetizrManager.Analytics.TrackEvent($"{eventPrefix} pressed", currentMission);
 
             isSkipped = false;
             SetActive(false);

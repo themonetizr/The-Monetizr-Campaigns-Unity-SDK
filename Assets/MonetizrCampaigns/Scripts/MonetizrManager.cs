@@ -405,8 +405,11 @@ namespace Monetizr.Campaigns
         public enum EventType
         {
             Impression,
+            ImpressionEnds,
             ButtonPressSkip,
             ButtonPressOk,
+            Error,
+            ActionSuccess,
         }
 
         public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
@@ -416,7 +419,7 @@ namespace Monetizr.Campaigns
         /// </summary>
         public UserDefinedEvent userDefinedEvent = null;
 
-        static internal void CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
+        static internal void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
         {
             try
             {
@@ -852,6 +855,8 @@ namespace Monetizr.Campaigns
 
                 //MonetizrManager.Analytics.TrackEvent("Enter email succeeded", m);
 
+                //MonetizrManager.Analytics.TrackEvent(m, AdPlacement.EmailEnterCouponRewardScreen, MonetizrManager.EventType.ActionSuccess);
+
                 ShowCongratsNotification((bool _) =>
                 {
                     //lscreen.SetActive(false);
@@ -879,7 +884,10 @@ namespace Monetizr.Campaigns
             {
                 Debug.Log("FAIL!");
 
-                MonetizrManager.Analytics.TrackEvent("Email enter failed", m);
+                //MonetizrManager.Analytics.TrackEvent("Email enter failed", m);
+
+                MonetizrManager.Analytics.TrackEvent(m, AdPlacement.EmailEnterCouponRewardScreen, MonetizrManager.EventType.Error);
+
 
                 ShowMessage((bool _) =>
                 {
@@ -1649,7 +1657,9 @@ namespace Monetizr.Campaigns
             if (!instance.isActive)
                 return;
 
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.TinyTeaser);
+            // MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.TinyTeaser);
+
+            //MonetizrManager.Analytics.TrackEvent(null, null, EventType.ImpressionEnds);
 
             instance.uiController.HidePanel(PanelId.TinyMenuTeaser);
         }
@@ -1755,8 +1765,11 @@ namespace Monetizr.Campaigns
             {
                 _challengesClient.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
 
-                _challengesClient.analytics.TrackEvent("Get List Started", campaigns[0]);
-                _challengesClient.analytics.StartTimedEvent("Get List Finished");
+                _challengesClient.analytics.TrackEvent(campaigns[0], AdPlacement.AssetsLoading, EventType.Impression);
+
+
+                //_challengesClient.analytics.TrackEvent("Get List Started", campaigns[0]);
+                //_challengesClient.analytics.StartTimedEvent("Get List Finished");
             }
             else
             {
@@ -1769,7 +1782,7 @@ namespace Monetizr.Campaigns
             await Task.Delay(10000);
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
-            Color c;
+            //Color c;
 
             foreach (var campaign in campaigns)
             {
@@ -1806,13 +1819,17 @@ namespace Monetizr.Campaigns
 
             if (activeChallengeId != null)
             {
-                _challengesClient.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
+                //_challengesClient.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
+
+                _challengesClient.analytics.TrackEvent(campaigns[0], AdPlacement.AssetsLoading, EventType.ImpressionEnds);
             }
             else
             {
                 if (campaigns.Count > 0)
                 {
-                    _challengesClient.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
+                    //_challengesClient.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
+
+                    _challengesClient.analytics.TrackEvent(campaigns[0], AdPlacement.AssetsLoading, EventType.Error);
                 }
             }
 

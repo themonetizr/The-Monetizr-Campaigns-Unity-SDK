@@ -103,6 +103,8 @@ namespace Monetizr.Campaigns
 
                 onComplete?.Invoke(isSkipped);
 
+                //TODO: track end of placement!!!!
+
                 GameObject.Destroy(panel.gameObject);
 
                 //nothing, but teaser
@@ -160,7 +162,8 @@ namespace Monetizr.Campaigns
                     t.InitializeByParent(id, m);
 
                 ctrlPanel.PreparePanel(id, complete, m);
-                               
+
+                MonetizrManager.Analytics.TrackEvent(m, ctrlPanel, MonetizrManager.EventType.Impression);
 
                 panels.Add(id, ctrlPanel);
             }
@@ -241,9 +244,10 @@ namespace Monetizr.Campaigns
                 PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.serverSettings.dictionary, PanelId.TinyMenuTeaser);
 
                 teaser.uiVersion = designVersion;
+                teaser.triggersButtonEventsOnDeactivate = false;
+
                 panels.Add(PanelId.TinyMenuTeaser, teaser);
-                
-                                
+                  
             }
             else
             {
@@ -264,6 +268,8 @@ namespace Monetizr.Campaigns
             teaser.SetActive(true);
 
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
+
+            MonetizrManager.Analytics.TrackEvent(m, teaser, MonetizrManager.EventType.Impression);
 
             if (screenPos != null)
             {

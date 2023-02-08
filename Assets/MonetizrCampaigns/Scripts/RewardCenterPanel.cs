@@ -32,7 +32,7 @@ namespace Monetizr.Campaigns
         private bool showNotClaimedDisabled = false;
 
         private string currentCampaign;
-        private Mission currentMission;
+        //private Mission currentMission;
 
         //public List<MissionUIDescription> missionsDescriptions;
 
@@ -40,6 +40,11 @@ namespace Monetizr.Campaigns
         {
             base.Awake();
 
+        }
+
+        internal override AdPlacement? GetAdPlacement()
+        {
+            return AdPlacement.RewardsCenterScreen;
         }
 
         internal void UpdateUI()
@@ -62,9 +67,9 @@ namespace Monetizr.Campaigns
             currentMission = m;
             currentCampaign =  MonetizrManager.Instance.GetActiveCampaign();
 
-            MonetizrManager.CallUserDefinedEvent(currentCampaign,
-                  NielsenDar.GetPlacementName(AdType.RewardsCenterScreen),
-                  MonetizrManager.EventType.Impression);
+            //MonetizrManager.CallUserDefinedEvent(currentCampaign,
+             //     NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
+             //     MonetizrManager.EventType.Impression);
 
             //string uiItemPrefab = "MonetizrRewardedItem";
 
@@ -78,10 +83,10 @@ namespace Monetizr.Campaigns
 
             //this.missionsDescriptions = missionsDescriptions;
 
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.RewardsCenterScreen, m);
-            MonetizrManager.Analytics.TrackEvent("Reward center opened",m);
+            //MonetizrManager.Analytics.BeginShowAdAsset(AdPlacement.RewardsCenterScreen, m);
+            //MonetizrManager.Analytics.TrackEvent("Reward center opened",m);
 
-            //MonetizrManager.HideTinyMenuTeaser();
+            MonetizrManager.HideTinyMenuTeaser();
 
             this.onComplete = onComplete;
 
@@ -416,7 +421,7 @@ namespace Monetizr.Campaigns
 
             Log.Print(m.missionTitle);
 
-            item.UpdateWithDescription(this, m, missionId);
+            item.UpdateWithDescription(this, m);
 
         }
 
@@ -433,9 +438,10 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
-            MonetizrManager.CallUserDefinedEvent(currentCampaign,
-              NielsenDar.GetPlacementName(AdType.RewardsCenterScreen),
-              MonetizrManager.EventType.ButtonPressSkip);
+            isSkipped = true;
+            //MonetizrManager.CallUserDefinedEvent(currentCampaign,
+            //  NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
+            //  MonetizrManager.EventType.ButtonPressSkip);
 
             SetActive(false);
         }
@@ -450,9 +456,11 @@ namespace Monetizr.Campaigns
             if (!missionDescription.isSponsored)
                 MonetizrManager.CleanUserDefinedMissions();
 
-            MonetizrManager.CallUserDefinedEvent(currentCampaign,
-              NielsenDar.GetPlacementName(AdType.RewardsCenterScreen),
-              MonetizrManager.EventType.ButtonPressOk);
+            //MonetizrManager.CallUserDefinedEvent(currentCampaign,
+            //  NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
+            //  MonetizrManager.EventType.ButtonPressOk);
+
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ButtonPressOk);
 
             //play video or claim ready user-defined mission
             missionDescription.onClaimButtonPress.Invoke();
@@ -500,10 +508,10 @@ namespace Monetizr.Campaigns
         //TODO: not sure if everything correct here
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.RewardsCenterScreen, currentMission);
+            //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.RewardsCenterScreen, currentMission);
 
             //if(MonetizrManager.tinyTeaserCanBeVisible)
-            //MonetizrManager.ShowTinyMenuTeaser(null);
+            MonetizrManager.ShowTinyMenuTeaser(null);
 
             if (!uiController.isVideoPlaying)
             {
@@ -527,7 +535,7 @@ namespace Monetizr.Campaigns
         //// Update is called once per frame
         void Update()
         {
-            float z = 0;
+            //float z = 0;
             Vector2 pos = new Vector2(0,-bannerHeight);
             
 

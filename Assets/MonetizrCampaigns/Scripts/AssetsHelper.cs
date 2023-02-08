@@ -17,7 +17,8 @@ namespace Monetizr.Campaigns
 
             yield return uwr.SendWebRequest();
 
-            if (uwr.isNetworkError)
+            if (uwr.result == UnityWebRequest.Result.ConnectionError)
+            //if (uwr.isNetworkError)
             {
                 Log.PrintError(uwr.error);
                 onDownloadFailed?.Invoke();
@@ -37,7 +38,8 @@ namespace Monetizr.Campaigns
 
             yield return uwr.SendWebRequest();
 
-            if (uwr.isNetworkError)
+            if(uwr.result == UnityWebRequest.Result.ConnectionError)
+            //if (uwr.isNetworkError)
             {
                 Log.PrintError(uwr.error);
                 onDownloadFailed?.Invoke();

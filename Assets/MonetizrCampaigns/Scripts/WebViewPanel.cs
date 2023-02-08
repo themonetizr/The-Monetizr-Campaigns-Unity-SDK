@@ -20,12 +20,16 @@ namespace Monetizr.Campaigns
         private UniWebView webView;
 #endif
         private string webUrl;
-        private Mission currentMissionDesc;
+        //private Mission currentMission;
         private string eventsPrefix;
-        private AdType adType;
+        private AdPlacement adType;
         private bool isAnalyticsNeeded = true;
         public Image background;
 
+        internal override AdPlacement? GetAdPlacement()
+        {
+            return adType;
+        }
 
         //private Action onComplete;
 #if UNI_WEB_VIEW
@@ -47,7 +51,7 @@ namespace Monetizr.Campaigns
 
             var w = Screen.width;
             var h = Screen.width * 1.5f;
-            var x = 0;
+            //var x = 0;
             var y = (Screen.height - h) / 2;
 
             float aspect = (float)Screen.height / (float)Screen.width;
@@ -88,9 +92,9 @@ namespace Monetizr.Campaigns
         {
             
 
-            TrackEvent("Survey started");
+            //TrackEvent("Survey started");
 
-            Debug.Log($"currentMissionDesc: {currentMissionDesc == null}");
+            Debug.Log($"currentMissionDesc: {currentMission == null}");
             //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
             // eventsPrefix = "Survey";
 
@@ -119,7 +123,7 @@ namespace Monetizr.Campaigns
         private void PrepareHtml5Panel()
         {
             
-            webUrl = "file://" + MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.Html5PathString);
+            webUrl = "file://" + MonetizrManager.Instance.GetAsset<string>(currentMission.campaignId, AssetsType.Html5PathString);
             // eventsPrefix = "Html5";
 
             webView.Load(webUrl);
@@ -131,7 +135,7 @@ namespace Monetizr.Campaigns
 #if UNI_WEB_VIEW
             this.onComplete = onComplete;
             panelId = id;
-            currentMissionDesc = m;
+            currentMission = m;
 
             bool fullScreen = true;
             bool useSafeFrame = false;
@@ -156,17 +160,17 @@ namespace Monetizr.Campaigns
 
             switch (id)
             {
-                case PanelId.SurveyWebView: adType = AdType.Survey; PrepareSurveyPanel(m); break;
+                case PanelId.SurveyWebView: adType = AdPlacement.Survey; PrepareSurveyPanel(m); break;
                 //case PanelId.VideoWebView: adType = AdType.Video; PrepareVideoPanel(); break;
-                case PanelId.Html5WebView: adType = AdType.Html5; PrepareHtml5Panel(); break;
-                case PanelId.HtmlWebPageView: adType = AdType.HtmlPage; PrepareWebViewPanel(m); break;
+                case PanelId.Html5WebView: adType = AdPlacement.Html5; PrepareHtml5Panel(); break;
+                case PanelId.HtmlWebPageView: adType = AdPlacement.HtmlPage; PrepareWebViewPanel(m); break;
             }
 
             //eventsPrefix = MonetizrAnalytics.adTypeNames[adType];
 
             eventsPrefix = adType.ToString();
 
-            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
             // Load a URL.
             Debug.Log($"Url to show {webUrl}");
@@ -174,8 +178,8 @@ namespace Monetizr.Campaigns
 
             if (isAnalyticsNeeded)
             {
-                TrackEvent($"{eventsPrefix} started");
-                MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMissionDesc);
+                //TrackEvent($"{eventsPrefix} started");
+                //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMissionDesc);
             }
 #endif
         }
@@ -214,7 +218,7 @@ namespace Monetizr.Campaigns
 
             if (statusCode >= 300)
             {
-                TrackEvent($"{eventsPrefix} error", statusCode);
+                TrackErrorEvent($"{eventsPrefix} error", statusCode);
 
                 ClosePanel();
 
@@ -228,7 +232,7 @@ namespace Monetizr.Campaigns
         {
             Debug.Log($"OnPageErrorReceived: {url} code: {errorCode}");
 
-            TrackEvent($"{eventsPrefix} error", errorCode);
+            TrackErrorEvent($"{eventsPrefix} error", errorCode);
 
             ClosePanel();
         }
@@ -269,9 +273,9 @@ namespace Monetizr.Campaigns
 
         private void OnCompleteEvent()
         {
-            MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
+            //MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
 
-            TrackEvent($"{eventsPrefix} completed");
+            //TrackEvent($"{eventsPrefix} completed");
             isSkipped = false;
 
             ClosePanel();
@@ -319,7 +323,7 @@ namespace Monetizr.Campaigns
                         webView.Show(true, UniWebViewTransitionEdge.Top, 0.4f);
                     }
                 },
-                    this.currentMissionDesc,
+                    this.currentMission,
                     PanelId.SurveyCloseConfirmation);
 
             });
@@ -330,21 +334,21 @@ namespace Monetizr.Campaigns
         {
             isSkipped = true;
 
-            MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
+            //MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
 
-            TrackEvent($"{eventsPrefix} skipped");
+            //TrackEvent($"{eventsPrefix} skipped");
 
             ClosePanel();
         }
 
 
 #endif
-        private void TrackEvent(string eventName, int statusCode = 0)
+        private void TrackErrorEvent(string eventName, int statusCode = 0)
         {
-            if (!isAnalyticsNeeded)
-                return;
+            //if (!isAnalyticsNeeded)
+            //    return;
 
-            if (currentMissionDesc.campaignId == null)
+            if (currentMission.campaignId == null)
                 return;
 
             Dictionary<string, string> p = new Dictionary<string, string>();
@@ -354,9 +358,9 @@ namespace Monetizr.Campaigns
             if(statusCode > 0)
                 p.Add("url_status_code", statusCode.ToString());
 
-            var campaign = MonetizrManager.Instance.GetCampaign(currentMissionDesc.campaignId);
+            //var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
 
-            MonetizrManager.Analytics.TrackEvent(eventName, campaign, false, p);
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Error, p);
 
             //MonetizrManager.Analytics.TrackEvent(eventName, currentMissionDesc);
         }
@@ -364,8 +368,8 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            if (isAnalyticsNeeded)
-                MonetizrManager.Analytics.EndShowAdAsset(adType, currentMissionDesc);
+            //if (isAnalyticsNeeded)
+            //    MonetizrManager.Analytics.EndShowAdAsset(adType, currentMissionDesc);
 
             MonetizrManager.Instance.SoundSwitch(true);
         }

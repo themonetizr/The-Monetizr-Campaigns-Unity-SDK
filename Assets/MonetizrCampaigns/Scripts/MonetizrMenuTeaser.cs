@@ -23,14 +23,14 @@ namespace Monetizr.Campaigns
 
         private int state = 0;
         private float progress = 0f;
-        private Material m = null;
+        //private Material m = null;
         private float delayTimeEnd = 0f;
         private float speed = 1f;
         private Rect uvRect = new Rect(0, 0.5f, 1.0f, 0.5f);
         private bool hasTextureAnimation = false;
         private bool hasAnimation = true;
 
-        private Mission currentMission;
+        //rivate Mission currentMission;
 
         public Image singleBackgroundImage;
         public Image watchVideoIcon;
@@ -39,6 +39,11 @@ namespace Monetizr.Campaigns
         public GameObject animatableBannerRoot;
         public Image rectangeBannerImage;
         public Image bannerRewardImage;
+ 
+        internal override AdPlacement? GetAdPlacement()
+        {
+            return AdPlacement.TinyTeaser;
+        }
 
         void Update()
         {
@@ -86,9 +91,13 @@ namespace Monetizr.Campaigns
 
         public void OnButtonClick()
         {
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.TinyTeaser), MonetizrManager.EventType.ButtonPressOk);
+            //MonetizrManager.Analytics.TrackEvent(currentMission, AdPlacement.TinyTeaser, MonetizrManager.EventType.ButtonPressOk);
 
-            MonetizrManager.Analytics.TrackEvent("Tiny teaser pressed", currentMission);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.TinyTeaser), MonetizrManager.EventType.ButtonPressOk);
+
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ButtonPressOk);
+
+            //MonetizrManager.Analytics.TrackEvent("Tiny teaser pressed", currentMission);
             MonetizrManager.ShowRewardCenter(null);
         }
 
@@ -109,9 +118,11 @@ namespace Monetizr.Campaigns
 
             Log.PrintWarning($"{m.campaignId} {m}");
 
-            MonetizrManager.Analytics.BeginShowAdAsset(AdType.TinyTeaser, m);
-            MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.TinyTeaser), MonetizrManager.EventType.Impression);
+
+
+            //MonetizrManager.Analytics.BeginShowAdAsset(AdPlacement.TinyTeaser, m);
+            //MonetizrManager.Analytics.TrackEvent("Tiny teaser shown", m);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.TinyTeaser), MonetizrManager.EventType.Impression);
         }
 
         internal void UpdateTransform(Mission m)
@@ -289,6 +300,8 @@ namespace Monetizr.Campaigns
             //Moved to HideTinyMenuTeaser
             //MonetizrManager.Analytics.EndShowAdAsset(AdType.TinyTeaser);
         }
+
+       
     }
 
 }

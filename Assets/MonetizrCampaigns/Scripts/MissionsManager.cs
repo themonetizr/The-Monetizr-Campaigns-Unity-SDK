@@ -508,7 +508,9 @@ namespace Monetizr.Campaigns
                     {
                         if (isMailSkipped)
                         {
-                            MonetizrManager.Analytics.TrackEvent("Email enter skipped", m);
+                            //MonetizrManager.Analytics.TrackEvent("Email enter skipped", m);
+
+                            MonetizrManager.Analytics.TrackEvent(m, AdPlacement.EmailEnterCouponRewardScreen, MonetizrManager.EventType.ButtonPressSkip);
 
                             onComplete?.Invoke(isMailSkipped);
                             return;
@@ -881,7 +883,7 @@ namespace Monetizr.Campaigns
                     }
                     else
                     {
-                        Log.Print($"Found campaign {ch} in local data");
+                        Log.Print($"Found mission {ch}:{i} in local data");
                     }
 
                     if (m == null)

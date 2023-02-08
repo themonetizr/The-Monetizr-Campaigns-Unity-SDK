@@ -27,7 +27,7 @@ namespace Monetizr.Campaigns
         }
 
         private List<Item> gameItems;
-        private Mission currentMission;
+        //private Mission currentMission;
 
         public Sprite backSprite;
         public Sprite backSpriteDisabled;
@@ -46,6 +46,11 @@ namespace Monetizr.Campaigns
 
         }
 
+        internal override AdPlacement? GetAdPlacement()
+        {
+            return AdPlacement.Minigame;
+        }
+
         void SetProgress(float a)
         {
             //uvRect.y = 0.5f * (1.0f - Tween(a));
@@ -61,9 +66,9 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
             //MonetizrManager.ShowRewardCenter(null);
-            MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
 
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressSkip);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.Minigame), MonetizrManager.EventType.ButtonPressSkip);
 
             isSkipped = true;
 
@@ -79,47 +84,27 @@ namespace Monetizr.Campaigns
             this.currentMission = m;
 
             bonusTaken = 0;
-
-            Debug.Log($"1 {car}");
-
             car.parent = this;
 
-            Debug.Log($"2 {logo} {logo.sprite}");
-
             logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
-
-            Debug.Log($"3 {logo.gameObject}");
-
             logo.gameObject.SetActive(logo.sprite != null);
-
-            
 
             gameItems = new List<Item>(9);
 
-            Debug.Log($"4 {gameItems}");
-
             for (int i = 0; i < items.Length; i++)
             {
-                Debug.Log($"5 item {i}");
-
                 int i_copy = i;
                 Button _b = items[i].GetComponent<Button>();
-
-                Debug.Log($"6 item {_b}");
 
                 _b.onClick.RemoveAllListeners();
                 _b.onClick.AddListener( ()=>{ OnItemClick(i_copy); });
                 Animator _a = items[i].GetComponent<Animator>();
-
-                Debug.Log($"6 item {_a}");
-
+                          
                 if (i != 0)
                     _b.interactable = false;
 
                 MemoryGameItem _gi = items[i].GetComponent<MemoryGameItem>();
-
-                Debug.Log($"7 item {_gi} {_gi.image}");
-
+                                
                 _gi.parent = this;
                 _gi.id = i;
 
@@ -130,27 +115,25 @@ namespace Monetizr.Campaigns
 
                 gameItems.Add(new Item { b = _b, go = items[i], value = 0, a = _a, gi = _gi, isOpened = false  });
             }
-
-            Debug.Log("5");
-
+                      
             movesLeftText.text = "MOVES LEFT: 4";
 
             //Log.PrintWarning($"{m.campaignId} {m}");
-            var adType = AdType.Minigame;
+            //var adType = AdPlacement.Minigame;
 
-            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
 
-            MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
         }
 
         int amountOpened = 0;
-        int phase = 0;
+        //int phase = 0;
         bool disabledClick = false;
-        int totalUnknownOpened = 0;
+        //int totalUnknownOpened = 0;
 
         //int[] map = { 0, 0, 1, 2, 3, 4, 5, 6, 5 };
 
@@ -308,9 +291,9 @@ namespace Monetizr.Campaigns
 
             SetActive(false);
 
-            MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
 
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressOk);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.Minigame), MonetizrManager.EventType.ButtonPressOk);
             //MonetizrManager.ShowCongratsNotification(null, m);
         }
 
@@ -330,7 +313,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.Minigame);
+            //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.Minigame);
         }
     }
 

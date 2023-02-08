@@ -37,19 +37,24 @@ namespace Monetizr.Campaigns
 
         public Animator crossButtonAnimator;
 
-        [HideInInspector]
-        public Mission currentMission;
+        //[HideInInspector]
+        //public Mission currentMission;
         private Regex validateEmailRegex;
         private string result;
 
         private EnterEmailType enterEmailType;
 
         private MonetizrManager.RewardSelectionType selection;
-        private AdType adType;
+        private AdPlacement adType;
 
         public Toggle termsToggle;
         private bool termsTogglePressed;
         //private Action onComplete;
+
+        internal override AdPlacement? GetAdPlacement()
+        {
+            return adType;
+        }
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
@@ -134,7 +139,7 @@ namespace Monetizr.Campaigns
             MonetizrManager.temporaryEmail = result;
             MonetizrManager.temporaryRewardTypeSelection = selection;
 
-            MonetizrManager.Analytics.EndShowAdAsset(adType, currentMission);
+            //MonetizrManager.Analytics.EndShowAdAsset(adType, currentMission);
         }
 
         static internal EnterEmailType GetPanelType(Mission m)
@@ -178,16 +183,16 @@ namespace Monetizr.Campaigns
             if (type == EnterEmailType.ProductReward)
             {
                 selection = MonetizrManager.RewardSelectionType.Product;
-                adType = AdType.EmailEnterCouponRewardScreen;
+                adType = AdPlacement.EmailEnterCouponRewardScreen;
             }
             else if (type == EnterEmailType.IngameReward)
             {
                 selection = MonetizrManager.RewardSelectionType.Ingame;
-                adType = AdType.EmailEnterInGameRewardScreen;
+                adType = AdPlacement.EmailEnterInGameRewardScreen;
             }
             else
             {
-                adType = AdType.EmailEnterSelectionRewardScreen;
+                adType = AdPlacement.EmailEnterSelectionRewardScreen;
             }
 
 
@@ -281,10 +286,10 @@ namespace Monetizr.Campaigns
 
             //rewardImage.sprite = rewardIcon;
 
-            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
-            MonetizrManager.Analytics.TrackEvent("Enter email shown", m);
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Enter email shown", m);
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
 
         }
 
@@ -297,9 +302,9 @@ namespace Monetizr.Campaigns
 
         public void _OnNoThanksPress()
         {
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
 
-            MonetizrManager.Analytics.TrackEvent("Enter email skipped", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Enter email skipped", currentMission);
 
             isSkipped = true;
             SetActive(false);
@@ -323,9 +328,9 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
 
-            MonetizrManager.Analytics.TrackEvent("Enter email submitted", currentMission);
+            //MonetizrManager.Analytics._TrackEvent("Enter email submitted", currentMission);
 
             isSkipped = false;
             SetActive(false);

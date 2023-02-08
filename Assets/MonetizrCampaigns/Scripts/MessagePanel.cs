@@ -15,8 +15,8 @@ namespace Monetizr.Campaigns
         public Text buttonText;
         public Button crossButton;
 
-        [HideInInspector]
-        public Mission currentMission;
+        //[HideInInspector]
+        //public Mission currentMission;
 
         //private Action onComplete;
 
@@ -52,7 +52,7 @@ namespace Monetizr.Campaigns
             isSkipped = false;
             SetActive(false);
         }
-
+                
     }
 
 }

@@ -9,7 +9,7 @@ namespace Monetizr.Campaigns
 {
     internal class MonetizrUnitySurvey : PanelController
     {
-        private Mission currentMission;
+        //private Mission currentMission;
 
         public Button closeButton;
         public Image logo;
@@ -36,7 +36,7 @@ namespace Monetizr.Campaigns
         private int currentQuestion = 0;
         private int nextQuestion = 1;
 
-        private AdType adType;
+        //private AdPlacement adType;
 
         private Surveys surveys;
         private Survey currentSurvey;
@@ -143,6 +143,10 @@ namespace Monetizr.Campaigns
             return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
         }
 
+        internal override AdPlacement? GetAdPlacement()
+        {
+            return AdPlacement.Survey;
+        }
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
@@ -159,13 +163,13 @@ namespace Monetizr.Campaigns
             logo.gameObject.SetActive(logo.sprite != null && currentSurvey.settings.showLogo);
 
 
-            adType = AdType.Survey;
+            //adType = AdPlacement.Survey;
 
-            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
 
-            MonetizrManager.Analytics.TrackEvent("Survey started", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Survey started", currentMission);
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
 
@@ -208,7 +212,7 @@ namespace Monetizr.Campaigns
 
             float width = 0;
             int id = 0;
-            bool isFirstQuestionEmpty = false;
+            //bool isFirstQuestionEmpty = false;
 
             currentSurvey.questions.ForEach(q =>
             {
@@ -233,7 +237,7 @@ namespace Monetizr.Campaigns
                 {
                     q.questionRoot.question.verticalOverflow = VerticalWrapMode.Overflow;
                     //q.questionRoot.question.alignment = TextAnchor.UpperLeft;
-                    isFirstQuestionEmpty = true;
+                    //isFirstQuestionEmpty = true;
                 }
 
                 int answerNum = 0;
@@ -483,9 +487,9 @@ namespace Monetizr.Campaigns
 
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
             //MonetizrManager.ShowRewardCenter(null);
-            MonetizrManager.Analytics.TrackEvent("Survey skipped", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Survey skipped", currentMission);
 
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Survey), MonetizrManager.EventType.ButtonPressSkip);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.Survey), MonetizrManager.EventType.ButtonPressSkip);
 
             isSkipped = true;
 
@@ -519,9 +523,9 @@ namespace Monetizr.Campaigns
 
             SubmitResponses();
 
-            MonetizrManager.Analytics.TrackEvent("Survey completed", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Survey completed", currentMission);
 
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
             //MonetizrManager.ShowCongratsNotification(null, m);
         }
 
@@ -544,7 +548,7 @@ namespace Monetizr.Campaigns
                     p.Add("answer_response", a.response);
                     p.Add("answer_text", a.text);
                     p.Add("question_text", q.text);
-                    MonetizrManager.Analytics.TrackEvent("Survey answer", campaign, false, p);
+                    MonetizrManager.Analytics._TrackEvent("Survey answer", campaign, false, p);
 
                     Log.Print($"-------Survey answer {a.response} {currentSurvey.settings.id}");
 
@@ -556,7 +560,7 @@ namespace Monetizr.Campaigns
         internal override void FinalizePanel(PanelId id)
         {
             
-            MonetizrManager.Analytics.EndShowAdAsset(adType);
+            //MonetizrManager.Analytics.EndShowAdAsset(adType);
         }
     }
 
