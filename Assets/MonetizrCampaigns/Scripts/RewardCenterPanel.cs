@@ -421,7 +421,7 @@ namespace Monetizr.Campaigns
 
             Log.Print(m.missionTitle);
 
-            item.UpdateWithDescription(this, m);
+            item.UpdateWithDescription(this, m, missionId);
 
         }
 

@@ -510,7 +510,7 @@ namespace Monetizr.Campaigns
                         {
                             //MonetizrManager.Analytics.TrackEvent("Email enter skipped", m);
 
-                            MonetizrManager.Analytics.TrackEvent(m, AdPlacement.EmailEnterCouponRewardScreen, MonetizrManager.EventType.ButtonPressSkip);
+                            MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressSkip);
 
                             onComplete?.Invoke(isMailSkipped);
                             return;

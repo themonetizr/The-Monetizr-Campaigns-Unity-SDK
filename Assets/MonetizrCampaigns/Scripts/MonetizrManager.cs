@@ -855,7 +855,7 @@ namespace Monetizr.Campaigns
 
                 //MonetizrManager.Analytics.TrackEvent("Enter email succeeded", m);
 
-                //MonetizrManager.Analytics.TrackEvent(m, AdPlacement.EmailEnterCouponRewardScreen, MonetizrManager.EventType.ActionSuccess);
+                MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressOk);
 
                 ShowCongratsNotification((bool _) =>
                 {
@@ -886,7 +886,9 @@ namespace Monetizr.Campaigns
 
                 //MonetizrManager.Analytics.TrackEvent("Email enter failed", m);
 
-                MonetizrManager.Analytics.TrackEvent(m, AdPlacement.EmailEnterCouponRewardScreen, MonetizrManager.EventType.Error);
+                //MonetizrManager.Analytics.TrackEvent(m, AdPlacement.EmailEnterInGameRewardScreen, MonetizrManager.EventType.Error);
+
+                MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.Error);
 
 
                 ShowMessage((bool _) =>
@@ -1765,7 +1767,7 @@ namespace Monetizr.Campaigns
             {
                 _challengesClient.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
 
-                _challengesClient.analytics.TrackEvent(campaigns[0], AdPlacement.AssetsLoading, EventType.Impression);
+                _challengesClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Impression);
 
 
                 //_challengesClient.analytics.TrackEvent("Get List Started", campaigns[0]);
@@ -1821,7 +1823,7 @@ namespace Monetizr.Campaigns
             {
                 //_challengesClient.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
 
-                _challengesClient.analytics.TrackEvent(campaigns[0], AdPlacement.AssetsLoading, EventType.ImpressionEnds);
+                _challengesClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
             }
             else
             {
@@ -1829,7 +1831,7 @@ namespace Monetizr.Campaigns
                 {
                     //_challengesClient.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
 
-                    _challengesClient.analytics.TrackEvent(campaigns[0], AdPlacement.AssetsLoading, EventType.Error);
+                    _challengesClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Error);
                 }
             }
 

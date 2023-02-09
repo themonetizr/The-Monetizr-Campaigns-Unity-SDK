@@ -141,7 +141,7 @@ public class Tests
         //    yield return null;
         //Assert.IsNotNull(o);
 
-        Assert.AreEqual(eventsAmount["TinyTeaser"], 2);
+        Assert.AreEqual(eventsAmount["TinyTeaser"], 4);
         Assert.AreEqual(eventsAmount["RewardsCenterScreen"], 2);
 
         //------
@@ -214,11 +214,11 @@ public class Tests
     {        
         var buttonObject = FindObjectByName(name);
 
-        Assert.IsNotNull(buttonObject);
+        Assert.IsNotNull(buttonObject, $"Game object {name} is null!");
 
         Button b = buttonObject.GetComponent<Button>();
 
-        Assert.IsNotNull(b);
+        Assert.IsNotNull(b,$"Button {name} is null!");
 
         b.onClick.Invoke();
 

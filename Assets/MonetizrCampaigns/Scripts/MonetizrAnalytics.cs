@@ -258,23 +258,33 @@ namespace Monetizr.Campaigns
         Unknown,
     }
 
-    internal class VisibleAdAsset
+    /*internal class VisibleAdAsset
     {
         internal AdPlacement adPlacement;
         internal ServerCampaign campaign;
         internal DateTime activateTime;
 
-    }
+    }*/
 
     internal class AdElement
     {
         internal AdPlacement placement;
         internal ServerCampaign campaign;
+        internal DateTime activateTime;
+        internal string eventName;
 
-        public AdElement(AdPlacement placement, ServerCampaign campaign)
+        /*public AdElement(AdPlacement placement, ServerCampaign campaign)
         {
             this.placement = placement;
             this.campaign = campaign;
+        }*/
+
+        public AdElement(string eventName, AdPlacement placement, ServerCampaign campaign)
+        {
+            this.eventName = eventName;
+            this.placement = placement;
+            this.campaign = campaign;
+            this.activateTime = DateTime.Now;
         }
     }
 
@@ -314,7 +324,8 @@ namespace Monetizr.Campaigns
                     return "NotificationScreen";
                 case AdPlacement.EmailEnterInGameRewardScreen:
                 case AdPlacement.EmailEnterCouponRewardScreen:
-                case AdPlacement.EmailEnterSelectionRewardScreen: return "EmailEnterScreen";
+                case AdPlacement.EmailEnterSelectionRewardScreen:
+                    return "EmailEnterScreen";
                 case AdPlacement.CongratsNotificationScreen:
                 case AdPlacement.EmailCongratsNotificationScreen: return "CongratsScreen";
                 case AdPlacement.Minigame: return "MiniGameScreen";
@@ -488,7 +499,7 @@ namespace Monetizr.Campaigns
             BeginShowAdAsset(type, m.campaignId);
         }*/
 
-        private void BeginShowAdAsset(AdPlacement placement, ServerCampaign campaign)
+        private void BeginShowAdAsset(string eventName, AdPlacement placement, ServerCampaign campaign)
         {
             if (campaign == null)
             {
@@ -499,7 +510,7 @@ namespace Monetizr.Campaigns
            //Log.Print($"MonetizrAnalytics BeginShowAdAsset: {placement} {campaign.id}");
 
             //Key value pair for duplicated types with different challenge ids
-            AdElement adElement = new AdElement(placement, campaign);
+            AdElement adElement = new AdElement(eventName, placement, campaign);
 
             if (visibleAdAsset.Contains(adElement))
             {
@@ -521,7 +532,7 @@ namespace Monetizr.Campaigns
 
             visibleAdAsset.Add(adElement);
 
-            StartTimedEvent(placement.ToString());
+            StartTimedEvent(eventName);
 
             //Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {type.ToString()}");
         }
@@ -644,6 +655,8 @@ namespace Monetizr.Campaigns
         {
             props["dar_tag_sent"] = darTag.ToString();
 
+            Debug.Log($"--->Mixpanel track {eventName}");
+
             Mixpanel.Identify(camp.brand_id);
             Mixpanel.Track(eventName, props);
 
@@ -702,7 +715,7 @@ namespace Monetizr.Campaigns
 
             string placementName = adAsset.placement.ToString();
 
-            _TrackEvent(placementName, adAsset.campaign, true, new Dictionary<string, string>() { { "type", placementName } });
+            _TrackEvent(adAsset.eventName, adAsset.campaign, true, new Dictionary<string, string>() { { "type", placementName } });
 
             //if (removeElement)
             //    visibleAdAsset.Remove(adAsset);
@@ -767,17 +780,17 @@ namespace Monetizr.Campaigns
 
             var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
 
-            TrackEvent(campaign, adPlacement, eventType, additionalValues);
+            TrackEvent(campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
         internal void TrackEvent(Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
 
-            TrackEvent(campaign, adPlacement, eventType, additionalValues);
+            TrackEvent(campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
-        internal void TrackEvent(ServerCampaign currentCampaign, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
+        internal void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             Debug.Log($"------Track event: {currentCampaign} {adPlacement} {eventType}");
 
@@ -840,30 +853,38 @@ namespace Monetizr.Campaigns
                 { MonetizrManager.EventType.Error, "failed" }
             };
 
-            TrackNewEvents(currentCampaign, adPlacement, placementName, eventType, additionalValues);
+            TrackNewEvents(currentCampaign, currentMission, adPlacement, placementName, eventType, additionalValues);
 
+            
             if (eventType == MonetizrManager.EventType.Impression)
             {
                 NielsenDar.Track(currentCampaign, adPlacement);
 
-                MonetizrManager.Analytics.BeginShowAdAsset(adPlacement, currentCampaign);
+                MonetizrManager.Analytics.BeginShowAdAsset($"{adPlacement}", adPlacement, currentCampaign);
             }
-
+            
             //No regular track event if we track end of impression
-            if(eventType == MonetizrManager.EventType.ImpressionEnds)
+            if (eventType == MonetizrManager.EventType.ImpressionEnds)
             {
                 MonetizrManager.Analytics.EndShowAdAsset(adPlacement, currentCampaign);
                 return;
             }
 
+            string eventName = $"{eventNames[adPlacement]} {eventTypes[eventType]}";
+
             //var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
 
-            _TrackEvent($"{eventNames[adPlacement]} {eventTypes[eventType]}", currentCampaign, false, additionalValues);
+            _TrackEvent(eventName, currentCampaign, false, additionalValues);
 
             
         }
 
+
+        HashSet<AdElement> adNewElements = new HashSet<AdElement>();
+
+
         internal void TrackNewEvents(ServerCampaign campaign,
+            Mission currentMission,
             AdPlacement adPlacement,
             string placementName,
             MonetizrManager.EventType eventType,
@@ -877,6 +898,25 @@ namespace Monetizr.Campaigns
 
             var eventName = "";
             bool timed = false;
+
+            switch(adPlacement)
+            {
+                case AdPlacement.EmailEnterCouponRewardScreen:
+                    additionalValues.Add("reward_type", "product");
+                    break;
+
+                case AdPlacement.EmailEnterInGameRewardScreen:
+                    additionalValues.Add("reward_type", "ingame");
+                    break;
+
+                case AdPlacement.EmailEnterSelectionRewardScreen:
+                    additionalValues.Add("reward_type", MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame ? "ingame" : "product");
+                    break;
+
+                default: break;
+            }
+
+            double duration = 0.0;
 
             switch(eventType)
             {
@@ -893,11 +933,28 @@ namespace Monetizr.Campaigns
 
                 case MonetizrManager.EventType.Impression:
                     eventName = "ImpressionStarts";
+                    //Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {ImpressionEnds}");
+                    adNewElements.Add(new AdElement("ImpressionEnds", adPlacement, campaign));
+
                     break;
 
                 case MonetizrManager.EventType.ImpressionEnds:
                     timed = true;
                     eventName = "ImpressionEnds";
+
+                    adNewElements.RemoveWhere((AdElement a) => {
+                       if(adPlacement == a.placement && campaign == a.campaign)
+                       {
+                            //additionalValues.Add("$duration", (DateTime.Now - a.activateTime).TotalSeconds.ToString());
+
+                            duration = (DateTime.Now - a.activateTime).TotalSeconds;
+
+                            return true;
+                       }
+
+                        return false;
+                    });
+
                     break;
 
                 case MonetizrManager.EventType.Error:
@@ -906,7 +963,7 @@ namespace Monetizr.Campaigns
 
             };
 
-            _TrackEvent(eventName, campaign, timed, additionalValues);
+            _TrackEvent(eventName, campaign, timed, additionalValues, duration);
         }
 
         internal string GetPlacementGroup(AdPlacement adPlacement)
@@ -928,37 +985,38 @@ namespace Monetizr.Campaigns
                     case AdPlacement.Video:
                     case AdPlacement.Html5:
                     case AdPlacement.Survey:
-                        return "EngagementScreen";
+                        return "EngagementScreens";
                     
                     case AdPlacement.EmailEnterInGameRewardScreen:
                     case AdPlacement.EmailEnterCouponRewardScreen:
                     case AdPlacement.EmailEnterSelectionRewardScreen:
-                        return "ActionScreen";
+                        return "ActionScreens";
                    
                     
                     //case AdPlacement.HtmlPage: return "";
                     
                     default:
-                        return "";
+                        return "Other";
 
                 }
             
         }
 
-        internal void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string,string> additionalValues = null)
+        internal void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string,string> additionalValues = null, double duration = -1.0)
         {
             Debug.Assert(isMixpanelInitialized);
 
-            string logString = $"--->TrackEvent: {name} {campaign.id}";
+            string logString = $"--->SendEvent: name:{name} id:{campaign.id}";
 
             if(additionalValues != null)
             {
                 if (additionalValues.ContainsKey("placement")) logString += " placement:" + additionalValues["placement"];
                 if (additionalValues.ContainsKey("placement_group")) logString += " group:" + additionalValues["placement_group"];
                 if (additionalValues.ContainsKey("action")) logString += " action:" + additionalValues["action"];
+                if (additionalValues.ContainsKey("$duration")) logString += " duration:" + additionalValues["$duration"];
             }
 
-            Log.Print(logString);
+            Log.PrintWarning(logString);
 
             var eventName = $"[UNITY_SDK] {name}";
 
@@ -990,6 +1048,11 @@ namespace Monetizr.Campaigns
             {
                 foreach (var s in additionalValues)
                     props[$"{s.Key}"] = s.Value;
+            }
+
+            if(duration > 0.0)
+            {
+                props["$duration"] = duration;
             }
 
 

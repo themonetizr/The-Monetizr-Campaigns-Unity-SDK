@@ -61,6 +61,7 @@ namespace Monetizr.Campaigns
             this.onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
+            this.triggersButtonEventsOnDeactivate = false;
 
             closeButton.onClick.AddListener(OnButtonPress);
             noThanksButton?.onClick.AddListener(OnNoThanksPress);
@@ -195,6 +196,7 @@ namespace Monetizr.Campaigns
                 adType = AdPlacement.EmailEnterSelectionRewardScreen;
             }
 
+            m.adPlacement = adType;
 
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 

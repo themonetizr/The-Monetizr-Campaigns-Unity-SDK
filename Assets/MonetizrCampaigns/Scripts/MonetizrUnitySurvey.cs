@@ -193,8 +193,8 @@ namespace Monetizr.Campaigns
 
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
 
-            Log.PrintWarning($"{m.surveyId}");
-            Log.PrintWarning($"{surveysContent}");
+            Log.Print($"{m.surveyId}");
+            //Log.PrintWarning($"{surveysContent}");
 
             surveys = JsonUtility.FromJson<Surveys>(surveysContent);
 
@@ -205,7 +205,7 @@ namespace Monetizr.Campaigns
 
             if (currentSurvey == null)
             {
-                Log.PrintWarning($"{m.surveyId} not found in surveys!");
+                Log.Print($"{m.surveyId} not found in surveys!");
                 _OnSkipButton();
                 return false;
             }

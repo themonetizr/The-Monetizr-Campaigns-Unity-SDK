@@ -353,6 +353,8 @@ namespace Monetizr.Campaigns
         [SerializeField] internal int autoStartAfter;
         [SerializeField] internal bool alwaysHiddenInRC;
         [SerializeField] internal bool hasUnitySurvey;
+
+        [NonSerialized] internal AdPlacement adPlacement;
     }
 
     /*internal class  SurveyMission : Mission
