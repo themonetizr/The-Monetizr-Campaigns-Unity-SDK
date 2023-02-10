@@ -737,41 +737,6 @@ MonoBehaviour:
   selection1Icon: {fileID: 1400274685770372009}
   selection2Icon: {fileID: 1967890598260252041}
   crossButtonAnimator: {fileID: 7432772928640070619}
-  currentMission:
-    apiKey: 
-    type: 0
-    startMoney: 0
-    isSponsored: 0
-    brandName: 
-    reward: 0
-    rewardPercent: 0
-    campaignId: 
-    surveyUrl: 
-    surveyId: 
-    claimedTime: 
-    deactivateTime:
-      _dateTime: 01/01/0001 00:00:00
-    activateTime:
-      _dateTime: 01/01/0001 00:00:00
-    delaySurveyTimeSec: 0
-    surveyAlreadyShown: 0
-    brandId: 
-    appId: 
-    rewardType: 0
-    brandBannerUrl: 
-    brandLogoUrl: 
-    brandRewardBannerUrl: 
-    id: 0
-    serverId: 0
-    isClaimed: 0
-    isDisabled: 0
-    hasVideo: 0
-    sdkVersion: 
-    activateAfter: 
-    isRewardIngame: 0
-    autoStartAfter: 0
-    alwaysHiddenInRC: 0
-    hasUnitySurvey: 0
   termsToggle: {fileID: 954670172643029268}
 --- !u!114 &8112458042353325120
 MonoBehaviour:
@@ -1471,7 +1436,7 @@ GameObject:
   - component: {fileID: 2054473298092138798}
   - component: {fileID: 7432772928640070619}
   m_Layer: 5
-  m_Name: CancelButton
+  m_Name: PanelCloseButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2225,7 +2190,7 @@ GameObject:
   - component: {fileID: 5274565836672719344}
   - component: {fileID: 7313334112698454066}
   m_Layer: 5
-  m_Name: InputField
+  m_Name: PanelInputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2722,7 +2687,7 @@ GameObject:
   - component: {fileID: 5344945013802130261}
   - component: {fileID: 4344017537882115212}
   m_Layer: 5
-  m_Name: CloseButton
+  m_Name: PanelOkButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3063,18 +3028,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2a1ab8e75c743444f973f8bb1d334ecc, type: 3}
---- !u!114 &1400274685770372009 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3491988621576631481, guid: 2a1ab8e75c743444f973f8bb1d334ecc,
-    type: 3}
-  m_PrefabInstance: {fileID: 2528999124776740624}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1115410880748239111 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3198245160497307159, guid: 2a1ab8e75c743444f973f8bb1d334ecc,
@@ -3093,6 +3046,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 2528999124776740624}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1400274685770372009 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3491988621576631481, guid: 2a1ab8e75c743444f973f8bb1d334ecc,
+    type: 3}
+  m_PrefabInstance: {fileID: 2528999124776740624}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3114612103443769648
 PrefabInstance:
   m_ObjectHideFlags: 0
