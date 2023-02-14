@@ -355,6 +355,8 @@ namespace Monetizr.Campaigns
         [SerializeField] internal bool hasUnitySurvey;
 
         [NonSerialized] internal AdPlacement adPlacement;
+
+        [NonSerialized] internal ServerCampaign campaign;
     }
 
     /*internal class  SurveyMission : Mission

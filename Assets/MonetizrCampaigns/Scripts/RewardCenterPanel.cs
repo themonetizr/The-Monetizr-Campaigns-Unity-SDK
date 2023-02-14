@@ -27,7 +27,7 @@ namespace Monetizr.Campaigns
         private List<MonetizrRewardedItem> missionItems = new List<MonetizrRewardedItem>();
 
         private int amountOfItems = 0;
-        private readonly int bannerHeight = 1050+100;
+        private float bannerHeight = 1150;
 
         private bool showNotClaimedDisabled = false;
 
@@ -159,19 +159,35 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            var campId = missions[0].campaignId;
+            var camp = missions[0].campaign;
 
             //mainBanner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 
             amountOfItems = 0;
 
+            bool hasBanner = camp.HasAsset(AssetsType.BrandBannerSprite);
+                       
+            if (hasBanner)
+            {
+                var go = GameObject.Instantiate<GameObject>(banner, contentRoot);
 
-            var go = GameObject.Instantiate<GameObject>(banner, contentRoot);
+                var images = go.GetComponentsInChildren<Image>();
 
-            var images = go.GetComponentsInChildren<Image>();
+                images[0].sprite = camp.GetAsset<Sprite>(AssetsType.BrandBannerSprite);
 
-            images[0].sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
-            images[1].sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandRewardLogoSprite);
+                bool hasLogo = camp.HasAsset(AssetsType.BrandRewardLogoSprite);
+
+                images[1].gameObject.SetActive(hasLogo);
+
+                if (hasLogo)
+                    images[1].sprite = camp.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
+
+                bannerHeight = 1150;
+            }
+            else
+            {
+                bannerHeight = 120;
+            }
 
             //go.GetComponent<Image>().sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 

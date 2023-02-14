@@ -851,6 +851,7 @@ namespace Monetizr.Campaigns
             for (int c = 0; c < campaigns.Count; c++)
             {
                 string ch = campaigns[c];
+                ServerCampaign serverCampaign = MonetizrManager.Instance.GetCampaign(ch);
 
                 if (c >= MonetizrManager.maximumCampaignAmount)
                 {
@@ -928,6 +929,7 @@ namespace Monetizr.Campaigns
 
                     m.brandName = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.BrandTitleString);
 
+                    m.campaign = serverCampaign;
                     //InitializeNonSerializedFields(m);
                 }
 
