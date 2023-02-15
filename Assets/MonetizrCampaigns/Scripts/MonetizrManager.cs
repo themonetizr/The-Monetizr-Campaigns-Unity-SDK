@@ -513,6 +513,15 @@ namespace Monetizr.Campaigns
             return null;
         }
 
+        public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
+        {
+            MonetizrAnalytics.isAdvertisingIDDefined = true;
+
+            MonetizrAnalytics.advertisingID = advertisingID;        
+            MonetizrAnalytics.limitAdvertising = limitAdvertising;
+
+            Log.Print($"MonetizrManager SetAdvertisingIds: { MonetizrAnalytics.advertisingID} {MonetizrAnalytics.limitAdvertising}");
+        }
 
         public static MonetizrManager Initialize(string apiKey,
             List<MissionDescription> sponsoredMissions = null,
@@ -562,6 +571,12 @@ namespace Monetizr.Campaigns
             }
 
             Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {SDKVersion}");
+
+            if(!MonetizrAnalytics.isAdvertisingIDDefined)
+            {
+                Log.PrintError($"MonetizrManager Initialize: Advertising ID is not defined");
+                return null;
+            }
 
             if(bundleId == null)
                 bundleId = Application.identifier;
@@ -1962,6 +1977,7 @@ namespace Monetizr.Campaigns
             }
         }
 
+       
     }
 
 }

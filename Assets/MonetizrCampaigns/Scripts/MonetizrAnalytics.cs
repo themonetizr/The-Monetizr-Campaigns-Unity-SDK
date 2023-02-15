@@ -312,6 +312,9 @@ namespace Monetizr.Campaigns
         internal static DeviceSizeGroup deviceSizeGroup = DeviceSizeGroup.Unknown;
         public static bool isMixpanelInitialized = false;
 
+        HashSet<AdElement> adNewElements = new HashSet<AdElement>();
+        internal static bool isAdvertisingIDDefined = false;
+
         internal static string GetPlacementName(AdPlacement t)
         {
             switch (t)
@@ -428,26 +431,36 @@ namespace Monetizr.Campaigns
             osVersion = "0.0";
 
 #if !UNITY_EDITOR
-#if UNITY_ANDROID
-               AndroidJavaClass versionInfo = new AndroidJavaClass("android/os/Build$VERSION");
+    #if UNITY_ANDROID
+                   AndroidJavaClass versionInfo = new AndroidJavaClass("android/os/Build$VERSION");
 
-               osVersion = versionInfo.GetStatic<string>("RELEASE");
-
-               AndroidJavaClass up = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
-               AndroidJavaObject currentActivity = up.GetStatic<AndroidJavaObject> ("currentActivity");
-               AndroidJavaClass client = new AndroidJavaClass ("com.google.android.gms.ads.identifier.AdvertisingIdClient");
-               AndroidJavaObject adInfo = client.CallStatic<AndroidJavaObject> ("getAdvertisingIdInfo",currentActivity);
-
-               advertisingID = adInfo.Call<string> ("getId").ToString();   
-               limitAdvertising = (adInfo.Call<bool> ("isLimitAdTrackingEnabled"));
-
-#elif UNITY_IOS
-               osVersion = UnityEngine.iOS.Device.systemVersion;
-               limitAdvertising = !(ATTrackingStatusBinding.GetAuthorizationTrackingStatus() == ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED);
-               advertisingID = Device.advertisingIdentifier;
-
+                   osVersion = versionInfo.GetStatic<string>("RELEASE");
+    #elif UNITY_IOS
+                   osVersion = UnityEngine.iOS.Device.systemVersion;
+    #endif
 #endif
-#endif
+
+            /*#if !UNITY_EDITOR
+            #if UNITY_ANDROID
+                           AndroidJavaClass versionInfo = new AndroidJavaClass("android/os/Build$VERSION");
+
+                           osVersion = versionInfo.GetStatic<string>("RELEASE");
+
+                           AndroidJavaClass up = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
+                           AndroidJavaObject currentActivity = up.GetStatic<AndroidJavaObject> ("currentActivity");
+                           AndroidJavaClass client = new AndroidJavaClass ("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+                           AndroidJavaObject adInfo = client.CallStatic<AndroidJavaObject> ("getAdvertisingIdInfo",currentActivity);
+
+                           advertisingID = adInfo.Call<string> ("getId").ToString();   
+                           limitAdvertising = (adInfo.Call<bool> ("isLimitAdTrackingEnabled"));
+
+            #elif UNITY_IOS
+                           osVersion = UnityEngine.iOS.Device.systemVersion;
+                           limitAdvertising = !(ATTrackingStatusBinding.GetAuthorizationTrackingStatus() == ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED);
+                           advertisingID = Device.advertisingIdentifier;
+
+            #endif
+            #endif*/
             deviceSizeGroup = GetDeviceGroup();
 
             Log.Print($"OS Version {osVersion} Ad id: {advertisingID} Limit ads: {limitAdvertising} Device group: {deviceSizeGroup}");
@@ -878,9 +891,6 @@ namespace Monetizr.Campaigns
 
             
         }
-
-
-        HashSet<AdElement> adNewElements = new HashSet<AdElement>();
 
 
         internal void TrackNewEvents(ServerCampaign campaign,
