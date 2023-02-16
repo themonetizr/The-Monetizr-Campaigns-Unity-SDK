@@ -90,7 +90,7 @@ namespace Monetizr.Campaigns
 
         public void ShowPanelFromPrefab(String prefab, PanelId id = PanelId.Unknown, Action<bool> onComplete = null, bool rememberPrevious = false, Mission m = null)
         {
-            //Debug.LogWarning($"ShowPanel: {id} Mission: {m==null}");
+            //Log.PrintWarning($"ShowPanel: {id} Mission: {m==null}");
 
             //if (panels.ContainsKey(previousPanel) && previousPanel != PanelId.Unknown)
             //    panels[previousPanel].SetActive(false);
@@ -133,7 +133,7 @@ namespace Monetizr.Campaigns
 
                     uiVersion = m.additionalParams.GetIntParam("design_version");
 
-                    //Debug.Log($"-------------{uiVersion}");
+                    //Log.Print($"-------------{uiVersion}");
                     */
                    /* if (id != PanelId.DebugPanel)
                     {
@@ -168,7 +168,7 @@ namespace Monetizr.Campaigns
                 panels.Add(id, ctrlPanel);
             }
 
-            
+            ctrlPanel.transform.SetAsLastSibling();
 
             ctrlPanel.SetActive(true);
 
@@ -194,7 +194,7 @@ namespace Monetizr.Campaigns
             Dictionary<string,string> additionalParams,
             PanelId id)
         {
-            //Debug.Log($"--------{id.ToString()}");
+            //Log.Print($"--------{id.ToString()}");
 
             SetColorForElement(background, additionalParams, "bg_color");
             SetColorForElement(border, additionalParams, "bg_border_color");
@@ -237,7 +237,7 @@ namespace Monetizr.Campaigns
 
                                
                 var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject,
-                    root ?? mainCanvas.transform);
+                    root != null ? root : mainCanvas.transform);
 
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
 
@@ -270,6 +270,10 @@ namespace Monetizr.Campaigns
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
 
             MonetizrManager.Analytics.TrackEvent(m, teaser, MonetizrManager.EventType.Impression);
+
+            //if teaser attached is not attached to user defined root
+            if(root == null)
+                teaser.rectTransform.SetAsFirstSibling();
 
             if (screenPos != null)
             {
