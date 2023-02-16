@@ -68,7 +68,7 @@ namespace Monetizr.Campaigns
 
                 foreach (KeyValuePair<string, object> kvp in dict)
                 {
-                    //Debug.Log($"-----{kvp.Key} {(string)kvp.Value}");
+                    //Log.Print($"-----{kvp.Key} {(string)kvp.Value}");
 
                     res.Add(kvp.Key, (string)kvp.Value);
                 }
@@ -99,12 +99,12 @@ namespace Monetizr.Campaigns
 
                     string result = value.Substring(startId + 1, endId - startId - 1);
 
-                    //Debug.Log($"-----{startId} {endId} {result}");
+                    //Log.Print($"-----{startId} {endId} {result}");
 
                     if (res.ContainsKey(result))
                     {
                         value = value.Replace($"%{result}%", res[result]);
-                        //Debug.Log($"-----replace {result} {res[result]}");
+                        //Log.Print($"-----replace {result} {res[result]}");
                     }
 
                 }

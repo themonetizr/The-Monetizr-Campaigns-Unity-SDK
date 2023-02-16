@@ -90,7 +90,7 @@ namespace Monetizr.Campaigns
                         
             string uri = $"https://e-11272.adzerk.net/api/v2";
 
-            Debug.Log($"Requesting VAST campaign with url {uri}");
+            Log.Print($"Requesting VAST campaign with url {uri}");
 
             XmlDocument xmlDoc = new XmlDocument(); // Create an XML document object
                        
@@ -115,13 +115,13 @@ namespace Monetizr.Campaigns
 
             var data = JsonUtility.FromJson<JsonData>(res);
 
-            Debug.Log($"html: {data.decisions.div1.contents[0].body}");
+            Log.Print($"html: {data.decisions.div1.contents[0].body}");
 
             VAST vastData = CreateVastFromXml(data.decisions.div1.contents[0].body);
 
             if(vastData == null)
             {
-                Debug.Log("Vast is not okay!");
+                Log.Print("Vast is not okay!");
                 return;
             }
 

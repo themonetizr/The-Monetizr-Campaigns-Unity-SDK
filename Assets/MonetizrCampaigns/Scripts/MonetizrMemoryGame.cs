@@ -210,7 +210,7 @@ namespace Monetizr.Campaigns
             if (disabledClick || gameItems[item].isOpened)
                 stats.amountOfTapsOnDisabledCells++;
 
-            Debug.Log(stats.ToString());
+            Log.Print(stats.ToString());
 
             if (disabledClick)
                 return;
@@ -218,7 +218,7 @@ namespace Monetizr.Campaigns
             if (gameItems[item].isOpened)
                 return;
 
-            Debug.Log("click" + item);
+            Log.Print("click" + item);
 
             if (gameItems[item].value != 0)
                 stats.amountOfTapsOnKnownCells++;
@@ -261,7 +261,7 @@ namespace Monetizr.Campaigns
             gameItems[item].isFullyOpened = true;
 
 
-            Debug.Log($"OnOpenDone {item} {gameItems[item].value}");
+            Log.Print($"OnOpenDone {item} {gameItems[item].value}");
 
             if (amountOpened < 2)
                 return;
@@ -354,7 +354,7 @@ namespace Monetizr.Campaigns
 
 
 
-            Debug.Log("OnCloseDone" + item);
+            Log.Print("OnCloseDone" + item);
         }
 
 

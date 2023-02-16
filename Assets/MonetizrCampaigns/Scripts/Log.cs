@@ -7,31 +7,31 @@ using UnityEngine;
 
 namespace Monetizr.Campaigns
 {
-    internal static class Log
+    public static class Log
     {
-        internal static void Print(object message)
+        public static void Print(object message)
         {
-#if MONETIZR_VERBOSE
-            Debug.Log(message);
+#if UNITY_EDITOR
+            Debug.Log($"Monetizr SDK: {message}");
+#else
+            Console.WriteLine($"Monetizr SDK: {message}");
 #endif
         }
 
-        internal static void PrintToConsole(object message)
+        public static void PrintToConsole(object message)
         {
-#if MONETIZR_VERBOSE
             Console.WriteLine(message);
-#endif
         }
 
 
-        internal static void PrintError(object message)
+        public static void PrintError(object message)
         {
-            Debug.LogError(message);
+            Debug.LogError($"Monetizr SDK: {message}");
         }
 
-        internal static void PrintWarning(object message)
+        public static void PrintWarning(object message)
         {
-            Debug.LogWarning(message);
+            Debug.LogWarning($"Monetizr SDK: {message}");
         }
     }
 }

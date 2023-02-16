@@ -76,7 +76,7 @@ namespace Monetizr.Campaigns
                 webView.Frame = new Rect(x, y, w, h);
 #endif
 
-            Debug.Log($"frame: {fullScreen} {webView.Frame}");
+            Log.Print($"frame: {fullScreen} {webView.Frame}");
 
             webView.OnMessageReceived += OnMessageReceived;
             webView.OnPageStarted += OnPageStarted;
@@ -94,7 +94,7 @@ namespace Monetizr.Campaigns
 
             //TrackEvent("Survey started");
 
-            Debug.Log($"currentMissionDesc: {currentMission == null}");
+            Log.Print($"currentMissionDesc: {currentMission == null}");
             //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
             // eventsPrefix = "Survey";
 
@@ -110,7 +110,7 @@ namespace Monetizr.Campaigns
 
             closeButton.gameObject.SetActive(true);
 
-            //Debug.Log($"currentMissionDesc: {currentMissionDesc == null}");
+            //Log.Print($"currentMissionDesc: {currentMissionDesc == null}");
             webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
                                  // eventsPrefix = "Survey";
 
@@ -173,7 +173,7 @@ namespace Monetizr.Campaigns
             //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
             // Load a URL.
-            Debug.Log($"Url to show {webUrl}");
+            Log.Print($"Url to show {webUrl}");
             webView.Show();
 
             if (isAnalyticsNeeded)
@@ -188,7 +188,7 @@ namespace Monetizr.Campaigns
 #if UNI_WEB_VIEW
         void OnMessageReceived(UniWebView webView, UniWebViewMessage message)
         {
-            Debug.Log($"OnMessageReceived: {message.RawMessage} {message.Args.ToString()}");
+            Log.Print($"OnMessageReceived: {message.RawMessage} {message.Args.ToString()}");
 
             if(message.RawMessage.Contains("close"))
             {
@@ -207,12 +207,12 @@ namespace Monetizr.Campaigns
 
         void OnPageStarted(UniWebView webView, string url)
         {
-            Debug.Log($"OnPageStarted: { url} ");
+            Log.Print($"OnPageStarted: { url} ");
         }
 
         void OnPageFinished(UniWebView webView, int statusCode, string url)
         {
-            Debug.Log($"OnPageFinished: {url} code: {statusCode}");
+            Log.Print($"OnPageFinished: {url} code: {statusCode}");
 
             webView.AddUrlScheme("mntzr");
 
@@ -230,7 +230,7 @@ namespace Monetizr.Campaigns
 
         void OnPageErrorReceived(UniWebView webView, int errorCode, string url)
         {
-            Debug.Log($"OnPageErrorReceived: {url} code: {errorCode}");
+            Log.Print($"OnPageErrorReceived: {url} code: {errorCode}");
 
             TrackErrorEvent($"{eventsPrefix} error", errorCode);
 
@@ -246,7 +246,7 @@ namespace Monetizr.Campaigns
                 if (!webUrl.Equals(currentUrl))
                 {
                     webUrl = currentUrl;
-                    Debug.Log("Update: " + webView.Url);
+                    Log.Print("Update: " + webView.Url);
 
 
                     /* if (webUrl.Contains("withdraw-consent") ||
@@ -284,7 +284,7 @@ namespace Monetizr.Campaigns
 
         private void ClosePanel()
         {
-            Debug.Log($"Closing webview isSkipped: {isSkipped}");
+            Log.Print($"Closing webview isSkipped: {isSkipped}");
             Destroy(webView);
             webView = null;
 

@@ -130,7 +130,7 @@ namespace Monetizr.Campaigns
 
             if (campaign == null)
             {
-                Debug.LogWarning("No active campaigns for RC!");
+                Log.PrintWarning("No active campaigns for RC!");
                 return;
             }
 
@@ -155,7 +155,7 @@ namespace Monetizr.Campaigns
 
             if(missions.Count == 0)
             {
-                Debug.LogWarning("No sponsored challenges for RC!");
+                Log.PrintWarning("No sponsored challenges for RC!");
                 return;
             }
 

@@ -503,7 +503,7 @@ namespace Monetizr.Campaigns
             Mixpanel.Init();
             Mixpanel.SetToken(apikey);
 
-            Debug.Log("Mixpanel init called");
+            Log.Print("Mixpanel init called");
         }
 
 
@@ -668,7 +668,7 @@ namespace Monetizr.Campaigns
         {
             props["dar_tag_sent"] = darTag.ToString();
 
-            Debug.Log($"--->Mixpanel track {eventName}");
+            Log.Print($"--->Mixpanel track {eventName}");
 
             Mixpanel.Identify(camp.brand_id);
             Mixpanel.Track(eventName, props);
@@ -685,7 +685,7 @@ namespace Monetizr.Campaigns
 
                 eventProps.Add(v.Key, value);
 
-                //Debug.Log($"params: {v.Key} {value}");
+                //Log.Print($"params: {v.Key} {value}");
             }
             
             amplitude.logEvent(eventName, eventProps);
@@ -805,7 +805,7 @@ namespace Monetizr.Campaigns
 
         internal void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
         {
-            Debug.Log($"------Track event: {currentCampaign} {adPlacement} {eventType}");
+            Log.Print($"------Track event: {currentCampaign} {adPlacement} {eventType}");
 
             Debug.Assert(currentCampaign != null);
             
@@ -1016,7 +1016,7 @@ namespace Monetizr.Campaigns
         {
             Debug.Assert(isMixpanelInitialized);
 
-            string logString = $"--->SendEvent: name:{name} id:{campaign.id}";
+            string logString = $"SendEvent: name:{name} id:{campaign.id}";
 
             if(additionalValues != null)
             {
@@ -1026,7 +1026,7 @@ namespace Monetizr.Campaigns
                 if (additionalValues.ContainsKey("$duration")) logString += " duration:" + additionalValues["$duration"];
             }
 
-            Log.PrintWarning(logString);
+            Log.Print(logString);
 
             var eventName = $"[UNITY_SDK] {name}";
 

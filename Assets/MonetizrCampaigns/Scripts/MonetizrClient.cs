@@ -42,13 +42,13 @@ namespace Monetizr.Campaigns
         private static async Task RequestEnd(UnityWebRequest request, CancellationToken token)
         {
             request.SendWebRequest();
-            Debug.Log($"Location request sent");
+            Log.Print($"Location request sent");
 
             while (!request.isDone)
             {
                 if (token.IsCancellationRequested)
                 {
-                    //Debug.Log("Task {0} cancelled");
+                    //Log.Print("Task {0} cancelled");
                     token.ThrowIfCancellationRequested();
                 }
                 await Task.Yield();
@@ -73,7 +73,7 @@ namespace Monetizr.Campaigns
                 }
                 catch (OperationCanceledException)
                 {
-                    Debug.Log("\nTasks cancelled: timed out.\n");
+                    Log.Print("\nTasks cancelled: timed out.\n");
                 }
                 finally
                 {
@@ -90,7 +90,7 @@ namespace Monetizr.Campaigns
                 }
 
                 if(ipApiData != null)
-                    Debug.Log($"Location: {ipApiData.country_code} {ipApiData.region_code}");
+                    Log.Print($"Location: {ipApiData.country_code} {ipApiData.region_code}");
             }
 
             return ipApiData;
@@ -238,7 +238,7 @@ namespace Monetizr.Campaigns
                 ch.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(ch.content));
 
                 //foreach(var v in ch.additional_params)
-                //    Debug.Log($"!!!! {v.Key}={v.Value}");
+                //    Log.Print($"!!!! {v.Key}={v.Value}");
 
                 Log.Print($"Loaded campaign: {ch.id}");
 
@@ -278,12 +278,12 @@ namespace Monetizr.Campaigns
                         
                         if (allowed_device_id.Length == 0)
                         {
-                            Debug.Log($"Campaign {e.id} has no allowed list");
+                            Log.Print($"Campaign {e.id} has no allowed list");
                             return false;
                         }
                         else
                         {
-                            Debug.Log($"Campaign {e.id} has allowed list: {allowed_device_id}");
+                            Log.Print($"Campaign {e.id} has allowed list: {allowed_device_id}");
 
                             bool isKeyFound = false;
 
@@ -296,12 +296,12 @@ namespace Monetizr.Campaigns
                         //if (!allowed_device_id.Contains(MonetizrAnalytics.advertisingID))
                         if (!isKeyFound)
                             {
-                                Debug.Log($"Device {MonetizrAnalytics.advertisingID} isn't allowed for campaign {e.id}");
+                                Log.Print($"Device {MonetizrAnalytics.advertisingID} isn't allowed for campaign {e.id}");
                                 return true;
                             }
                             else
                             {
-                                Debug.Log($"Device {MonetizrAnalytics.advertisingID} is OK for campaign {e.id}");
+                                Log.Print($"Device {MonetizrAnalytics.advertisingID} is OK for campaign {e.id}");
                                 return false;
                             }
 
@@ -312,7 +312,7 @@ namespace Monetizr.Campaigns
                 }
                 else
                 {
-                    Debug.Log($"No ad id defined to filter campaigns. Please allow ad tracking!");
+                    Log.Print($"No ad id defined to filter campaigns. Please allow ad tracking!");
                 }
 #endif
 
@@ -334,17 +334,17 @@ namespace Monetizr.Campaigns
 
                         if (result.Count > 0)
                         {
-                            Debug.Log($"{result.Count} campaigns passed location filter");
+                            Log.Print($"{result.Count} campaigns passed location filter");
                         }
                     }
                     else
                     {
-                        Debug.Log($"No location data");
+                        Log.Print($"No location data");
                     }
                 }
                 else
                 {
-                    Debug.Log($"Geo-filtering disabled");
+                    Log.Print($"Geo-filtering disabled");
                 }
             }
 
@@ -381,7 +381,7 @@ namespace Monetizr.Campaigns
 
             string s = await response.Content.ReadAsStringAsync();
 
-            Debug.Log($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+            Log.Print($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -427,13 +427,13 @@ namespace Monetizr.Campaigns
 
                 if(reward == null)
                 {
-                    Debug.Log($"Product reward doesn't found for campaign {ingame}");
+                    Log.Print($"Product reward doesn't found for campaign {ingame}");
 
                     onFailure?.Invoke();
                     return;
                 }
 
-                Debug.Log($"Reward {reward.id} found in_game_only {reward.in_game_only}");
+                Log.Print($"Reward {reward.id} found in_game_only {reward.in_game_only}");
 
                 content = $"{{\"email\":\"{MonetizrManager.temporaryEmail}\",\"reward_id\":\"{reward.id}\"}}";
 
@@ -443,13 +443,13 @@ namespace Monetizr.Campaigns
             requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
 
             
-            Debug.Log($"Request:\n[{requestMessage}] content:\n[{content}]");
+            Log.Print($"Request:\n[{requestMessage}] content:\n[{content}]");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage,ct);
 
             string s = await response.Content.ReadAsStringAsync();
 
-            Debug.Log($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+            Log.Print($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
             {

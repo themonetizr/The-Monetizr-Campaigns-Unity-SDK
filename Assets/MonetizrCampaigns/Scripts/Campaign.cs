@@ -205,7 +205,7 @@ namespace Monetizr.Campaigns
         {
             if (asset.url == null || asset.url.Length == 0)
             {
-                Debug.LogWarning($"Resource {texture} {sprite} has no url in path!");
+                Log.PrintWarning($"Resource {texture} {sprite} has no url in path!");
                 this.isLoaded = false;
                 return;
             }
@@ -220,7 +220,7 @@ namespace Monetizr.Campaigns
 
             asset.localFullPath = fpath;
 
-            //Debug.Log(fpath);
+            //Log.Print(fpath);
 
             byte[] data = null;
 
@@ -279,14 +279,14 @@ namespace Monetizr.Campaigns
             bool texStatus = tex != null;
             bool spriteStatus = s != null;
 
-            //Debug.Log($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
+            //Log.Print($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
         }
 
         internal async Task PreloadAssetToCache(ServerCampaign.Asset asset, /*AssetsType urlString,*/ AssetsType fileString, bool required = true)
         {
             if (asset.url == null || asset.url.Length == 0)
             {
-                Debug.LogWarning($"Malformed URL for {fileString} {this.id}");
+                Log.PrintWarning($"Malformed URL for {fileString} {this.id}");
                 return;
             }
 
@@ -373,7 +373,7 @@ namespace Monetizr.Campaigns
         {
             foreach (var asset in assets)
             {
-                Debug.Log($"Loading {asset.type}");
+                Log.Print($"Loading {asset.type}");
 
                 switch (asset.type)
                 {

@@ -132,7 +132,7 @@ namespace Monetizr.Campaigns
 
             if (!hasVideo)
             {
-                Debug.LogWarning($"campaign {campaign} has no video asset!");
+                Log.PrintWarning($"campaign {campaign} has no video asset!");
             }
 
             if (!hasHtml && !hasVideo)
@@ -351,12 +351,12 @@ namespace Monetizr.Campaigns
 
             if (nextMission != null && nextMission != m)
             {
-                Debug.Log($"======{nextMission.serverId}");
+                Log.Print($"======{nextMission.serverId}");
 
                 onComplete = (bool skipped) =>
                 {
 
-                    Debug.Log($"======{nextMission.serverId} {skipped}");
+                    Log.Print($"======{nextMission.serverId} {skipped}");
 
                     //launch previous on complete
                     if (!skipped)
@@ -448,7 +448,7 @@ namespace Monetizr.Campaigns
                 if (!m.hasUnitySurvey)
 #if UNITY_EDITOR_WIN
                 {
-                    Debug.Log($"Completing survey {m.surveyUrl} on windows");
+                    Log.Print($"Completing survey {m.surveyUrl} on windows");
                     onSurveyComplete.Invoke(false);
                 }
 #else
@@ -527,7 +527,7 @@ namespace Monetizr.Campaigns
             //show video, then claim rewards if it's completed
             return () =>
             {
-                //Debug.Log($"----- {needToPlayVideo}");
+                //Log.Print($"----- {needToPlayVideo}");
 
                 if (needToPlayVideo)
                 {
@@ -641,7 +641,7 @@ namespace Monetizr.Campaigns
 
                     //string surveyUrl = serverSettings.GetParam(_m.survey);
 
-                   // Debug.Log($"----------------- {_m.survey} : {_m.surveyUnity}");
+                   // Log.Print($"----------------- {_m.survey} : {_m.surveyUnity}");
 
                     m.Add(new MissionDescription
                     {
@@ -793,7 +793,7 @@ namespace Monetizr.Campaigns
             int serverDefinedMission = 0;
 
 
-            Debug.LogWarning($"AddMissionsToCampaigns count: {campaigns.Count}");
+            Log.PrintWarning($"AddMissionsToCampaigns count: {campaigns.Count}");
 
             if (campaigns.Count > 0)
             {
@@ -805,7 +805,7 @@ namespace Monetizr.Campaigns
 
                 string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).serverSettings.GetParam("custom_missions");
                                 
-                Debug.LogWarning($"Predefined missions from settings: {serverMissionsJson}");
+                Log.PrintWarning($"Predefined missions from settings: {serverMissionsJson}");
 
                 if (serverMissionsJson?.Length > 0)
                 {
@@ -820,7 +820,7 @@ namespace Monetizr.Campaigns
                     }
                     catch (Exception e)
                     {
-                        Debug.LogWarning($"Problem {e.ToString()} with json {serverMissionsJson}");
+                        Log.PrintWarning($"Problem {e.ToString()} with json {serverMissionsJson}");
                     }
 
                     if (ic != null)
@@ -833,7 +833,7 @@ namespace Monetizr.Campaigns
             //if (prefefinedSponsoredMissions.Count > 1)
             //    prefefinedSponsoredMissions = prefefinedSponsoredMissions.GetRange(serverDefinedMission, 1);
 
-            Debug.Log($"Predefined missions has {prefefinedSponsoredMissions.Count} values");
+            Log.Print($"Predefined missions has {prefefinedSponsoredMissions.Count} values");
 
             serializedMissions.Load();
 
@@ -879,7 +879,7 @@ namespace Monetizr.Campaigns
                         }
                         else
                         {
-                            Debug.LogError($"Can't create campaign with type {prefefinedSponsoredMissions[i].missionType}");
+                            Log.PrintError($"Can't create campaign with type {prefefinedSponsoredMissions[i].missionType}");
                         }
                     }
                     else
@@ -940,7 +940,7 @@ namespace Monetizr.Campaigns
             //remove if mission in save, but not in the predefined list
             missions.RemoveAll(m => m.isToBeRemoved);
 
-            Debug.Log($"Total amount of missions {missions.Count}");
+            Log.Print($"Total amount of missions {missions.Count}");
 
             UpdateMissionsActivity(null);
 
@@ -1109,7 +1109,7 @@ namespace Monetizr.Campaigns
                 //check if mission self referenced in activate after
                 if (hasActivateAfter && m.activateAfter.FindIndex(_id => _id == m.serverId) > 0)
                 {
-                    Debug.LogWarning($"Mission id {m.serverId} activate after itself!");
+                    Log.PrintWarning($"Mission id {m.serverId} activate after itself!");
                     hasActivateAfter = false;
                 }
                 

@@ -17,7 +17,7 @@ public class TeaserHelper : MonoBehaviour
 
     void OnDisable()
     {
-        //Debug.Log("on disable!");
+        //Log.Print("on disable!");
         MonetizrManager.OnMainMenuHide();
     }
 }

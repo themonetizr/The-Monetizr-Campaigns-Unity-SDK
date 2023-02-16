@@ -79,7 +79,7 @@ namespace Monetizr.Campaigns
                         {
                             NonLinear_typeStaticResource staticRes = (NonLinear_typeStaticResource)nl.Item;
 
-                            //Debug.Log($"{staticRes.Value}");
+                            //Log.Print($"{staticRes.Value}");
 
                             asset = new ServerCampaign.Asset()
                             {
@@ -90,7 +90,7 @@ namespace Monetizr.Campaigns
                                 fext = ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
                             };
 
-                            //Debug.Log(asset.ToString());
+                            //Log.Print(asset.ToString());
 
                             serverCampaign.assets.Add(asset);
                         }
@@ -101,9 +101,9 @@ namespace Monetizr.Campaigns
                 {
                     VASTADInLineCreativeLinear it = (VASTADInLineCreativeLinear)c.Item;
 
-                    Debug.Log(it.MediaFiles[0].Value);
+                    Log.Print(it.MediaFiles[0].Value);
 
-                    Debug.Log(it.AdParameters);
+                    Log.Print(it.AdParameters);
 
                     videoAsset = new ServerCampaign.Asset()
                     {
@@ -120,7 +120,7 @@ namespace Monetizr.Campaigns
 
                     hasVideo = true;
 
-                    //Debug.Log(asset.ToString());
+                    //Log.Print(asset.ToString());
 
                     if (it.AdParameters != null)
                     {
@@ -269,7 +269,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                Log.Print(e);
             }
 
             return vastData;
@@ -287,7 +287,7 @@ namespace Monetizr.Campaigns
 
             string uri = $"https://servedbyadbutler.com/vast.spark?setID={vp.setID}&ID={vp.id}&pid={vp.pid}";
 
-            Debug.Log($"Requesting VAST campaign with url {uri}");
+            Log.Print($"Requesting VAST campaign with url {uri}");
 
 
 
@@ -296,7 +296,7 @@ namespace Monetizr.Campaigns
             {
                 await webRequest.SendWebRequest();
 
-                //Debug.Log(webRequest.downloadHandler.text);
+                //Log.Print(webRequest.downloadHandler.text);
 
 
 
@@ -306,13 +306,13 @@ namespace Monetizr.Campaigns
             /*XmlNodeList elemList = xmlDoc.GetElementsByTagName("Creative");
             for (int i = 0; i < elemList.Count; i++)
             {
-                Debug.Log($"{i}------{elemList[i].InnerXml}");
+                Log.Print($"{i}------{elemList[i].InnerXml}");
             }*/
 
             VAST vastData = CreateVastFromXml(res);
 
 
-            //Debug.Log(v.Ad[0].Item.GetType());
+            //Log.Print(v.Ad[0].Item.GetType());
 
             ServerCampaign serverCampaign = await PrepareServerCampaign(vastData);
 

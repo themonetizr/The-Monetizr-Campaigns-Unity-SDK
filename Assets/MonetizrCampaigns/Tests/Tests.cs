@@ -124,7 +124,7 @@ public class Tests
 
         //------
 
-        Debug.Log("done");
+        //Log.Print("done");
 
         yield return null;
     }

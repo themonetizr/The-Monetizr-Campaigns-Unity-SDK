@@ -427,7 +427,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception ex)
             {
-                Debug.Log($"Exception in userDefinedEvent {ex.ToString()}");
+                Log.Print($"Exception in userDefinedEvent {ex.ToString()}");
             }
         }
 
@@ -565,7 +565,7 @@ namespace Monetizr.Campaigns
             {
                 soundSwitch = (bool isOn) =>
                 {
-                    Debug.Log($"Audio listener pause state {!isOn}");
+                    Log.Print($"Audio listener pause state {!isOn}");
                     AudioListener.pause = !isOn;
                 };
             }
@@ -731,7 +731,7 @@ namespace Monetizr.Campaigns
             if (apiKey == _challengesClient.currentApiKey)
                 return true;
 
-            Debug.Log($"Changing api key to {apiKey}");
+            Log.Print($"Changing api key to {apiKey}");
 
             _challengesClient.Close();
 
@@ -823,7 +823,7 @@ namespace Monetizr.Campaigns
 
             if (m == null)
             {
-                Debug.Log($"Nothing to reset in ResetCampaign");
+                Log.Print($"Nothing to reset in ResetCampaign");
                 return;
             }
 
@@ -844,7 +844,7 @@ namespace Monetizr.Campaigns
             }
             catch (OperationCanceledException)
             {
-                Debug.Log("\nTasks cancelled: timed out.\n");
+                Log.Print("\nTasks cancelled: timed out.\n");
 
                 //onFail.Invoke();
             }
@@ -866,7 +866,7 @@ namespace Monetizr.Campaigns
 
             Action onSuccess = () =>
             {
-                Debug.Log("SUCCESS!");
+                Log.Print("SUCCESS!");
 
                 //MonetizrManager.Analytics.TrackEvent("Enter email succeeded", m);
 
@@ -897,7 +897,7 @@ namespace Monetizr.Campaigns
 
             Action onFail = () =>
             {
-                Debug.Log("FAIL!");
+                Log.Print("FAIL!");
 
                 //MonetizrManager.Analytics.TrackEvent("Email enter failed", m);
 
@@ -930,7 +930,7 @@ namespace Monetizr.Campaigns
                 }
                 catch (OperationCanceledException)
                 {
-                    Debug.Log("\nTasks cancelled: timed out.\n");
+                    Log.Print("\nTasks cancelled: timed out.\n");
 
                     //onFail.Invoke();
                 }
@@ -973,13 +973,13 @@ namespace Monetizr.Campaigns
         {
             if (instance.uiController.panels.ContainsKey(PanelId.StartNotification))
             {
-                Debug.Log($"ShowStartupNotification ContainsKey(PanelId.StartNotification) {placement}");
+                Log.Print($"ShowStartupNotification ContainsKey(PanelId.StartNotification) {placement}");
                 return;
             }
 
             bool forceSkip = false;
 
-            //Debug.Log($"------ShowStartupNotification 1 {placement}");
+            //Log.Print($"------ShowStartupNotification 1 {placement}");
 
             if (instance == null || !instance.HasCampaignsAndActive())
             {
@@ -987,9 +987,9 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            //Debug.Log($"------ShowStartupNotification 2 {placement}");
+            //Log.Print($"------ShowStartupNotification 2 {placement}");
 
-            //Debug.LogWarning("ShowStartupNotification");
+            //Log.PrintWarning("ShowStartupNotification");
 
             //Mission sponsoredMsns = instance.missionsManager.missions.Find((Mission item) => { return item.isSponsored; });
             var missions = instance.missionsManager.GetMissionsForRewardCenter();
@@ -1016,33 +1016,33 @@ namespace Monetizr.Campaigns
                 forceSkip = mission.campaignServerSettings.GetParam("no_start_level_notifications") == "true";
 
                 if (forceSkip)
-                    Debug.Log($"No notifications on level start defined on serverside");
+                    Log.Print($"No notifications on level start defined on serverside");
             }
             else if (placement == 1)
             {
                 forceSkip = mission.campaignServerSettings.GetParam("no_main_menu_notifications") == "true";
 
                 if (forceSkip)
-                    Debug.Log($"No notifications in main menu defined on serverside");
+                    Log.Print($"No notifications in main menu defined on serverside");
             }
 
-            // Debug.Log($"------ShowStartupNotification 3 {placement}");
+            // Log.Print($"------ShowStartupNotification 3 {placement}");
 
             //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
 
             if (mission.campaignServerSettings.GetParam("no_campaigns_notification") == "true")
             {
-                Debug.Log($"No notifications defined on serverside");
+                Log.Print($"No notifications defined on serverside");
                 forceSkip = true;
             }
 
-            //Debug.Log($"Notifications sk {mission.amountOfNotificationsSkipped} shown {mission.amountOfNotificationsShown}");
+            //Log.Print($"Notifications sk {mission.amountOfNotificationsSkipped} shown {mission.amountOfNotificationsShown}");
 
             mission.amountOfNotificationsSkipped++;
 
             if (mission.amountOfNotificationsSkipped <= mission.campaignServerSettings.GetIntParam("amount_of_skipped_notifications"))
             {
-                Debug.Log($"Amount of skipped notifications less then {mission.amountOfNotificationsSkipped}");
+                Log.Print($"Amount of skipped notifications less then {mission.amountOfNotificationsSkipped}");
                 forceSkip = true;
             }
 
@@ -1051,7 +1051,7 @@ namespace Monetizr.Campaigns
             var currentAmount = instance.localSettings.GetSetting(mission.campaignId).amountNotificationsShown;
             if (currentAmount > serverMaxAmount)
             {
-                Debug.Log($"Startup notification impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
+                Log.Print($"Startup notification impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
                 forceSkip = true;
             }
 
@@ -1062,7 +1062,7 @@ namespace Monetizr.Campaigns
 
             if (lastTime < serverDelay)
             {
-                Debug.Log($"Startup notification last show time less then {serverDelay}");
+                Log.Print($"Startup notification last show time less then {serverDelay}");
                 forceSkip = true;
             }
 
@@ -1085,11 +1085,11 @@ namespace Monetizr.Campaigns
 
             //instance.missionsManager.SaveAll();
 
-            //Debug.Log($"------ShowStartupNotification 4 {placement}");
+            //Log.Print($"------ShowStartupNotification 4 {placement}");
 
-            //Debug.LogWarning("!!!!-------");
+            //Log.PrintWarning("!!!!-------");
 
-            Debug.Log($"Notification shown {currentAmount}/{serverMaxAmount} last time: {lastTime}/{serverDelay}");
+            Log.Print($"Notification shown {currentAmount}/{serverMaxAmount} last time: {lastTime}/{serverDelay}");
 
             FillInfo(mission);
 
@@ -1363,7 +1363,7 @@ namespace Monetizr.Campaigns
             /*int i = 1;
             foreach (var m2 in Instance.missionsManager.missions)
             {
-                Debug.Log($"{i}:{m2.missionTitle}:{m2.campaignId}");
+                Log.Print($"{i}:{m2.missionTitle}:{m2.campaignId}");
                 i++;
             }*/
 
@@ -1378,7 +1378,7 @@ namespace Monetizr.Campaigns
             if (missions.Count == 1 && !showRewardCenterForOneMission)
             //if (Instance.missionsManager.missions.Count == 1)
             {
-                //Debug.Log($"---_PressSingleMission");
+                //Log.Print($"---_PressSingleMission");
 
                 Log.Print($"Only one mission available and showRewardCenterForOneMission is false");
 
@@ -1617,14 +1617,14 @@ namespace Monetizr.Campaigns
             //has some challanges
             if (!instance.HasCampaignsAndActive())
             {
-                Debug.Log($"No active campaigns for teaser");
+                Log.Print($"No active campaigns for teaser");
                 return;
             }
 
             //has some active missions
             if (instance.missionsManager.GetActiveMissionsNum() == 0)
             {
-                Debug.Log($"No active missions for teaser");
+                Log.Print($"No active missions for teaser");
                 return;
             }
 
@@ -1645,11 +1645,11 @@ namespace Monetizr.Campaigns
             var currentAmount = instance.localSettings.GetSetting(campaign.id).amountTeasersShown;
             if (currentAmount > serverMaxAmount)
             {
-                Debug.Log($"Teaser impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
+                Log.Print($"Teaser impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
                 return;
             }
 
-            Debug.Log($"Teaser shown {currentAmount}/{serverMaxAmount}");
+            Log.Print($"Teaser shown {currentAmount}/{serverMaxAmount}");
 
             instance.localSettings.GetSetting(campaign.id).amountTeasersShown++;
             instance.localSettings.SaveData();
@@ -1808,11 +1808,11 @@ namespace Monetizr.Campaigns
 
                 string path = Application.persistentDataPath + "/" + campaign.id;
 
-                Debug.Log($"Campaign path: {path}");
+                Log.Print($"Campaign path: {path}");
 
                 await campaign.LoadCampaignAssets();               
 
-                Debug.Log($"Loading finished {campaign.isLoaded}");
+                Log.Print($"Loading finished {campaign.isLoaded}");
 
                 if (campaign.isLoaded)
                 {
@@ -1823,7 +1823,7 @@ namespace Monetizr.Campaigns
 
             activeChallengeId = campaignIds.Count > 0 ? campaignIds[0] : null;
 
-            Debug.Log($"Active challenge {activeChallengeId}");
+            Log.Print($"Active challenge {activeChallengeId}");
 
             isMissionsIsOudated = true;
 
@@ -1865,7 +1865,7 @@ namespace Monetizr.Campaigns
 
             if (!campaigns.ContainsKey(chId))
             {
-                Debug.LogWarning($"You're trying to get campaign {chId} which is not exist!");
+                Log.PrintWarning($"You're trying to get campaign {chId} which is not exist!");
                 return null;
             }
 
