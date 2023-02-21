@@ -7,8 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using UnityEditor.Android;
 using UnityEngine;
 using UnityEngine.Networking;
+
+using Monetizr.Campaigns.Vast42;
+using MiniJSON;
 
 namespace Monetizr.Campaigns
 {
@@ -44,16 +48,62 @@ namespace Monetizr.Campaigns
             return new VastParams() { id = p[0], setID = p[1], pid = p[2] };
         }
 
+
+        [System.Serializable]
+        public class AdVerifications
+        {
+            internal List<AdVerification> adVerifications = new List<AdVerification>();
+        }
+
+        [System.Serializable]
+        public class AdVerification
+        {
+            public List<VerificationExecutableResource> ExecutableResource = new List<VerificationExecutableResource>();
+            public List<VerificationJavaScriptResource> JavaScriptResource = new List<VerificationJavaScriptResource>();
+            public List<VerificationTracking> Tracking = new List<VerificationTracking>();
+            public string VerificationParameters;
+            public string VendorField;
+        }
+
+        [System.Serializable]
+        public class VerificationExecutableResource
+        {
+            public string apiFramework;
+            public string type;
+            public string value;
+        }
+
+        [System.Serializable]
+        public class VerificationJavaScriptResource
+        {
+            public string apiFramework;
+            public bool browserOptional;
+            public bool browserOptionalSpecified;
+            public string value;
+        }
+
+        [System.Serializable]
+        public class VerificationTracking
+        {
+            public string eventUrl;
+            public string value;
+        }
+
         internal async Task<ServerCampaign> PrepareServerCampaign(VAST v)
         {
-            if (v.Ad == null || v.Ad.Length == 0)
+            if (v.Items == null || v.Items.Length == 0)
                 return null;
 
+            if (!(v.Items[0] is VASTAD))
+                return null;
+
+            VASTAD vad = (VASTAD)v.Items[0];
+
             //ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
-            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}", dar_tag = "" };
+            ServerCampaign serverCampaign = new ServerCampaign() { id = $"{vad.id}", dar_tag = "" };
+                       
 
-
-            if (!(v.Ad[0].Item is VASTADInLine))
+            if (!(vad.Item is Inline_type))
                 return null;
 
             bool hasSettings = false;
@@ -61,7 +111,57 @@ namespace Monetizr.Campaigns
 
             ServerCampaign.Asset videoAsset = null;
 
-            VASTADInLine inLine = (VASTADInLine)v.Ad[0].Item;
+            var inLine = (Inline_type)vad.Item;
+
+            AdVerifications adv = new AdVerifications();
+
+            foreach (var av in inLine.AdVerifications)
+            {
+                Log.Print($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
+
+                var jsrList = new List<VerificationJavaScriptResource>();
+
+                if (av.JavaScriptResource != null)
+                {
+                    foreach (var jsr in av.JavaScriptResource)
+                    {
+                        jsrList.Add(new VerificationJavaScriptResource() { apiFramework = jsr.apiFramework, browserOptional = jsr.browserOptional, browserOptionalSpecified = jsr.browserOptionalSpecified, value = jsr.Value });
+                        Log.Print($"JavaScriptResource: [{jsr.Value}]");
+                    }
+                }
+
+                var trackingList = new List<VerificationTracking>();
+
+                if (av.TrackingEvents != null)
+                {
+                    foreach (var te in av.TrackingEvents)
+                    {
+                        Log.Print($"TrackingEvents: [{te.Value}]");
+
+                        trackingList.Add(new VerificationTracking() { eventUrl = te.@event, value = te.Value });
+                    }
+                }
+
+                var execList = new List<VerificationExecutableResource>();
+
+                if(av.ExecutableResource != null)
+                {
+                    foreach (var er in av.ExecutableResource)
+                    {
+                        Log.Print($"TrackingEvents: [{er.Value}]");
+
+                        execList.Add(new VerificationExecutableResource() { apiFramework = er.apiFramework, type = er.type, value = er.Value });
+                    }
+                }
+
+                adv.adVerifications.Add(new AdVerification() { ExecutableResource = execList, JavaScriptResource = jsrList, Tracking = trackingList, VendorField = av.vendor, VerificationParameters = av.VerificationParameters });
+            }
+
+            //string s = Json.Serialize(adv.adVerifications);
+            string s = JsonUtility.ToJson(adv.adVerifications[0].JavaScriptResource);
+
+            //string s = JSON.Serialize(inLine.adVerificationsField);
+            Log.Print(s);
 
             //serverCampaign.id = v.Ad[0].id;
 
@@ -69,51 +169,53 @@ namespace Monetizr.Campaigns
             {
                 ServerCampaign.Asset asset = null;
 
-                if (c.Item is VASTADInLineCreativeNonLinearAds)
+                if (c.NonLinearAds != null)
                 {
-                    VASTADInLineCreativeNonLinearAds it = (VASTADInLineCreativeNonLinearAds)c.Item;
+                    var it = c.NonLinearAds;
 
                     foreach (var nl in it.NonLinear)
                     {
-                        if (nl.Item is NonLinear_typeStaticResource)
-                        {
-                            NonLinear_typeStaticResource staticRes = (NonLinear_typeStaticResource)nl.Item;
+                        string adParameters = nl.AdParameters.Value;
+                        var staticRes = nl.StaticResource[0];
 
                             //Log.Print($"{staticRes.Value}");
 
-                            asset = new ServerCampaign.Asset()
-                            {
+                        asset = new ServerCampaign.Asset()
+                        {
                                 id = $"{c.id} {nl.id}",
                                 url = staticRes.Value,
-                                type = nl.AdParameters,
+                                type = adParameters,
                                 fname = ConvertCreativeToFname(staticRes.Value),
                                 fext = ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
-                            };
+                        };
 
                             //Log.Print(asset.ToString());
 
-                            serverCampaign.assets.Add(asset);
-                        }
+                        serverCampaign.assets.Add(asset);
+                        
                     }
 
                 }
-                else if (c.Item is VASTADInLineCreativeLinear)
+
+                if (c.Linear != null)
                 {
-                    VASTADInLineCreativeLinear it = (VASTADInLineCreativeLinear)c.Item;
+                    var it = c.Linear;
 
-                    Log.Print(it.MediaFiles[0].Value);
-
+                    //Log.Print(it.MediaFiles[0].Value);
+                                        
                     Log.Print(it.AdParameters);
+                    string value = it.MediaFiles.MediaFile[0].Value;
+                    string type = it.MediaFiles.MediaFile[0].type;
 
                     videoAsset = new ServerCampaign.Asset()
                     {
                         id = c.id,
-                        url = it.MediaFiles[0].Value,
-                        fpath = ConvertCreativeToFname(it.MediaFiles[0].Value),
+                        url = value,
+                        fpath = ConvertCreativeToFname(value),
                         fname = "video",
-                        fext = ConvertCreativeToExt(it.MediaFiles[0].type, it.MediaFiles[0].Value),
+                        fext = ConvertCreativeToExt(type, value),
                         type = "html",
-                        mainAssetName = $"{ConvertCreativeToFname(it.MediaFiles[0].Value)}/index.html"
+                        mainAssetName = $"{ConvertCreativeToFname(value)}/index.html"
                     };
 
                     serverCampaign.assets.Add(videoAsset);
@@ -124,17 +226,19 @@ namespace Monetizr.Campaigns
 
                     if (it.AdParameters != null)
                     {
-                        it.AdParameters = it.AdParameters.Replace("\n", "");
+                        string adp = it.AdParameters.Value;
 
-                        var dict = Json.Deserialize(it.AdParameters) as Dictionary<string, object>;
+                        adp = adp.Replace("\n", "");
 
-                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(it.AdParameters, dict));
+                        var dict = Json.Deserialize(adp) as Dictionary<string, object>;
+
+                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(adp, dict));
                     }
                 }
-                else if (c.Item is VASTADInLineCreativeCompanionAds)
+                /*else if (c.Item is VASTADInLineCreativeCompanionAds)
                 {
 
-                }
+                }*/
 
 
             }

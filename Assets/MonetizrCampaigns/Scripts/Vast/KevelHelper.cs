@@ -7,6 +7,8 @@ using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.Networking;
 
+using Monetizr.Campaigns.Vast42;
+
 namespace Monetizr.Campaigns
 {
     internal class KevelHelper : VastHelper

@@ -33,7 +33,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace Monetizr.Campaigns
+namespace MiniJSON
 {
     // Example usage:
     //
