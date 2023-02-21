@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using System;
 using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
+using Toggle = UnityEngine.UI.Toggle;
 
 public class Tests
 {
@@ -29,6 +30,8 @@ public class Tests
         Assert.AreEqual(Utils.ConvertToIntArray("1.2.3")[2], 3);
 
         Assert.AreEqual(Utils.ConvertToIntArray("1,2,3",',')[2], 3);
+
+        //Assert.AreNotEqual(Utils.ShuffleList({"1,2,3"}), 3);
     }
 
     [SetUp]
@@ -43,11 +46,15 @@ public class Tests
 
         Sprite img = UnityEditor.AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
 
+        Time.timeScale = 5;
+
         MonetizrManager.bundleId = "com.monetizr.sample";
 
-        MonetizrManager.claimForSkippedCampaigns = true;
+        
 
         eventsAmount.Clear();
+
+        MonetizrManager.SetAdvertisingIds("", false);
 
         MonetizrManager.SetGameCoinAsset(RewardType.Coins, img, "Coins",
             () => { return 0; },
@@ -60,9 +67,7 @@ public class Tests
 
             if (MonetizrManager.Instance.HasCampaignsAndActive())
             {
-                //we can show teaser manually, but better to use TeaserHelper script
-                //see DummyMainUI object in SampleScene
-                //dummyUI.SetActive(true);
+                MonetizrManager.claimForSkippedCampaigns = false;
 
                 MonetizrManager.ShowTinyMenuTeaser();
                 //Do something
@@ -90,7 +95,7 @@ public class Tests
 
     static GameObject FindObjectByName(string name)
     {
-        GameObject[] gos = (GameObject[])GameObject.FindObjectsOfType(typeof(GameObject));
+        GameObject[] gos = (GameObject[])GameObject.FindObjectsOfType(typeof(GameObject),true);
 
         for (int i = 0; i < gos.Length; i++)
             if (gos[i].name.Contains(name))
@@ -159,7 +164,7 @@ public class Tests
             new ClickTask("RewardCenterButtonClaim4",4),
             new ClickTask("PanelCloseButton",2),
             new ClickTask("MessageCloseButton",2),
-            new ClickTask("NotifyCloseButton",2),
+            //new ClickTask("NotifyCloseButton",2),
         };
 
         yield return new TasksManager().Run(tasks);
@@ -178,6 +183,13 @@ public class Tests
 
             new ClickTask("PanelCloseButton",2),
             new ClickTask("MessageCloseButton",2),
+
+            new ClickTask("RewardCenterButtonClaim4",2),
+            new InputFieldTask("PanelInputField","artem+100@themonetizr.com",2),
+            new ClickTask("PanelOkButton",2),
+            new ClickTask("NotifyCloseButton",2),
+
+            new TestVisibility("MonetizrRewardedItem4",false,2)
             //new ClickTask("NotifyCloseButton",2),
         };
 
@@ -185,6 +197,92 @@ public class Tests
 
         //yield return null;
     }
+
+    [UnityTest]
+    public IEnumerator TestMemoryGame()
+    {
+        List<int> b = new List<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+        Utils.ShuffleList(b);
+
+        var tasks = new List<TestUITask>() {
+
+            new ClickTask("MonetizrMenuTeaser",2),
+
+            new ClickTask("RewardCenterButtonClaim1",2),
+
+            new ClickTask("PanelCloseButton",2),
+            //new ClickTask("MessageCloseButton",2),
+
+            new TestVisibility("MonetizrRewardedItem1",true,2),
+
+            new ClickTask("RewardCenterButtonClaim1",2),
+
+            new ClickTask($"GameItem{b[0]}",2),
+            new ClickTask($"GameItem{b[1]}",2),
+            new ClickTask($"GameItem{b[2]}",2),
+            new ClickTask($"GameItem{b[3]}",2),
+            new ClickTask($"GameItem{b[3]}",2),
+            new ClickTask($"GameItem{b[4]}",5),
+
+            new ClickTask("NotifyCloseButton",2),
+
+            new TestVisibility("MonetizrRewardedItem1",false,2)
+            //new ClickTask("NotifyCloseButton",2),
+        };
+
+        yield return new TasksManager().Run(tasks);
+
+        //yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator TestSurvey()
+    {
+        var tasks = new List<TestUITask>() {
+
+            new ClickTask("MonetizrMenuTeaser",2),
+
+            new ClickTask("RewardCenterButtonClaim0",2),
+
+            /*new ClickTask("PanelCloseButton",2),
+            new ClickTask("MessageCloseButton",2),
+
+            new TestVisibility("MonetizrRewardedItem0",true,2),
+
+            new ClickTask("RewardCenterButtonClaim0",2),*/
+
+            //page1
+            new ClickTask($"NextButton",2),
+
+            //page2
+            new ToggleTask($"Q:1:A:1",2),
+
+            //page3
+            new ToggleTask($"Q:2:A:1",2),
+            new ToggleTask($"Q:2:A:2",2),
+            new ClickTask($"NextButton",2),
+
+            //page4
+            new ToggleTask($"Q:3:A:2",2),
+
+            //page5
+            new InputFieldTask("SurveyInputField","test!!!",4),
+            new ClickTask($"NextButton",4),
+
+            //page6
+            new ClickTask($"NextButton",2),
+
+            new ClickTask("NotifyCloseButton",2),
+
+            new TestVisibility("MonetizrRewardedItem0",false,2)
+            //new ClickTask("NotifyCloseButton",2),
+        };
+
+        yield return new TasksManager().Run(tasks);
+
+        //yield return null;
+    }
+
 
     class TasksManager
     {
@@ -259,6 +357,30 @@ public class Tests
         }
     }
 
+    class ToggleTask : TestUITask
+    {
+        public ToggleTask(string button, int delay) : base(button, delay)
+        {
+
+        }
+
+        public override void Do()
+        {
+            var buttonObject = Tests.FindObjectByName(button);
+
+            Assert.IsNotNull(buttonObject, $"Game object {button} is null!");
+
+            Toggle b = buttonObject.GetComponent<Toggle>();
+
+            Assert.IsTrue(b.interactable, $"Button {button} is not active!");
+
+            Assert.IsNotNull(b, $"Button {button} is null!");
+
+            //b.onClick.Invoke();
+            b.isOn = true;
+        }
+    }
+
     class TestInteractivity : TestUITask
     {
         bool interactive;
@@ -279,6 +401,25 @@ public class Tests
             Assert.IsTrue(b.interactable == interactive, $"Button {button} is wrongly interactive. Should be {interactive}!");
 
             Assert.IsNotNull(b, $"Button {button} is null!");
+        }
+    }
+
+    class TestVisibility : TestUITask
+    {
+        bool visibility;
+
+        public TestVisibility(string button, bool visible, int delay) : base(button, delay)
+        {
+            this.visibility = visible;
+        }
+
+        public override void Do()
+        {
+            var buttonObject = Tests.FindObjectByName(button);
+
+            Assert.IsNotNull(buttonObject, $"Game object {button} is null!");
+                        
+            Assert.IsTrue(buttonObject.activeSelf == visibility, $"Object {button} is wrongly active. Should be {visibility}!");
         }
     }
 

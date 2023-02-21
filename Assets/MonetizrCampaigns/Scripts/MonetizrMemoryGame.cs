@@ -148,6 +148,7 @@ namespace Monetizr.Campaigns
             for (int i = 0; i < items.Length; i++)
             {
                 int i_copy = i;
+                items[i].name = $"GameItem{i}";
                 Button _b = items[i].GetComponent<Button>();
                 _b.onClick.RemoveAllListeners();
                 _b.onClick.AddListener(() => { OnItemClick(i_copy); });

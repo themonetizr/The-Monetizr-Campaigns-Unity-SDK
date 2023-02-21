@@ -416,6 +416,8 @@ namespace Monetizr.Campaigns
         private void AddSponsoredChallenge(Mission m, int missionId)
         {
             var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
+            go.name = $"MonetizrRewardedItem{missionId}";
+            
             var item = go.GetComponent<MonetizrRewardedItem>();
 
             m.rewardCenterItem = item;

@@ -243,7 +243,7 @@ GameObject:
   - component: {fileID: 448932330696829619}
   - component: {fileID: 5985255971184301839}
   m_Layer: 5
-  m_Name: InputField
+  m_Name: SurveyInputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

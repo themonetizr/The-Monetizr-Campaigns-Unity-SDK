@@ -95,7 +95,7 @@ namespace Monetizr.Campaigns
             {
                 int i_copy = i;
                 Button _b = items[i].GetComponent<Button>();
-
+                items[i].name = $"GameItem{i}";
                 _b.onClick.RemoveAllListeners();
                 _b.onClick.AddListener( ()=>{ OnItemClick(i_copy); });
                 Animator _a = items[i].GetComponent<Animator>();

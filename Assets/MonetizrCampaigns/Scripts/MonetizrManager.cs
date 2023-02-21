@@ -574,7 +574,7 @@ namespace Monetizr.Campaigns
 
             if(!MonetizrAnalytics.isAdvertisingIDDefined)
             {
-                Log.PrintError($"MonetizrManager Initialize: Advertising ID is not defined");
+                Log.PrintError($"MonetizrManager Initialize: Advertising ID is not defined. Be sure you called MonetizrManager.SetAdvertisingIds before Initialize call.");
                 return null;
             }
 

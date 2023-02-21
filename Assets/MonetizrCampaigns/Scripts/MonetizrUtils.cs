@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static Monetizr.Campaigns.MonetizrUnitySurvey;
 
 namespace Monetizr.Campaigns
 {
@@ -114,5 +115,18 @@ namespace Monetizr.Campaigns
 
             return res2;
         }
+
+        public static void ShuffleList<T>(List<T> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                var temp = list[i];
+                int randomIndex = UnityEngine.Random.Range(i, list.Count);
+                list[i] = list[randomIndex];
+                list[randomIndex] = temp;
+            }
+        }
+
+
     }
 }
