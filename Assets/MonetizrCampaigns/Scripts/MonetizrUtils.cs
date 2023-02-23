@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -148,6 +150,16 @@ namespace Monetizr.Campaigns
             return array == null || array.Length == 0;
         }
 
-
+        public static void ExtractAllToDirectory(string zipPath, string extractPath)
+        {
+            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+            {
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    if (!String.IsNullOrEmpty(entry.Name))
+                        entry.ExtractToFile(Path.Combine(extractPath, entry.Name));
+                }
+            }
+        }
     }
 }

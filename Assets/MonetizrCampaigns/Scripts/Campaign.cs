@@ -345,7 +345,8 @@ namespace Monetizr.Campaigns
                     //if (!Directory.Exists(zipFolder))
                     Directory.CreateDirectory(zipFolder);
 
-                    ZipFile.ExtractToDirectory(fpath, zipFolder);
+                    //ZipFile.ExtractToDirectory(fpath, zipFolder);
+                    Utils.ExtractAllToDirectory(fpath, zipFolder);
 
                     File.Delete(fpath);
                 }

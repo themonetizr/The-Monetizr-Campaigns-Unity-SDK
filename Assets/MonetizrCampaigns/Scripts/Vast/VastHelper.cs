@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-using UnityEditor.Android;
+//using UnityEditor.Android;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -165,7 +165,7 @@ namespace Monetizr.Campaigns
 
             //string s = Json.Serialize(adv.adVerifications);
 
-            return JsonUtility.ToJson(adv,true);
+            return JsonUtility.ToJson(adv);
         }
 
         internal async Task<ServerCampaign> PrepareServerCampaign(VAST v)
@@ -332,17 +332,28 @@ namespace Monetizr.Campaigns
 
                 File.WriteAllBytes(zipFolder + "/html.zip", data);
 
-                ZipFile.ExtractToDirectory(zipFolder + "/html.zip", zipFolder);
+                //ZipFile.ExtractToDirectory(zipFolder + "/html.zip", zipFolder);
+
+                Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
 
                 File.Delete(zipFolder + "/html.zip");
 
                 //--------------
 
-                var str = File.ReadAllText($"{zipFolder}/index.html");
+                string index_path = $"{zipFolder}/index.html";
 
-                str = str.Replace("${MON_VAST_COMPONENT}", $"{serverCampaign.vastAdVerificationParams}");
+                if (!File.Exists(index_path))
+                {
+                    Log.PrintError("index.html in video player is not exist!!!");
+                }
+                else
+                {
+                    var str = File.ReadAllText(index_path);
 
-                File.WriteAllText($"{zipFolder}/index.html",str);
+                    str = str.Replace("${MON_VAST_COMPONENT}", $"{serverCampaign.vastAdVerificationParams}");
+
+                    File.WriteAllText(index_path, str);
+                }
 
                 //---------------
 
