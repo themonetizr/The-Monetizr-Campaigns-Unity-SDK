@@ -126,7 +126,7 @@ namespace Monetizr.Campaigns
 
         internal string CreateStringFromVerificationSettings(Verification_type[] adVerifications)
         {
-            if (adVerifications == null)
+            if (adVerifications.IsNullOrEmpty())
             {
                 Log.PrintWarning("AdVerifications is not defined in the VAST xml!");
                 return "{}";
