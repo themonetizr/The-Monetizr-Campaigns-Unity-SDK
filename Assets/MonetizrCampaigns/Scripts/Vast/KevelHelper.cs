@@ -110,6 +110,7 @@ namespace Monetizr.Campaigns
                 res = webRequest.downloadHandler.text;
             }
 
+            Log.Print($"Kevel Json: {res}");
             //res = "{\"JsonData\":" + res + "}";
 
 

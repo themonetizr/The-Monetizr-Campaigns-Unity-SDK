@@ -50,43 +50,122 @@ namespace Monetizr.Campaigns
 
 
         [System.Serializable]
-        public class AdVerifications
+        internal class AdVerifications
         {
-            internal List<AdVerification> adVerifications = new List<AdVerification>();
+            public List<AdVerification> adVerifications = new List<AdVerification>();
         }
 
         [System.Serializable]
-        public class AdVerification
+        internal class AdVerification
         {
-            public List<VerificationExecutableResource> ExecutableResource = new List<VerificationExecutableResource>();
-            public List<VerificationJavaScriptResource> JavaScriptResource = new List<VerificationJavaScriptResource>();
-            public List<VerificationTracking> Tracking = new List<VerificationTracking>();
-            public string VerificationParameters;
-            public string VendorField;
+            public string verificationParameters = "";
+            public string vendorField = "";
+            public List<VerificationExecutableResource> executableResource = new List<VerificationExecutableResource>();
+            public List<VerificationJavaScriptResource> javaScriptResource = new List<VerificationJavaScriptResource>();
+            public List<VerificationTracking> tracking = new List<VerificationTracking>();
+
         }
 
         [System.Serializable]
-        public class VerificationExecutableResource
+        internal class VerificationExecutableResource
         {
-            public string apiFramework;
-            public string type;
-            public string value;
+            public string apiFramework = "";
+            public string type = "";
+            public string value = "";
+
+            public VerificationExecutableResource()
+            {
+            }
+
+            public VerificationExecutableResource(Verification_typeExecutableResource er)
+            {
+                apiFramework = er.apiFramework;
+                type = er.type;
+                value = er.Value;
+            }
         }
 
         [System.Serializable]
-        public class VerificationJavaScriptResource
+        internal class VerificationJavaScriptResource
         {
-            public string apiFramework;
-            public bool browserOptional;
-            public bool browserOptionalSpecified;
-            public string value;
+            public string apiFramework = "";
+            public bool browserOptional = false;
+            public bool browserOptionalSpecified = false;
+            public string value = "";
+
+            public VerificationJavaScriptResource()
+            {
+            }
+
+            public VerificationJavaScriptResource(Verification_typeJavaScriptResource jsr)
+            {
+                apiFramework = jsr.apiFramework;
+                browserOptional = jsr.browserOptional;
+                browserOptionalSpecified = jsr.browserOptionalSpecified;
+                value = jsr.Value;
+            }
         }
 
         [System.Serializable]
-        public class VerificationTracking
+        internal class VerificationTracking
         {
-            public string eventUrl;
-            public string value;
+            public string @event = "";
+            public string value = "";
+
+            public VerificationTracking()
+            {
+            }
+
+            public VerificationTracking(TrackingEvents_Verification_typeTracking te)
+            {
+                @event = te.@event;
+                value = te.Value;
+            }
+        }
+                        
+
+        internal string CreateStringFromVerificationSettings(Verification_type[] adVerifications)
+        {
+            if (adVerifications == null)
+            {
+                Log.PrintWarning("AdVerifications is not defined in the VAST xml!");
+                return "{}";
+            }
+
+            AdVerifications adv = new AdVerifications();
+
+            foreach (var av in adVerifications)
+            {
+                //Log.Print($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
+
+                var jsrList = Utils.ArrayToList<Verification_typeJavaScriptResource, VerificationJavaScriptResource>(
+                    av.JavaScriptResource,
+                    (Verification_typeJavaScriptResource jsr) => { return new VerificationJavaScriptResource(jsr); },
+                    new VerificationJavaScriptResource());
+
+                var trackingList = Utils.ArrayToList<TrackingEvents_Verification_typeTracking, VerificationTracking>(
+                    av.TrackingEvents,
+                    (TrackingEvents_Verification_typeTracking te) => { return new VerificationTracking(te); },
+                    new VerificationTracking());
+
+                var execList = Utils.ArrayToList<Verification_typeExecutableResource, VerificationExecutableResource>(
+                    av.ExecutableResource,
+                    (Verification_typeExecutableResource er) => { return new VerificationExecutableResource(er); },
+                    new VerificationExecutableResource());
+                
+                adv.adVerifications.Add(new AdVerification()
+                {
+                    executableResource = execList,
+                    javaScriptResource = jsrList,
+                    tracking = trackingList,
+                    vendorField = av.vendor,
+                    verificationParameters = av.VerificationParameters
+                });
+            }
+
+            //string s = Json.Serialize(adv.adVerifications);
+
+            return JsonUtility.ToJson(adv,true);
         }
 
         internal async Task<ServerCampaign> PrepareServerCampaign(VAST v)
@@ -101,7 +180,7 @@ namespace Monetizr.Campaigns
 
             //ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
             ServerCampaign serverCampaign = new ServerCampaign() { id = $"{vad.id}", dar_tag = "" };
-                       
+
 
             if (!(vad.Item is Inline_type))
                 return null;
@@ -113,55 +192,15 @@ namespace Monetizr.Campaigns
 
             var inLine = (Inline_type)vad.Item;
 
-            AdVerifications adv = new AdVerifications();
 
-            foreach (var av in inLine.AdVerifications)
-            {
-                Log.Print($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
-
-                var jsrList = new List<VerificationJavaScriptResource>();
-
-                if (av.JavaScriptResource != null)
-                {
-                    foreach (var jsr in av.JavaScriptResource)
-                    {
-                        jsrList.Add(new VerificationJavaScriptResource() { apiFramework = jsr.apiFramework, browserOptional = jsr.browserOptional, browserOptionalSpecified = jsr.browserOptionalSpecified, value = jsr.Value });
-                        Log.Print($"JavaScriptResource: [{jsr.Value}]");
-                    }
-                }
-
-                var trackingList = new List<VerificationTracking>();
-
-                if (av.TrackingEvents != null)
-                {
-                    foreach (var te in av.TrackingEvents)
-                    {
-                        Log.Print($"TrackingEvents: [{te.Value}]");
-
-                        trackingList.Add(new VerificationTracking() { eventUrl = te.@event, value = te.Value });
-                    }
-                }
-
-                var execList = new List<VerificationExecutableResource>();
-
-                if(av.ExecutableResource != null)
-                {
-                    foreach (var er in av.ExecutableResource)
-                    {
-                        Log.Print($"TrackingEvents: [{er.Value}]");
-
-                        execList.Add(new VerificationExecutableResource() { apiFramework = er.apiFramework, type = er.type, value = er.Value });
-                    }
-                }
-
-                adv.adVerifications.Add(new AdVerification() { ExecutableResource = execList, JavaScriptResource = jsrList, Tracking = trackingList, VendorField = av.vendor, VerificationParameters = av.VerificationParameters });
-            }
-
-            //string s = Json.Serialize(adv.adVerifications);
-            string s = JsonUtility.ToJson(adv.adVerifications[0].JavaScriptResource);
 
             //string s = JSON.Serialize(inLine.adVerificationsField);
+
+            string s = CreateStringFromVerificationSettings(inLine.AdVerifications);
+
             Log.Print(s);
+
+            serverCampaign.vastAdVerificationParams = s;
 
             //serverCampaign.id = v.Ad[0].id;
 
@@ -178,21 +217,21 @@ namespace Monetizr.Campaigns
                         string adParameters = nl.AdParameters.Value;
                         var staticRes = nl.StaticResource[0];
 
-                            //Log.Print($"{staticRes.Value}");
+                        //Log.Print($"{staticRes.Value}");
 
                         asset = new ServerCampaign.Asset()
                         {
-                                id = $"{c.id} {nl.id}",
-                                url = staticRes.Value,
-                                type = adParameters,
-                                fname = ConvertCreativeToFname(staticRes.Value),
-                                fext = ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
+                            id = $"{c.id} {nl.id}",
+                            url = staticRes.Value,
+                            type = adParameters,
+                            fname = ConvertCreativeToFname(staticRes.Value),
+                            fext = ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
                         };
 
-                            //Log.Print(asset.ToString());
+                        //Log.Print(asset.ToString());
 
                         serverCampaign.assets.Add(asset);
-                        
+
                     }
 
                 }
@@ -202,7 +241,7 @@ namespace Monetizr.Campaigns
                     var it = c.Linear;
 
                     //Log.Print(it.MediaFiles[0].Value);
-                                        
+
                     Log.Print(it.AdParameters);
                     string value = it.MediaFiles.MediaFile[0].Value;
                     string type = it.MediaFiles.MediaFile[0].type;
@@ -265,10 +304,10 @@ namespace Monetizr.Campaigns
                 serverCampaign.serverSettings.dictionary.Add("CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr");
                 serverCampaign.serverSettings.dictionary.Add("CongratsNotification.header_text", "Get your awesome reward!");
 
-                serverCampaign.serverSettings.dictionary.Add("StartNotification.SurveyReward.header_text","<b>Survey by Monetizr</b>");
-                serverCampaign.serverSettings.dictionary.Add("StartNotification.button_text","Learn more!");
-                serverCampaign.serverSettings.dictionary.Add("StartNotification.content_text","Join Monetizr<br/>to get game rewards");
-                serverCampaign.serverSettings.dictionary.Add("StartNotification.header_text","<b>Rewards by Monetizr</b>");
+                serverCampaign.serverSettings.dictionary.Add("StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>");
+                serverCampaign.serverSettings.dictionary.Add("StartNotification.button_text", "Learn more!");
+                serverCampaign.serverSettings.dictionary.Add("StartNotification.content_text", "Join Monetizr<br/>to get game rewards");
+                serverCampaign.serverSettings.dictionary.Add("StartNotification.header_text", "<b>Rewards by Monetizr</b>");
 
                 serverCampaign.serverSettings.dictionary.Add("RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%");
 
@@ -299,6 +338,14 @@ namespace Monetizr.Campaigns
 
                 //--------------
 
+                var str = File.ReadAllText($"{zipFolder}/index.html");
+
+                str = str.Replace("${MON_VAST_COMPONENT}", $"{serverCampaign.vastAdVerificationParams}");
+
+                File.WriteAllText($"{zipFolder}/index.html",str);
+
+                //---------------
+
                 if (!serverCampaign.HasAssetInList("tiny_teaser"))
                 {
                     serverCampaign.assets.Add(new ServerCampaign.Asset()
@@ -309,14 +356,14 @@ namespace Monetizr.Campaigns
                     });
                 }
 
-                serverCampaign.assets.Add(new ServerCampaign.Asset()
+                /*serverCampaign.assets.Add(new ServerCampaign.Asset()
                 {
                     url = "https://image.themonetizr.com/default_assets/monetizr_banner.jpg",
                     type = "banner",
 
-                });
+                });*/
 
-                if (!serverCampaign.HasAssetInList("logo"))
+                /*if (!serverCampaign.HasAssetInList("logo"))
                 {
                     serverCampaign.assets.Add(new ServerCampaign.Asset()
                     {
@@ -325,7 +372,7 @@ namespace Monetizr.Campaigns
                         type = "logo",
 
                     });
-                }
+                }*/
 
             }
 
@@ -336,7 +383,8 @@ namespace Monetizr.Campaigns
         {
             if (Path.HasExtension(url))
             {
-                return Path.GetExtension(url);
+                //remove starting dot
+                return Path.GetExtension(url).Substring(1);
             }
 
             int i = type.LastIndexOf('/');
@@ -389,7 +437,9 @@ namespace Monetizr.Campaigns
             //string uri = $"https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154";
             //https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154
 
-            string uri = $"https://servedbyadbutler.com/vast.spark?setID={vp.setID}&ID={vp.id}&pid={vp.pid}";
+            //string uri = $"https://servedbyadbutler.com/vast.spark?setID={vp.setID}&ID={vp.id}&pid={vp.pid}";
+
+            string uri = "https://vast-serve-stineosy7q-uc.a.run.app";
 
             Log.Print($"Requesting VAST campaign with url {uri}");
 

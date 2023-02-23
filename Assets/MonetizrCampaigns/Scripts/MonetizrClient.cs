@@ -159,8 +159,8 @@ namespace Monetizr.Campaigns
             MonetizrManager.isVastActive = false;
             List<ServerCampaign> result = new List<ServerCampaign>();
 
-            //VastHelper v = new VastHelper(this);
-            KevelHelper v = new KevelHelper(this);
+            VastHelper v = new VastHelper(this);
+            //KevelHelper v = new KevelHelper(this);
 
             if (v != null)
             {

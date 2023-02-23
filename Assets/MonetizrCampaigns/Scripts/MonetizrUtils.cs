@@ -127,6 +127,27 @@ namespace Monetizr.Campaigns
             }
         }
 
+        public static List<ListType> ArrayToList<ArrayType, ListType>(ArrayType[] array, Func<ArrayType, ListType> convertToListType, ListType defaultElement)
+        {
+            var list = new List<ListType>();
+
+            if (array == null && defaultElement != null)
+            {
+                list.Add(defaultElement);
+            }
+            else
+            {
+                Array.ForEach(array, (ArrayType elem) => { list.Add(convertToListType(elem)); });
+            }
+
+            return list;
+        }
+
+        public static bool IsNullOrEmpty<T>(this T[] array)
+        {
+            return array == null || array.Length == 0;
+        }
+
 
     }
 }

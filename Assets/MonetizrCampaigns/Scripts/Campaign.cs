@@ -80,6 +80,9 @@ namespace Monetizr.Campaigns
         public List<Location> locations = new List<Location>();
 
         [System.NonSerialized]
+        internal string vastAdVerificationParams = "";
+
+        [System.NonSerialized]
         private Dictionary<AssetsType, object> assetsDict = new Dictionary<AssetsType, object>();
 
         [System.NonSerialized]
