@@ -14,13 +14,13 @@ namespace Monetizr.Campaigns
 #if UNITY_EDITOR
             Debug.Log($"Monetizr SDK: {message}");
 #else
-            Console.WriteLine($"Monetizr SDK: {message}");
+            PrintLine($"Monetizr SDK: {message}");
 #endif
         }
 
-        public static void PrintToConsole(object message)
+        public static void PrintLine(object message)
         {
-            Console.WriteLine(message);
+            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message);
         }
 
 
