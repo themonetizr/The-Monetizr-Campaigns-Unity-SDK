@@ -48,10 +48,28 @@ namespace Monetizr.Campaigns
             return new VastParams() { id = p[0], setID = p[1], pid = p[2] };
         }
 
+        [System.Serializable]
+        internal class OtherSettings
+        {
+            public bool isSkippable = true;
+            public string skipOffset = "";
+            public bool isAutoPlay = true;
+            public string position = "preroll";
+        }
+            
+
+        /*[System.Serializable]
+        internal class VastSettings
+        {
+            public OtherSettings otherSettings;
+            public VastSettings adVerifications;
+        }*/
 
         [System.Serializable]
-        internal class AdVerifications
+        internal class VastSettings
         {
+            public OtherSettings otherSettings;
+
             public List<AdVerification> adVerifications = new List<AdVerification>();
         }
 
@@ -124,16 +142,19 @@ namespace Monetizr.Campaigns
         }
                         
 
-        internal string CreateStringFromVerificationSettings(Verification_type[] adVerifications)
+        internal string CreateVastSettings(Verification_type[] adVerifications, string _skipOffset)
         {
+            //adVerifications = null;
+
             if (adVerifications.IsNullOrEmpty())
             {
                 Log.PrintWarning("AdVerifications is not defined in the VAST xml!");
-                return "{}";
+                
             }
 
-            AdVerifications adv = new AdVerifications();
+            VastSettings adv = new VastSettings();
 
+            if(!adVerifications.IsNullOrEmpty())
             foreach (var av in adVerifications)
             {
                 //Log.Print($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
@@ -164,6 +185,8 @@ namespace Monetizr.Campaigns
             }
 
             //string s = Json.Serialize(adv.adVerifications);
+
+            adv.otherSettings = new OtherSettings() { skipOffset = _skipOffset };
 
             return JsonUtility.ToJson(adv);
         }
@@ -196,11 +219,8 @@ namespace Monetizr.Campaigns
 
             //string s = JSON.Serialize(inLine.adVerificationsField);
 
-            string s = CreateStringFromVerificationSettings(inLine.AdVerifications);
 
-            Log.Print(s);
-
-            serverCampaign.vastAdVerificationParams = s;
+            string skipOffet = "";
 
             //serverCampaign.id = v.Ad[0].id;
 
@@ -261,6 +281,8 @@ namespace Monetizr.Campaigns
 
                     hasVideo = true;
 
+                    skipOffet = it.skipoffset;
+
                     //Log.Print(asset.ToString());
 
                     if (it.AdParameters != null)
@@ -281,6 +303,15 @@ namespace Monetizr.Campaigns
 
 
             }
+
+
+            string s = CreateVastSettings(inLine.AdVerifications, skipOffet);
+
+            Log.Print(s);
+
+            serverCampaign.vastAdVerificationParams = s;
+
+
 
             if (!hasSettings && videoAsset != null)
             {

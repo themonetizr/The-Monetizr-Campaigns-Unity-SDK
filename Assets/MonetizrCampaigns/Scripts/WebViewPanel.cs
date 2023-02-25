@@ -40,10 +40,13 @@ namespace Monetizr.Campaigns
 #if UNITY_EDITOR
     fullScreen = false;
 #endif
+            UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
 
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
             UniWebView.SetWebContentsDebuggingEnabled(true);
+            UniWebView.SetJavaScriptEnabled(true);
+
 
             MonetizrManager.Instance.SoundSwitch(false);
 
@@ -284,7 +287,17 @@ namespace Monetizr.Campaigns
 
         private void ClosePanel()
         {
-            Log.Print($"Closing webview isSkipped: {isSkipped}");
+            Log.Print($"Stopping OMID ad session");
+
+            webView.StopOMIDAdSession();
+
+            Invoke("DestroyWebView", 1);
+        }
+
+        private void DestroyWebView()
+        {
+            Log.Print($"Destroying webview isSkipped: {isSkipped}");
+
             Destroy(webView);
             webView = null;
 
