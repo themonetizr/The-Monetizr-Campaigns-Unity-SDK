@@ -14,10 +14,34 @@ public class UniWebViewInterface {
         plugin.CallStatic("prepare");
     }
 
+    //OMSDK part-------
+
+    public static void InitOMSDK(string jsonSettings, string omidJSServiceContent) {
+        CheckPlatform();
+        plugin.CallStatic("initOMSDK",jsonSettings,omidJSServiceContent); 
+    }
+
+    public static void InitOMSDKSession(string resourceUrl) {
+        CheckPlatform();
+        plugin.CallStatic("initOMSDKSession",resourceUrl); 
+    }
+
+    public static void StartImpression() 
+        CheckPlatform();
+        plugin.CallStatic("startImpression"); 
+    }
+
+    public static void StopImpression() {
+        CheckPlatform();
+        plugin.CallStatic("stopImpression"); 
+    }
+
     public static void StopOMIDAdSession(string name) {
         CheckPlatform();
         plugin.CallStatic("stopOMIDAdSession",name); 
     }
+
+    //--------
 
     public static void SetLogLevel(int level) {
         CheckPlatform();

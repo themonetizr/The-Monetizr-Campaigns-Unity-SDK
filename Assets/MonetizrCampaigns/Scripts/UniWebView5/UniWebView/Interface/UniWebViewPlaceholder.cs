@@ -6,7 +6,11 @@ public class UniWebViewInterface {
     
     private static bool alreadyLoggedWarning = false;
 
-    public static void StopOMIDAdSession(string name) { CheckPlatform(); }
+    public static void StopOMIDAdSession(string name) { CheckPlatform(); }  
+    public static void InitOMSDK(string jsonSettings, string omidJSServiceContent) { CheckPlatform(); }  
+    public static void InitOMSDKSession(string resourceUrl) { CheckPlatform(); }  
+    public static void StartImpression() { CheckPlatform(); }  
+    public static void StopImpression() { CheckPlatform(); }  
 
     public static void SetLogLevel(int level) { CheckPlatform(); }
     public static void Init(string name, int x, int y, int width, int height) { CheckPlatform(); }

@@ -312,6 +312,7 @@ namespace Monetizr.Campaigns
             serverCampaign.vastAdVerificationParams = s;
 
 
+            InitializeOMSDK();
 
             if (!hasSettings && videoAsset != null)
             {
@@ -419,6 +420,34 @@ namespace Monetizr.Campaigns
             }
 
             return serverCampaign;
+        }
+
+        //TODO!
+        private void InitializeOMSDK()
+        {
+            string jsonSettings = "";
+
+            /* string jsonSettings = @"{""vendorName"":\"Themonetizr\",
+        "sdkVersion":"",
+        "verificationResources":[
+           {
+                     "vendorKey":"",
+              "url":""
+              "params":""
+           },
+           {
+                     "vendorKey":"",
+              "url":""
+              "params":""
+           },
+
+        ]
+     }
+             """; */
+            string omidJSServiceContent = null; //https://image.themonetizr.com/omsdk/omsdk-v1.js
+
+
+            UniWebViewInterface.InitOMSDK(jsonSettings, omidJSServiceContent);
         }
 
         private string ConvertCreativeToExt(string type, string url)

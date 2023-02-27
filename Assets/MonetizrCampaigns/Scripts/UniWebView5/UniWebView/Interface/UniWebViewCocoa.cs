@@ -76,6 +76,8 @@ public class UniWebViewInterface {
         }
     }
 
+    //-------
+
     [DllImport(DllLib)]
     private static extern void uv_stopOMIDAdSession(string name);
     public static void StopOMIDAdSession(string name)
@@ -89,6 +91,15 @@ public class UniWebViewInterface {
 
         uv_stopOMIDAdSession(name);
     }
+
+    public static void InitOMSDK(string jsonSettings, string omidJSServiceContent) { CheckPlatform(); }
+    public static void InitOMSDKSession(string resourceUrl) { CheckPlatform(); }
+    public static void StartImpression() { CheckPlatform(); }
+    public static void StopImpression() { CheckPlatform(); }
+
+
+    //--------
+
 
     [DllImport(DllLib)]
     private static extern void uv_setLogLevel(int level);
