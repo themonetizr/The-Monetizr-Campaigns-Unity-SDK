@@ -46,6 +46,7 @@ namespace Monetizr.Campaigns
             UniWebView.SetAllowInlinePlay(true);
             UniWebView.SetWebContentsDebuggingEnabled(true);
             UniWebView.SetJavaScriptEnabled(true);
+            UniWebView.SetAllowUniversalAccessFromFileURLs(true);
 
 
             MonetizrManager.Instance.SoundSwitch(false);

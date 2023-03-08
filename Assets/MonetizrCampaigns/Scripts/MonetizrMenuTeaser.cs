@@ -116,7 +116,7 @@ namespace Monetizr.Campaigns
                     PreparePanelDefaultVersion(id, onComplete, m); break;
             }*/
 
-            Log.PrintWarning($"{m.campaignId} {m}");
+            Log.Print($"PreparePanel teaser: {m.campaignId} {m}");
 
 
 

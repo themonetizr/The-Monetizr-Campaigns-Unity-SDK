@@ -94,8 +94,8 @@ public class UniWebViewInterface {
 
     public static void InitOMSDK(string jsonSettings, string omidJSServiceContent) { CheckPlatform(); }
     public static void InitOMSDKSession(string resourceUrl) { CheckPlatform(); }
-    public static void StartImpression() { CheckPlatform(); }
-    public static void StopImpression() { CheckPlatform(); }
+    public static void StartImpression(string resourceUrl) { CheckPlatform(); }
+    public static void StopImpression(string resourceUrl) { CheckPlatform(); }
 
 
     //--------

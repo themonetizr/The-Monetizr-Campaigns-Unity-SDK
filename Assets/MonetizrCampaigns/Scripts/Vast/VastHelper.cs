@@ -19,6 +19,7 @@ namespace Monetizr.Campaigns
     internal class VastHelper
     {
         MonetizrClient client;
+        private VastSettings vastSettings;
 
         internal class VastParams
         {
@@ -49,12 +50,13 @@ namespace Monetizr.Campaigns
         }
 
         [System.Serializable]
-        internal class OtherSettings
+        internal class VideoSettings
         {
             public bool isSkippable = true;
             public string skipOffset = "";
             public bool isAutoPlay = true;
             public string position = "preroll";
+            public string videoUrl = "";
         }
             
 
@@ -68,7 +70,10 @@ namespace Monetizr.Campaigns
         [System.Serializable]
         internal class VastSettings
         {
-            public OtherSettings otherSettings;
+            public string vendorName = "Themonetizr";
+            public string sdkVersion = "0.0.9";
+
+            public VideoSettings videoSettings;
 
             public List<AdVerification> adVerifications = new List<AdVerification>();
         }
@@ -142,7 +147,7 @@ namespace Monetizr.Campaigns
         }
                         
 
-        internal string CreateVastSettings(Verification_type[] adVerifications, string _skipOffset)
+        internal string CreateVastSettings(Verification_type[] adVerifications, string _skipOffset, string _videoUrl)
         {
             //adVerifications = null;
 
@@ -152,7 +157,7 @@ namespace Monetizr.Campaigns
                 
             }
 
-            VastSettings adv = new VastSettings();
+            vastSettings = new VastSettings();
 
             if(!adVerifications.IsNullOrEmpty())
             foreach (var av in adVerifications)
@@ -174,7 +179,7 @@ namespace Monetizr.Campaigns
                     (Verification_typeExecutableResource er) => { return new VerificationExecutableResource(er); },
                     new VerificationExecutableResource());
                 
-                adv.adVerifications.Add(new AdVerification()
+                vastSettings.adVerifications.Add(new AdVerification()
                 {
                     executableResource = execList,
                     javaScriptResource = jsrList,
@@ -186,9 +191,9 @@ namespace Monetizr.Campaigns
 
             //string s = Json.Serialize(adv.adVerifications);
 
-            adv.otherSettings = new OtherSettings() { skipOffset = _skipOffset };
+            vastSettings.videoSettings = new VideoSettings() { skipOffset = _skipOffset, videoUrl = _videoUrl };
 
-            return JsonUtility.ToJson(adv);
+            return JsonUtility.ToJson(vastSettings);
         }
 
         internal async Task<ServerCampaign> PrepareServerCampaign(VAST v)
@@ -220,7 +225,8 @@ namespace Monetizr.Campaigns
             //string s = JSON.Serialize(inLine.adVerificationsField);
 
 
-            string skipOffet = "";
+            string skipOffset = "";
+            string videoUrl = "";
 
             //serverCampaign.id = v.Ad[0].id;
 
@@ -279,9 +285,11 @@ namespace Monetizr.Campaigns
 
                     serverCampaign.assets.Add(videoAsset);
 
+                    videoUrl = value;
+
                     hasVideo = true;
 
-                    skipOffet = it.skipoffset;
+                    skipOffset = it.skipoffset;
 
                     //Log.Print(asset.ToString());
 
@@ -305,14 +313,14 @@ namespace Monetizr.Campaigns
             }
 
 
-            string s = CreateVastSettings(inLine.AdVerifications, skipOffet);
+            string s = CreateVastSettings(inLine.AdVerifications, skipOffset, videoUrl);
 
             Log.Print(s);
 
             serverCampaign.vastAdVerificationParams = s;
 
 
-            InitializeOMSDK();
+            await InitializeOMSDK(serverCampaign.vastAdVerificationParams);
 
             if (!hasSettings && videoAsset != null)
             {
@@ -382,7 +390,7 @@ namespace Monetizr.Campaigns
                 {
                     var str = File.ReadAllText(index_path);
 
-                    str = str.Replace("${MON_VAST_COMPONENT}", $"{serverCampaign.vastAdVerificationParams}");
+                    str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{serverCampaign.vastAdVerificationParams}");
 
                     File.WriteAllText(index_path, str);
                 }
@@ -423,31 +431,22 @@ namespace Monetizr.Campaigns
         }
 
         //TODO!
-        private void InitializeOMSDK()
+        private async Task InitializeOMSDK(string vastAdVerificationParams)
         {
-            string jsonSettings = "";
+            byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/omsdk/omsdk-v1.js");
 
-            /* string jsonSettings = @"{""vendorName"":\"Themonetizr\",
-        "sdkVersion":"",
-        "verificationResources":[
-           {
-                     "vendorKey":"",
-              "url":""
-              "params":""
-           },
-           {
-                     "vendorKey":"",
-              "url":""
-              "params":""
-           },
+            if (data == null)
+            {
+                Log.PrintWarning("Download of omsdk-v1.js failed!");
+                return;
+            }
 
-        ]
-     }
-             """; */
-            string omidJSServiceContent = null; //https://image.themonetizr.com/omsdk/omsdk-v1.js
+            string omidJSServiceContent = Encoding.UTF8.GetString(data);
 
+            //Log.Print($"InitializeOMSDK {vastAdVerificationParams}");
+            Log.Print($"InitializeOMSDK {omidJSServiceContent}");
 
-            UniWebViewInterface.InitOMSDK(jsonSettings, omidJSServiceContent);
+            UniWebViewInterface.InitOMSDK(vastAdVerificationParams, omidJSServiceContent);
         }
 
         private string ConvertCreativeToExt(string type, string url)

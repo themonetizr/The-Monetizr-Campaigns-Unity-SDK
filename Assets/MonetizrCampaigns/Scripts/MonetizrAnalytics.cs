@@ -903,8 +903,13 @@ namespace Monetizr.Campaigns
             if (additionalValues == null)
                 additionalValues = new Dictionary<string, string>();
 
+            string placementGroup = GetPlacementGroup(adPlacement);
+
             additionalValues.Add("placement", placementName);
             additionalValues.Add("placement_group", GetPlacementGroup(adPlacement));
+
+            if(MonetizrManager.isVastActive)
+                TrackOMSDKEvents(eventType, adPlacement, placementGroup);
 
             var eventName = "";
             bool timed = false;
@@ -974,6 +979,51 @@ namespace Monetizr.Campaigns
             };
 
             _TrackEvent(eventName, campaign, timed, additionalValues, duration);
+        }
+
+        private bool CanTrackInOMSDK(AdPlacement adPlacement)
+        {
+            switch (adPlacement)
+            {
+                case AdPlacement.TinyTeaser:
+
+                case AdPlacement.NotificationScreen:
+                case AdPlacement.SurveyNotificationScreen:
+                case AdPlacement.CongratsNotificationScreen:
+                case AdPlacement.EmailCongratsNotificationScreen:
+                
+                case AdPlacement.Minigame:
+                case AdPlacement.Video:
+                case AdPlacement.Survey:
+
+                case AdPlacement.EmailEnterInGameRewardScreen:
+                case AdPlacement.EmailEnterCouponRewardScreen:
+                case AdPlacement.EmailEnterSelectionRewardScreen:
+                    return true;
+            }
+
+            return false;
+        }
+
+        private void TrackOMSDKEvents(MonetizrManager.EventType eventType, AdPlacement adPlacement, string placementGroup)
+        {
+            //Videos has it's own OMSDK tracking
+            if (!CanTrackInOMSDK(adPlacement))
+                return;
+
+            //TODO: change to real url
+            string resourceUrl = $"https://image.themonetizr.com/{placementGroup.ToLower()}.png";
+
+            if (eventType == MonetizrManager.EventType.Impression)
+            {
+                UniWebViewInterface.InitOMSDKSession(resourceUrl);
+                UniWebViewInterface.StartImpression(resourceUrl);
+            }
+
+            if (eventType == MonetizrManager.EventType.ImpressionEnds)
+            {
+                UniWebViewInterface.StopImpression(resourceUrl);
+            }
         }
 
         internal string GetPlacementGroup(AdPlacement adPlacement)

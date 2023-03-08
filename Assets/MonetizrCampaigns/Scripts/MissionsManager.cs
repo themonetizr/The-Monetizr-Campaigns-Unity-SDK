@@ -793,7 +793,7 @@ namespace Monetizr.Campaigns
             int serverDefinedMission = 0;
 
 
-            Log.PrintWarning($"AddMissionsToCampaigns count: {campaigns.Count}");
+            Log.Print($"AddMissionsToCampaigns count: {campaigns.Count}");
 
             if (campaigns.Count > 0)
             {
@@ -805,7 +805,7 @@ namespace Monetizr.Campaigns
 
                 string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).serverSettings.GetParam("custom_missions");
                                 
-                Log.PrintWarning($"Predefined missions from settings: {serverMissionsJson}");
+                Log.Print($"Predefined missions from settings: {serverMissionsJson}");
 
                 if (serverMissionsJson?.Length > 0)
                 {

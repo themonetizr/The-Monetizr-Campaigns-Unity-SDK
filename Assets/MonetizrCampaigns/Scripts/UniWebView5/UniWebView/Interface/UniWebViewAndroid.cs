@@ -26,14 +26,14 @@ public class UniWebViewInterface {
         plugin.CallStatic("initOMSDKSession",resourceUrl); 
     }
 
-    public static void StartImpression() 
+    public static void StartImpression(string resourceUrl) { 
         CheckPlatform();
-        plugin.CallStatic("startImpression"); 
+        plugin.CallStatic("startImpression",resourceUrl); 
     }
 
-    public static void StopImpression() {
+    public static void StopImpression(string resourceUrl) {
         CheckPlatform();
-        plugin.CallStatic("stopImpression"); 
+        plugin.CallStatic("stopImpression",resourceUrl); 
     }
 
     public static void StopOMIDAdSession(string name) {
