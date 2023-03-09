@@ -92,10 +92,41 @@ public class UniWebViewInterface {
         uv_stopOMIDAdSession(name);
     }
 
-    public static void InitOMSDK(string jsonSettings, string omidJSServiceContent) { CheckPlatform(); }
-    public static void InitOMSDKSession(string resourceUrl) { CheckPlatform(); }
-    public static void StartImpression(string resourceUrl) { CheckPlatform(); }
-    public static void StopImpression(string resourceUrl) { CheckPlatform(); }
+    [DllImport(DllLib)]
+    private static extern void uv_initOMSDK(string jsonSettings, string omidJSServiceContent);
+    public static void InitOMSDK(string jsonSettings, string omidJSServiceContent)
+    {
+        CheckPlatform();
+
+        uv_initOMSDK(jsonSettings, omidJSServiceContent);
+    }
+
+    [DllImport(DllLib)]
+    private static extern void uv_initOMSDKSession(string resourceUrl);
+    public static void InitOMSDKSession(string resourceUrl)
+    {
+        CheckPlatform();
+
+        uv_initOMSDKSession(resourceUrl);
+    }
+
+    [DllImport(DllLib)]
+    private static extern void uv_startImpression(string resourceUrl);
+    public static void StartImpression(string resourceUrl)
+    {
+        CheckPlatform();
+
+        uv_startImpression(resourceUrl);
+    }
+
+    [DllImport(DllLib)]
+    private static extern void uv_stopImpression(string resourceUrl);
+    public static void StopImpression(string resourceUrl)
+    {
+        CheckPlatform();
+
+        uv_stopImpression(resourceUrl);
+    }
 
 
     //--------
