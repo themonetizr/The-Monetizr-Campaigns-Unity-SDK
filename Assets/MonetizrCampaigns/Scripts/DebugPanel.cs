@@ -106,6 +106,13 @@ namespace Monetizr.Campaigns
             isIDChanged = true;
         }
 
+        public void TurnOnOffColorBg()
+        {
+            GameObject obj = GameObject.Find("KeyBackgroundCanvas");
+
+            obj.GetComponent<Canvas>().enabled = !obj.GetComponent<Canvas>().enabled;
+        }
+
         public void OpenGame()
         {
             //var challengeId = MonetizrManager.Instance.GetActiveCampaign();

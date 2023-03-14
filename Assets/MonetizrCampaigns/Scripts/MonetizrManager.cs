@@ -857,7 +857,7 @@ namespace Monetizr.Campaigns
             lscreen.SetActive(false);
         }
 
-        internal static async void WaitForEndRequestAndNotify(Action<bool> onComplete, Mission m)
+        internal static async void WaitForEndRequestAndNotify(Action<bool> onComplete, Mission m, Action updateUIDelegate)
         {
             //show screen to block
             var lscreen = instance.uiController.ShowLoadingScreen();
@@ -872,10 +872,11 @@ namespace Monetizr.Campaigns
 
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressOk);
 
-                ShowCongratsNotification((bool _) =>
+                MonetizrManager.Instance.OnClaimRewardComplete(m, false, onComplete, updateUIDelegate);
+
+               /* ShowCongratsNotification((bool _) =>
                 {
                     //lscreen.SetActive(false);
-
 
 
                     m.state = MissionUIState.ToBeHidden;
@@ -892,7 +893,7 @@ namespace Monetizr.Campaigns
 
                     onComplete?.Invoke(false);
                 },
-                m);
+                m);*/
             };
 
             Action onFail = () =>
@@ -1689,10 +1690,13 @@ namespace Monetizr.Campaigns
             if (isSkipped)
                 return;
 
+            Log.Print($"OnClaimRewardComplete for {mission.serverId}");
+
             ShowCongratsNotification((bool _) =>
             {
                 bool updateUI = false;
 
+                Log.Print($"OnClaimRewardComplete --> ShowCongratsNotification {mission.serverId}");
 
                 if (mission.campaignServerSettings.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
                 {
