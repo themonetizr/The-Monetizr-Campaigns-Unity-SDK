@@ -516,7 +516,7 @@ namespace Monetizr.Campaigns
                             return;
                         }
 
-                        MonetizrManager.WaitForEndRequestAndNotify(onComplete, m);
+                        MonetizrManager.WaitForEndRequestAndNotify(onComplete, m, updateUIDelegate);
 
                     },
                     m,
@@ -1093,6 +1093,9 @@ namespace Monetizr.Campaigns
         {
             bool isUpdateNeeded = false;
 
+            if(finishedMission != null)
+            Log.Print($"-----UpdateMissionsActivity for {finishedMission.serverId}");
+
             foreach (var m in missions)
             {
                 if (m == finishedMission)
@@ -1104,7 +1107,11 @@ namespace Monetizr.Campaigns
                 if (m.isClaimed == ClaimState.Claimed)
                     continue;
 
+                
+
                 bool hasActivateAfter = m.activateAfter.Count > 0;
+
+                Log.Print($"-----Updating activity for {m.serverId} has {hasActivateAfter}");
 
                 //check if mission self referenced in activate after
                 if (hasActivateAfter && m.activateAfter.FindIndex(_id => _id == m.serverId) > 0)
@@ -1133,6 +1140,8 @@ namespace Monetizr.Campaigns
                     if (_m != null && _m.isClaimed != ClaimState.Claimed)
                     {
                         shouldBeDisabled = true;
+
+                        Log.PrintWarning($"------Mission {id} disabled because {_m.serverId} is not active");
                     }
                 }
 
