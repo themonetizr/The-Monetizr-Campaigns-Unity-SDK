@@ -25,7 +25,7 @@ namespace Monetizr.Campaigns
     {
         internal MissionType missionType;
         internal ulong reward;
-        internal int rewardPercent;
+        internal float rewardPercent;
         internal RewardType rewardCurrency;
         internal List<int> activateAfter = new List<int>();
         internal string surveyUrl;
@@ -248,6 +248,25 @@ namespace Monetizr.Campaigns
             return result;
         }
 
+        public float GetFloatParam(TKey p, float defaultParam = 0)
+        {
+            if (p == null)
+                return defaultParam;
+
+            if (!dictionary.ContainsKey(p))
+                return defaultParam;
+
+            float result = 0;
+            string val = dictionary[p].ToString();
+
+            if (!float.TryParse(val, out result))
+            {
+                return defaultParam;
+            }
+
+            return result;
+        }
+
     }
 
     [Serializable]
@@ -263,7 +282,7 @@ namespace Monetizr.Campaigns
         [SerializeField] internal bool isSponsored;
         [SerializeField] internal string brandName;
         [SerializeField] internal ulong reward;
-        [SerializeField] internal int rewardPercent;
+        [SerializeField] internal float rewardPercent;
 
         [NonSerialized] internal int sponsoredId;
        // [NonSerialized] internal Sprite brandBanner;
