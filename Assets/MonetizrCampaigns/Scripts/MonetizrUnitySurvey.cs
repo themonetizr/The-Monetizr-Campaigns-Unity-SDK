@@ -194,7 +194,12 @@ namespace Monetizr.Campaigns
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
 
             Log.Print($"{m.surveyId}");
-            //Log.PrintWarning($"{surveysContent}");
+
+            if (!Utils.TestJson(surveysContent))
+            {
+                Log.PrintError($"Json isn't properly formatted.");
+                Log.PrintWarning($"{surveysContent}");
+            }
 
             surveys = JsonUtility.FromJson<Surveys>(surveysContent);
 

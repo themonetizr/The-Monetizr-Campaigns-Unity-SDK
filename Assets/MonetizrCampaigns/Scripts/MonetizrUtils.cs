@@ -161,5 +161,31 @@ namespace Monetizr.Campaigns
                 }
             }
         }
+
+        public static bool TestJson(string jsonString)
+        {
+            int quoteCount = 0;
+            int cbCount1 = 0;
+            int cbCount2 = 0;
+
+            foreach (char c in jsonString)
+            {
+                switch(c)   
+                {
+                    case '\"': quoteCount++; break;
+                    case '{': cbCount1++; break;
+                    case '}': cbCount2++; break;
+                    default: break;
+                }
+            }
+
+            if (quoteCount % 2 != 0)
+                return false;
+
+            if (cbCount1 != cbCount2)
+                return false;
+
+            return true;
+        }
     }
 }
