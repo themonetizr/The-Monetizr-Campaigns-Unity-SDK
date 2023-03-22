@@ -288,16 +288,18 @@ namespace Monetizr.Campaigns
 
         private void ClosePanel()
         {
-            Log.Print($"Stopping OMID ad session");
+            Log.Print($"Stopping OMID ad session at time: {Time.time}");
 
             webView.StopOMIDAdSession();
 
-            Invoke("DestroyWebView", 1);
+            float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay",1.0f);
+
+            Invoke("DestroyWebView", time);
         }
 
         private void DestroyWebView()
         {
-            Log.Print($"Destroying webview isSkipped: {isSkipped}");
+            Log.Print($"Destroying webview isSkipped: {isSkipped} current time: {Time.time}");
 
             Destroy(webView);
             webView = null;

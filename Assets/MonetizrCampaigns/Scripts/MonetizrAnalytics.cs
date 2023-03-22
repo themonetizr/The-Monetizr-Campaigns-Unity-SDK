@@ -903,13 +903,13 @@ namespace Monetizr.Campaigns
             if (additionalValues == null)
                 additionalValues = new Dictionary<string, string>();
 
-            string placementGroup = GetPlacementGroup(adPlacement);
+            //string placementGroup = GetPlacementGroup(adPlacement);
 
             additionalValues.Add("placement", placementName);
             additionalValues.Add("placement_group", GetPlacementGroup(adPlacement));
 
-            if(MonetizrManager.isVastActive)
-                TrackOMSDKEvents(eventType, adPlacement, placementGroup);
+            //if(MonetizrManager.isVastActive)
+            //    TrackOMSDKEvents(eventType, adPlacement, placementGroup);
 
             var eventName = "";
             bool timed = false;

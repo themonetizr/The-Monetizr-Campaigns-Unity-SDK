@@ -71,7 +71,7 @@ namespace Monetizr.Campaigns
         internal class VastSettings
         {
             public string vendorName = "Themonetizr";
-            public string sdkVersion = "0.0.9";
+            public string sdkVersion = MonetizrManager.SDKVersion;
 
             public VideoSettings videoSettings;
 
@@ -220,7 +220,32 @@ namespace Monetizr.Campaigns
 
             var inLine = (Inline_type)vad.Item;
 
+            //default settings
+            serverCampaign.serverSettings = new SettingsDictionary<string, string>();
+            serverCampaign.serverSettings.dictionary.Add("design_version", "2");
+            serverCampaign.serverSettings.dictionary.Add("amount_of_teasers", "100");
+            serverCampaign.serverSettings.dictionary.Add("teaser_design_version", "3");
+            serverCampaign.serverSettings.dictionary.Add("amount_of_notifications", "100");
+            serverCampaign.serverSettings.dictionary.Add("RewardCenter.show_for_one_mission", "true");
 
+            serverCampaign.serverSettings.dictionary.Add("bg_color", "#124674");
+            serverCampaign.serverSettings.dictionary.Add("bg_color2", "#124674");
+            serverCampaign.serverSettings.dictionary.Add("link_color", "#AAAAFF");
+            serverCampaign.serverSettings.dictionary.Add("text_color", "#FFFFFF");
+            serverCampaign.serverSettings.dictionary.Add("bg_border_color", "#FFFFFF");
+            serverCampaign.serverSettings.dictionary.Add("RewardCenter.reward_text_color", "#2196F3");
+
+            serverCampaign.serverSettings.dictionary.Add("CongratsNotification.button_text", "Awesome!");
+            serverCampaign.serverSettings.dictionary.Add("CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr");
+            serverCampaign.serverSettings.dictionary.Add("CongratsNotification.header_text", "Get your awesome reward!");
+
+            serverCampaign.serverSettings.dictionary.Add("StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>");
+            serverCampaign.serverSettings.dictionary.Add("StartNotification.button_text", "Learn more!");
+            serverCampaign.serverSettings.dictionary.Add("StartNotification.content_text", "Join Monetizr<br/>to get game rewards");
+            serverCampaign.serverSettings.dictionary.Add("StartNotification.header_text", "<b>Rewards by Monetizr</b>");
+
+            serverCampaign.serverSettings.dictionary.Add("RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%");
+            //-----
 
             //string s = JSON.Serialize(inLine.adVerificationsField);
 
@@ -268,7 +293,7 @@ namespace Monetizr.Campaigns
 
                     //Log.Print(it.MediaFiles[0].Value);
 
-                    Log.Print(it.AdParameters);
+                    
                     string value = it.MediaFiles.MediaFile[0].Value;
                     string type = it.MediaFiles.MediaFile[0].type;
 
@@ -295,13 +320,24 @@ namespace Monetizr.Campaigns
 
                     if (it.AdParameters != null)
                     {
+                        Log.Print(it.AdParameters.Value);
+
                         string adp = it.AdParameters.Value;
 
                         adp = adp.Replace("\n", "");
 
                         var dict = Json.Deserialize(adp) as Dictionary<string, object>;
 
-                        serverCampaign.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(adp, dict));
+                        var parsedDict = Utils.ParseContentString("", dict);
+
+                        foreach (var i in parsedDict)
+                        {
+                            serverCampaign.serverSettings.dictionary.Add(i.Key, i.Value);
+
+                            Log.Print($"Additional settings from AdParameters [{i.Key}:{i.Value}]");
+                        }
+
+                        //serverCampaign.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(adp, dict));
                     }
                 }
                 /*else if (c.Item is VASTADInLineCreativeCompanionAds)
@@ -322,35 +358,12 @@ namespace Monetizr.Campaigns
 
             await InitializeOMSDK(serverCampaign.vastAdVerificationParams);
 
-            if (!hasSettings && videoAsset != null)
+            if (videoAsset != null)
             {
-                serverCampaign.serverSettings = new SettingsDictionary<string, string>();
+                //serverCampaign.serverSettings = new SettingsDictionary<string, string>();
 
                 serverCampaign.serverSettings.dictionary.Add("custom_missions", "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
-                serverCampaign.serverSettings.dictionary.Add("design_version", "2");
-                serverCampaign.serverSettings.dictionary.Add("amount_of_teasers", "100");
-                serverCampaign.serverSettings.dictionary.Add("teaser_design_version", "3");
-                serverCampaign.serverSettings.dictionary.Add("amount_of_notifications", "100");
-                serverCampaign.serverSettings.dictionary.Add("RewardCenter.show_for_one_mission", "true");
-
-                serverCampaign.serverSettings.dictionary.Add("bg_color", "#124674");
-                serverCampaign.serverSettings.dictionary.Add("bg_color2", "#124674");
-                serverCampaign.serverSettings.dictionary.Add("link_color", "#AAAAFF");
-                serverCampaign.serverSettings.dictionary.Add("text_color", "#FFFFFF");
-                serverCampaign.serverSettings.dictionary.Add("bg_border_color", "#FFFFFF");
-                serverCampaign.serverSettings.dictionary.Add("RewardCenter.reward_text_color", "#2196F3");
-
-                serverCampaign.serverSettings.dictionary.Add("CongratsNotification.button_text", "Awesome!");
-                serverCampaign.serverSettings.dictionary.Add("CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr");
-                serverCampaign.serverSettings.dictionary.Add("CongratsNotification.header_text", "Get your awesome reward!");
-
-                serverCampaign.serverSettings.dictionary.Add("StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>");
-                serverCampaign.serverSettings.dictionary.Add("StartNotification.button_text", "Learn more!");
-                serverCampaign.serverSettings.dictionary.Add("StartNotification.content_text", "Join Monetizr<br/>to get game rewards");
-                serverCampaign.serverSettings.dictionary.Add("StartNotification.header_text", "<b>Rewards by Monetizr</b>");
-
-                serverCampaign.serverSettings.dictionary.Add("RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%");
-
+                
                 //create folder with video name
 
                 //dowload video and video player into that folder
