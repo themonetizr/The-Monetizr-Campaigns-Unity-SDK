@@ -1816,7 +1816,10 @@ namespace Monetizr.Campaigns
 
                 await campaign.LoadCampaignAssets();               
 
-                Log.Print($"Loading finished {campaign.isLoaded}");
+                if(campaign.isLoaded)
+                    Log.Print($"Loading finished");
+                else
+                    Log.PrintError($"Loading error!");
 
                 if (campaign.isLoaded)
                 {
