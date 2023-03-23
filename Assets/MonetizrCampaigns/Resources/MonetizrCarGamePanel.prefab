@@ -739,8 +739,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiVersion: 0
-  backgroundImage: {fileID: 0}
-  backgroundBorderImage: {fileID: 0}
+  backgroundImage: {fileID: 1601973313011850879}
+  backgroundBorderImage: {fileID: 7226164532691812479}
   nextPanelId: -1
   backSprite: {fileID: 21300000, guid: 97651fa639b2846a8bd8a2f22bdc6bed, type: 3}
   backSpriteDisabled: {fileID: 21300000, guid: 11fcc8c5752924fe29dcebafcd9c105d, type: 3}
