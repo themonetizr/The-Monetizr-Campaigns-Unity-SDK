@@ -574,7 +574,7 @@ namespace Monetizr.Campaigns
             {
                 if (m.rewardType == rt)
                 {
-                    m.reward = (ulong)(reward.maximumAmount * (m.rewardPercent / 100.0f));
+                    m.reward = (ulong)(reward.maximumAmount * m.rewardPercent);
                 }
             }
 
@@ -621,7 +621,7 @@ namespace Monetizr.Campaigns
                     }
                     else
                     {*/
-                    int rewardAmount = _m.GetRewardAmount();
+                    float rewardAmount = _m.GetRewardAmount()/100.0f;
                     RewardType currency = _m.GetRewardType();
 
                     MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(currency);
@@ -634,14 +634,14 @@ namespace Monetizr.Campaigns
                     if (rewardAmount > 100.0f)
                         return;
 
-                    ulong rewardAmount2 = (ulong)(gr.maximumAmount * (rewardAmount / 100.0f));
+                    ulong rewardAmount2 = (ulong)Math.Ceiling(gr.maximumAmount * rewardAmount);
                     //}
 
                     //activateAfter = _m.GetActivateRange();
 
                     //string surveyUrl = serverSettings.GetParam(_m.survey);
 
-                   // Log.Print($"----------------- {_m.survey} : {_m.surveyUnity}");
+                    Log.Print($"CreateMissionDescriptions:max:{gr.maximumAmount}:real:{rewardAmount2}:percent:{rewardAmount}");
 
                     m.Add(new MissionDescription
                     {
@@ -759,11 +759,11 @@ namespace Monetizr.Campaigns
                 return RewardType.Coins;
             }
 
-            public int GetRewardAmount()
+            public float GetRewardAmount()
             {
-                int reward = 0;
+                float reward = 0;
 
-                if (int.TryParse(percent_amount, out reward))
+                if (float.TryParse(percent_amount, out reward))
                     return Mathf.Clamp(reward, 0, 100);
 
                 return 0;

@@ -185,7 +185,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 87}
-  m_SizeDelta: {x: 644.4, y: 281.9}
+  m_SizeDelta: {x: 670, y: 281.9}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &5398235617683018933
 CanvasRenderer:
@@ -228,9 +228,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1.42
-  m_Text: 'You got 2 Energy
-
-    Boosters from Charmin'
+  m_Text: Revisa tu bandeja de entrada para obtener tu 100k coins.
 --- !u!1 &2193823692905062487
 GameObject:
   m_ObjectHideFlags: 0
@@ -487,41 +485,6 @@ MonoBehaviour:
   buttonText: {fileID: 7234977449560703399}
   noThanksButton: {fileID: 3046868277876281524}
   gift: {fileID: 3611454950221394275}
-  currentMission:
-    apiKey: 
-    type: 0
-    startMoney: 0
-    isSponsored: 0
-    brandName: 
-    reward: 0
-    rewardPercent: 0
-    campaignId: 
-    surveyUrl: 
-    surveyId: 
-    claimedTime: 
-    deactivateTime:
-      _dateTime: 01/01/0001 00:00:00
-    activateTime:
-      _dateTime: 01/01/0001 00:00:00
-    delaySurveyTimeSec: 0
-    surveyAlreadyShown: 0
-    brandId: 
-    appId: 
-    rewardType: 0
-    brandBannerUrl: 
-    brandLogoUrl: 
-    brandRewardBannerUrl: 
-    id: 0
-    serverId: 0
-    isClaimed: 0
-    isDisabled: 0
-    hasVideo: 0
-    sdkVersion: 
-    activateAfter: 
-    isRewardIngame: 0
-    autoStartAfter: 0
-    alwaysHiddenInRC: 0
-    hasUnitySurvey: 0
   leaderboardImage: {fileID: 5788864503576455431}
 --- !u!114 &6572120955561666976
 MonoBehaviour:
