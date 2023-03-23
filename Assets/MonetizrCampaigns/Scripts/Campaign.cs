@@ -233,8 +233,15 @@ namespace Monetizr.Campaigns
 
                 if (data == null)
                 {
+                    Log.PrintWarning($"Loading {asset.url} failed!");
+
                     if (!isOptional)
+                    {
+                        Log.PrintError($"Campaign loading will fail, because asset is required!");
                         this.isLoaded = false;
+                    }
+
+                   
 
                     return;
                 }
@@ -249,8 +256,13 @@ namespace Monetizr.Campaigns
 
                 if (data == null)
                 {
+                    Log.PrintWarning($"Loading {fpath} failed!");
+
                     if (!isOptional)
+                    {
+                        Log.PrintError($"Campaign loading will fail, because asset is required!");
                         this.isLoaded = false;
+                    }
 
                     return;
                 }
