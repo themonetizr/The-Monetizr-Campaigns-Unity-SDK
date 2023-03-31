@@ -24,6 +24,7 @@ namespace Monetizr.Campaigns
         }
 
 
+        // ReSharper disable Unity.PerformanceAnalysis
         public static void PrintError(object message)
         {
             Debug.LogError($"Monetizr SDK: {message}");

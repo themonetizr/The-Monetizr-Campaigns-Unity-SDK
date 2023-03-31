@@ -580,6 +580,46 @@ namespace Monetizr.Campaigns
 
         }
 
+        internal static Sprite GetMissionRewardImage(Mission m)
+        {
+            if (!string.IsNullOrEmpty(m.rewardAssetName))
+            {
+                if (m.campaign.TryGetSpriteAsset(m.rewardAssetName, out var s))
+                    return s;
+            }
+            
+            Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
+            Sprite customCoin = m.campaign.GetAsset<Sprite>(AssetsType.CustomCoinSprite);
+               
+            if (m.rewardType == RewardType.Coins && customCoin != null)
+            {
+                rewardIcon = customCoin;
+            }
+            
+            Sprite ingameRewardSprite = m.campaign.GetAsset<Sprite>(AssetsType.IngameRewardSprite);
+            
+            if (ingameRewardSprite != null && EnterEmailPanel.GetPanelType(m) == EnterEmailType.IngameReward)
+            {
+                rewardIcon = ingameRewardSprite;
+            }
+
+            Sprite productRewardSprite = m.campaign.GetAsset<Sprite>(AssetsType.RewardSprite);
+
+            if (productRewardSprite != null && EnterEmailPanel.GetPanelType(m) == EnterEmailType.ProductReward)
+            {
+                rewardIcon = productRewardSprite;
+            }
+
+            Sprite selectionRewardSprite = m.campaign.GetAsset<Sprite>(AssetsType.UnknownRewardSprite);
+            
+            if (selectionRewardSprite != null && EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward)
+            {
+                rewardIcon = selectionRewardSprite;
+            }
+
+            return rewardIcon;
+        }
+
         internal Mission GetFirstUnactiveMission()
         {
             foreach (var m in missions)
@@ -607,20 +647,7 @@ namespace Monetizr.Campaigns
 
                     if (serverMissionType == MissionType.Undefined)
                         return;
-
-                    //MissionDescription original = originalList.Find((MissionDescription md) => { return md.missionType == serverMissionType; });
-
-                    //int rewardAmount = 1;
-                    //RewardType currency = RewardType.Coins;
-                    //List<int> activateAfter = new List<int>();
-
-                    /*if(original != null)
-                    {
-                        rewardAmount = original.reward;
-                        currency = original.rewardCurrency;
-                    }
-                    else
-                    {*/
+                    
                     float rewardAmount = _m.GetRewardAmount()/100.0f;
                     RewardType currency = _m.GetRewardType();
 
@@ -655,7 +682,8 @@ namespace Monetizr.Campaigns
                         rewardPercent = rewardAmount,
                         id = _m.getId(),
                         alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
-                        autoStartAfter = _m.GetAutoStartId()
+                        autoStartAfter = _m.GetAutoStartId(),
+                        rewardImage = _m.reward_image,
                     }); ;
 
                 });
@@ -693,6 +721,8 @@ namespace Monetizr.Campaigns
 
             //Auto start after completing 
             public string auto_start_after;
+
+            public string reward_image;
 
             public int GetAutoStartId()
             {
@@ -890,14 +920,18 @@ namespace Monetizr.Campaigns
                     if (m == null)
                         continue;
 
+                    m.campaign = serverCampaign;
+                    
                     m.sdkVersion = MonetizrManager.SDKVersion;
 
                     //if (string.IsNullOrEmpty(m.surveyUrl))
 
+                    m.rewardAssetName = md.rewardImage;
+                        
                     if(!md.hasUnitySurvey)
                         m.surveyUrl = md.surveyUrl;
                     else
-                        m.surveyUrl = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.SurveyURLString);
+                        m.surveyUrl = m.campaign.GetAsset<string>(AssetsType.SurveyURLString);
 
                     m.hasUnitySurvey = md.hasUnitySurvey;
 
@@ -905,9 +939,8 @@ namespace Monetizr.Campaigns
                                        
                     m.isServerCampaignActive = true;
 
-
                     m.isToBeRemoved = false;
-                    m.campaignServerSettings = MonetizrManager.Instance.GetCampaign(ch).serverSettings;
+                    m.campaignServerSettings = m.campaign.serverSettings;
 
                     bool showNotClaimedDisabled = m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
 
@@ -927,9 +960,9 @@ namespace Monetizr.Campaigns
                     m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity
                     m.activateAfter = prefefinedSponsoredMissions[i].activateAfter;
 
-                    m.brandName = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.BrandTitleString);
+                    m.brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
 
-                    m.campaign = serverCampaign;
+                    
                     //InitializeNonSerializedFields(m);
                 }
 

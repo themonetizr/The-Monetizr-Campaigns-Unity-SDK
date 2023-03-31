@@ -34,6 +34,7 @@ namespace Monetizr.Campaigns
         internal int autoStartAfter;
         internal bool alwaysHiddenInRC;
         internal bool hasUnitySurvey;
+        internal string rewardImage;
     }
 
     internal enum MissionUIState
@@ -376,6 +377,7 @@ namespace Monetizr.Campaigns
         [NonSerialized] internal AdPlacement adPlacement;
 
         [NonSerialized] internal ServerCampaign campaign;
+        [NonSerialized] public string rewardAssetName;
     }
 
     /*internal class  SurveyMission : Mission

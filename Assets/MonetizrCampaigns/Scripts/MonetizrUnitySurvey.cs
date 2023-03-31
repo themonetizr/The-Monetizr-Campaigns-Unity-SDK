@@ -331,12 +331,12 @@ namespace Monetizr.Campaigns
 
             if (!currentSurvey.settings.hideReward)
             {
-                Sprite rewardSprite = MonetizrManager.gameRewards[m.rewardType].icon;
+               /* Sprite rewardSprite = MonetizrManager.gameRewards[m.rewardType].icon;
 
                 if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite))
                     rewardSprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
-
-                rewardImage.sprite = rewardSprite;
+*/
+                rewardImage.sprite = MissionsManager.GetMissionRewardImage(m);;
             }
 
             UpdateButtons();
