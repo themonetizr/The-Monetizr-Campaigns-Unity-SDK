@@ -188,6 +188,24 @@ namespace Monetizr.Campaigns
             return assetsDict.ContainsKey(t);
         }
 
+        internal bool TryGetAsset<T>(AssetsType t, out T res)
+        {
+            res = default(T);
+            
+            if (AssetsSystemTypes[t] != typeof(T))
+            {
+                Log.PrintError($"AssetsType {t} and {typeof(T)} do not match!");
+                return false;
+            }
+
+            if (!assetsDict.ContainsKey(t))
+                return false;
+            
+            res = (T)Convert.ChangeType(assetsDict[t], typeof(T));
+            
+            return true;
+        }
+        
         internal T GetAsset<T>(AssetsType t)
         {
             if (AssetsSystemTypes[t] != typeof(T))

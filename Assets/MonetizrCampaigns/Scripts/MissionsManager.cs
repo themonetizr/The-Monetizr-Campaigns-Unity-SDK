@@ -589,30 +589,27 @@ namespace Monetizr.Campaigns
             }
             
             Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
-            Sprite customCoin = m.campaign.GetAsset<Sprite>(AssetsType.CustomCoinSprite);
-               
-            if (m.rewardType == RewardType.Coins && customCoin != null)
+                
+            if (m.rewardType == RewardType.Coins && 
+                m.campaign.TryGetAsset<Sprite>(AssetsType.CustomCoinSprite,out var customCoin))
             {
                 rewardIcon = customCoin;
             }
             
-            Sprite ingameRewardSprite = m.campaign.GetAsset<Sprite>(AssetsType.IngameRewardSprite);
-            
-            if (ingameRewardSprite != null && EnterEmailPanel.GetPanelType(m) == EnterEmailType.IngameReward)
+            if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.IngameReward &&
+                m.campaign.TryGetAsset<Sprite>(AssetsType.IngameRewardSprite, out var inGameRewardSprite))
             {
-                rewardIcon = ingameRewardSprite;
+                rewardIcon = inGameRewardSprite;
             }
-
-            Sprite productRewardSprite = m.campaign.GetAsset<Sprite>(AssetsType.RewardSprite);
-
-            if (productRewardSprite != null && EnterEmailPanel.GetPanelType(m) == EnterEmailType.ProductReward)
+            
+            if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.ProductReward &&
+                m.campaign.TryGetAsset<Sprite>(AssetsType.RewardSprite, out var productRewardSprite))
             {
                 rewardIcon = productRewardSprite;
             }
-
-            Sprite selectionRewardSprite = m.campaign.GetAsset<Sprite>(AssetsType.UnknownRewardSprite);
             
-            if (selectionRewardSprite != null && EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward)
+            if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward &&
+                m.campaign.TryGetAsset<Sprite>(AssetsType.UnknownRewardSprite, out var selectionRewardSprite))
             {
                 rewardIcon = selectionRewardSprite;
             }
