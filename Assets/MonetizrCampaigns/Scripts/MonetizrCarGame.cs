@@ -86,8 +86,14 @@ namespace Monetizr.Campaigns
             bonusTaken = 0;
             car.parent = this;
 
-            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
-            logo.gameObject.SetActive(logo.sprite != null);
+            //logo.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite); ;
+            //logo.gameObject.SetActive(logo.sprite != null);
+
+            bool hasLogo = m.campaign.TryGetAsset(AssetsType.BrandRewardLogoSprite, out Sprite res);
+            
+            logo.sprite = res;
+            logo.gameObject.SetActive(hasLogo);
+            
 
             gameItems = new List<Item>(9);
 

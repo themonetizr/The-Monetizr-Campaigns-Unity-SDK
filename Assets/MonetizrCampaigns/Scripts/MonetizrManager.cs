@@ -1630,14 +1630,14 @@ namespace Monetizr.Campaigns
             }
 
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
-            if (!instance.HasAsset(challengeId, AssetsType.TinyTeaserSprite) &&
-                !instance.HasAsset(challengeId, AssetsType.TeaserGifPathString))
+            var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
+            
+            if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) &&
+                !campaign.HasAsset(AssetsType.TeaserGifPathString))
             {
                 Log.Print("No texture for tiny teaser!");
                 return;
             }
-
-            var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
             if (campaign.serverSettings.GetParam("hide_teaser_button") == "true")
                 return;
@@ -1919,7 +1919,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Get Asset from the challenge
         /// </summary>
-        public T GetAsset<T>(String challengeId, AssetsType t)
+        public T _GetAsset<T>(String challengeId, AssetsType t)
         {
             if (challengeId == null)
             {
@@ -1933,7 +1933,7 @@ namespace Monetizr.Campaigns
                 return default(T);
             }
 
-            if (!HasAsset(challengeId, t))
+            if (!_HasAsset(challengeId, t))
             {
                 //Log.Print($"{challengeId} has no asset {t}");
                 return default(T);
@@ -1952,7 +1952,7 @@ namespace Monetizr.Campaigns
             return campaigns.ContainsKey(challengeId);
         }
 
-        public bool HasAsset(String challengeId, AssetsType t)
+        public bool _HasAsset(String challengeId, AssetsType t)
         {
             if (campaigns == null)
                 return false;

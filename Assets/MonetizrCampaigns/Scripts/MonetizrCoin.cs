@@ -19,14 +19,21 @@ public class MonetizrCoin : MonoBehaviour
 
         var currentCampaign = MonetizrManager.Instance.GetActiveCampaign();
 
-        if (MonetizrManager.Instance.HasAsset(currentCampaign, AssetsType.CustomCoinSprite))
+        var campaign = MonetizrManager.Instance.GetCampaign(currentCampaign);
+
+        if (campaign.TryGetAsset<Sprite>(AssetsType.CustomCoinSprite, out Sprite coinSprite))
+        {
+            uiCoin.sprite = coinSprite;
+        }
+        
+        /*if (MonetizrManager.Instance.HasAsset(currentCampaign, AssetsType.CustomCoinSprite))
         {
             var coinSprite = MonetizrManager.Instance.GetAsset<Sprite>(currentCampaign, AssetsType.CustomCoinSprite);
 
             uiCoin.sprite = coinSprite;
 
             return true;
-        }
+        }*/
 
         return false;
     }

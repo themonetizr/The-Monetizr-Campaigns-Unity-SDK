@@ -199,8 +199,8 @@ namespace Monetizr.Campaigns
                 singleBackgroundImage.enabled = true;
 
 
-                if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.TinyTeaserSprite))
-                    singleBackgroundImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.TinyTeaserSprite);
+                if (m.campaign.HasAsset(AssetsType.TinyTeaserSprite))
+                    singleBackgroundImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.TinyTeaserSprite);
 
                 return;
             }
@@ -215,9 +215,9 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.TeaserGifPathString))
+            if (m.campaign.HasAsset(AssetsType.TeaserGifPathString))
             {
-                string url = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.TeaserGifPathString);
+                string url = m.campaign.GetAsset<string>(AssetsType.TeaserGifPathString);
 
                 gifImage.gameObject.SetActive(true);
                 gifImage.SetGifFromUrl(url);
@@ -233,7 +233,7 @@ namespace Monetizr.Campaigns
 
                 bannerRewardImage.sprite = MonetizrRewardedItem.GetRewardSprite(m);
 
-                rectangeBannerImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.TinyTeaserSprite);
+                rectangeBannerImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.TinyTeaserSprite);
 
             }
 

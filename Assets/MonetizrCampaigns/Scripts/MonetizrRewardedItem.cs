@@ -70,7 +70,7 @@ namespace Monetizr.Campaigns
             mission = m;
 
             //brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
-            missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite);
+            missionIcon = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
 
             brandBanner = null;
 

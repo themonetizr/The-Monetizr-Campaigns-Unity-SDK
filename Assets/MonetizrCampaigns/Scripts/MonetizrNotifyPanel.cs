@@ -50,11 +50,11 @@ namespace Monetizr.Campaigns
             closeButton.onClick.AddListener(OnButtonPress);
             noThanksButton?.onClick.AddListener(OnNoThanksPress);
 
-            brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandLogoSprite);
-            brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardBannerSprite);
-            brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
+            brandLogo = m.campaign.GetAsset<Sprite>(AssetsType.BrandLogoSprite);
+            brandRewardBanner = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardBannerSprite);
+            brandBanner = m.campaign.GetAsset<Sprite>(AssetsType.BrandBannerSprite);
 
-            leaderboardImage.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.LeaderboardBannerSprite);
+            leaderboardImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.LeaderboardBannerSprite);
             leaderboardImage.gameObject.SetActive(leaderboardImage.sprite != null);
 
             rewardIcon = MissionsManager.GetMissionRewardImage(m);
@@ -98,7 +98,7 @@ namespace Monetizr.Campaigns
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
             banner.sprite = brandBanner;
-            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null);
 
             rewardAmount.text = m.reward.ToString();
@@ -108,9 +108,9 @@ namespace Monetizr.Campaigns
             
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             gift?.gameObject.SetActive(false);
@@ -178,9 +178,9 @@ namespace Monetizr.Campaigns
             //Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             /*Sprite customCoin = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.CustomCoinSprite);
@@ -265,7 +265,7 @@ namespace Monetizr.Campaigns
             text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
 
             gift?.gameObject.SetActive(false);
-            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null);
             rewardImageBackgroud.gameObject.SetActive(false);
             rewardAmount.gameObject.SetActive(false);
@@ -289,7 +289,7 @@ namespace Monetizr.Campaigns
             var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
 
             banner.sprite = brandRewardBanner;
-            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null);
             rewardAmount.text = m.reward.ToString();
 
@@ -298,9 +298,9 @@ namespace Monetizr.Campaigns
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(challengeId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(challengeId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             /*Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
@@ -409,7 +409,7 @@ namespace Monetizr.Campaigns
             else
                 banner.sprite = brandBanner;
 
-            banner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
+            banner.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandBannerSprite);
 
             if (brandLogo != null)
                 logo.sprite = brandLogo;
@@ -457,7 +457,7 @@ namespace Monetizr.Campaigns
 
             //rewardImage.sprite = rewardIcon;
 
-            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            logo.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite); ;
             logo.gameObject.SetActive(logo.sprite != null);
 
             gift?.gameObject.SetActive(false);

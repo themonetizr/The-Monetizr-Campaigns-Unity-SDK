@@ -1046,10 +1046,11 @@ namespace Monetizr.Campaigns
 
             var ch = campaign.id;
 
-            if(MonetizrManager.Instance.HasAsset(ch, AssetsType.BrandTitleString))
-                brand_name = MonetizrManager.Instance.GetAsset<string>(ch, AssetsType.BrandTitleString);
+            if (campaign.TryGetAsset(AssetsType.BrandTitleString, out string res))
+            {
+                brand_name = res;
+            }
 
-           
             var props = new Value();
             
             AddDefaultMixpanelValues(props, campaign, brand_name);

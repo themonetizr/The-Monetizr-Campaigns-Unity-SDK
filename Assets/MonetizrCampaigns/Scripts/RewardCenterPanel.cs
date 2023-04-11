@@ -206,7 +206,7 @@ namespace Monetizr.Campaigns
                         headerText.color = color;*/
 
 
-                    var bgSprite = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.TiledBackgroundSprite);
+                    var bgSprite = m.campaign.GetAsset<Sprite>(AssetsType.TiledBackgroundSprite);
 
                     if (bgSprite != default(Sprite))
                         background.sprite = bgSprite;
@@ -232,12 +232,12 @@ namespace Monetizr.Campaigns
         {
             string campaignId = m.campaignId;
 
-            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
+            string brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
@@ -254,14 +254,14 @@ namespace Monetizr.Campaigns
         {
             string campaignId = m.campaignId;
 
-            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
+            string brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
                        
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
@@ -281,14 +281,14 @@ namespace Monetizr.Campaigns
         {
             string campaignId = m.campaignId;
 
-            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
+            string brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
 
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
@@ -305,14 +305,14 @@ namespace Monetizr.Campaigns
         {
             string campaignId = m.campaignId;
 
-            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
+            string brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
 
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
@@ -345,14 +345,14 @@ namespace Monetizr.Campaigns
         {
             string campaignId = m.campaignId;
 
-            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
+            string brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
 
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
@@ -380,9 +380,9 @@ namespace Monetizr.Campaigns
             item.currectProgress = getCurrencyFunc() - m.startMoney;
             item.maxProgress = m.reward;
 
-            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite))
+            if (m.campaign.HasAsset(AssetsType.RewardSprite))
             {
-                item.giftIcon.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
+                item.giftIcon.sprite = m.campaign.GetAsset<Sprite>(AssetsType.RewardSprite);
             }
 
         }
@@ -391,14 +391,14 @@ namespace Monetizr.Campaigns
         {
             string campaignId = m.campaignId;
 
-            string brandName = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.BrandTitleString);
+            string brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
 
-            if (m.rewardType == RewardType.Coins && MonetizrManager.Instance.HasAsset(campaignId, AssetsType.CustomCoinString))
+            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
-                rewardTitle = MonetizrManager.Instance.GetAsset<string>(campaignId, AssetsType.CustomCoinString);
+                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;

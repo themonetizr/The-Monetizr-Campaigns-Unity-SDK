@@ -123,7 +123,7 @@ namespace Monetizr.Campaigns
         private void PrepareHtml5Panel()
         {
             
-            webUrl = "file://" + MonetizrManager.Instance.GetAsset<string>(currentMission.campaignId, AssetsType.Html5PathString);
+            webUrl = "file://" + currentMission.campaign.GetAsset<string>(AssetsType.Html5PathString);
             // eventsPrefix = "Html5";
 
             webView.Load(webUrl);
