@@ -70,7 +70,7 @@ namespace Monetizr.Campaigns
             mission = m;
 
             //brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
-            missionIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite);
+            missionIcon = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
 
             brandBanner = null;
 
@@ -162,7 +162,8 @@ namespace Monetizr.Campaigns
 
         internal static Sprite GetRewardSprite(Mission m)
         {
-            Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
+            return MissionsManager.GetMissionRewardImage(m);
+            /*Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
 
             Sprite customCoin = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.CustomCoinSprite);
 
@@ -179,7 +180,7 @@ namespace Monetizr.Campaigns
                 rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
             }
 
-            return rewardIcon;
+            return rewardIcon;*/
         }
 
         internal void ButtonPressed(ButtonController buttonController)

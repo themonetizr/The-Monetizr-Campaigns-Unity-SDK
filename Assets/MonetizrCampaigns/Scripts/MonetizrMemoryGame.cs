@@ -113,8 +113,13 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
-            logo.gameObject.SetActive(logo.sprite != null);
+            bool hasLogo = m.campaign.TryGetAsset(AssetsType.BrandRewardLogoSprite, out Sprite res);
+            
+            logo.sprite = res;
+            logo.gameObject.SetActive(hasLogo);
+            
+            //logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            //logo.gameObject.SetActive(logo.sprite != null);
 
             stats.gameStartTime = DateTime.Now;
             stats.lastTapTime = DateTime.Now;
@@ -123,10 +128,22 @@ namespace Monetizr.Campaigns
             this.panelId = id;
             this.currentMission = m;
 
-
-            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite1))
+            AssetsType[] minigameSprites =
             {
-                mapSprites[0] = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.MinigameSprite1);
+                AssetsType.MinigameSprite1,
+                AssetsType.MinigameSprite2,
+                AssetsType.MinigameSprite3
+            };
+
+            for(int i = 0; i < minigameSprites.Length; i++)
+            {
+                if (m.campaign.TryGetAsset<Sprite>(minigameSprites[i], out Sprite res2))
+                    mapSprites[i] = res2;
+            }
+
+            /*if (m.campaign.TryGetAsset<Sprite>(AssetsType.MinigameSprite1,out Sprite res1))
+            {
+                mapSprites[0] = res;
             }
 
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite2))
@@ -137,7 +154,7 @@ namespace Monetizr.Campaigns
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite3))
             {
                 mapSprites[2] = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.MinigameSprite3);
-            }
+            }*/
 
             UIController.SetColorForElement(minigameBackground, m.campaignServerSettings.dictionary, "MemoryGame.bg_color2");
 

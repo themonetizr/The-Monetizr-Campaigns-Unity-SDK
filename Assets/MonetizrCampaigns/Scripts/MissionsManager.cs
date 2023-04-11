@@ -110,25 +110,10 @@ namespace Monetizr.Campaigns
             return true;
         }
 
-        //-------------------
-
-
-
-        //using different approach here
-        //instead of binding campaigns 
-        //create set of missions for each campaign
-
-        //TODO: 
-        //- add global define for this approach
-        //- add different types of missions with campaign
-        //- restore progress
-        //- claim full campaigns when all missions conntected to this campaign is over
-        //- saving progress  
-
-        Mission prepareVideoMission(MissionType mt, string campaign)
+        Mission prepareVideoMission(MissionType mt, ServerCampaign campaign)
         {
-            bool hasHtml = MonetizrManager.Instance.HasAsset(campaign, AssetsType.Html5PathString);
-            bool hasVideo = MonetizrManager.Instance.HasAsset(campaign, AssetsType.VideoFilePathString);
+            bool hasHtml = campaign.HasAsset(AssetsType.Html5PathString);
+            bool hasVideo = campaign.HasAsset(AssetsType.VideoFilePathString);
 
             if (!hasVideo)
             {
@@ -152,7 +137,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareTwitterMission(MissionType mt, string campaign)
+        Mission prepareTwitterMission(MissionType mt, ServerCampaign campaign)
         {
             return new Mission()
             {
@@ -168,7 +153,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareDoubleMission(MissionType mt, string campaign)
+        Mission prepareDoubleMission(MissionType mt, ServerCampaign campaign)
         {
             RewardType rt = RewardType.Coins;
 
@@ -187,9 +172,9 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission PrepareSurveyMission(MissionType mt, string campaign)
+        Mission PrepareSurveyMission(MissionType mt, ServerCampaign campaign)
         {
-            string url = MonetizrManager.Instance.GetAsset<string>(campaign, AssetsType.SurveyURLString);
+            string url = campaign.GetAsset<string>(AssetsType.SurveyURLString);
 
             //if (string.IsNullOrEmpty(url))
             //    return null;
@@ -210,10 +195,10 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission PrepareGiveawayMission(MissionType mt, string campaign)
+        Mission PrepareGiveawayMission(MissionType mt, ServerCampaign campaign)
         {
             //if no claimable reward in campaign - no give away missions
-            var claimableReward = MonetizrManager.Instance.GetCampaign(campaign).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
+            var claimableReward = campaign.rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
 
             if (claimableReward == null)
                 return null;
@@ -235,12 +220,12 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareVideoGiveawayMission(MissionType mt, string campaign)
+        Mission prepareVideoGiveawayMission(MissionType mt, ServerCampaign campaign)
         {
-            bool hasHtml = MonetizrManager.Instance.HasAsset(campaign, AssetsType.Html5PathString);
-            bool hasVideo = MonetizrManager.Instance.HasAsset(campaign, AssetsType.VideoFilePathString);
+            bool hasHtml = campaign.HasAsset(AssetsType.Html5PathString);
+            bool hasVideo = campaign.HasAsset(AssetsType.VideoFilePathString);
 
-            bool video = !(MonetizrManager.Instance.GetCampaign(campaign).serverSettings.GetParam("email_giveaway_mission_without_video") == "true");
+            bool video = !(campaign.serverSettings.GetParam("email_giveaway_mission_without_video") == "true");
 
             if (video && !hasHtml && !hasVideo)
             {
@@ -272,7 +257,7 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareMinigameMission(MissionType mt, string campaign)
+        Mission prepareMinigameMission(MissionType mt, ServerCampaign campaign)
         {
             RewardType rt = RewardType.Coins;
 
@@ -292,7 +277,7 @@ namespace Monetizr.Campaigns
         }
 
         //TODO: make separate classes for each mission type
-        Mission prepareNewMission(int id, string campaign, MissionDescription md)
+        Mission prepareNewMission(int id, ServerCampaign campaign, MissionDescription md)
         {
             MissionType mt = md.missionType;
             Mission m = null;
@@ -319,7 +304,7 @@ namespace Monetizr.Campaigns
             m.id = id;
             m.isSponsored = true;
             m.isClaimed = ClaimState.NotClaimed;
-            m.campaignId = campaign;
+            m.campaignId = campaign.id;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
 
             m.sdkVersion = MonetizrManager.SDKVersion;
@@ -552,7 +537,7 @@ namespace Monetizr.Campaigns
             return;
 #endif
 
-            var htmlPath = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.Html5PathString);
+            var htmlPath = m.campaign.GetAsset<string>(AssetsType.Html5PathString);
 
             if (htmlPath != null)
             {
@@ -560,7 +545,7 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                var videoPath = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.VideoFilePathString);
+                var videoPath = m.campaign.GetAsset<string>(AssetsType.VideoFilePathString);
 
                 //MonetizrManager._PlayVideo(videoPath, (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped); });
 
@@ -578,6 +563,43 @@ namespace Monetizr.Campaigns
                 }
             }
 
+        }
+
+        internal static Sprite GetMissionRewardImage(Mission m)
+        {
+            if (!string.IsNullOrEmpty(m.rewardAssetName))
+            {
+                if (m.campaign.TryGetSpriteAsset(m.rewardAssetName, out var s))
+                    return s;
+            }
+            
+            Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
+                
+            if (m.rewardType == RewardType.Coins && 
+                m.campaign.TryGetAsset<Sprite>(AssetsType.CustomCoinSprite,out var customCoin))
+            {
+                rewardIcon = customCoin;
+            }
+            
+            if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.IngameReward &&
+                m.campaign.TryGetAsset<Sprite>(AssetsType.IngameRewardSprite, out var inGameRewardSprite))
+            {
+                rewardIcon = inGameRewardSprite;
+            }
+            
+            if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.ProductReward &&
+                m.campaign.TryGetAsset<Sprite>(AssetsType.RewardSprite, out var productRewardSprite))
+            {
+                rewardIcon = productRewardSprite;
+            }
+            
+            if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward &&
+                m.campaign.TryGetAsset<Sprite>(AssetsType.UnknownRewardSprite, out var selectionRewardSprite))
+            {
+                rewardIcon = selectionRewardSprite;
+            }
+
+            return rewardIcon;
         }
 
         internal Mission GetFirstUnactiveMission()
@@ -607,20 +629,7 @@ namespace Monetizr.Campaigns
 
                     if (serverMissionType == MissionType.Undefined)
                         return;
-
-                    //MissionDescription original = originalList.Find((MissionDescription md) => { return md.missionType == serverMissionType; });
-
-                    //int rewardAmount = 1;
-                    //RewardType currency = RewardType.Coins;
-                    //List<int> activateAfter = new List<int>();
-
-                    /*if(original != null)
-                    {
-                        rewardAmount = original.reward;
-                        currency = original.rewardCurrency;
-                    }
-                    else
-                    {*/
+                    
                     float rewardAmount = _m.GetRewardAmount()/100.0f;
                     RewardType currency = _m.GetRewardType();
 
@@ -655,7 +664,8 @@ namespace Monetizr.Campaigns
                         rewardPercent = rewardAmount,
                         id = _m.getId(),
                         alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
-                        autoStartAfter = _m.GetAutoStartId()
+                        autoStartAfter = _m.GetAutoStartId(),
+                        rewardImage = _m.reward_image,
                     }); ;
 
                 });
@@ -693,6 +703,8 @@ namespace Monetizr.Campaigns
 
             //Auto start after completing 
             public string auto_start_after;
+
+            public string reward_image;
 
             public int GetAutoStartId()
             {
@@ -871,7 +883,7 @@ namespace Monetizr.Campaigns
                     if (m == null)
                     {
                         //
-                        m = prepareNewMission(i, ch, prefefinedSponsoredMissions[i]);
+                        m = prepareNewMission(i, serverCampaign, prefefinedSponsoredMissions[i]);
 
                         if (m != null)
                         {
@@ -890,14 +902,18 @@ namespace Monetizr.Campaigns
                     if (m == null)
                         continue;
 
+                    m.campaign = serverCampaign;
+                    
                     m.sdkVersion = MonetizrManager.SDKVersion;
 
                     //if (string.IsNullOrEmpty(m.surveyUrl))
 
+                    m.rewardAssetName = md.rewardImage;
+                        
                     if(!md.hasUnitySurvey)
                         m.surveyUrl = md.surveyUrl;
                     else
-                        m.surveyUrl = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.SurveyURLString);
+                        m.surveyUrl = m.campaign.GetAsset<string>(AssetsType.SurveyURLString);
 
                     m.hasUnitySurvey = md.hasUnitySurvey;
 
@@ -905,9 +921,8 @@ namespace Monetizr.Campaigns
                                        
                     m.isServerCampaignActive = true;
 
-
                     m.isToBeRemoved = false;
-                    m.campaignServerSettings = MonetizrManager.Instance.GetCampaign(ch).serverSettings;
+                    m.campaignServerSettings = m.campaign.serverSettings;
 
                     bool showNotClaimedDisabled = m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
 
@@ -927,9 +942,9 @@ namespace Monetizr.Campaigns
                     m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity
                     m.activateAfter = prefefinedSponsoredMissions[i].activateAfter;
 
-                    m.brandName = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.BrandTitleString);
+                    m.brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
 
-                    m.campaign = serverCampaign;
+                    
                     //InitializeNonSerializedFields(m);
                 }
 

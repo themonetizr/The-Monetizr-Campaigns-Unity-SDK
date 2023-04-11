@@ -159,10 +159,14 @@ namespace Monetizr.Campaigns
             if (!LoadSurvey(m))
                 return;
 
-            logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
-            logo.gameObject.SetActive(logo.sprite != null && currentSurvey.settings.showLogo);
+            //logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            //logo.gameObject.SetActive(logo.sprite != null && currentSurvey.settings.showLogo);
 
-
+            bool hasLogo = m.campaign.TryGetAsset(AssetsType.BrandRewardLogoSprite, out Sprite res);
+            
+            logo.sprite = res;
+            logo.gameObject.SetActive(hasLogo && currentSurvey.settings.showLogo);
+            
             //adType = AdPlacement.Survey;
 
             //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
@@ -331,12 +335,12 @@ namespace Monetizr.Campaigns
 
             if (!currentSurvey.settings.hideReward)
             {
-                Sprite rewardSprite = MonetizrManager.gameRewards[m.rewardType].icon;
+               /* Sprite rewardSprite = MonetizrManager.gameRewards[m.rewardType].icon;
 
                 if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite))
                     rewardSprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
-
-                rewardImage.sprite = rewardSprite;
+*/
+                rewardImage.sprite = MissionsManager.GetMissionRewardImage(m);;
             }
 
             UpdateButtons();

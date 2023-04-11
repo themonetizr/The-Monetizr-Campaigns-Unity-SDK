@@ -140,7 +140,9 @@ namespace Monetizr.Campaigns
             public string fpath;
             public string mainAssetName;
             public string localFullPath;
-
+            
+            public Sprite spriteAsset;
+            
             public override string ToString()
             {
                 return $"Id: {id}, Type: {type}, Title: {title}, URL: {url}, Survey Content: {survey_content}";
@@ -149,7 +151,21 @@ namespace Monetizr.Campaigns
 
         internal bool HasAssetInList(string type)
         {
-            return assets.Find(a => { return a.type == type; }) != null;
+            return assets.Find(a => a.type == type) != null;
+        }
+        
+        internal bool TryGetSpriteAsset(string spriteTitle, out Sprite res)
+        { 
+            int index = assets.FindIndex(a => a.title == spriteTitle);
+
+            if (index >= 0)
+            {
+                res = assets[index].spriteAsset;
+                return true;
+            }
+
+            res = null;
+            return false;
         }
 
         internal void SetAsset<T>(AssetsType t, object asset)
@@ -172,6 +188,24 @@ namespace Monetizr.Campaigns
             return assetsDict.ContainsKey(t);
         }
 
+        internal bool TryGetAsset<T>(AssetsType t, out T res)
+        {
+            res = default(T);
+            
+            if (AssetsSystemTypes[t] != typeof(T))
+            {
+                Log.PrintError($"AssetsType {t} and {typeof(T)} do not match!");
+                return false;
+            }
+
+            if (!assetsDict.ContainsKey(t))
+                return false;
+            
+            res = (T)Convert.ChangeType(assetsDict[t], typeof(T));
+            
+            return true;
+        }
+        
         internal T GetAsset<T>(AssetsType t)
         {
             if (AssetsSystemTypes[t] != typeof(T))
@@ -254,19 +288,6 @@ namespace Monetizr.Campaigns
             {
                 data = File.ReadAllBytes(fpath);
 
-                if (data == null)
-                {
-                    Log.PrintWarning($"Loading {fpath} failed!");
-
-                    if (!isOptional)
-                    {
-                        Log.PrintError($"Campaign loading will fail, because asset is required!");
-                        this.isLoaded = false;
-                    }
-
-                    return;
-                }
-
                 //Log.Print("reading: " + fpath);
             }
 
@@ -281,18 +302,18 @@ namespace Monetizr.Campaigns
             if (texture != AssetsType.Unknown)
                 SetAsset<Texture2D>(texture, tex);
 
-            Sprite s = null;
+            Sprite s = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+            asset.spriteAsset = s;
+            
             if (sprite != AssetsType.Unknown)
-            {
-                s = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-
+            { 
                 SetAsset<Sprite>(sprite, s);
             }
 
             //campaign.SetAssetUrl(sprite, asset.url);
 
-            bool texStatus = tex != null;
-            bool spriteStatus = s != null;
+            //bool texStatus = tex != null;
+            //bool spriteStatus = s != null;
 
             //Log.Print($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
         }
@@ -510,7 +531,12 @@ namespace Monetizr.Campaigns
 
                         break;
 
-
+                    case "image":
+                        
+                        Log.PrintWarning("Found image asset!");
+                        await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.Unknown, true);
+                        
+                        break;
 
                 }
 
