@@ -142,7 +142,12 @@ namespace Monetizr.Campaigns
             public string localFullPath;
             
             public Sprite spriteAsset;
-            
+
+            public Asset Clone()
+            {
+                return (Asset)this.MemberwiseClone();
+            }
+
             public override string ToString()
             {
                 return $"Id: {id}, Type: {type}, Title: {title}, URL: {url}, Survey Content: {survey_content}";
