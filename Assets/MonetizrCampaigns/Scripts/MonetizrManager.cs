@@ -36,7 +36,7 @@ namespace Monetizr.Campaigns
     {
         public static readonly Dictionary<ErrorType, string> msg = new Dictionary<ErrorType, string>()
         {
-            { ErrorType.NotinitializedSDK, "You're trying to use Monetizer SDK before it's been initialized. Call MonetizerManager.Initalize first." },
+            { ErrorType.NotinitializedSDK, "You're trying to use Monetizr SDK before it's been initialized. Call MonetizerManager.Initalize first." },
             { ErrorType.SimultaneusAdAssets, "Simultaneous display of multiple ads is not supported!" },
             { ErrorType.AdAssetStillShowing, "Some ad asset are still showing." },
             { ErrorType.ConnectionError, "Connection error while getting list of campaigns!" }
@@ -552,6 +552,8 @@ namespace Monetizr.Campaigns
             //if (sponsoredMissions.Count > 1)
             //    sponsoredMissions = sponsoredMissions.GetRange(0, 1);
 
+             
+                
 #if UNITY_EDITOR
             keepLocalClaimData = true;
             serverClaimForCampaigns = false;
@@ -597,7 +599,7 @@ namespace Monetizr.Campaigns
             return instance;
         }
 
-        public static MonetizrManager Instance
+        internal static MonetizrManager Instance
         {
             get
             {
@@ -629,6 +631,7 @@ namespace Monetizr.Campaigns
                 Log.Print("WebView isn't supported on current platform!");
             }
 #endif
+            //ExternalAnalytics = null;
 
             localSettings = new LocalSettingsManager();
 
@@ -1473,7 +1476,7 @@ namespace Monetizr.Campaigns
         {
             _ShowWebView(onComplete, PanelId.VideoWebView, m);
         }
-
+    
         public static void SetTeaserPosition(Vector2 pos)
         {
             tinyTeaserPosition = pos;
@@ -1483,6 +1486,12 @@ namespace Monetizr.Campaigns
         {
             teaserRoot = root;
         }
+
+        public static Action<string, Dictionary<string, object>> ExternalAnalytics
+        {
+            internal get;
+            set;
+        } = null;
 
         public static void OnStartGameLevel(Action onComplete)
         {
@@ -1983,8 +1992,9 @@ namespace Monetizr.Campaigns
                 onFailure.Invoke();
             }
         }
+        
+        
 
-       
     }
 
 }

@@ -63,9 +63,9 @@ public class Tests
 
         MonetizrManager.Initialize("t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo", null, () =>
         {
-            Assert.IsTrue(MonetizrManager.Instance.HasCampaignsAndActive(), "Campaign should have active campaigns");
+            Assert.IsTrue(MonetizrManager.IsActiveAndEnabled(), "Campaign should have active campaigns");
 
-            if (MonetizrManager.Instance.HasCampaignsAndActive())
+            if (MonetizrManager.IsActiveAndEnabled())
             {
                 MonetizrManager.claimForSkippedCampaigns = false;
 

@@ -1,5 +1,5 @@
- //#define USING_FACEBOOK
-#define USING_AMPLITUDE
+//#define USING_FACEBOOK
+//#define USING_AMPLITUDE
 
 using System.Collections;
 using System.Collections.Generic;
@@ -363,10 +363,9 @@ namespace Monetizr.Campaigns
 
         internal static string deviceIdentifier = "";
 
-#if USING_AMPLITUDE
-        private Amplitude amplitude;
-       
-#endif
+//#if USING_AMPLITUDE
+//        private Amplitude amplitude;
+//#endif
 
         private static float DeviceDiagonalSizeInInches()
         {
@@ -464,13 +463,7 @@ namespace Monetizr.Campaigns
             deviceSizeGroup = GetDeviceGroup();
 
             Log.Print($"OS Version {osVersion} Ad id: {advertisingID} Limit ads: {limitAdvertising} Device group: {deviceSizeGroup}");
-
-#if USING_AMPLITUDE
-            amplitude = Amplitude.Instance;
-            amplitude.logging = true;
-            amplitude.init("6a1fad35d3813820b6b68af48b36e9d5");
-            amplitude.setOnceUserProperty("user_segment", MonetizrManager.abTestSegment);
-#endif
+            
             isMixpanelInitialized = false;
 
             //Mixpanel.SetToken("cda45517ed8266e804d4966a0e693d0d");
@@ -676,20 +669,24 @@ namespace Monetizr.Campaigns
             if (camp.serverSettings.GetBoolParam("mixpanel_fast_flush",false))
                 Mixpanel.Flush();
 
-#if USING_AMPLITUDE
-            Dictionary<string, object> eventProps = new Dictionary<string, object>();
 
-            foreach(var v in props.GetFieldValue<Dictionary<string, Value>>("_container"))
+            if (MonetizrManager.ExternalAnalytics != null)
             {
-                var value = v.Value.GetFieldValue<string>("_string");
+                Dictionary<string, object> eventProps = new Dictionary<string, object>();
 
-                eventProps.Add(v.Key, value);
+                foreach (var v in props.GetFieldValue<Dictionary<string, Value>>("_container"))
+                {
+                    var value = v.Value.GetFieldValue<string>("_string");
 
-                //Log.Print($"params: {v.Key} {value}");
+                    eventProps.Add(v.Key, value);
+
+                    //Log.Print($"params: {v.Key} {value}");
+                }
+
+                MonetizrManager.ExternalAnalytics(eventName, eventProps);
             }
-            
-            amplitude.logEvent(eventName, eventProps);
-#endif
+            //amplitude.logEvent(eventName, eventProps);
+
         }
 
         private void _EndShowAdAsset(AdElement adAsset)
