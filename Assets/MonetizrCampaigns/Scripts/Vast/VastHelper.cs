@@ -265,7 +265,19 @@ namespace Monetizr.Campaigns
 
                     foreach (var nl in it.NonLinear)
                     {
-                        string adParameters = nl.AdParameters.Value;
+                        string adParameters;
+
+                        //No parameters
+                        //TODO: define 
+                        if (nl.AdParameters == null || string.IsNullOrEmpty(nl.AdParameters.Value))
+                        {
+                            adParameters = "tiny_teaser";
+                        }
+                        else
+                        {
+                            adParameters = nl.AdParameters.Value;
+                        }
+                        
                         var staticRes = nl.StaticResource[0];
 
                         //Log.Print($"{staticRes.Value}");
@@ -283,6 +295,14 @@ namespace Monetizr.Campaigns
 
                         serverCampaign.assets.Add(asset);
 
+                       /* ServerCampaign.Asset a2 = asset.Clone();
+                        a2.type = "banner";
+                        serverCampaign.assets.Add(a2);
+                        
+                        ServerCampaign.Asset a3 = asset.Clone();
+                        a3.type = "logo";
+                        serverCampaign.assets.Add(a3);*/
+
                     }
 
                 }
@@ -293,9 +313,22 @@ namespace Monetizr.Campaigns
 
                     //Log.Print(it.MediaFiles[0].Value);
 
+                    if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
+                    {
+                        Log.Print($"MediaFile is null in Linear creative");
+                        break;
+                    }
                     
-                    string value = it.MediaFiles.MediaFile[0].Value;
-                    string type = it.MediaFiles.MediaFile[0].type;
+                    Linear_Inline_typeMediaFilesMediaFile mediaFile = it.MediaFiles.MediaFile[0];
+
+                    if (it.MediaFiles.MediaFile.Length > 1)
+                    {
+                        mediaFile = Array.Find(it.MediaFiles.MediaFile,
+                            (Linear_Inline_typeMediaFilesMediaFile a) => a.type.Equals("video/mp4"));
+                    }
+                    
+                    string value = mediaFile.Value;
+                    string type = mediaFile.type;
 
                     videoAsset = new ServerCampaign.Asset()
                     {
@@ -522,7 +555,12 @@ namespace Monetizr.Campaigns
 
             //string uri = $"https://servedbyadbutler.com/vast.spark?setID={vp.setID}&ID={vp.id}&pid={vp.pid}";
 
-            string uri = "https://vast-serve-stineosy7q-uc.a.run.app";
+            //Pubmatic VAST
+            string uri = "https://programmatic-serve-stineosy7q-uc.a.run.app"; 
+
+            
+            //OMSDK certification site
+            //string uri = "https://vast-serve-stineosy7q-uc.a.run.app";
 
             Log.Print($"Requesting VAST campaign with url {uri}");
 
@@ -551,8 +589,19 @@ namespace Monetizr.Campaigns
 
             //Log.Print(v.Ad[0].Item.GetType());
 
+            if (vastData != null)
+            {
+                Log.Print("VAST data successfully loaded!");
+            }
+
             ServerCampaign serverCampaign = await PrepareServerCampaign(vastData);
 
+            if (serverCampaign == null)
+            {
+                Log.Print("PrepareServerCampaign failed!");
+                return;
+            }
+            
             if (serverCampaign != null)
                 campList.Add(serverCampaign);
 
