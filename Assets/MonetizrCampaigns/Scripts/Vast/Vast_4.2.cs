@@ -20,8 +20,8 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.iab.com/VAST", IsNullable=false)]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.iab.com/VAST", IsNullable=false)]
     public partial class VAST {
         
         private object[] itemsField;
@@ -57,7 +57,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class VASTAD {
         
         private AdDefinitionBase_type itemField;
@@ -158,7 +158,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Inline_type : AdDefinitionBase_type {
         
         private string adServingIdField;
@@ -279,7 +279,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Verification_type {
         
         private Verification_typeExecutableResource[] executableResourceField;
@@ -352,7 +352,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Verification_typeExecutableResource {
         
         private string apiFrameworkField;
@@ -400,7 +400,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class NonLinearAd_Base_type {
         
         private NonLinearAd_Base_typeNonLinearClickTracking nonLinearClickTrackingField;
@@ -421,7 +421,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class NonLinearAd_Base_typeNonLinearClickTracking {
         
         private string idField;
@@ -456,7 +456,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class VideoClicks_type {
         
         private VideoClicks_typeClickTracking[] clickTrackingField;
@@ -503,7 +503,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class VideoClicks_typeClickTracking {
         
         private string idField;
@@ -538,7 +538,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class VideoClicks_typeClickThrough {
         
         private string idField;
@@ -573,7 +573,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class VideoClicks_typeCustomClick {
         
         private string idField;
@@ -610,7 +610,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Linear_Base_type {
         
         private Icon_type[] iconsField;
@@ -658,7 +658,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Icon_type : CreativeResource_type {
         
         private Icon_typeIconClicks iconClicksField;
@@ -848,7 +848,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Icon_typeIconClicks {
         
         private Icon_typeIconClicksIconClickFallbackImage[] iconClickFallbackImagesField;
@@ -896,7 +896,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Icon_typeIconClicksIconClickFallbackImage {
         
         private string altTextField;
@@ -956,7 +956,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class IconClickTracking_type {
         
         private string idField;
@@ -994,7 +994,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class CreativeResource_type {
         
         private HTMLResource_type[] hTMLResourceField;
@@ -1042,7 +1042,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class HTMLResource_type {
         
         private string valueField;
@@ -1064,7 +1064,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class CreativeResource_typeStaticResource {
         
         private string creativeTypeField;
@@ -1099,7 +1099,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class CompanionAd_type : CreativeResource_type {
         
         private AdParameters_type adParametersField;
@@ -1353,7 +1353,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class AdParameters_type {
         
         private bool xmlEncodedField;
@@ -1401,7 +1401,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class CompanionAd_typeCompanionClickTracking {
         
         private string idField;
@@ -1436,7 +1436,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class CreativeExtensions_typeCreativeExtension {
         
         private System.Xml.XmlElement[] anyField;
@@ -1484,7 +1484,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class TrackingEvents_typeTracking {
         
         private TrackingEvents_typeTrackingEvent eventField;
@@ -1530,7 +1530,7 @@ namespace Monetizr.Campaigns.Vast42
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "0.0.0.0")]
     [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public enum TrackingEvents_typeTrackingEvent {
         
         /// <remarks/>
@@ -1612,7 +1612,7 @@ namespace Monetizr.Campaigns.Vast42
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "0.0.0.0")]
     [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public enum CompanionAd_typeRenderingMode {
         
         /// <remarks/>
@@ -1631,7 +1631,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class NonLinearAd_Inline_type : CreativeResource_type {
         
         private AdParameters_type adParametersField;
@@ -1834,7 +1834,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class NonLinearAd_Inline_typeNonLinearClickTracking {
         
         private string idField;
@@ -1869,7 +1869,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Linear_Inline_type : Linear_Base_type {
         
         private AdParameters_type adParametersField;
@@ -1927,7 +1927,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Linear_Inline_typeMediaFiles {
         
         private Linear_Inline_typeMediaFilesClosedCaptionFile[] closedCaptionFilesField;
@@ -1988,7 +1988,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Linear_Inline_typeMediaFilesClosedCaptionFile {
         
         private string typeField;
@@ -2036,7 +2036,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Linear_Inline_typeMediaFilesMediaFile {
         
         private string idField;
@@ -2264,7 +2264,7 @@ namespace Monetizr.Campaigns.Vast42
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "0.0.0.0")]
     [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public enum Linear_Inline_typeMediaFilesMediaFileDelivery {
         
         /// <remarks/>
@@ -2279,7 +2279,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Linear_Inline_typeMediaFilesMezzanine {
         
         private string idField;
@@ -2403,7 +2403,7 @@ namespace Monetizr.Campaigns.Vast42
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "0.0.0.0")]
     [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public enum Linear_Inline_typeMediaFilesMezzanineDelivery {
         
         /// <remarks/>
@@ -2418,7 +2418,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Linear_Inline_typeMediaFilesInteractiveCreativeFile {
         
         private string typeField;
@@ -2492,7 +2492,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Linear_Wrapper_type : Linear_Base_type {
         
         private VideoClicks_type videoClicksField;
@@ -2513,7 +2513,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class CompanionAds_Collection_type {
         
         private CompanionAd_type[] companionField;
@@ -2559,7 +2559,7 @@ namespace Monetizr.Campaigns.Vast42
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "0.0.0.0")]
     [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public enum CompanionAds_Collection_typeRequired {
         
         /// <remarks/>
@@ -2579,7 +2579,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Creative_Base_type {
         
         private string sequenceField;
@@ -2640,7 +2640,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Creative_Inline_type : Creative_Base_type {
         
         private CompanionAds_Collection_type companionAdsField;
@@ -2711,7 +2711,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Creative_Inline_typeNonLinearAds {
         
         private TrackingEvents_typeTracking[] trackingEventsField;
@@ -2746,7 +2746,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Creative_Inline_typeUniversalAdId {
         
         private string idRegistryField;
@@ -2781,7 +2781,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Creative_Wrapper_type : Creative_Base_type {
         
         private CompanionAds_Collection_type companionAdsField;
@@ -2826,7 +2826,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Creative_Wrapper_typeNonLinearAds {
         
         private TrackingEvents_typeTracking[] trackingEventsField;
@@ -2861,7 +2861,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class ViewableImpression_type {
         
         private string[] viewableField;
@@ -2922,7 +2922,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Impression_type {
         
         private string idField;
@@ -2959,7 +2959,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class AdDefinitionBase_type {
         
         private AdDefinitionBase_typeAdSystem adSystemField;
@@ -3043,7 +3043,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class AdDefinitionBase_typeAdSystem {
         
         private string versionField;
@@ -3078,7 +3078,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class AdDefinitionBase_typeExtension {
         
         private System.Xml.XmlElement[] anyField;
@@ -3113,7 +3113,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class AdDefinitionBase_typePricing {
         
         private AdDefinitionBase_typePricingModel modelField;
@@ -3159,7 +3159,7 @@ namespace Monetizr.Campaigns.Vast42
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "0.0.0.0")]
     [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public enum AdDefinitionBase_typePricingModel {
         
         /// <remarks/>
@@ -3192,7 +3192,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.iab.com/VAST")]
     public partial class Wrapper_type : AdDefinitionBase_type {
         
         private Verification_type[] adVerificationsField;
@@ -3331,7 +3331,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Wrapper_typeBlockedAdCategories {
         
         private string authorityField;
@@ -3366,7 +3366,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Verification_typeJavaScriptResource {
         
         private string apiFrameworkField;
@@ -3427,7 +3427,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class TrackingEvents_Verification_typeTracking {
         
         private string eventField;
@@ -3462,7 +3462,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Inline_typeCategory {
         
         private string authorityField;
@@ -3497,7 +3497,7 @@ namespace Monetizr.Campaigns.Vast42
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class Inline_typeSurvey {
         
         private string typeField;
@@ -3530,7 +3530,7 @@ namespace Monetizr.Campaigns.Vast42
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "0.0.0.0")]
     [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
+    //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public enum VASTADAdType {
         
         /// <remarks/>
