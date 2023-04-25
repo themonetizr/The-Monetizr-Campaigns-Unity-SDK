@@ -197,11 +197,12 @@ namespace Monetizr.Campaigns
 
 
                 singleBackgroundImage.enabled = true;
-
-
+                
                 if (m.campaign.HasAsset(AssetsType.TinyTeaserSprite))
                     singleBackgroundImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.TinyTeaserSprite);
-
+    
+                
+                
                 return;
             }
 

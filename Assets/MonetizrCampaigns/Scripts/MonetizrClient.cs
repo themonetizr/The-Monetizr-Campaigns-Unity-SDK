@@ -164,7 +164,7 @@ namespace Monetizr.Campaigns
 
             if (v != null)
             {
-                await v.GetCampaign(result);
+                await v.GetCampaign(result,Client);
 
                 //await v.GetVastCampaign(result);
 
@@ -177,35 +177,7 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            /*KevelHelper v = new KevelHelper(this);
-
-            if (v != null)
-            {
-                await v.GetCampaign(result);
-
-                //await v.GetVastCampaign(result);
-
-                if (result.Count != 0)
-                {
-                    MonetizrManager.isVastActive = true;
-                    MonetizrManager.maximumCampaignAmount = result.Count;
-
-                    return result;
-                }
-            }*/
-
-            HttpRequestMessage requestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri(k_BaseUri + "api/campaigns"),
-                Headers = {
-                    {"player-id", analytics.GetUserId()},
-                    { "app-bundle-id", MonetizrManager.bundleId },
-                    { "sdk-version", MonetizrManager.SDKVersion },
-                    {"os-group", MonetizrAnalytics.GetOsGroup() },
-                    {"ad-id",MonetizrAnalytics.advertisingID }
-                }
-            };
+            var requestMessage = GetHttpRequestMessage(k_BaseUri + "api/campaigns");
 
             Log.Print($"Sent request: {requestMessage.ToString()}");
 
@@ -356,27 +328,31 @@ namespace Monetizr.Campaigns
 
         }
 
-              
+        internal static HttpRequestMessage GetHttpRequestMessage(string uri)
+        {
+            return new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(uri),
+                Headers =
+                {
+                    {"player-id",MonetizrAnalytics.deviceIdentifier},
+                    {"app-bundle-id", MonetizrManager.bundleId},
+                    {"sdk-version", MonetizrManager.SDKVersion},
+                    {"os-group", MonetizrAnalytics.GetOsGroup()},
+                    {"ad-id", MonetizrAnalytics.advertisingID}
+                }
+            };
+        }
 
         /// <summary>
         /// Reset the challenge as claimed by the player.
         /// </summary>
         public async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(k_BaseUri + "api/campaigns/" + campaignId + "/reset"),
-                Headers =
-                {
-                    {"player-id", analytics.GetUserId()},
-                    { "app-bundle-id", MonetizrManager.bundleId },
-                    { "sdk-version", MonetizrManager.SDKVersion },
-                    {"os-group", MonetizrAnalytics.GetOsGroup() },
-                    {"ad-id",MonetizrAnalytics.advertisingID }
-                }
-            };
-                        
+            HttpRequestMessage requestMessage =
+                GetHttpRequestMessage(k_BaseUri + "api/campaigns/" + campaignId + "/reset");
+
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
 
             string s = await response.Content.ReadAsStringAsync();
@@ -398,20 +374,8 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(k_BaseUri + "api/campaigns/" + challenge.id + "/claim"),
-                Headers =
-                {
-                    {"player-id", analytics.GetUserId()},
-                    {"app-bundle-id", MonetizrManager.bundleId },
-                    {"sdk-version", MonetizrManager.SDKVersion },
-                    {"os-group", MonetizrAnalytics.GetOsGroup() },
-                    {"ad-id",MonetizrAnalytics.advertisingID }
-                }
-            };
-
+            HttpRequestMessage requestMessage =
+                GetHttpRequestMessage(k_BaseUri + "api/campaigns/" + challenge.id + "/claim");
             
             string content = string.Empty;
 

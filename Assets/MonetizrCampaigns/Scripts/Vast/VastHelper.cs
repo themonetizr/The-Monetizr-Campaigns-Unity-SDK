@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -543,7 +544,7 @@ namespace Monetizr.Campaigns
             return vastData;
         }
 
-        internal async Task GetCampaign(List<ServerCampaign> campList)
+        internal async Task GetCampaign(List<ServerCampaign> campList, HttpClient httpClient)
         {
             VastParams vp = GetVastParams();
 
@@ -564,25 +565,20 @@ namespace Monetizr.Campaigns
 
             Log.Print($"Requesting VAST campaign with url {uri}");
 
+            var requestMessage = MonetizrClient.GetHttpRequestMessage("https://programmatic-serve-stineosy7q-uc.a.run.app");
+            
+            HttpResponseMessage response = await httpClient.SendAsync(requestMessage);
 
+            var res = await response.Content.ReadAsStringAsync();
 
-            string res = null;
-            using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
-            {
-                await webRequest.SendWebRequest();
+            Log.Print($"Proxy response is: {res} {response.StatusCode}");
+            Log.Print(res);
 
-                //Log.Print(webRequest.downloadHandler.text);
+            if (!response.IsSuccessStatusCode)
+                return;
 
-
-
-                res = webRequest.downloadHandler.text;
-            }
-
-            /*XmlNodeList elemList = xmlDoc.GetElementsByTagName("Creative");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                Log.Print($"{i}------{elemList[i].InnerXml}");
-            }*/
+            if (res.Length == 0)
+                return;
 
             VAST vastData = CreateVastFromXml(res);
 
