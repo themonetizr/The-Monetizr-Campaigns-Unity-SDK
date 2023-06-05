@@ -1607,6 +1607,12 @@ namespace Monetizr.Campaigns.Vast42
         
         /// <remarks/>
         interactiveStart,
+        
+        expand,
+        
+        collapse,
+        
+        
     }
     
     /// <remarks/>

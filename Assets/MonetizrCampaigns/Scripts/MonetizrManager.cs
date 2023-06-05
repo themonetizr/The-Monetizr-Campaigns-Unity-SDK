@@ -1545,6 +1545,8 @@ namespace Monetizr.Campaigns
 
             if (showNotifications)
             {
+                HideTinyMenuTeaser();
+                
                 ShowStartupNotification(1, (bool isSkipped) =>
                         {
                             if (isSkipped)
@@ -1762,13 +1764,8 @@ namespace Monetizr.Campaigns
         {
             instance.uiController.PlayVideo(videoPath, onComplete);
         }*/
-
-
-     
-
-        /// <summary>
-        /// Request challenges from the server
-        /// </summary>
+        
+        
         public async void RequestChallenges(Action<bool> onRequestComplete)
         {
             List<ServerCampaign> campaigns = new List<ServerCampaign>();
@@ -1780,6 +1777,11 @@ namespace Monetizr.Campaigns
             catch (Exception e)
             {
                 Log.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]} {e}");
+
+#if !UNITY_EDITOR            
+                _challengesClient.SendErrorToRemoteServer("Error",e.Message,e.ToString());
+#endif
+
                 onRequestComplete?.Invoke(false);
             }
 
@@ -1813,6 +1815,8 @@ namespace Monetizr.Campaigns
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
             //Color c;
+            
+           
 
             foreach (var campaign in campaigns)
             {

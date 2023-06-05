@@ -167,6 +167,17 @@ namespace Monetizr.Campaigns
             dictionary = d;
         }
 
+        public void MergeSettingsFrom(SettingsDictionary<TKey, TValue> addDictionary)
+        {
+            addDictionary.dictionary.ToList().ForEach(
+                x => dictionary[x.Key] = x.Value);
+        }
+
+        public bool HasParam(TKey p)
+        {
+            return dictionary.ContainsKey(p);
+        }
+        
         public TValue GetParam(TKey p, TValue def = default(TValue))
         {
             if(p == null)

@@ -613,18 +613,27 @@ namespace Monetizr.Campaigns
         }
 
         private void AddDefaultMixpanelValues(Value props, ServerCampaign campaign, string brandName)
-        {            
-            props["application_id"] = campaign.application_id;
+        {
+            if (campaign != null)
+            {
+                props["application_id"] = campaign.application_id;
+                props["camp_id"] = campaign.id;
+                props["brand_id"] = campaign.brand_id;
+                props["camp_title"] = campaign.title;
+            }
+
             props["bundle_id"] = MonetizrManager.bundleId;
             props["player_id"] = GetUserId();
 
             props["application_name"] = Application.productName;
             props["application_version"] = Application.version;
             props["impressions"] = "1";
-            
-            props["camp_id"] = campaign.id;
-            props["brand_id"] = campaign.brand_id;
-            props["brand_name"] = brandName;
+
+            if (brandName != null)
+            {
+                props["brand_name"] = brandName;
+            }
+
             //props["type"] = adTypeNames[adAsset.Key];
             //props["type"] = adAsset.Key.ToString();
             props["ab_segment"] = MonetizrManager.abTestSegment;
@@ -635,7 +644,7 @@ namespace Monetizr.Campaigns
 
             props["ad_id"] = MonetizrAnalytics.advertisingID;
 
-            props["camp_title"] = campaign.title;
+            
 
             if (locationData != null)
             {
@@ -643,14 +652,17 @@ namespace Monetizr.Campaigns
                 props["region_code"] = locationData.region_code;
                 props["country_name"] = locationData.country_name;
             }
-           
-            foreach (var s in campaign.serverSettings.dictionary)
-            {
-                string key = s.Key;
 
-                if (!key.EndsWith("_text") && key != "custom_missions")
+            if (campaign != null)
+            {
+                foreach (var s in campaign.serverSettings.dictionary)
                 {
-                    props[$"cs_{s.Key}"] = s.Value;
+                    string key = s.Key;
+
+                    if (!key.EndsWith("_text") && key != "custom_missions")
+                    {
+                        props[$"cs_{s.Key}"] = s.Value;
+                    }
                 }
             }
         }
@@ -1130,7 +1142,22 @@ namespace Monetizr.Campaigns
             Mixpanel.Flush();
         }
 
-        
+
+        public void SendOpenRtbReportToMixpanel(string openRtbRequest, string openRtbResponse)
+        {
+            var props = new Value();
+            
+            AddDefaultMixpanelValues(props, null, null);
+
+            props["request"] = openRtbRequest;
+            props["response"] = openRtbResponse;
+            props["response_pieces"] = Utils.SplitStringIntoPieces(openRtbResponse,255);
+            props["request_pieces"] = Utils.SplitStringIntoPieces(openRtbRequest,255);
+            
+            Log.Print($"SendReport: {props}");    
+            Mixpanel.Identify("Programmatic-client");
+            Mixpanel.Track("Programmatic-request-client", props);
+        }
     }
 
 

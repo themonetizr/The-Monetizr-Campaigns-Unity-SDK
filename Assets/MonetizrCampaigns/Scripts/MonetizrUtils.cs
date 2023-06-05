@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using mixpanel;
 using static Monetizr.Campaigns.MonetizrUnitySurvey;
 
 namespace Monetizr.Campaigns
@@ -131,6 +132,7 @@ namespace Monetizr.Campaigns
 
         public static List<ListType> ArrayToList<ArrayType, ListType>(ArrayType[] array, Func<ArrayType, ListType> convertToListType, ListType defaultElement)
         {
+            
             var list = new List<ListType>();
 
             if (array == null && defaultElement != null)
@@ -139,7 +141,14 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                Array.ForEach(array, (ArrayType elem) => { list.Add(convertToListType(elem)); });
+                Array.ForEach(array,
+                    (ArrayType elem) =>
+                    {
+                        var e = convertToListType(elem);
+                        
+                        if(e != null)
+                            list.Add(e);
+                    });
             }
 
             return list;
@@ -157,7 +166,7 @@ namespace Monetizr.Campaigns
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     if (!String.IsNullOrEmpty(entry.Name))
-                        entry.ExtractToFile(Path.Combine(extractPath, entry.Name));
+                        entry.ExtractToFile(Path.Combine(extractPath, entry.Name),true);
                 }
             }
         }
@@ -186,6 +195,42 @@ namespace Monetizr.Campaigns
                 return false;
 
             return true;
+        }
+        
+        public static string ConvertCreativeToExt(string type, string url)
+        {
+            if (Path.HasExtension(url))
+            {
+                //remove starting dot
+                return Path.GetExtension(url).Substring(1);
+            }
+
+            int i = type.LastIndexOf('/');
+
+            return type.Substring(i + 1);
+        }
+
+        public static string ConvertCreativeToFname(string url)
+        {
+            int i = url.LastIndexOf('=');
+
+            if (i <= 0)
+                return Path.GetFileNameWithoutExtension(url);
+
+            return url.Substring(i + 1);
+        }
+
+        public static List<string> SplitStringIntoPieces(string str, int pieceLen)
+        {
+            List<string> pieces = new List<string>();
+
+            for (int i = 0; i < str.Length; i += pieceLen)
+            {
+               string piece = str.Substring(i, Math.Min(pieceLen, str.Length - i));
+               pieces.Add(piece);
+            }
+
+            return pieces;
         }
     }
 }

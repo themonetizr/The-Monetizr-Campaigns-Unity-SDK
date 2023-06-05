@@ -333,15 +333,16 @@ namespace Monetizr.Campaigns
 
             string path = Application.persistentDataPath + "/" + this.id;
 
+            string fname = string.IsNullOrEmpty(asset.fname) ? Path.GetFileName(asset.url) : $"{asset.fname}.{asset.fext}";
+            path = string.IsNullOrEmpty(asset.fpath) ? $"{path}" : $"{path}/{asset.fpath}";
+            string fpath = $"{path}/{fname}";
+            string zipFolder = null;
+            string fileToCheck = fpath;
+            
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
-            string fname = string.IsNullOrEmpty(asset.fname) ? Path.GetFileName(asset.url) : $"{asset.fname}.{asset.fext}";
-            string fpath = string.IsNullOrEmpty(asset.fpath) ? $"{path}/{fname}" : $"{path}/{asset.fpath}/{fname}";
-            string zipFolder = null;
-            string fileToCheck = fpath;
-
-            Log.Print("PreloadAssetToCache: " + fname);
+            //Log.Print("PreloadAssetToCache: " + fname);
 
             if (fname.Contains("zip"))
             {
@@ -352,6 +353,8 @@ namespace Monetizr.Campaigns
             }
 
             byte[] data = null;
+            
+            Log.Print($"PreloadAssetToCache: {fname} {fileToCheck}");
 
             if (!File.Exists(fileToCheck))
             {
