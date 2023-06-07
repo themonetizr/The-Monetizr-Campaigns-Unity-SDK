@@ -9,6 +9,16 @@ namespace Monetizr.Campaigns
 {
     public static class Log
     {
+        private static bool _isVerbose = true;
+
+        public static void PrintVerbose(object message)
+        {
+            if(!_isVerbose)
+                return;
+            
+            Print(message);
+        }
+
         public static void Print(object message)
         {
 #if UNITY_EDITOR

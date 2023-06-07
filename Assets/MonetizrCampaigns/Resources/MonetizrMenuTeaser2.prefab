@@ -384,6 +384,9 @@ MonoBehaviour:
   singleBackgroundImage: {fileID: 1027851531880307660}
   watchVideoIcon: {fileID: 0}
   buttonTextRect: {fileID: 0}
+  animatableBannerRoot: {fileID: 8659198726826020385}
+  rectangeBannerImage: {fileID: 0}
+  bannerRewardImage: {fileID: 0}
 --- !u!95 &8779468765280008942
 Animator:
   serializedVersion: 3

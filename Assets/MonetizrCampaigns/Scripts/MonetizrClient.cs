@@ -213,6 +213,8 @@ namespace Monetizr.Campaigns
 
             var loadResult = await GetServerCampaignsFromMonetizr();
             
+            Log.PrintVerbose($"GetServerCampaignsFromMonetizr result {loadResult.isSuccess}");
+            
             if(loadResult.isSuccess)
             { 
                 return loadResult.result;
@@ -408,10 +410,14 @@ namespace Monetizr.Campaigns
                 //list = result;
                 return (false, new List<ServerCampaign>());
             }
-
-
+            
             var challenges = JsonUtility.FromJson<Challenges>("{\"challenges\":" + challengesString + "}");
 
+            if (challenges.challenges.Length == 0)
+            {
+                return (false, new List<ServerCampaign>());
+            }
+            
             foreach (var ch in challenges.challenges)
             {
                 Log.Print($"-----{ch.content}");
@@ -423,11 +429,13 @@ namespace Monetizr.Campaigns
             return (true,new List<ServerCampaign>(challenges.challenges));
         }
 
-        internal static HttpRequestMessage GetHttpRequestMessage(string uri)
+        internal static HttpRequestMessage GetHttpRequestMessage(string uri, bool isPost = false)
         {
+            var httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
+            
             return new HttpRequestMessage
             {
-                Method = HttpMethod.Get,
+                Method = httpMethod,
                 RequestUri = new Uri(uri),
                 Headers =
                 {
@@ -480,7 +488,7 @@ namespace Monetizr.Campaigns
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =
-                GetHttpRequestMessage(k_BaseUri + "api/campaigns/" + challenge.id + "/claim");
+                GetHttpRequestMessage(k_BaseUri + "api/campaigns/" + challenge.id + "/claim",true);
 
             string content = string.Empty;
 

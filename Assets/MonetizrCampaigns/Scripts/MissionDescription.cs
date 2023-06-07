@@ -289,8 +289,6 @@ namespace Monetizr.Campaigns
         [SerializeField] internal MissionType type;
         [SerializeField] internal ulong startMoney;
    
-        
-
         [SerializeField] internal bool isSponsored;
         [SerializeField] internal string brandName;
         [SerializeField] internal ulong reward;

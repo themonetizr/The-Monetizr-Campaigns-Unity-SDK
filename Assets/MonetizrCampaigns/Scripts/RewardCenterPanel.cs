@@ -294,52 +294,13 @@ namespace Monetizr.Campaigns
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} survey";
-            m.missionDescription = $"Complete survey and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} with {brandName}";
-            m.progress = 1.0f;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
+            m.missionDescription =
+                $"Complete survey and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} with {brandName}";
+            m.progress = 1.0f; // ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Start survey";
             m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
         }
-
-        private void AddTwitterChallenge(MonetizrRewardedItem item, Mission m, int missionId)
-        {
-            string campaignId = m.campaignId;
-
-            string brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
-
-            string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
-
-
-            if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
-            {
-                rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
-            }
-
-            var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
-
-            m.missionTitle = $"{brandName} twitter";
-            m.missionDescription = $"Follow twitter and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} with {brandName}";
-            m.progress = 1.0f; // ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
-            m.brandName = brandName;
-            m.claimButtonText = "Follow twitter";
-
-            Action<bool> onSurveyComplete = (bool isSkipped) =>
-            {
-                OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
-            };
-
-            //show video, then claim rewards if it's completed
-            m.onClaimButtonPress = () => {
-                /*OnClaimRewardComplete(m, false);*/
-
-                MonetizrManager.ShowNotification((bool _) => { MonetizrManager.GoToLink(onSurveyComplete, m); },
-                        m,
-                        PanelId.TwitterNotification);
-
-            };
-
-        }
-          
 
         private void AddVideoGiveawayChallenge(MonetizrRewardedItem item, Mission m, int missionId)
         {
@@ -380,10 +341,12 @@ namespace Monetizr.Campaigns
             item.currectProgress = getCurrencyFunc() - m.startMoney;
             item.maxProgress = m.reward;
 
-            if (m.campaign.HasAsset(AssetsType.RewardSprite))
+            item.giftIcon.sprite = MissionsManager.GetMissionRewardImage(m);
+            
+            /*if (m.campaign.HasAsset(AssetsType.RewardSprite))
             {
                 item.giftIcon.sprite = m.campaign.GetAsset<Sprite>(AssetsType.RewardSprite);
-            }
+            }*/
 
         }
 
@@ -429,7 +392,7 @@ namespace Monetizr.Campaigns
                 case MissionType.VideoReward: AddRewardedVideoChallenge(item, m,missionId); break;
                 case MissionType.MutiplyReward: AddMultiplyCoinsChallenge(item, m,missionId); break;
                 case MissionType.SurveyReward: AddSurveyChallenge(item, m, missionId); break;
-                case MissionType.TwitterReward: AddTwitterChallenge(item, m, missionId); break;
+                //case MissionType.TwitterReward: AddTwitterChallenge(item, m, missionId); break;
                 //case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
                 case MissionType.VideoWithEmailGiveaway: AddVideoGiveawayChallenge(item, m, missionId); break;
                 case MissionType.MinigameReward:

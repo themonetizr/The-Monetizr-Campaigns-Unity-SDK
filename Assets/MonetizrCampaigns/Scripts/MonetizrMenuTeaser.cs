@@ -224,7 +224,7 @@ namespace Monetizr.Campaigns
                 gifImage.SetGifFromUrl(url);
                 
 
-                animatableBannerRoot.SetActive(false);
+                animatableBannerRoot?.SetActive(false);
             }
             else
             {
@@ -232,7 +232,7 @@ namespace Monetizr.Campaigns
 
                 animatableBannerRoot.SetActive(true);
 
-                bannerRewardImage.sprite = MonetizrRewardedItem.GetRewardSprite(m);
+                bannerRewardImage.sprite = MissionsManager.GetMissionRewardImage(m);
 
                 rectangeBannerImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.TinyTeaserSprite);
 

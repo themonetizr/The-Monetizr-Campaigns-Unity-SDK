@@ -1666,7 +1666,7 @@ namespace Monetizr.Campaigns
             instance.localSettings.GetSetting(campaign.id).amountTeasersShown++;
             instance.localSettings.SaveData();
 
-            int uiVersion = campaign.serverSettings.GetIntParam("teaser_design_version", 2);
+            int uiVersion = 3;//campaign.serverSettings.GetIntParam("teaser_design_version", 2);
 
             instance.uiController.ShowTinyMenuTeaser(teaserRoot, tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
 

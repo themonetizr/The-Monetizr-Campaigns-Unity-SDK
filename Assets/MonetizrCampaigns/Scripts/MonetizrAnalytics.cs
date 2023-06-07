@@ -496,7 +496,7 @@ namespace Monetizr.Campaigns
             Mixpanel.Init();
             Mixpanel.SetToken(apikey);
 
-            Log.Print("Mixpanel init called");
+            Log.Print($"Mixpanel init called {apikey}");
         }
 
 

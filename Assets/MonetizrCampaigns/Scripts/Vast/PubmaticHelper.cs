@@ -161,12 +161,15 @@ namespace Monetizr.Campaigns
             
             //
             var testmode = globalSettings.GetBoolParam("mixpanel.testmode", false);
-            var panelKey = globalSettings.GetParam("mixpanel.testmode", "");
-            monetizrClient.InitializeMixpanel(testmode, panelKey);
+            var mixpanelKey = globalSettings.GetParam("mixpanel.apikey", "");
+            monetizrClient.InitializeMixpanel(testmode, mixpanelKey);
             
             
             //getting openrtb campaign from monetizr proxy or with ssp endpoin
             Log.Print(globalSettings.dictionary.ToString());
+            
+            if(globalSettings.GetBoolParam("openrtb.disabled", false))
+                return (false, new List<ServerCampaign>());
             
             string uri = "https://programmatic-serve-stineosy7q-uc.a.run.app/?test=1&native&pmp";
             var requestMessage = MonetizrClient.GetHttpRequestMessage(uri);

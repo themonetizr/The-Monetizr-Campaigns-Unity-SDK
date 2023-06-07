@@ -137,22 +137,6 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareTwitterMission(MissionType mt, ServerCampaign campaign)
-        {
-            return new Mission()
-            {
-                //rewardType = RewardType.Coins,
-                type = MissionType.TwitterReward,
-                //reward = reward,
-                progress = 1.0f,
-                isDisabled = false,
-                activateTime = DateTime.MinValue,
-                deactivateTime = DateTime.MaxValue,
-                hasVideo = false,
-                isRewardIngame = true,
-            };
-        }
-
         Mission prepareDoubleMission(MissionType mt, ServerCampaign campaign)
         {
             RewardType rt = RewardType.Coins;
@@ -287,7 +271,7 @@ namespace Monetizr.Campaigns
                 case MissionType.MutiplyReward: m = prepareDoubleMission(mt, campaign); break;
                 case MissionType.VideoReward: m = prepareVideoMission(mt, campaign); break;
                 case MissionType.SurveyReward: m = PrepareSurveyMission(mt, campaign); break;
-                case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign); break;
+                //case MissionType.TwitterReward: m = prepareTwitterMission(mt, campaign); break;
                 // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
                 case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign); break;
                 case MissionType.MinigameReward:
@@ -567,10 +551,14 @@ namespace Monetizr.Campaigns
 
         internal static Sprite GetMissionRewardImage(Mission m)
         {
+            
             if (!string.IsNullOrEmpty(m.rewardAssetName))
             {
                 if (m.campaign.TryGetSpriteAsset(m.rewardAssetName, out var s))
+                {
+                    //Log.Print($"GetMissionRewardImage: {m.id} {m.rewardAssetName}");
                     return s;
+                }
             }
             
             Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;

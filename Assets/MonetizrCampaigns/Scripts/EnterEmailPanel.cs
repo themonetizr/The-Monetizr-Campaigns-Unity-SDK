@@ -240,6 +240,7 @@ namespace Monetizr.Campaigns
                 rewardIcon = customCoin;
             }
 
+           
 
             //title.text = $"Get {giveawayTitle}!";
             //text.text = $"<color=#F05627>Enter your e-mail</color> to get giveaway from {brandTitle}.\nDon't miss out!";
@@ -288,6 +289,10 @@ namespace Monetizr.Campaigns
                 selection2Icon.sprite = m.campaign.GetAsset<Sprite>(AssetsType.RewardSprite);
             }
 
+            //TODO: needs to be checked carefully!!!
+            rewardImage.sprite = MissionsManager.GetMissionRewardImage(m);
+            
+            
             //rewardImage.gameObject.SetActive(false);
             rewardAmount.gameObject.SetActive(false);
             rewardImageBackgroud.gameObject.SetActive(false);

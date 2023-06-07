@@ -123,13 +123,13 @@ namespace Monetizr.Campaigns
 
             boosterNumber.text = $"+{ScoreShow(m.reward)}";
 
-            Sprite rewardIcon = GetRewardSprite(m);
+            Sprite rewardIcon = MissionsManager.GetMissionRewardImage(m);;
 
 
             boosterIcon.sprite = rewardIcon == null ? defaultBoosterIcon : rewardIcon;
 
             boosterIcon.gameObject.SetActive(!showGift);
-
+            
             giftIcon.gameObject.SetActive(showGift);
 
             rewardLine.fillAmount = m.progress;
@@ -158,29 +158,6 @@ namespace Monetizr.Campaigns
 
             foreach (var t in gameObject.GetComponents<PanelTextItem>())
                 t.InitializeByParent(PanelId.RewardCenter, m);
-        }
-
-        internal static Sprite GetRewardSprite(Mission m)
-        {
-            return MissionsManager.GetMissionRewardImage(m);
-            /*Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
-
-            Sprite customCoin = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.CustomCoinSprite);
-
-            if (m.rewardType == RewardType.Coins && customCoin != null)
-                rewardIcon = customCoin;
-
-            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) && m.isRewardIngame)
-            {
-                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
-            }
-
-            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite) && !m.isRewardIngame)
-            {
-                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
-            }
-
-            return rewardIcon;*/
         }
 
         internal void ButtonPressed(ButtonController buttonController)
