@@ -7,12 +7,15 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using mixpanel;
+using UnityEngine;
 using static Monetizr.Campaigns.MonetizrUnitySurvey;
 
 namespace Monetizr.Campaigns
 {
     public static class Utils
     {
+        public static Vector2 Abs(Vector2 v) => new Vector2(Mathf.Abs(v.x), Mathf.Abs(v.y));
+
         public static int[] ConvertToIntArray(string s, char delimeter = '.')
         {
             return Array.ConvertAll(s.Split(delimeter), (v) => { int k = 0; return int.TryParse(v, out k) ? k : 0; });
@@ -231,6 +234,11 @@ namespace Monetizr.Campaigns
             }
 
             return pieces;
+        }
+
+        public static bool isInLandscapeMode()
+        {
+            return (Screen.width > Screen.height);
         }
     }
 }

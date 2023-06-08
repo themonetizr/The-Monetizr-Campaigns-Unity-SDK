@@ -17,7 +17,8 @@ namespace Monetizr.Campaigns
         public Image background;
         public Image mainBanner;
         public GameObject banner;
-        public RectTransform scrollView;
+        public RectTransform scrollViewRect;
+        public ScrollRect scrollViewElement;
 
         public GameObject termsAndCondPrefab;
 
@@ -27,11 +28,20 @@ namespace Monetizr.Campaigns
         private List<MonetizrRewardedItem> missionItems = new List<MonetizrRewardedItem>();
 
         private int amountOfItems = 0;
+        private bool hasBanner;
         private float bannerHeight = 1150;
 
         private bool showNotClaimedDisabled = false;
 
         private string currentCampaign;
+
+        private bool isLandscape = false;
+
+        private GameObject bannerObject;
+        private RectTransform bannerObjectRect;
+
+        
+
         //private Mission currentMission;
 
         //public List<MissionUIDescription> missionsDescriptions;
@@ -66,6 +76,14 @@ namespace Monetizr.Campaigns
         {
             currentMission = m;
             currentCampaign =  MonetizrManager.Instance.GetActiveCampaign();
+
+            /*if (Utils.isInLandscapeMode())
+            {
+                scrollViewElement.horizontal = false;
+                scrollViewElement.vertical = true;
+            }*/
+
+
 
             //MonetizrManager.CallUserDefinedEvent(currentCampaign,
              //     NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
@@ -113,16 +131,6 @@ namespace Monetizr.Campaigns
 
         private void AddSponsoredChallenges()
         {
-            //var challenges = MonetizrManager.Instance.GetAvailableChallenges();
-            //var activeChallenge = MonetizrManager.Instance.GetActiveChallenge();
-            //int curChallenge = 0;
-
-            //if (challenges.Count == 0)
-            //    return;
-
-            //put active challenge to the first place
-            //challenges.Remove(activeChallenge);
-            //challenges.Insert(0, activeChallenge);
 
             var campaignId = MonetizrManager.Instance.GetActiveCampaign();
 
@@ -135,15 +143,20 @@ namespace Monetizr.Campaigns
             }
 
 
-            var r = campaign.serverSettings.GetRectParam("RewardCenter.transform", new List<float>{ 35,0,35,0});
+            var r = campaign.serverSettings.GetRectParam("RewardCenter.transform", new List<float>{ 30,0,0,0});
 
-            /*Left*/ 
-            scrollView.offsetMin = new Vector2(r[0], r[3]);
+            if (Utils.isInLandscapeMode())
+            {
+                r = campaign.serverSettings.GetRectParam("RewardCenter.transform_landscape", new List<float> { 0, 0, 0, 0 });
+            }
+
+            /*Left*/
+            scrollViewRect.offsetMin = new Vector2(r[0], r[3]);
             /*Bottom*/ 
             //scrollView.offsetMin.y = r[3];
 
             /*Right*/ 
-            scrollView.offsetMax = new Vector2(-r[2], r[1]);
+            scrollViewRect.offsetMax = new Vector2(-r[2], r[1]);
                 /*Top*/ 
            // scrollView.offsetMax.y = r[1];
            
@@ -165,13 +178,15 @@ namespace Monetizr.Campaigns
 
             amountOfItems = 0;
 
-            bool hasBanner = camp.HasAsset(AssetsType.BrandBannerSprite);
+            hasBanner = camp.HasAsset(AssetsType.BrandBannerSprite);
                        
             if (hasBanner)
             {
-                var go = GameObject.Instantiate<GameObject>(banner, contentRoot);
+                bannerObject = GameObject.Instantiate<GameObject>(banner, contentRoot);
 
-                var images = go.GetComponentsInChildren<Image>();
+                bannerObjectRect = bannerObject.GetComponent<RectTransform>();
+
+                var images = bannerObject.GetComponentsInChildren<Image>();
 
                 images[0].sprite = camp.GetAsset<Sprite>(AssetsType.BrandBannerSprite);
 
@@ -215,6 +230,7 @@ namespace Monetizr.Campaigns
                 AddSponsoredChallenge(m, amountOfItems);
 
                 amountOfItems++;
+
                 //curChallenge++;
 
                 //if there's no room for sponsored campagn
@@ -507,20 +523,13 @@ namespace Monetizr.Campaigns
             
         }
 
-        // Start is called before the first frame update
-        //void Start()
-        //{
-
-        //}
-
-        //// Update is called once per frame
-        void Update()
+        void UpdatePortraitMode()
         {
             //float z = 0;
-            Vector2 pos = new Vector2(0,-bannerHeight);
-            
+            Vector2 pos = new Vector2(510, -bannerHeight);
 
-            foreach(var it in missionItems)
+
+            foreach (var it in missionItems)
             {
                 if (it.mission == null)
                     continue;
@@ -543,15 +552,103 @@ namespace Monetizr.Campaigns
                     continue;
                 }
 
-                it.rect.anchoredPosition = pos;     
+                it.rect.anchoredPosition = pos;
 
                 pos.y -= it.rect.sizeDelta.y;
             }
 
-            termsAndCondRect.anchoredPosition = pos;
-            pos.y -= termsAndCondRect.sizeDelta.y;
+            //termsAndCondRect.anchoredPosition = pos;
+            //pos.y -= termsAndCondRect.sizeDelta.y;
 
             contentRect.sizeDelta = -pos;
+        }
+
+        void UpdateLandscapeMode()
+        {
+            float shiftDelta = 45;
+
+            if(hasBanner)
+                bannerObjectRect.anchoredPosition = new Vector2(75 + shiftDelta, -940);
+
+            float screenReferenceSizeX = 1920;
+            //float screenReferenceSizeY = 1080;
+
+            float blockDistanceY = 150;
+            float blockDistanceX = 50;
+
+            bannerHeight = 970 + shiftDelta;
+
+            if (!hasBanner)
+                bannerHeight = 0;
+
+            float blockWidth = 1100;
+
+            //float z = 0;
+
+            float startX = bannerHeight + blockWidth / 2 + blockDistanceX;
+
+            Vector2 pos = new Vector2(startX, 0);
+            Vector2 size = Vector2.zero;
+            Vector2 originalSize = contentRect.sizeDelta;
+
+            int id = 0;
+
+            foreach (var it in missionItems)
+            {
+                if (it.mission == null)
+                    continue;
+
+                //if (it.mission.isDisabled)
+                //    continue;
+
+                if (it.mission.state == MissionUIState.Hidden)
+                    continue;
+
+                if (it.mission.state == MissionUIState.ToBeHidden)
+                {
+                    if (it.gameObject.activeSelf)
+                    {
+                        it.gameObject.SetActive(false);
+                        it.mission.isDisabled = true;
+                        it.mission.state = MissionUIState.Hidden;
+                    }
+
+                    continue;
+                }
+
+                it.rect.anchoredPosition = pos;
+
+                if (id % 2 == 0)
+                {
+                    pos.y -= it.rect.sizeDelta.y + blockDistanceY;
+                }
+                else
+                {
+                   
+                    pos.x += it.rect.sizeDelta.x + blockDistanceX;
+                    pos.y = 0;
+                }
+
+                id++;
+            }
+
+            //termsAndCondRect.anchoredPosition = pos;
+
+            Log.Print(pos);
+            //pos.y -= termsAndCondRect.sizeDelta.y;
+
+            contentRect.sizeDelta = new Vector2(pos.x + blockWidth/2, originalSize.y);
+
+
+        }
+
+        //// Update is called once per frame
+        void Update()
+        {
+            if (Utils.isInLandscapeMode())
+                UpdateLandscapeMode();
+            else
+                UpdatePortraitMode();
 
         }
     }

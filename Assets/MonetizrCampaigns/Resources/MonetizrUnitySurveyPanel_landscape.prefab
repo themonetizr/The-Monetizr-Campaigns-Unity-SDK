@@ -422,7 +422,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -505.12, y: -42}
+  m_AnchoredPosition: {x: -480, y: -21}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &5152785386245871115
@@ -785,7 +785,7 @@ GameObject:
   - component: {fileID: 2331839769963241637}
   - component: {fileID: 6117922490522058262}
   m_Layer: 5
-  m_Name: MonetizrUnitySurveyPanel
+  m_Name: MonetizrUnitySurveyPanel_landscape
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1752,8 +1752,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8006041604034092849}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.87243}
+  m_LocalScale: {x: 0.65103906, y: 0.65103906, z: 0.65103906}
   m_Children:
   - {fileID: 5686713118393388225}
   - {fileID: 399195218464420729}

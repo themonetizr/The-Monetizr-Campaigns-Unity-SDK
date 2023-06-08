@@ -94,6 +94,10 @@ namespace Monetizr.Campaigns
 
             //if (panels.ContainsKey(previousPanel) && previousPanel != PanelId.Unknown)
             //    panels[previousPanel].SetActive(false);
+
+           
+
+
             PanelController ctrlPanel = null;
             GameObject panel = null;
 
@@ -126,22 +130,40 @@ namespace Monetizr.Campaigns
             else
             {
                 int uiVersion = 0;
-/*
-                if (m != null)
-                {
-                    //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
+                /*
+                                if (m != null)
+                                {
+                                    //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
 
-                    uiVersion = m.additionalParams.GetIntParam("design_version");
+                                    uiVersion = m.additionalParams.GetIntParam("design_version");
 
-                    //Log.Print($"-------------{uiVersion}");
-                    */
-                   /* if (id != PanelId.DebugPanel)
-                    {
-                        prefab += "2";
-                    }*/
+                                    //Log.Print($"-------------{uiVersion}");
+                                    */
+                /* if (id != PanelId.DebugPanel)
+                 {
+                     prefab += "2";
+                 }*/
                 //}
 
-                GameObject asset = Resources.Load(prefab) as GameObject;
+                string prefabLandscape = prefab + "_landscape";
+                GameObject asset = null;
+
+                //if (Screen.orientation == ScreenOrientation.Portrait ||
+                //    Screen.orientation == ScreenOrientation.PortraitUpsideDown)
+
+                //Log.Print($"------{Screen.width} {Screen.height}");
+
+                if (Utils.isInLandscapeMode())
+                {       
+                    //Log.Print("Loading landscape");
+                    asset = Resources.Load(prefabLandscape) as GameObject;
+                }
+
+                if (asset == null)
+                {
+                    //Log.Print("Loading regular prefab");
+                    asset = Resources.Load(prefab) as GameObject;
+                }
 
                 panel = GameObject.Instantiate<GameObject>(asset, mainCanvas.transform);
                 ctrlPanel = panel.GetComponent<PanelController>();
