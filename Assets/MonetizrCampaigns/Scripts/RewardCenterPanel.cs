@@ -634,7 +634,7 @@ namespace Monetizr.Campaigns
 
             //termsAndCondRect.anchoredPosition = pos;
 
-            Log.Print(pos);
+            //Log.Print(pos);
             //pos.y -= termsAndCondRect.sizeDelta.y;
 
             contentRect.sizeDelta = new Vector2(pos.x + blockWidth/2, originalSize.y);

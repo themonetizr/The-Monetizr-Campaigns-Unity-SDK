@@ -10,6 +10,9 @@ namespace Monetizr.Campaigns
         private CanvasScaler cs = null;
         private float aspect = 0;
         private Vector2 initialRefRes;
+        private ScreenOrientation _orientation;
+        private Vector2Int _displaySize;
+
 
         private void UpdatePortrait()
         {
@@ -41,9 +44,30 @@ namespace Monetizr.Campaigns
 
         private void Start()
         {
+            _displaySize = new Vector2Int(Screen.width,Screen.height);
             cs = gameObject.GetComponent<CanvasScaler>();
             initialRefRes = cs.referenceResolution;
 
+            if (Utils.isInLandscapeMode())
+                UpdateLandscape();
+            else
+                UpdatePortrait();
+            
+            InvokeRepeating("CheckForChange", 1, 1);
+        }
+        
+        private void CheckForChange()
+        {
+            if (_displaySize.x != Screen.width || _displaySize.y != Screen.height) {
+                _displaySize = new Vector2Int(Screen.width,Screen.height);
+                OnOrientationChanged(_orientation);
+            }
+        }
+
+        private void OnOrientationChanged(ScreenOrientation orientation)
+        {
+            Log.Print("Orientation changed!");
+            
             if (Utils.isInLandscapeMode())
                 UpdateLandscape();
             else
