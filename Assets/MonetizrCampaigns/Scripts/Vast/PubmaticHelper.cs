@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Monetizr.Campaigns.Vast42;
+using SimpleJSON;
 using UnityEngine;
 
 namespace Monetizr.Campaigns
@@ -14,13 +15,69 @@ namespace Monetizr.Campaigns
         public class OpenRTBResponse
         {
             public string id;
-
             public SeatBid[] seatbid;
+            private static JSONNode _root;
 
-
+            private OpenRTBResponse(JSONNode jsonNode)
+            {
+                _root = jsonNode;
+            }
+            
             public static OpenRTBResponse Load(string json)
             {
-                return JsonUtility.FromJson<OpenRTBResponse>(json);
+                //Log.Print("json->"+json);
+
+                //json = json.Replace("\\\"", "\'");
+                
+                var root = SimpleJSON.JSON.Parse(json);
+             
+                //Log.Print("root->"+root.ToString());
+                
+                var response = new OpenRTBResponse(root);
+
+                return response;
+
+                //return JsonUtility.FromJson<OpenRTBResponse>(json);
+            }
+
+            public string GetAdm()
+            {
+                var seatbidsArray = _root["seatbid"];
+
+                if (seatbidsArray == null || seatbidsArray.Count == 0)
+                    return "";
+                
+                var firstSeatBid = seatbidsArray[0];
+
+                if (firstSeatBid == null)
+                    return "";
+
+                var bidsArray = firstSeatBid["bid"];
+                
+                if (bidsArray == null || bidsArray.Count == 0)
+                    return "";
+
+                var firstBid = bidsArray[0];
+                
+                if (firstBid == null)
+                    return "";
+
+                var admNode = firstBid["adm"];
+                
+                if (admNode == null)
+                    return "";
+                
+                string result = admNode.Value.Replace("\\\"","\"");
+                
+                //Log.Print("---->"+_root);
+                return result;
+                //openRtbResponse.seatbid[0]?.bid[0]?.adm;
+                //throw new NotImplementedException();
+            }
+
+            public string GetId()
+            {
+                return _root["id"];
             }
         }
 
@@ -162,7 +219,8 @@ namespace Monetizr.Campaigns
             //
             var testmode = globalSettings.GetBoolParam("mixpanel.testmode", false);
             var mixpanelKey = globalSettings.GetParam("mixpanel.apikey", "");
-            monetizrClient.InitializeMixpanel(testmode, mixpanelKey);
+            var apiUrl = globalSettings.GetParam("api_url", "");
+            monetizrClient.InitializeMixpanel(testmode, mixpanelKey, apiUrl);
             
             
             //getting openrtb campaign from monetizr proxy or with ssp endpoin
@@ -185,7 +243,8 @@ namespace Monetizr.Campaigns
                     Log.PrintWarning($"request: {openRtbRequest}");
 
                     uri = globalSettings.GetParam("openrtb.endpoint");
-                    requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, openRtbRequest);
+                    
+                    requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, openRtbRequest, HttpMethod.Post);
                 }
             }
 
@@ -193,20 +252,30 @@ namespace Monetizr.Campaigns
 
             var response = await MonetizrClient.DownloadUrlAsString(requestMessage);
 
+#if UNITY_EDITOR
+            uri = "http://127.0.0.1:8000/?test=3";
+            requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, "", HttpMethod.Get);
+            response = await MonetizrClient.DownloadUrlAsString(requestMessage);
+#endif
+
             if (!response.isSuccess)
             {
+#if !UNITY_EDITOR
                 if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
                     monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "NoContent");
-                
+#endif                
+
                 return (false,new List<ServerCampaign>());
             }
+
 
             string res = response.content;
             
             if (res.Contains("Request failed!"))
                 return (false, new List<ServerCampaign>());
-
-            //TODO:
+            
+            
+#if !UNITY_EDITOR            
             if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
             {
                 monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, res);
@@ -220,50 +289,68 @@ namespace Monetizr.Campaigns
                                 $"Notify: Openrtb request successfully received (test mode: {testmode}) ");
 //#endif
             }
+#endif
             
             var openRtbResponse = OpenRTBResponse.Load(res);
 
-            var adm = openRtbResponse.seatbid[0]?.bid[0]?.adm;
+
+            var adm = openRtbResponse.GetAdm();
+            
+            Log.Print($"{openRtbResponse} {adm}");
 
             if (string.IsNullOrEmpty(adm))
                 return (false, new List<ServerCampaign>());
-
-            //adm = adm.Replace("\\\\n", "\n");
-            //adm = adm.Replace("\\\"", "'");
-
-            Log.Print($"{openRtbResponse.id} {openRtbResponse.seatbid[0].bid[0].adm}");
-
-            string json =
-                "{\"native\": {\"assets\": [{\"data\":{\"value\":\"TEST_TEXT_TEST_TEXT_TEST_TEXT_TEST_TEXT_TEST_TEXT_TEST_TEXT_TEST_TEXT_TEST_TEXT\"},\"id\":3},{\"data\":{\"value\":\"install\"},\"id\":4},{\"id\":2, \"img\": { \"h\":80, \"url\": \"https://cdn.splicky.com/720298803/test-banner8080.jpg\", \"w\": 80} }, {  \"id \":1,  \"title\":{\"text\":\"TEST_TITLE\"} },{\"video\":{\"vasttag\":\"\"}}]}}";
-
-            //var nativeData = NativeData.Load(json);
-
-
-            //*
             
-            //extracting vast tag out of json, because parse is not working with xml inside
-            string input = adm;
-            string startTag = "vasttag\":\"";
-            string endTag = "\"}";
+            string vastString = null;
+            string nativeString = null;
+            
+            if (adm.Contains("vasttag"))
+            {
+                //extracting vast tag out of json, because parse is not working with xml inside
+                string input = adm;
+                string startTag = "vasttag\":\"";
+                string endTag = "\"}";
 
-            int start = input.LastIndexOf(startTag, StringComparison.Ordinal) + startTag.Length;
-            int end = input.IndexOf(endTag, start, StringComparison.Ordinal);
+                int start = input.LastIndexOf(startTag, StringComparison.Ordinal) + startTag.Length;
+                int end = input.IndexOf(endTag, start, StringComparison.Ordinal);
 
-            string vast = input.Substring(start, end - start);
-            string result = input.Remove(start, end - start);
+                vastString = input.Substring(start, end - start);
+                nativeString = input.Remove(start, end - start);
+            }
+            else if(adm.StartsWith("<VAST"))
+            {
+                vastString = adm;
+            }
 
             //*/
-            VAST vastData = CreateVastFromXml(vast);
+            VAST vastData = CreateVastFromXml(vastString);
 
-            ServerCampaign serverCampaign = await PrepareServerCampaign(openRtbResponse.id, vastData, true);
+            ServerCampaign serverCampaign = await PrepareServerCampaign(openRtbResponse.GetId(), vastData, true);
             
             if (vastData != null)
                 Log.Print("vast loaded");
             
             serverCampaign.serverSettings.MergeSettingsFrom(globalSettings);
 
-            Log.Print($"vast {vast}\n\n{result}");
+            //Log.Print($"vast {vastString}\n\n{nativeString}");
 
+            if (nativeString != null)
+            {
+                LoadAdditionalNativeAssets(nativeString, serverCampaign);
+            }
+
+            if (serverCampaign != null)
+            {
+                resultCampaignList.Add(serverCampaign);
+            }
+
+            //Log.Print($"Culture: {System.Globalization.CultureInfo.CurrentCulture.Name}");
+
+            return (true,resultCampaignList);
+        }
+
+        private void LoadAdditionalNativeAssets(string result, ServerCampaign serverCampaign)
+        {
             var nativeData = NativeData.Load(result);
 
             //sc.id = openRtbResponse.id;
@@ -285,13 +372,13 @@ namespace Monetizr.Campaigns
                 {
                     case AssetType.Unknown:
                         break;
-                    
+
                     case AssetType.Data:
-                        if(a.data.value.Length > 15)
+                        if (a.data.value.Length > 15)
                             serverCampaign.serverSettings.dictionary["RewardCenter.VideoReward.content_text"] = a.data.value;
-                        
+
                         break;
-                    
+
                     case AssetType.Image:
                         var asset = new ServerCampaign.Asset()
                         {
@@ -302,30 +389,18 @@ namespace Monetizr.Campaigns
                             fext = Utils.ConvertCreativeToExt("", url),
                         };
                         serverCampaign.assets.Add(asset);
-                        
+
                         break;
                     case AssetType.Title:
                         serverCampaign.serverSettings.dictionary["TinyMenuTeaser.button_text"] = a.title.text;
                         break;
                     case AssetType.Video:
                         break;
-                    
                 }
-                
+
 
                 //Log.Print(asset.ToString());
-
-               
             }
-
-            if (serverCampaign != null)
-            {
-                resultCampaignList.Add(serverCampaign);
-            }
-
-            //Log.Print($"Culture: {System.Globalization.CultureInfo.CurrentCulture.Name}");
-
-            return (true,resultCampaignList);
         }
     }
 }

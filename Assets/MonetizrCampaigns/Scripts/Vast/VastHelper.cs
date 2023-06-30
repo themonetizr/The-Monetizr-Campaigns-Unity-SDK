@@ -171,17 +171,17 @@ namespace Monetizr.Campaigns
                 {
                     //Log.Print($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
 
-                    var jsrList = Utils.ArrayToList<Verification_typeJavaScriptResource, VerificationJavaScriptResource>(
+                    var jsrList = Utils.CreateListFromArray<Verification_typeJavaScriptResource, VerificationJavaScriptResource>(
                         av.JavaScriptResource,
                         (Verification_typeJavaScriptResource jsr) => { return new VerificationJavaScriptResource(jsr); },
                         new VerificationJavaScriptResource());
 
-                    var trackingList = Utils.ArrayToList<TrackingEvents_Verification_typeTracking, TrackingEvent>(
+                    var trackingList = Utils.CreateListFromArray<TrackingEvents_Verification_typeTracking, TrackingEvent>(
                         av.TrackingEvents,
                         (TrackingEvents_Verification_typeTracking te) => { return new TrackingEvent(te); },
                         new TrackingEvent());
 
-                    var execList = Utils.ArrayToList<Verification_typeExecutableResource, VerificationExecutableResource>(
+                    var execList = Utils.CreateListFromArray<Verification_typeExecutableResource, VerificationExecutableResource>(
                         av.ExecutableResource,
                         (Verification_typeExecutableResource er) => { return new VerificationExecutableResource(er); },
                         new VerificationExecutableResource());
@@ -225,6 +225,37 @@ namespace Monetizr.Campaigns
             Log.Print($"settings: {res}");
             return res;
         }
+        
+        internal SettingsDictionary<string, string> GetDefaultSettingsForProgrammatic()
+        {
+            var serverSettings = new SettingsDictionary<string, string>();
+
+            serverSettings.dictionary.Add("design_version", "2");
+            serverSettings.dictionary.Add("amount_of_teasers", "100");
+            serverSettings.dictionary.Add("teaser_design_version", "3");
+            serverSettings.dictionary.Add("amount_of_notifications", "100");
+            serverSettings.dictionary.Add("RewardCenter.show_for_one_mission", "true");
+
+            serverSettings.dictionary.Add("bg_color", "#124674");
+            serverSettings.dictionary.Add("bg_color2", "#124674");
+            serverSettings.dictionary.Add("link_color", "#AAAAFF");
+            serverSettings.dictionary.Add("text_color", "#FFFFFF");
+            serverSettings.dictionary.Add("bg_border_color", "#FFFFFF");
+            serverSettings.dictionary.Add("RewardCenter.reward_text_color", "#2196F3");
+
+            serverSettings.dictionary.Add("CongratsNotification.button_text", "Awesome!");
+            serverSettings.dictionary.Add("CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr");
+            serverSettings.dictionary.Add("CongratsNotification.header_text", "Get your awesome reward!");
+
+            serverSettings.dictionary.Add("StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>");
+            serverSettings.dictionary.Add("StartNotification.button_text", "Learn more!");
+            serverSettings.dictionary.Add("StartNotification.content_text", "Join Monetizr<br/>to get game rewards");
+            serverSettings.dictionary.Add("StartNotification.header_text", "<b>Rewards by Monetizr</b>");
+
+            serverSettings.dictionary.Add("RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%");
+
+            return serverSettings;
+        }
 
         internal async Task<ServerCampaign> PrepareServerCampaign(string campaignId, VAST v, bool videoOnly = false)
         {
@@ -237,120 +268,51 @@ namespace Monetizr.Campaigns
             VASTAD vad = (VASTAD)v.Items[0];
 
             //ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
-            ServerCampaign serverCampaign = new ServerCampaign()
-            {
-                id = string.IsNullOrEmpty(campaignId) ? $"{vad.id}" : campaignId, 
-                dar_tag = ""
-            };
-
+            ServerCampaign serverCampaign = new ServerCampaign(
+                string.IsNullOrEmpty(campaignId) ? $"{vad.id}" : campaignId,
+                "",
+                GetDefaultSettingsForProgrammatic()
+            );
+         
             List<TrackingEvent> videoTrackingEvents = new List<TrackingEvent>();
 
-            if (!(vad.Item is Inline_type))
+            //Wrapper_type
+            //var inLine = vad.Item as Inline_type;
+            
+            var inLine = vad.Item as Wrapper_type;
+            
+            //wrapper
+            
+            
+            if (inLine == null)
                 return null;
-
-            bool hasSettings = false;
-            bool hasVideo = false;
-
-            ServerCampaign.Asset videoAsset = null;
-
-            var inLine = (Inline_type)vad.Item;
-
-            //default settings
-            serverCampaign.serverSettings = new SettingsDictionary<string, string>();
-            serverCampaign.serverSettings.dictionary.Add("design_version", "2");
-            serverCampaign.serverSettings.dictionary.Add("amount_of_teasers", "100");
-            serverCampaign.serverSettings.dictionary.Add("teaser_design_version", "3");
-            serverCampaign.serverSettings.dictionary.Add("amount_of_notifications", "100");
-            serverCampaign.serverSettings.dictionary.Add("RewardCenter.show_for_one_mission", "true");
-
-            serverCampaign.serverSettings.dictionary.Add("bg_color", "#124674");
-            serverCampaign.serverSettings.dictionary.Add("bg_color2", "#124674");
-            serverCampaign.serverSettings.dictionary.Add("link_color", "#AAAAFF");
-            serverCampaign.serverSettings.dictionary.Add("text_color", "#FFFFFF");
-            serverCampaign.serverSettings.dictionary.Add("bg_border_color", "#FFFFFF");
-            serverCampaign.serverSettings.dictionary.Add("RewardCenter.reward_text_color", "#2196F3");
-
-            serverCampaign.serverSettings.dictionary.Add("CongratsNotification.button_text", "Awesome!");
-            serverCampaign.serverSettings.dictionary.Add("CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr");
-            serverCampaign.serverSettings.dictionary.Add("CongratsNotification.header_text", "Get your awesome reward!");
-
-            serverCampaign.serverSettings.dictionary.Add("StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>");
-            serverCampaign.serverSettings.dictionary.Add("StartNotification.button_text", "Learn more!");
-            serverCampaign.serverSettings.dictionary.Add("StartNotification.content_text", "Join Monetizr<br/>to get game rewards");
-            serverCampaign.serverSettings.dictionary.Add("StartNotification.header_text", "<b>Rewards by Monetizr</b>");
-
-            serverCampaign.serverSettings.dictionary.Add("RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%");
-            //-----
-                
-            //SettingsDictionary<string, string> globalSettings = await client.DownloadGlobalSettings();
-
-            //serverCampaign.serverSettings.MergeWith(globalSettings);
-            //string s = JSON.Serialize(inLine.adVerificationsField);
-
-
+            
+            //TODO: support Wrapper_type
+            
             string skipOffset = "";
             string videoUrl = "";
 
-            //serverCampaign.id = v.Ad[0].id;
+            ServerCampaign.Asset videoAsset = null;
 
             foreach (var c in inLine.Creatives)
             {
-                ServerCampaign.Asset asset = null;
-
+                //load non linear campaions
                 if (c.NonLinearAds != null && !videoOnly)
                 {
                     var it = c.NonLinearAds;
 
                     foreach (var nl in it.NonLinear)
                     {
-                        string adParameters;
-
-                        //No parameters
-                        //TODO: define 
-                        if (nl.AdParameters == null || string.IsNullOrEmpty(nl.AdParameters.Value))
-                        {
-                            adParameters = "tiny_teaser";
-                        }
-                        else
-                        {
-                            adParameters = nl.AdParameters.Value;
-                        }
-                            
-                        var staticRes = nl.StaticResource[0];
-
-                        //Log.Print($"{staticRes.Value}");
-
-                        asset = new ServerCampaign.Asset()
-                        {
-                            id = $"{c.id} {nl.id}",
-                            url = staticRes.Value,
-                            type = adParameters,
-                            fname = Utils.ConvertCreativeToFname(staticRes.Value),
-                            fext = Utils.ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
-                        };
-
-                        //Log.Print(asset.ToString());
-
-                        serverCampaign.assets.Add(asset);
-
-                        /* ServerCampaign.Asset a2 = asset.Clone();
-                         a2.type = "banner";
-                         serverCampaign.assets.Add(a2);
-                         
-                         ServerCampaign.Asset a3 = asset.Clone();
-                         a3.type = "logo";
-                         serverCampaign.assets.Add(a3);*/
-
+                        AddCampaignAssetFromNonLinearCreative(nl, c, serverCampaign);
                     }
 
                 }
 
+                //load videos
                 if (c.Linear != null)
                 {
                     var it = c.Linear;
-
-                    //Log.Print(it.MediaFiles[0].Value);
-
+                    
                     if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
                     {
                         Log.Print($"MediaFile is null in Linear creative");
@@ -367,9 +329,7 @@ namespace Monetizr.Campaigns
                         
                     string value = mediaFile.Value;
                     string type = mediaFile.type;
-
-                        
-                        
+                    
                     videoAsset = new ServerCampaign.Asset()
                     {
                         id = c.id,
@@ -384,12 +344,9 @@ namespace Monetizr.Campaigns
                     serverCampaign.assets.Add(videoAsset);
 
                     videoUrl = value;
-
-                    hasVideo = true;
-
                     skipOffset = it.skipoffset;
                         
-                    videoTrackingEvents = Utils.ArrayToList<TrackingEvents_typeTracking, TrackingEvent>(
+                    videoTrackingEvents = Utils.CreateListFromArray<TrackingEvents_typeTracking, TrackingEvent>(
                         it.TrackingEvents,
                         (TrackingEvents_typeTracking te) =>
                         {
@@ -398,101 +355,31 @@ namespace Monetizr.Campaigns
                         new TrackingEvent());
                         
                     //Log.Print(asset.ToString());
+                    var adParameters = it.AdParameters;
 
-                    if (it.AdParameters != null)
-                    {
-                        Log.Print(it.AdParameters.Value);
-
-                        string adp = it.AdParameters.Value;
-
-                        adp = adp.Replace("\n", "");
-
-                        var dict = Json.Deserialize(adp) as Dictionary<string, object>;
-
-                        var parsedDict = Utils.ParseContentString("", dict);
-
-                        foreach (var i in parsedDict)
-                        {
-                            serverCampaign.serverSettings.dictionary.Add(i.Key, i.Value);
-
-                            Log.Print($"Additional settings from AdParameters [{i.Key}:{i.Value}]");
-                        }
-
-                        //serverCampaign.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(adp, dict));
-                    }
+                    LoadCampagnSettingsFromAdParams(it.AdParameters, serverCampaign);
                 }
-                /*else if (c.Item is VASTADInLineCreativeCompanionAds)
-                {
-
-                }*/
+              
 
 
             }
 
 
-            string s = CreateVastSettings(inLine.AdVerifications, skipOffset, videoUrl, videoTrackingEvents);
+            string vastJsonSettings = CreateVastSettings(inLine.AdVerifications, skipOffset, videoUrl, videoTrackingEvents);
 
-            Log.Print(s);
+            Log.Print($"Vast settings: {vastJsonSettings}");
 
-            serverCampaign.vastAdVerificationParams = s;
-
+            serverCampaign.vastAdVerificationParams = vastJsonSettings;
 
             await InitializeOMSDK(serverCampaign.vastAdVerificationParams);
 
             Log.Print("Loading video player");
+            
             if (videoAsset != null)
             {
-                //serverCampaign.serverSettings = new SettingsDictionary<string, string>();
-
                 serverCampaign.serverSettings.dictionary.Add("custom_missions", "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
-                    
-                //create folder with video name
-
-                //dowload video and video player into that folder
-
-                //download videoplayer
-                string campPath = Application.persistentDataPath + "/" + serverCampaign.id;
-
                 
-                //if (!Directory.Exists(campPath))
-                //    Directory.CreateDirectory(campPath);
-
-                string zipFolder = campPath + "/" + videoAsset.fpath;
-                
-                Log.Print($"{campPath} {zipFolder}");
-
-                //if (Directory.Exists(zipFolder))
-                //    ServerCampaign.DeleteDirectory(zipFolder);
-
-                if (!Directory.Exists(zipFolder))
-                    Directory.CreateDirectory(zipFolder);
-
-                byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
-
-                File.WriteAllBytes(zipFolder + "/html.zip", data);
-
-                //ZipFile.ExtractToDirectory(zipFolder + "/html.zip", zipFolder);
-
-                Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-
-                File.Delete(zipFolder + "/html.zip");
-
-                //--------------
-
-                string indexPath = $"{zipFolder}/index.html";
-
-                if (!File.Exists(indexPath))
-                {
-                    Log.PrintError("index.html in video player is not exist!!!");
-                }
-                else
-                {
-                    var str = File.ReadAllText(indexPath);
-
-                    str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{serverCampaign.vastAdVerificationParams}");
-
-                    File.WriteAllText(indexPath, str);
-                }
+                await DownloadAndPrepareHtmlVideoPlayer(serverCampaign, videoAsset);
 
                 //---------------
 
@@ -506,27 +393,117 @@ namespace Monetizr.Campaigns
                     });
                 }
 
-                /*serverCampaign.assets.Add(new ServerCampaign.Asset()
-                {
-                    url = "https://image.themonetizr.com/default_assets/monetizr_banner.jpg",
-                    type = "banner",
-
-                });*/
-
-                /*if (!serverCampaign.HasAssetInList("logo"))
-                {
-                    serverCampaign.assets.Add(new ServerCampaign.Asset()
-                    {
-                        //url = "https://image.themonetizr.com/default_assets/monetizr_logo.png",
-                        url = "https://storage.googleapis.com/middleware-media-files/challenge_asset/64072ae1-4d45-4037-b704-f68b6411caf9.png",
-                        type = "logo",
-
-                    });
-                }*/
-
             }
 
             return serverCampaign;
+        }
+
+        private static void LoadCampagnSettingsFromAdParams(AdParameters_type adParameters, ServerCampaign serverCampaign)
+        {
+            if (adParameters == null) return;
+            
+            Log.Print(adParameters.Value);
+
+            string adp = adParameters.Value;
+
+            adp = adp.Replace("\n", "");
+
+            var dict = Json.Deserialize(adp) as Dictionary<string, object>;
+
+            var parsedDict = Utils.ParseContentString("", dict);
+
+            foreach (var i in parsedDict)
+            {
+                serverCampaign.serverSettings.dictionary.Add(i.Key, i.Value);
+
+                Log.Print($"Additional settings from AdParameters [{i.Key}:{i.Value}]");
+            }
+
+            //serverCampaign.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(adp, dict));
+        }
+
+        private static async Task DownloadAndPrepareHtmlVideoPlayer(ServerCampaign serverCampaign, ServerCampaign.Asset videoAsset)
+        {
+            string campPath = Application.persistentDataPath + "/" + serverCampaign.id;
+
+            string zipFolder = campPath + "/" + videoAsset.fpath;
+
+            Log.Print($"{campPath} {zipFolder}");
+
+            //if (Directory.Exists(zipFolder))
+            //    ServerCampaign.DeleteDirectory(zipFolder);
+
+            if (!Directory.Exists(zipFolder))
+                Directory.CreateDirectory(zipFolder);
+
+            byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+
+            File.WriteAllBytes(zipFolder + "/html.zip", data);
+
+            //ZipFile.ExtractToDirectory(zipFolder + "/html.zip", zipFolder);
+
+            Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
+
+            File.Delete(zipFolder + "/html.zip");
+
+            //--------------
+
+            string indexPath = $"{zipFolder}/index.html";
+
+            if (!File.Exists(indexPath))
+            {
+                Log.PrintError("index.html in video player is not exist!!!");
+            }
+            else
+            {
+                var str = File.ReadAllText(indexPath);
+
+                str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{serverCampaign.vastAdVerificationParams}");
+
+                File.WriteAllText(indexPath, str);
+            }
+        }
+
+        private static void AddCampaignAssetFromNonLinearCreative(NonLinearAd_Inline_type nl, Creative_Inline_type c,
+            ServerCampaign serverCampaign)
+        {
+            string adParameters;
+
+            //No parameters
+            //TODO: define 
+            if (nl.AdParameters == null || string.IsNullOrEmpty(nl.AdParameters.Value))
+            {
+                adParameters = "tiny_teaser";
+            }
+            else
+            {
+                adParameters = nl.AdParameters.Value;
+            }
+
+            var staticRes = nl.StaticResource[0];
+
+            //Log.Print($"{staticRes.Value}");
+
+            ServerCampaign.Asset asset = new ServerCampaign.Asset()
+            {
+                id = $"{c.id} {nl.id}",
+                url = staticRes.Value,
+                type = adParameters,
+                fname = Utils.ConvertCreativeToFname(staticRes.Value),
+                fext = Utils.ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
+            };
+
+            //Log.Print(asset.ToString());
+
+            serverCampaign.assets.Add(asset);
+
+            /*ServerCampaign.Asset a2 = asset.Clone();
+                         a2.type = "banner";
+                         serverCampaign.assets.Add(a2);
+                         
+                         ServerCampaign.Asset a3 = asset.Clone();
+                         a3.type = "logo";
+                         serverCampaign.assets.Add(a3);*/
         }
 
         //TODO!

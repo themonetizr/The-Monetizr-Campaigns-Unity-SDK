@@ -79,6 +79,17 @@ namespace Monetizr.Campaigns
         public List<Asset> assets = new List<Asset>();
         public List<Location> locations = new List<Location>();
 
+        public ServerCampaign(string id, string darTag, SettingsDictionary<string,string> defaultServerSettings)
+        {
+            this.id = id;
+            dar_tag = darTag;
+            serverSettings = defaultServerSettings;
+        }
+
+        public ServerCampaign()
+        {
+        }
+
         [System.NonSerialized]
         internal string vastAdVerificationParams = "";
 
@@ -569,9 +580,7 @@ namespace Monetizr.Campaigns
 
             Directory.Delete(target_dir, false);
         }
-
-
-
+        
         internal bool IsCampaignInsideLocation(IpApiData locData)
         {
             //no location data

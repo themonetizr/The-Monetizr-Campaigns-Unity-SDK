@@ -133,11 +133,17 @@ namespace Monetizr.Campaigns
             }
         }
 
-        public static List<ListType> ArrayToList<ArrayType, ListType>(ArrayType[] array, Func<ArrayType, ListType> convertToListType, ListType defaultElement)
+        public static List<ListType> CreateListFromArray<ArrayType, ListType>(ArrayType[] array, Func<ArrayType, ListType> convertToListType, ListType defaultElement)
         {
-            
             var list = new List<ListType>();
 
+            AddArrayToList(list,array,convertToListType,defaultElement);
+
+            return list;
+        }
+        
+        public static void AddArrayToList<ArrayType, ListType>(List<ListType> list, ArrayType[] array, Func<ArrayType, ListType> convertToListType, ListType defaultElement)
+        {
             if (array == null && defaultElement != null)
             {
                 list.Add(defaultElement);
@@ -153,8 +159,6 @@ namespace Monetizr.Campaigns
                             list.Add(e);
                     });
             }
-
-            return list;
         }
 
         public static bool IsNullOrEmpty<T>(this T[] array)

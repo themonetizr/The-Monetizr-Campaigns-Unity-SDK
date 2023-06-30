@@ -169,7 +169,10 @@ namespace Monetizr.Campaigns
 
         public void MergeSettingsFrom(SettingsDictionary<TKey, TValue> addDictionary)
         {
-            addDictionary.dictionary.ToList().ForEach(
+            if (dictionary.Count == 0)
+                return;
+            
+            addDictionary.dictionary?.ToList().ForEach(
                 x => dictionary[x.Key] = x.Value);
         }
 

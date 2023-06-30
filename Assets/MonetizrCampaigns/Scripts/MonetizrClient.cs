@@ -31,9 +31,9 @@ namespace Monetizr.Campaigns
     {
         //public PlayerInfo playerInfo { get; set; }
 
-        private string k_BaseUri = "https://api.themonetizr.com/";
-        private string k_BaseTestUri = "https://api-test.themonetizr.com/";
-        private static readonly HttpClient client = new HttpClient();
+        private string _baseApiUrl = "https://api.themonetizr.com/api/campaigns";
+        private readonly string _baseTestApiUrl = "https://api-test.themonetizr.com/api/campaigns";
+        private static readonly HttpClient Client = new HttpClient();
 
         public MonetizrAnalytics analytics { get; private set; }
         public string currentApiKey;
@@ -43,7 +43,7 @@ namespace Monetizr.Campaigns
 
         internal HttpClient GetClient()
         {
-            return client;
+            return Client;
         }
         
         private static async Task RequestEnd(UnityWebRequest request, CancellationToken token)
@@ -112,9 +112,9 @@ namespace Monetizr.Campaigns
 
             analytics = new MonetizrAnalytics();
 
-            client.Timeout = TimeSpan.FromSeconds(timeout);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.Timeout = TimeSpan.FromSeconds(timeout);
+            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
 
             //Client.DefaultRequestHeaders.Add("player-id", analytics.GetUserId());
@@ -123,15 +123,19 @@ namespace Monetizr.Campaigns
             //Client.DefaultRequestHeaders.Add("os-group", MonetizrAnalytics.GetOsGroup());
         }
 
-        public void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey)
+        public void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
         {
             string key = "cda45517ed8266e804d4966a0e693d0d";
-            k_BaseUri = "https://api.themonetizr.com/";
+            
+            //k_BaseUri = "https://api.themonetizr.com/api/campaigns";
+
+            if (!string.IsNullOrEmpty(apiUri))
+                _baseApiUrl = apiUri;
 
             if (testEnvironment)
             {
                 key = "d4de97058730720b3b8080881c6ba2e0";
-                k_BaseUri = "https://api-test.themonetizr.com/";
+                _baseApiUrl = _baseTestApiUrl;
             }
             
             if (!string.IsNullOrEmpty(mixPanelApiKey))
@@ -148,7 +152,7 @@ namespace Monetizr.Campaigns
 
         public void Close()
         {
-            client.CancelPendingRequests();
+            Client.CancelPendingRequests();
         }
 
         [Serializable]
@@ -159,7 +163,7 @@ namespace Monetizr.Campaigns
 
         public static async Task<(bool isSuccess,string content)> DownloadUrlAsString(HttpRequestMessage requestMessage)
         {
-            HttpResponseMessage response = await client.SendAsync(requestMessage);
+            HttpResponseMessage response = await Client.SendAsync(requestMessage);
 
             string result = await response.Content.ReadAsStringAsync();
 
@@ -176,11 +180,11 @@ namespace Monetizr.Campaigns
         
         public async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
         {
-            var requestMessage = GetHttpRequestMessage(k_BaseTestUri + "settings");
+            var requestMessage = GetHttpRequestMessage(_baseTestApiUrl + "settings");
 
             Log.Print($"Sent settings: {requestMessage.ToString()}");
 
-            HttpResponseMessage response = await client.SendAsync(requestMessage);
+            HttpResponseMessage response = await Client.SendAsync(requestMessage);
 
             var resultString = await response.Content.ReadAsStringAsync();
 
@@ -211,21 +215,19 @@ namespace Monetizr.Campaigns
             MonetizrManager.isVastActive = false;
             //List<ServerCampaign> result = new List<ServerCampaign>();
 
-            var loadResult = await GetServerCampaignsFromMonetizr();
+            //TODO: regular campaigns
+            /*var loadResult = await GetServerCampaignsFromMonetizr();
             
             Log.PrintVerbose($"GetServerCampaignsFromMonetizr result {loadResult.isSuccess}");
             
             if(loadResult.isSuccess)
             { 
                 return loadResult.result;
-            }
+            }*/
 
             //VastHelper v = new VastHelper(this);
             //KevelHelper v = new KevelHelper(this);
             PubmaticHelper v = new PubmaticHelper(this);
-
-            //if (v == null)
-            //    return result;
 
             var programmaticCampaignResult = await v.GetProgrammaticCampaign(this);
             if (programmaticCampaignResult.isSuccess && 
@@ -383,11 +385,11 @@ namespace Monetizr.Campaigns
 
         private async Task<(bool isSuccess,List<ServerCampaign> result)> GetServerCampaignsFromMonetizr()
         {
-            var requestMessage = GetHttpRequestMessage(k_BaseUri + "api/campaigns");
+            var requestMessage = GetHttpRequestMessage(_baseApiUrl);
 
             Log.Print($"Sent request: {requestMessage.ToString()}");
 
-            HttpResponseMessage response = await client.SendAsync(requestMessage);
+            HttpResponseMessage response = await Client.SendAsync(requestMessage);
 
             var challengesString = await response.Content.ReadAsStringAsync();
 
@@ -448,7 +450,7 @@ namespace Monetizr.Campaigns
             };
         }
         
-        internal static HttpRequestMessage GetOpenRtbRequestMessage(string url, string content)
+        internal static HttpRequestMessage GetOpenRtbRequestMessage(string url, string content, HttpMethod method)
         {
             HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, url);
             httpRequest.Headers.Add("x-openrtb-version", "2.5");
@@ -463,9 +465,9 @@ namespace Monetizr.Campaigns
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =
-                GetHttpRequestMessage(k_BaseUri + "api/campaigns/" + campaignId + "/reset");
+                GetHttpRequestMessage($"{_baseApiUrl}/{campaignId}/reset");
 
-            HttpResponseMessage response = await client.SendAsync(requestMessage, ct);
+            HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
 
             string s = await response.Content.ReadAsStringAsync();
 
@@ -488,7 +490,7 @@ namespace Monetizr.Campaigns
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =
-                GetHttpRequestMessage(k_BaseUri + "api/campaigns/" + challenge.id + "/claim",true);
+                GetHttpRequestMessage($"{_baseApiUrl}/{challenge.id}/claim",true);
 
             string content = string.Empty;
 
@@ -522,7 +524,7 @@ namespace Monetizr.Campaigns
 
             Log.Print($"Request:\n[{requestMessage}] content:\n[{content}]");
 
-            HttpResponseMessage response = await client.SendAsync(requestMessage, ct);
+            HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
 
             string s = await response.Content.ReadAsStringAsync();
 
@@ -544,7 +546,7 @@ namespace Monetizr.Campaigns
 
             var requestMessage = MonetizrClient.GetHttpRequestMessage(url);
 
-            _ = client.SendAsync(requestMessage);
+            _ = Client.SendAsync(requestMessage);
         }
 
         public void SendReportToMixpanel(string openRtbRequest, string res)
