@@ -170,6 +170,13 @@ namespace Monetizr.Campaigns
             return assets.Find(a => a.type == type) != null;
         }
         
+        internal bool TryGetAssetInList(string type, out Asset asset)
+        {
+            asset = assets.Find(a => a.type == type);
+
+            return asset != null;
+        }
+        
         internal bool TryGetSpriteAsset(string spriteTitle, out Sprite res)
         { 
             int index = assets.FindIndex(a => a.title == spriteTitle);

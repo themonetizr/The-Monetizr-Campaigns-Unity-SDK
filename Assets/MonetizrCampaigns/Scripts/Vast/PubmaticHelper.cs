@@ -323,12 +323,9 @@ namespace Monetizr.Campaigns
             }
 
             //*/
-            VAST vastData = CreateVastFromXml(vastString);
 
-            ServerCampaign serverCampaign = await PrepareServerCampaign(openRtbResponse.GetId(), vastData, true);
+            ServerCampaign serverCampaign = await PrepareServerCampaign(openRtbResponse.GetId(), vastString, true);
             
-            if (vastData != null)
-                Log.Print("vast loaded");
             
             serverCampaign.serverSettings.MergeSettingsFrom(globalSettings);
 

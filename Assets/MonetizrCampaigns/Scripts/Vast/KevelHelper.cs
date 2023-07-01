@@ -128,7 +128,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            ServerCampaign serverCampaign = await PrepareServerCampaign(null, vastData);
+            ServerCampaign serverCampaign = await PrepareServerCampaign(null, data.decisions.div1.contents[0].body);
 
             if (serverCampaign != null)
                 campList.Add(serverCampaign);
