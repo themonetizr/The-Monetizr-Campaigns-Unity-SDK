@@ -452,7 +452,7 @@ namespace Monetizr.Campaigns
         
         internal static HttpRequestMessage GetOpenRtbRequestMessage(string url, string content, HttpMethod method)
         {
-            HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, url);
+            HttpRequestMessage httpRequest = new HttpRequestMessage(method, url);
             httpRequest.Headers.Add("x-openrtb-version", "2.5");
             httpRequest.Content = new StringContent(content, Encoding.UTF8, "application/json");
             return httpRequest;

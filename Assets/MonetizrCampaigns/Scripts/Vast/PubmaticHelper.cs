@@ -220,6 +220,8 @@ namespace Monetizr.Campaigns
             var testmode = globalSettings.GetBoolParam("mixpanel.testmode", false);
             var mixpanelKey = globalSettings.GetParam("mixpanel.apikey", "");
             var apiUrl = globalSettings.GetParam("api_url", "");
+            var videoOnly = globalSettings.GetBoolParam("openrtb.video_only", true);
+            
             monetizrClient.InitializeMixpanel(testmode, mixpanelKey, apiUrl);
             
             
@@ -254,7 +256,7 @@ namespace Monetizr.Campaigns
 
 #if UNITY_EDITOR
             uri = "http://127.0.0.1:8000/?test=3";
-            requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, "", HttpMethod.Get);
+            requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, "", HttpMethod.Post);
             response = await MonetizrClient.DownloadUrlAsString(requestMessage);
 #endif
 
@@ -324,7 +326,7 @@ namespace Monetizr.Campaigns
 
             //*/
 
-            ServerCampaign serverCampaign = await PrepareServerCampaign(openRtbResponse.GetId(), vastString, true);
+            ServerCampaign serverCampaign = await PrepareServerCampaign(openRtbResponse.GetId(), vastString, videoOnly);
             
             
             serverCampaign.serverSettings.MergeSettingsFrom(globalSettings);

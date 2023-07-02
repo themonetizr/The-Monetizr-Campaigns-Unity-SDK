@@ -352,8 +352,6 @@
                             private void AddWrapperCreativesIntoAssets()
                             {
                                 var adItem = _wrapper;
-
-                                WrapperAdTagUri = _wrapper.VASTAdTagURI;
                                 
                                 foreach (var c in adItem.Creatives)
                                 {
@@ -372,8 +370,8 @@
                                 }
                             }
 
-                            public string WrapperAdTagUri { get; private set; }
-
+                            internal string WrapperAdTagUri => _type == Type.Wrapper ? _wrapper.VASTAdTagURI : null;
+                            
                             private void AddInlineCreativesIntoAssets()
                             {
                                 var adItem = _inline;
@@ -467,7 +465,7 @@
                             
                             //---
                             
-                            if (await LoadVastContent(vastContent, videoOnly, serverCampaign, vastSettings, videoTrackingEvents)) 
+                            if (!await LoadVastContent(vastContent, videoOnly, serverCampaign, vastSettings, videoTrackingEvents)) 
                                 return null;
 
                             //-----
@@ -521,8 +519,9 @@
 
                             if (!string.IsNullOrEmpty(adItem.WrapperAdTagUri))
                             {
-                                var requestMessage = MonetizrClient.GetOpenRtbRequestMessage(adItem.WrapperAdTagUri, "", HttpMethod.Get);
-                                var result = await MonetizrClient.DownloadUrlAsString(requestMessage);
+                                Log.Print($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
+                                
+                                var result = await MonetizrClient.DownloadUrlAsString(new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri));
 
                                 if (!result.isSuccess)
                                     return false;

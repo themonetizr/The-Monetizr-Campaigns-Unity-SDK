@@ -1612,7 +1612,7 @@ namespace Monetizr.Campaigns.Vast42
         
         collapse,
         
-        
+        fullscreen,
     }
     
     /// <remarks/>
