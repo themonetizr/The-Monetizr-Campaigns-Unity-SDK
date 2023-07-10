@@ -1777,7 +1777,14 @@ namespace Monetizr.Campaigns
             catch (Exception e)
             {
                 Log.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]} {e}");
-
+                
+                if (_challengesClient.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
+                {
+                    _challengesClient.SendErrorToRemoteServer("Campaign error",
+                        "Campaign error",
+                        $"Campaign error:\nApp: {bundleId}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{e.ToString()}");
+                }
+                
 #if !UNITY_EDITOR            
                 _challengesClient.SendErrorToRemoteServer("Error",e.Message,e.ToString());
 #endif

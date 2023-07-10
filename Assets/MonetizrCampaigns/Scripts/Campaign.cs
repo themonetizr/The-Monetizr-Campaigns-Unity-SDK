@@ -91,7 +91,7 @@ namespace Monetizr.Campaigns
         }
 
         [System.NonSerialized]
-        internal string vastAdVerificationParams = "";
+        internal string vastAdParameters = "";
 
         [System.NonSerialized]
         private Dictionary<AssetsType, object> assetsDict = new Dictionary<AssetsType, object>();

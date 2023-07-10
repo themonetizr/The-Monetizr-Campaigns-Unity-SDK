@@ -31,8 +31,25 @@ namespace Monetizr.Campaigns
     {
         //public PlayerInfo playerInfo { get; set; }
 
-        private string _baseApiUrl = "https://api.themonetizr.com/api/campaigns";
-        private readonly string _baseTestApiUrl = "https://api-test.themonetizr.com/api/campaigns";
+        private string _baseApiUrl = "https://api.themonetizr.com";
+
+        private string CampaignsApiUrl
+        {
+            get
+            {
+                return _baseApiUrl + "/api/campaigns";
+            }
+        }
+        
+        private string SettingsApiUrl
+        {
+            get
+            {
+                return _baseApiUrl + "/settings";
+            }
+        }
+
+        private readonly string _baseTestApiUrl = "https://api-test.themonetizr.com";
         private static readonly HttpClient Client = new HttpClient();
 
         public MonetizrAnalytics analytics { get; private set; }
@@ -41,7 +58,7 @@ namespace Monetizr.Campaigns
 
         private CancellationTokenSource downloadCancellationTokenSource;
 
-        internal HttpClient GetClient()
+        internal HttpClient GetHttpClient()
         {
             return Client;
         }
@@ -110,6 +127,8 @@ namespace Monetizr.Campaigns
 
             currentApiKey = apiKey;
 
+            GlobalSettings = new SettingsDictionary<string, string>();
+                
             analytics = new MonetizrAnalytics();
 
             Client.Timeout = TimeSpan.FromSeconds(timeout);
@@ -180,7 +199,7 @@ namespace Monetizr.Campaigns
         
         public async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
         {
-            var requestMessage = GetHttpRequestMessage(_baseTestApiUrl + "settings");
+            var requestMessage = GetHttpRequestMessage(SettingsApiUrl);
 
             Log.Print($"Sent settings: {requestMessage.ToString()}");
 
@@ -193,8 +212,8 @@ namespace Monetizr.Campaigns
             //---
 
 
-            Log.Print($"Settings response is: {responseOk} {response.StatusCode}");
-            Log.Print(resultString);
+            Log.Print($"Settings response is: {response.StatusCode}");
+            Log.Print($"Settings: {resultString}");
 
             SettingsDictionary<string, string> result = new SettingsDictionary<string, string>();
 
@@ -215,15 +234,19 @@ namespace Monetizr.Campaigns
             MonetizrManager.isVastActive = false;
             //List<ServerCampaign> result = new List<ServerCampaign>();
 
-            //TODO: regular campaigns
-            /*var loadResult = await GetServerCampaignsFromMonetizr();
+            //loading settings
+            GlobalSettings = await DownloadGlobalSettings();
+            
+            //load regular campaigns
+            
+            var loadResult = await GetServerCampaignsFromMonetizr();
             
             Log.PrintVerbose($"GetServerCampaignsFromMonetizr result {loadResult.isSuccess}");
             
             if(loadResult.isSuccess)
             { 
                 return loadResult.result;
-            }*/
+            }
 
             //VastHelper v = new VastHelper(this);
             //KevelHelper v = new KevelHelper(this);
@@ -241,7 +264,9 @@ namespace Monetizr.Campaigns
 
             return new List<ServerCampaign>();
         }
-        
+
+        internal SettingsDictionary<string, string> GlobalSettings { get; private set; }
+
         public async Task<List<ServerCampaign>> GetList()
         {
             var result = await LoadCampaignsListFromServer();
@@ -385,7 +410,7 @@ namespace Monetizr.Campaigns
 
         private async Task<(bool isSuccess,List<ServerCampaign> result)> GetServerCampaignsFromMonetizr()
         {
-            var requestMessage = GetHttpRequestMessage(_baseApiUrl);
+            var requestMessage = GetHttpRequestMessage(CampaignsApiUrl);
 
             Log.Print($"Sent request: {requestMessage.ToString()}");
 
@@ -465,7 +490,7 @@ namespace Monetizr.Campaigns
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =
-                GetHttpRequestMessage($"{_baseApiUrl}/{campaignId}/reset");
+                GetHttpRequestMessage($"{CampaignsApiUrl}/{campaignId}/reset");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
 
@@ -490,7 +515,7 @@ namespace Monetizr.Campaigns
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =
-                GetHttpRequestMessage($"{_baseApiUrl}/{challenge.id}/claim",true);
+                GetHttpRequestMessage($"{CampaignsApiUrl}/{challenge.id}/claim",true);
 
             string content = string.Empty;
 

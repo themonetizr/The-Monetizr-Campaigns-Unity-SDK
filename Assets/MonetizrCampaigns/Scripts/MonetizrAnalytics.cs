@@ -12,6 +12,7 @@ using System.Linq;
 using UnityEngine.UIElements;
 
 using System.Reflection;
+using SimpleJSON;
 using UnityEditor;
 
 
@@ -1143,14 +1144,47 @@ namespace Monetizr.Campaigns
         }
 
 
-        public void SendOpenRtbReportToMixpanel(string openRtbRequest, string openRtbResponse)
+        public void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse)
         {
             var props = new Value();
             
             AddDefaultMixpanelValues(props, null, null);
 
+            var parameters =SimpleJSON.JSON.Parse(openRtbRequest);
+            
+            void NestedDictIteration(string rootName, SimpleJSON.JSONNode p)
+            {
+                foreach (var key in p)
+                {
+                    var value = key.Value;
+                    var k = key.Key;
+                    
+                    var name = string.IsNullOrEmpty(k) ? rootName : $"{rootName}/{key.Key}";
+
+                    if (value.IsString || value.IsNumber)
+                    {
+                        string v = key.Value.ToString();
+
+                        if (value.IsString)
+                            v = v.Trim('"');
+
+                        props[name] = v;
+                        //Debug.LogError($"{name},{v}");
+                    }
+                    
+                    NestedDictIteration(name,key.Value);
+                }
+            }
+
+            NestedDictIteration("",parameters);
+            
+            #if UNITY_EDITOR
+                props["test"] = 1;
+            #endif
+            
             props["request"] = openRtbRequest;
             props["response"] = openRtbResponse;
+            props["status"] = status;
             props["response_pieces"] = Utils.SplitStringIntoPieces(openRtbResponse,255);
             props["request_pieces"] = Utils.SplitStringIntoPieces(openRtbRequest,255);
             

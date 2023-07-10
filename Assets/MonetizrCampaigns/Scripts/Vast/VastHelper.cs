@@ -1,9 +1,11 @@
 ﻿                using System;
+                using System.Collections;
                 using System.Collections.Generic;
                 using System.IO;
                 using System.IO.Compression;
                 using System.Linq;
                 using System.Net.Http;
+                using System.Numerics;
                 using System.Text;
                 using System.Threading.Tasks;
                 using System.Xml;
@@ -14,6 +16,7 @@
 
                 using Monetizr.Campaigns.Vast42;
                 using MiniJSON;
+                using Vector2 = UnityEngine.Vector2;
 
                 namespace Monetizr.Campaigns
                 {
@@ -212,27 +215,32 @@
 
                         }
 
-                        private static string DumpsVastSettings(VastSettings _vastSettings, List<TrackingEvent> _trackingEvents)
+                        private static string DumpsVastSettings(VastSettings _vastSettings,
+                            List<TrackingEvent> _trackingEvents)
                         {
                             string res = JsonUtility.ToJson(_vastSettings);
 
-                            //TODO: insert at the end
-                            //}-> ,{"trackingEvents":{"name1":"url1","name2":"url2",...}}
+                            //,{"trackingEvents":[
+                            //{
+                            //    "event":"type",
+                            //    "url":"url"
+                            //},
+                            //]}
 
-                            string trackingEventsJson = ",\"trackingEvents\":{";
+                            string trackingEventsJson = ",\"trackingEvents\":[";
 
                             //foreach (var te in events)
                             for (int i = 0; i < _trackingEvents.Count; i++)
                             {
                                 var te = _trackingEvents[i];
 
-                                trackingEventsJson += $"\"{te.@event}\":\"{te.value}\"";
+                                trackingEventsJson += $"{{\"event\":\"{te.@event}\",\"url\":\"{te.value}\"}}";
 
                                 if (i < _trackingEvents.Count - 1)
                                     trackingEventsJson += ",";
                             }
 
-                            trackingEventsJson += "}";
+                            trackingEventsJson += "]";
 
                             res = res.Insert(res.Length - 1, trackingEventsJson);
 
@@ -275,6 +283,20 @@
                         
                         class VastAdItem
                         {
+                            internal struct PreferableVideoSize
+                            {
+                                internal int bitrate;
+                                internal int width;
+                                internal int height;
+
+                                public PreferableVideoSize(int bitrate, int width, int height)
+                                {
+                                    this.bitrate = bitrate;
+                                    this.width = width;
+                                    this.height = height;
+                                }
+                            }
+                            
                             private readonly ServerCampaign _serverCampaign;
                             private readonly Wrapper_type _wrapper;
                             private readonly Inline_type _inline;
@@ -284,6 +306,7 @@
                             private List<TrackingEvent> _videoTrackingEvents;
                             private readonly AdDefinitionBase_type _baseType;
                             private ServerCampaign.Asset _videoAsset;
+                            private PreferableVideoSize _preferableVideoSize;
                             
                             enum Type
                             {
@@ -305,6 +328,7 @@
                                 ServerCampaign serverCampaign, 
                                 VastSettings vastSettings,
                                 List<TrackingEvent> videoTrackingEvents,
+                                PreferableVideoSize preferableVideoSize,
                                 bool loadVideoOnly)
                             {
                                 _videoTrackingEvents = videoTrackingEvents;
@@ -314,6 +338,7 @@
                                 _wrapper = adDefinition as Wrapper_type;
                                 _inline = adDefinition as Inline_type;
                                 _loadVideoOnly = loadVideoOnly;
+                                _preferableVideoSize = preferableVideoSize;
                             
                                 _type = Type.Unknown;
                                 
@@ -372,6 +397,7 @@
 
                             internal string WrapperAdTagUri => _type == Type.Wrapper ? _wrapper.VASTAdTagURI : null;
                             
+                            
                             private void AddInlineCreativesIntoAssets()
                             {
                                 var adItem = _inline;
@@ -403,11 +429,51 @@
                                             
                                         Linear_Inline_typeMediaFilesMediaFile mediaFile = it.MediaFiles.MediaFile[0];
 
+                                        float w = (float)_preferableVideoSize.width;
+                                        float h = (float) _preferableVideoSize.height;
+
+                                        Vector2 prefSize = new Vector2(w, h);
+                                        
+                                        //choose media file close to preferable size and bitrate
+                                        Array.Sort(it.MediaFiles.MediaFile, (m1, m2) =>
+                                        {
+                                            if (m1 == null || m2 == null ||
+                                                string.IsNullOrEmpty(m1.width) || string.IsNullOrEmpty(m1.height) ||
+                                                string.IsNullOrEmpty(m2.width) || string.IsNullOrEmpty(m2.height))
+                                                return 0;
+                                            
+                                            Vector2 v1 = new Vector2(float.Parse(m1.width), float.Parse(m1.height));
+                                            Vector2 v2 = new Vector2(float.Parse(m2.width), float.Parse(m2.height));
+                                            
+                                            int compareSize = Vector2.Distance(v1,prefSize).CompareTo(Vector2.Distance(v2,prefSize));
+
+                                            //if the same size, take a look on bit rate
+                                            if (compareSize == 0)
+                                            {
+                                                if (string.IsNullOrEmpty(m1.bitrate) ||
+                                                    string.IsNullOrEmpty(m2.bitrate))
+                                                    return 0;
+                                                    
+                                                int br1 = Math.Abs(int.Parse(m1.bitrate) - _preferableVideoSize.bitrate);
+                                                int br2 = Math.Abs(int.Parse(m2.bitrate) - _preferableVideoSize.bitrate);
+
+                                                int result = br1.CompareTo(br2);
+                                                return result;
+                                            }
+
+                                            return compareSize;
+                                        });
+                                        
                                         if (it.MediaFiles.MediaFile.Length > 1)
                                         {
                                             mediaFile = Array.Find(it.MediaFiles.MediaFile,
-                                                (Linear_Inline_typeMediaFilesMediaFile a) => a.type.Equals("video/mp4"));
+                                                (Linear_Inline_typeMediaFilesMediaFile a) =>
+                                                {
+                                                    return a.type.Equals("video/mp4");
+                                                });
                                         }
+                                        
+                                        Log.Print($"Chosen video file - type:{mediaFile.type} br:{mediaFile.bitrate} w:{mediaFile.width} h:{mediaFile.height} ");
                                             
                                         string value = mediaFile.Value;
                                         string type = mediaFile.type;
@@ -475,11 +541,10 @@
                             
                             Log.Print($"Vast settings: {vastJsonSettings}");
 
-                            serverCampaign.vastAdVerificationParams = vastJsonSettings;
+                            serverCampaign.vastAdParameters = vastJsonSettings;
 
-                            await InitializeOMSDK(serverCampaign.vastAdVerificationParams);
-
-                            Log.Print("Loading video player");
+                            await InitializeOMSDK(serverCampaign.vastAdParameters);
+                            
 
                             await PrepareVideoAsset(serverCampaign);
 
@@ -506,10 +571,15 @@
                             if (!(vastData.Items[0] is VASTAD vad))
                                 return false;
 
+                            int prefBitRate = client.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
+                            int prefWidth = client.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
+                            int prefHeight = client.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
+
                             var adItem = new VastAdItem(vad.Item,
                                 serverCampaign,
                                 vastSettings,
                                 videoTrackingEvents,
+                                new VastAdItem.PreferableVideoSize(prefBitRate,prefWidth,prefHeight),
                                 videoOnly);
 
                             if (adItem.InUnknownAdType())
@@ -538,9 +608,13 @@
 
                         private async Task PrepareVideoAsset(ServerCampaign serverCampaign)
                         {
-                            if(!serverCampaign.TryGetAssetInList("html", out var videoAsset))
+                            Log.Print("Loading video player");
+
+                            if (!serverCampaign.TryGetAssetInList("html", out var videoAsset))
+                            {
                                 return;
-                            
+                            }
+
                             serverCampaign.serverSettings.dictionary.Add("custom_missions",
                                     "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
 
@@ -619,7 +693,7 @@
                             {
                                 var str = File.ReadAllText(indexPath);
 
-                                str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{serverCampaign.vastAdVerificationParams}");
+                                str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{serverCampaign.vastAdParameters}");
 
                                 File.WriteAllText(indexPath, str);
                             }
