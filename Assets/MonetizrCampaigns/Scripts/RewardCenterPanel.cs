@@ -15,7 +15,10 @@ namespace Monetizr.Campaigns
         private bool hasSponsoredChallenges;
         public Text headerText;
         public Image background;
+        
         public Image mainBanner;
+        public Image mainLogo;
+
         public GameObject banner;
         public RectTransform scrollViewRect;
         public ScrollRect scrollViewElement;
@@ -28,11 +31,11 @@ namespace Monetizr.Campaigns
         private List<MonetizrRewardedItem> missionItems = new List<MonetizrRewardedItem>();
 
         private int amountOfItems = 0;
-        private bool hasBanner;
+        private bool scrollListHasBanner;
         private float bannerHeight = 1150;
 
         private bool showNotClaimedDisabled = false;
-
+        private List<Mission> missionsForRewardCenter;
         private string currentCampaign;
 
         private bool isLandscape = false;
@@ -40,7 +43,7 @@ namespace Monetizr.Campaigns
         private GameObject bannerObject;
         private RectTransform bannerObjectRect;
 
-        
+        public GameObject bannerLayoutElement;
 
         //private Mission currentMission;
 
@@ -143,44 +146,66 @@ namespace Monetizr.Campaigns
             }
 
 
-            var r = campaign.serverSettings.GetRectParam("RewardCenter.transform", new List<float>{ 30,0,0,0});
-
             if (Utils.isInLandscapeMode())
             {
-                r = campaign.serverSettings.GetRectParam("RewardCenter.transform_landscape", new List<float> { 0, 0, 0, 0 });
+                //r = campaign.serverSettings.GetRectParam("RewardCenter.transform_landscape", new List<float> { 0, 0, 0, 0 });
             }
+            else
+            {
+                var r = campaign.serverSettings.GetRectParam("RewardCenter.transform", new List<float> { 30, 0, 0, 0 });
 
-            /*Left*/
-            scrollViewRect.offsetMin = new Vector2(r[0], r[3]);
-            /*Bottom*/ 
-            //scrollView.offsetMin.y = r[3];
+                /*Left*/
+                scrollViewRect.offsetMin = new Vector2(r[0], r[3]);
+                /*Bottom*/
+                //scrollView.offsetMin.y = r[3];
 
-            /*Right*/ 
-            scrollViewRect.offsetMax = new Vector2(-r[2], r[1]);
-                /*Top*/ 
-           // scrollView.offsetMax.y = r[1];
-           
-
+                /*Right*/
+                scrollViewRect.offsetMax = new Vector2(-r[2], r[1]);
+                /*Top*/
+                // scrollView.offsetMax.y = r[1];
+            }
 
             showNotClaimedDisabled = campaign.serverSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
+            missionsForRewardCenter = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
 
-            if(missions.Count == 0)
+            if (missionsForRewardCenter.Count == 0)
             {
                 Log.PrintWarning("No sponsored challenges for RC!");
                 return;
             }
 
-            var camp = missions[0].campaign;
+            var camp = missionsForRewardCenter[0].campaign;
 
             //mainBanner.sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 
             amountOfItems = 0;
 
-            hasBanner = camp.HasAsset(AssetsType.BrandBannerSprite);
-                       
-            if (hasBanner)
+            var hasBanner = camp.HasAsset(AssetsType.BrandBannerSprite);
+                        
+            
+            if (Utils.isInLandscapeMode())
+            {
+                if (hasBanner)
+                {
+                    mainBanner.sprite = camp.GetAsset<Sprite>(AssetsType.BrandBannerSprite);
+                    
+                    bool hasLogo = camp.HasAsset(AssetsType.BrandRewardLogoSprite);
+
+                    if(hasLogo)
+                    {
+                        mainLogo.sprite = camp.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
+                    }
+                }
+                else
+                {
+                    bannerLayoutElement.SetActive(false);
+                }
+            }
+
+            scrollListHasBanner = Utils.isInLandscapeMode() ? false : hasBanner;
+
+            if (scrollListHasBanner)
             {
                 bannerObject = GameObject.Instantiate<GameObject>(banner, contentRoot);
 
@@ -201,18 +226,18 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                bannerHeight = 120;
+                //bannerHeight = 120;
             }
 
             //go.GetComponent<Image>().sprite = MonetizrManager.Instance.GetAsset<Sprite>(campId, AssetsType.BrandBannerSprite);
 
-            foreach (var m in missions)
+            foreach (var m in missionsForRewardCenter)
             {
                 var ch = m.campaignId;
 
                 m.showHidden = showNotClaimedDisabled && m.isDisabled && m.isClaimed != ClaimState.Claimed;
                     
-                if (ch == missions[0].campaignId)
+                if (ch == missionsForRewardCenter[0].campaignId)
                 //if (ch == activeChallenge)
                 {
                    /* var color = MonetizrManager.Instance.GetAsset<Color>(ch, AssetsType.HeaderTextColor);
@@ -238,10 +263,32 @@ namespace Monetizr.Campaigns
                 //    break;
             }
 
+            UpdateStatusBar();
+
 
             var t = GameObject.Instantiate<GameObject>(termsAndCondPrefab, contentRoot);
 
             termsAndCondRect = t.GetComponent<RectTransform>();
+        }
+
+        private void UpdateStatusBar()
+        {
+            var camp = MonetizrManager.Instance.GetCampaign(currentCampaign);
+
+            var statusText = camp.serverSettings.GetParam("RewardCenter.transform", "Rewards claimed: %claimed_missions%/%total_missions%");
+ 
+            int claimed = 0;
+
+            var missions = MonetizrManager.Instance.missionsManager.missions;
+
+            foreach (var m in missions)
+                if (m.isClaimed == ClaimState.Claimed)
+                    claimed++;
+
+            statusText = statusText.Replace("%claimed_missions%",claimed.ToString());
+            statusText = statusText.Replace("%total_missions%", missions.Count.ToString());
+
+            headerText.text = statusText;
         }
 
         private void AddRewardedVideoChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -493,8 +540,9 @@ namespace Monetizr.Campaigns
                     m.state = MissionUIState.Visible;
                     m.isDisabled = false;
                 }
-                
             }
+
+            UpdateStatusBar();
         }
 
         public void OnVideoPlayPress(Mission m, Action<bool> onComplete)
@@ -525,7 +573,10 @@ namespace Monetizr.Campaigns
 
         void UpdatePortraitMode()
         {
-            //float z = 0;
+            if (!scrollListHasBanner && Utils.isInLandscapeMode())
+                bannerHeight = 0;
+
+                //float z = 0;
             Vector2 pos = new Vector2(510, -bannerHeight);
 
 
@@ -567,7 +618,7 @@ namespace Monetizr.Campaigns
         {
             float shiftDelta = 45;
 
-            if(hasBanner)
+            if(scrollListHasBanner)
                 bannerObjectRect.anchoredPosition = new Vector2(75 + shiftDelta, -940);
 
             float screenReferenceSizeX = 1920;
@@ -578,7 +629,7 @@ namespace Monetizr.Campaigns
 
             bannerHeight = 970 + shiftDelta;
 
-            if (!hasBanner)
+            if (!scrollListHasBanner)
                 bannerHeight = 0;
 
             float blockWidth = 1100;
@@ -645,9 +696,9 @@ namespace Monetizr.Campaigns
         //// Update is called once per frame
         void Update()
         {
-            if (Utils.isInLandscapeMode())
-                UpdateLandscapeMode();
-            else
+            //if (Utils.isInLandscapeMode())
+            //    UpdateLandscapeMode();
+            //else
                 UpdatePortraitMode();
 
         }

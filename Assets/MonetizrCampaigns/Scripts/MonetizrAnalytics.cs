@@ -1150,7 +1150,7 @@ namespace Monetizr.Campaigns
             
             AddDefaultMixpanelValues(props, null, null);
 
-            var parameters =SimpleJSON.JSON.Parse(openRtbRequest);
+            var parameters = SimpleJSON.JSON.Parse(openRtbRequest);
             
             void NestedDictIteration(string rootName, SimpleJSON.JSONNode p)
             {

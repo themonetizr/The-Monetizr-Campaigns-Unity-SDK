@@ -93,7 +93,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8476186599486507923
 RectTransform:
   m_ObjectHideFlags: 0
@@ -299,6 +299,7 @@ MonoBehaviour:
   closeButtonImageAsset: {fileID: 4900000, guid: d470db49358db4e43966772c1ecc75e2,
     type: 3}
   closeButton: {fileID: 8476186599486507920}
+  background: {fileID: 0}
 --- !u!1 &8476186599874992487
 GameObject:
   m_ObjectHideFlags: 0
