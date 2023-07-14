@@ -48,7 +48,7 @@ namespace Monetizr.Campaigns
             return 0;
         }
 
-        public static Dictionary<string, string> ParseJson(string content)
+        public static Dictionary<string, string> _ParseJson(string content)
         {
             content = content.Trim(new[] { '{', '}' }).Replace('\'', '\"');
 
@@ -62,6 +62,34 @@ namespace Monetizr.Campaigns
             return regxComma.Split(content)
                             .Select(v => regxColon.Split(v))
                             .ToDictionary(v => v.First().Trim(trimmedChars), v => v.Last().Trim(trimmedChars));
+        }
+
+        public static Dictionary<string, string> ParseJson(string content)
+        {
+            var result = new Dictionary<string, string>();
+
+            var root = SimpleJSON.JSON.Parse(content);
+
+            foreach (var key in root)
+            {
+                var value = key.Value;
+                var name = key.Key;
+
+                if (value.IsString || value.IsNumber)
+                {
+                    string v = key.Value.ToString();
+
+                    if (value.IsString)
+                        v = v.Trim('"');
+
+                    result[name] = v;
+                    
+                    //Debug.LogError($"{name},{v}");
+                }
+                      
+            }
+
+            return result;
         }
 
         //Unity FromJson doesn't support Dictionaries
@@ -166,15 +194,26 @@ namespace Monetizr.Campaigns
             return array == null || array.Length == 0;
         }
 
-        public static void ExtractAllToDirectory(string zipPath, string extractPath)
+        public static bool ExtractAllToDirectory(string zipPath, string extractPath)
         {
-            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+            try
             {
-                foreach (ZipArchiveEntry entry in archive.Entries)
+                using (ZipArchive archive = ZipFile.OpenRead(zipPath))
                 {
-                    if (!String.IsNullOrEmpty(entry.Name))
-                        entry.ExtractToFile(Path.Combine(extractPath, entry.Name),true);
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        if (!String.IsNullOrEmpty(entry.Name))
+                            entry.ExtractToFile(Path.Combine(extractPath, entry.Name), true);
+                    }
                 }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.PrintError($"Extract {zipPath} to directory {extractPath} failed with error {e.ToString()}");
+
+                return false;
             }
         }
 
