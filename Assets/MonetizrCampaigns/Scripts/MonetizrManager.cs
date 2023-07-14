@@ -1835,22 +1835,30 @@ namespace Monetizr.Campaigns
                 Log.Print($"Campaign path: {path}");
 
                 await campaign.LoadCampaignAssets();               
-
-                if(campaign.isLoaded)
-                    Log.Print($"Loading finished");
-                else
-                    Log.PrintError($"Loading error!");
-
+                
                 if (campaign.isLoaded)
                 {
+                    Log.Print($"Campign {campaign.id} successfully loaded");
+
                     this.campaigns.Add(campaign.id, campaign);
                     campaignIds.Add(campaign.id);
+                }
+                else
+                {
+                    Log.PrintError($"Campign {campaign.id} loading failed with error {campaign.loadingError}!");
+
+                    if (_challengesClient.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
+                    {
+                        _challengesClient.SendErrorToRemoteServer("Campaign loading assets error",
+                            "Campaign loading assets error",
+                            $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{campaign.loadingError}");
+                    }
                 }
             }
 
             activeChallengeId = campaignIds.Count > 0 ? campaignIds[0] : null;
 
-            Log.Print($"Active challenge {activeChallengeId}");
+            Log.Print($"Active campaign: {activeChallengeId}");
 
             isMissionsIsOudated = true;
 
