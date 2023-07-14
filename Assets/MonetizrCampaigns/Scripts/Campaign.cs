@@ -100,6 +100,9 @@ namespace Monetizr.Campaigns
         public bool isLoaded = true;
 
         [System.NonSerialized]
+        public string loadingError = "";
+
+        [System.NonSerialized]
         public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
 
         [System.Serializable]
@@ -295,6 +298,8 @@ namespace Monetizr.Campaigns
                     if (!isOptional)
                     {
                         Log.PrintError($"Campaign loading will fail, because asset is required!");
+
+                        this.loadingError = $"Nothing downloaded with a path {asset.url}";
                         this.isLoaded = false;
                     }
 
@@ -385,7 +390,10 @@ namespace Monetizr.Campaigns
                     Log.Print("Nothing downloaded! Data == null");
 
                     if (required)
+                    {
                         this.isLoaded = false;
+                        this.loadingError = $"Nothing downloaded with a path {asset.url}";
+                    }
 
                     return;
                 }
@@ -405,9 +413,20 @@ namespace Monetizr.Campaigns
                     Directory.CreateDirectory(zipFolder);
 
                     //ZipFile.ExtractToDirectory(fpath, zipFolder);
-                    Utils.ExtractAllToDirectory(fpath, zipFolder);
-
+                    var unzipResult = Utils.ExtractAllToDirectory(fpath, zipFolder);
+                                        
                     File.Delete(fpath);
+
+                    if(!unzipResult)
+                    {
+                        if (required)
+                        {
+                            this.isLoaded = false;
+                            this.loadingError = $"Zip {fpath} extracting failed!";
+                        }
+
+                        return;
+                    }
                 }
 
 

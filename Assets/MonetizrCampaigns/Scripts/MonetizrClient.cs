@@ -211,7 +211,6 @@ namespace Monetizr.Campaigns
 
             //---
 
-
             Log.Print($"Settings response is: {response.StatusCode}");
             Log.Print($"Settings: {resultString}");
 
