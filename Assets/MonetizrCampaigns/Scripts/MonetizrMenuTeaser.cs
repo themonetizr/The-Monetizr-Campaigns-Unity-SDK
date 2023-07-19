@@ -39,7 +39,12 @@ namespace Monetizr.Campaigns
         public GameObject animatableBannerRoot;
         public Image rectangeBannerImage;
         public Image bannerRewardImage;
- 
+
+        public Text missionsNum;
+
+        public GameObject buttonObject;
+        public GameObject numberObject;
+
         internal override AdPlacement? GetAdPlacement()
         {
             return AdPlacement.TinyTeaser;
@@ -216,7 +221,29 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            if (m.campaign.HasAsset(AssetsType.TeaserGifPathString))
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
+
+            var numText = currentMission.campaignServerSettings.GetParam("teaser.num_text", "%missions_num%");
+
+            numText = numText.Replace("%missions_num%", $"{missions.Count}");
+
+            missionsNum.text = numText;
+
+            var hasGif = m.campaign.HasAsset(AssetsType.TeaserGifPathString);
+
+            var showButton = currentMission.campaignServerSettings.GetBoolParam("teaser.show_button", true);
+
+            buttonObject.SetActive(showButton);
+
+            var showNumber = currentMission.campaignServerSettings.GetBoolParam("teaser.show_number", true);
+
+
+
+            numberObject.SetActive(showNumber);
+
+            //hasGif = false;
+
+            if (hasGif)
             {
                 string url = m.campaign.GetAsset<string>(AssetsType.TeaserGifPathString);
 
@@ -234,7 +261,7 @@ namespace Monetizr.Campaigns
 
                 bannerRewardImage.sprite = MissionsManager.GetMissionRewardImage(m);
 
-                rectangeBannerImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.TinyTeaserSprite);
+                rectangeBannerImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
 
             }
 
