@@ -251,9 +251,9 @@ namespace Monetizr.Campaigns
                     //screenPos = Vector2.zero;
                 }*/
 
-                if (designVersion == 3)
+                if (designVersion >= 3)
                 {
-                    teaserPrefab = "MonetizrMenuTeaser3";
+                    teaserPrefab = $"MonetizrMenuTeaser{designVersion}";
                     //screenPos = Vector2.zero;
                 }
 
