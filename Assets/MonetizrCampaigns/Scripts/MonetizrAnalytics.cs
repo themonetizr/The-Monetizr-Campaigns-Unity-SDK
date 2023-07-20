@@ -250,6 +250,7 @@ namespace Monetizr.Campaigns
         RewardsCenterScreen,
 
         AssetsLoading,
+        ActionScreen,
     }
 
     internal enum DeviceSizeGroup
@@ -843,7 +844,8 @@ namespace Monetizr.Campaigns
                 { AdPlacement.EmailEnterCouponRewardScreen, "Enter email" },
                 { AdPlacement.EmailEnterInGameRewardScreen, "Enter email" },
                 { AdPlacement.EmailEnterSelectionRewardScreen, "Enter email" },
-                { AdPlacement.AssetsLoading, "Assets loading" }
+                { AdPlacement.AssetsLoading, "Assets loading" },
+                { AdPlacement.ActionScreen, "Action screen" }
             };
 
             
@@ -855,6 +857,7 @@ namespace Monetizr.Campaigns
                     case AdPlacement.Survey:
                     case AdPlacement.Html5:
                     case AdPlacement.HtmlPage:
+                    case AdPlacement.ActionScreen:
                         return "completed";
 
                     case AdPlacement.EmailEnterCouponRewardScreen:

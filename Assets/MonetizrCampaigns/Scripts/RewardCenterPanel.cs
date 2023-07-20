@@ -429,8 +429,8 @@ namespace Monetizr.Campaigns
 
             var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
-            m.missionTitle = $"{brandName} minigame";
-            m.missionDescription = $"Play minigame and get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
+            m.missionTitle = $"{brandName} challenge";
+            m.missionDescription = $"Complete challenge and get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
             m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Play!";
@@ -460,6 +460,7 @@ namespace Monetizr.Campaigns
                 case MissionType.VideoWithEmailGiveaway: AddVideoGiveawayChallenge(item, m, missionId); break;
                 case MissionType.MinigameReward:
                 case MissionType.MemoryMinigameReward:
+                case MissionType.ActionReward:
                     AddMinigameChallenge(item, m, missionId); break;
             }
 

@@ -29,6 +29,7 @@ namespace Monetizr.Campaigns
         MemoryGame,
         SurveyCloseConfirmation,
         SurveyUnityView,
+        ActionHtmlPanelView,
     }
     
     internal class UIController
@@ -129,30 +130,9 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                int uiVersion = 0;
-                /*
-                                if (m != null)
-                                {
-                                    //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
-
-                                    uiVersion = m.additionalParams.GetIntParam("design_version");
-
-                                    //Log.Print($"-------------{uiVersion}");
-                                    */
-                /* if (id != PanelId.DebugPanel)
-                 {
-                     prefab += "2";
-                 }*/
-                //}
-
                 string prefabLandscape = prefab + "_landscape";
                 GameObject asset = null;
-
-                //if (Screen.orientation == ScreenOrientation.Portrait ||
-                //    Screen.orientation == ScreenOrientation.PortraitUpsideDown)
-
-                //Log.Print($"------{Screen.width} {Screen.height}");
-
+                             
                 if (Utils.isInLandscapeMode())
                 {       
                     //Log.Print("Loading landscape");
@@ -178,7 +158,7 @@ namespace Monetizr.Campaigns
 
 
                 ctrlPanel.uiController = this;
-                ctrlPanel.uiVersion = uiVersion;
+                ctrlPanel.uiVersion = 0;
 
                 foreach (var t in ctrlPanel.gameObject.GetComponents<PanelTextItem>())
                     t.InitializeByParent(id, m);

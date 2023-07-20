@@ -20,11 +20,18 @@ namespace Monetizr.Campaigns
         private UniWebView webView;
 #endif
         private string webUrl;
+        private string rewardWebUrl;
         //private Mission currentMission;
         private string eventsPrefix;
         private AdPlacement adType;
         private bool isAnalyticsNeeded = true;
         public Image background;
+
+        public GameObject claimButton;
+
+        public Animator crossButtonAnimator;
+
+        private int pagesSwitch = -1;
 
         internal override AdPlacement? GetAdPlacement()
         {
@@ -44,7 +51,11 @@ namespace Monetizr.Campaigns
 
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
+
+#if UNITY_EDITOR
             UniWebView.SetWebContentsDebuggingEnabled(true);
+#endif
+
             UniWebView.SetJavaScriptEnabled(true);
             UniWebView.SetAllowUniversalAccessFromFileURLs(true);
 
@@ -124,6 +135,44 @@ namespace Monetizr.Campaigns
 
         }
 
+        internal void PrepareActionPanel(Mission m)
+        {
+            //MonetizrManager.Analytics.TrackEvent("Survey webview", currentMissionDesc);
+
+            closeButton.gameObject.SetActive(true);
+
+            //Log.Print($"currentMissionDesc: {currentMissionDesc == null}");
+            //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
+                                 // eventsPrefix = "Survey";
+
+            webUrl = m.campaignServerSettings.GetParam("ActionReward.url");
+
+            if(string.IsNullOrEmpty(webUrl))
+            {
+                Log.PrintError($"ActionReward.url is null");
+            }
+
+            rewardWebUrl = m.campaignServerSettings.GetParam("ActionReward.reward_url");
+
+            webView.Load(webUrl);
+
+            //isAnalyticsNeeded = false;
+
+            int delay = m.campaignServerSettings.GetIntParam("ActionReward.reward_time", 0);
+
+            StartCoroutine(ShowClaimButton(delay));
+
+            pagesSwitch = m.campaignServerSettings.GetIntParam("ActionReward.reward_time", 0);
+        }
+
+        internal IEnumerator ShowClaimButton(int delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            claimButton.SetActive(true);
+            //crossButtonAnimator.enabled = true;
+        }
+
         private void PrepareHtml5Panel()
         {
             
@@ -153,9 +202,20 @@ namespace Monetizr.Campaigns
                 useSafeFrame = true;
             }
 
+            if(id == PanelId.ActionHtmlPanelView)
+            {
+                fullScreen = false;
+            }
+
+            claimButton.SetActive(false);
+
             PrepareWebViewComponent(fullScreen, useSafeFrame);
 
             closeButton.gameObject.SetActive(!fullScreen);
+
+            int closeButtonDelay = m.campaignServerSettings.GetIntParam("email_enter_close_button_delay", 0);
+
+            StartCoroutine(ShowCloseButton(closeButtonDelay));
 
             if (id == PanelId.Html5WebView)
                 background.color = Color.black;
@@ -168,6 +228,7 @@ namespace Monetizr.Campaigns
                 //case PanelId.VideoWebView: adType = AdType.Video; PrepareVideoPanel(); break;
                 case PanelId.Html5WebView: adType = AdPlacement.Html5; PrepareHtml5Panel(); break;
                 case PanelId.HtmlWebPageView: adType = AdPlacement.HtmlPage; PrepareWebViewPanel(m); break;
+                case PanelId.ActionHtmlPanelView: adType = AdPlacement.ActionScreen; PrepareActionPanel(m); break;
             }
 
             //eventsPrefix = MonetizrAnalytics.adTypeNames[adType];
@@ -188,6 +249,12 @@ namespace Monetizr.Campaigns
 #endif
         }
 
+        IEnumerator ShowCloseButton(float time)
+        {
+            yield return new WaitForSeconds(time);
+
+            crossButtonAnimator.enabled = true;
+        }
 
 #if UNI_WEB_VIEW
         void OnMessageReceived(UniWebView webView, UniWebViewMessage message)
@@ -252,19 +319,12 @@ namespace Monetizr.Campaigns
                     webUrl = currentUrl;
                     Log.Print("Update: " + webView.Url);
 
+                    pagesSwitch--;
 
-                    /* if (webUrl.Contains("withdraw-consent") ||
-                        webUrl.Contains("reportabuse") ||
-                        webUrl.Contains("google.com/forms/about"))
-                    {
-                        OnSkipPress();
-                        return;
-                    }*/
-
-
-                    if (webUrl.Contains("end-page-gateway") ||
-                        webUrl.Contains("themonetizr.com") ||
-                        webUrl.Contains("uniwebview"))
+                    if (webUrl.Contains("themonetizr.com") ||
+                        webUrl.Contains("uniwebview") ||
+                        webUrl.Contains(rewardWebUrl) ||
+                        pagesSwitch == 0)
                     {
                         OnCompleteEvent();
                         return;
@@ -288,11 +348,14 @@ namespace Monetizr.Campaigns
 
         private void ClosePanel()
         {
-            Log.Print($"Stopping OMID ad session at time: {Time.time}");
+            Log.Print($"Stopping OMID ad session at time: {Time.time}"); 
 
             webView.StopOMIDAdSession();
 
             float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay",1.0f);
+
+            if (panelId != PanelId.Html5WebView)
+                time = 0;
 
             Invoke("DestroyWebView", time);
         }
@@ -316,6 +379,13 @@ namespace Monetizr.Campaigns
         }
 
        
+        public void OnClaimRewardPress()
+        {
+            Log.Print("OnClaimRewardPress");
+
+            OnCompleteEvent();
+        }
+
 
         public void OnSkipPress()
         {
@@ -389,6 +459,8 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.Instance.SoundSwitch(true);
         }
+
+
 
         //// Start is called before the first frame update
         //void Start()

@@ -1104,90 +1104,12 @@ namespace Monetizr.Campaigns
         {
             ShowNotification(onComplete, m, PanelId.CongratsNotification);
         }
-
-        internal static bool TryShowSurveyNotification(Action onComplete)
-        {
-            //MissionUIDescription sponsoredMsns = instance.missionsManager.getCampaignReadyForSurvey();
-
-            Mission sponsoredMsns = instance.missionsManager.FindActiveSurveyMission();
-
-            if (sponsoredMsns == null)
-            {
-                onComplete?.Invoke();
-                return false;
-            }
-
-            FillInfo(sponsoredMsns);
-
-            Action<bool> onSurveyComplete = (bool isSkipped) =>
-            {
-                if (MonetizrManager.claimForSkippedCampaigns)
-                    isSkipped = false;
-
-                if (!isSkipped)
-                {
-                    //sponsoredMsns.AddPremiumCurrencyAction.Invoke(sponsoredMsns.reward);
-
-                    //MonetizrManager.gameRewards[sponsoredMsns.rewardType].AddCurrencyAction(sponsoredMsns.reward);
-
-                    //ShowCongratsNotification(onComplete, sponsoredMsns);
-
-                    Instance.ClaimMission(sponsoredMsns, isSkipped, true, onComplete);
-                }
-                else
-                {
-                    onComplete?.Invoke();
-                }
-
-
-            };
-
-            ShowNotification((bool _) => { ShowSurvey(onSurveyComplete, sponsoredMsns); },
-                sponsoredMsns,
-                PanelId.SurveyNotification);
-
-            return true;
-        }
+               
 
         internal void ClaimMissionData(Mission m)
         {
             gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-
-            /*if (m.type == MissionType.VideoReward)
-            {
-                ShowRewardCenter(null);
-                //m.AddPremiumCurrencyAction.Invoke(m.reward);
-
-                gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-            }
-            else if (m.type == MissionType.MutiplyReward)
-            {
-                m.reward *= 2;
-
-                //m.AddNormalCurrencyAction.Invoke(m.reward);
-
-                gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-            }
-            if (m.type == MissionType.VideoWithEmailGiveaway)
-            {
-                //ShowRewardCenter(null);
-                //m.AddPremiumCurrencyAction.Invoke(m.reward);
-
-                gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-            }
-            else if (m.type == MissionType.SurveyReward)
-            {
-                gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-
-                //ShowRewardCenter(null);
-            }
-            else if (m.type == MissionType.TwitterReward)
-            {
-                gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-
-                //ShowRewardCenter(null);
-            }*/
-
+            
             if (keepLocalClaimData)
                 Instance.SaveClaimedReward(m);
         }
@@ -1457,6 +1379,11 @@ namespace Monetizr.Campaigns
             onComplete.Invoke(false);
         }
 
+        internal static void ShowActionView(Action<bool> onComplete, Mission m = null)
+        {
+            _ShowWebView(onComplete, PanelId.ActionHtmlPanelView, m);
+        }
+
         internal static void ShowSurvey(Action<bool> onComplete, Mission m = null)
         {
             _ShowWebView(onComplete, PanelId.SurveyWebView, m);
@@ -1644,7 +1571,8 @@ namespace Monetizr.Campaigns
             var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
             
             if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) &&
-                !campaign.HasAsset(AssetsType.TeaserGifPathString))
+                !campaign.HasAsset(AssetsType.TeaserGifPathString) && 
+                !campaign.HasAsset(AssetsType.BrandRewardLogoSprite))
             {
                 Log.Print("No texture for tiny teaser!");
                 return;
@@ -1714,8 +1642,6 @@ namespace Monetizr.Campaigns
                     mission.state = MissionUIState.ToBeHidden;
                     mission.isClaimed = ClaimState.Claimed;
                 }
-
-
 
                 ClaimMissionData(mission);
 

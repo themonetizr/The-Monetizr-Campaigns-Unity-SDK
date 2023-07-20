@@ -199,14 +199,16 @@ namespace Monetizr.Campaigns
             if (assetsDict.ContainsKey(t))
             {
                 Log.PrintWarning($"An item {t} already exist in the campaign {id}");
-                return;
+                //return;
             }
 
             //Log.Print($"Adding asset {asset} into {t}");
 
             MonetizrManager.HoldResource(asset);
 
-            assetsDict.Add(t, asset);
+            assetsDict[t] = asset;
+
+            //assetsDict.Add(t, asset);
         }
 
         internal bool HasAsset(AssetsType t)
@@ -455,7 +457,7 @@ namespace Monetizr.Campaigns
         {
             foreach (var asset in assets)
             {
-                Log.Print($"Loading {asset.type}");
+                Log.Print($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
 
                 switch (asset.type)
                 {
@@ -578,7 +580,7 @@ namespace Monetizr.Campaigns
 
                     case "image":
                         
-                        Log.PrintWarning("Found image asset!");
+                        //Log.PrintWarning($"Found image {asset.title} asset w!");
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.Unknown, true);
                         
                         break;

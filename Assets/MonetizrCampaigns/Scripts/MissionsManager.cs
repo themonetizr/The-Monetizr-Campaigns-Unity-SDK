@@ -241,22 +241,17 @@ namespace Monetizr.Campaigns
             };
         }
 
-        Mission prepareMinigameMission(MissionType mt, ServerCampaign campaign)
+        Mission prepareMission(MissionType mt, ServerCampaign campaign, bool hasVideo, bool isRewardInGame)
         {
-            RewardType rt = RewardType.Coins;
-
             return new Mission()
             {
-                //rewardType = rt,
-                startMoney = MonetizrManager.gameRewards[rt].GetCurrencyFunc(),
                 type = mt,
-                //reward = reward,
                 progress = 1.0f,
                 isDisabled = false,
                 activateTime = DateTime.MinValue,
                 deactivateTime = DateTime.MaxValue,
-                hasVideo = false,
-                isRewardIngame = true,
+                hasVideo = hasVideo,
+                isRewardIngame = isRewardInGame,
             };
         }
 
@@ -275,14 +270,18 @@ namespace Monetizr.Campaigns
                 // case MissionType.GiveawayWithMail: m = prepareGiveawayMission(mt, campaign, reward); break;
                 case MissionType.VideoWithEmailGiveaway: m = prepareVideoGiveawayMission(mt, campaign); break;
                 case MissionType.MinigameReward:
-                case MissionType.MemoryMinigameReward: m = prepareMinigameMission(mt, campaign); break;
+                case MissionType.MemoryMinigameReward:
+                case MissionType.ActionReward:
+                    m = prepareMission(mt, campaign, false, true); break;
 
             }
 
             if (m == null)
                 return null;
 
+            
             m.rewardType = md.rewardCurrency;
+            m.startMoney = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc();
             m.reward = md.reward;
             m.state = MissionUIState.Visible;
             m.id = id;
@@ -315,17 +314,16 @@ namespace Monetizr.Campaigns
         {
             var onComplete = __onComplete;
 
-
             var nextMission = missions.Find(_m => m.serverId == _m.autoStartAfter);
 
             if (nextMission != null && nextMission != m)
             {
-                Log.Print($"======{nextMission.serverId}");
+                //Log.Print($"======{nextMission.serverId}");
 
                 onComplete = (bool skipped) =>
                 {
 
-                    Log.Print($"======{nextMission.serverId} {skipped}");
+                    //Log.Print($"======{nextMission.serverId} {skipped}");
 
                     //launch previous on complete
                     if (!skipped)
@@ -343,6 +341,7 @@ namespace Monetizr.Campaigns
                 case MissionType.VideoWithEmailGiveaway: return GetEmailGiveawayClaimAction(m, onComplete, updateUIDelegate);
                 case MissionType.VideoReward: return VideoClaimAction(m, onComplete, updateUIDelegate);
                 case MissionType.MutiplyReward: return MutiplyRewardClaimAction(m, onComplete, updateUIDelegate);
+                case MissionType.ActionReward: return ActionRewardClaimAction(m, onComplete, updateUIDelegate);
             }
 
             return null;
@@ -400,6 +399,21 @@ namespace Monetizr.Campaigns
 
             };
         }
+
+        internal Action ActionRewardClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        {
+            Action<bool> onSurveyComplete = (bool isSkipped) =>
+            {
+                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
+            };
+                    
+            return () =>
+            {
+                MonetizrManager.ShowActionView(onSurveyComplete, m);
+            };
+            //#endif
+        }
+
 
         internal Action SurveyClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
         {
@@ -800,8 +814,7 @@ namespace Monetizr.Campaigns
                 ServerCampaign sc = MonetizrManager.Instance.GetCampaign(campaigns[0]);
 
                 serverDefinedMission = sc.serverSettings.GetIntParam("server_defined_mission", 0);
-
-                
+                                
 
                 string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).serverSettings.GetParam("custom_missions");
                                 
@@ -1042,28 +1055,7 @@ namespace Monetizr.Campaigns
             bool r = DateTime.Now >= m.activateTime && DateTime.Now <= m.deactivateTime;
             return r;
         }
-
-        internal Mission FindActiveSurveyMission()
-        {
-            return missions.Find((Mission m) =>
-            {
-                return m.type == MissionType.SurveyReward && m.isClaimed == ClaimState.NotClaimed && !m.isDisabled && IsActiveByTime(m);
-            });
-        }
-
-        internal Mission FindMissionForStartNotify()
-        {
-            return missions.Find((Mission m) =>
-            {
-                return m.type != MissionType.SurveyReward &&
-                        m.isClaimed == ClaimState.NotClaimed &&
-                        !m.isDisabled &&
-                        IsActiveByTime(m)
-                        && m.isServerCampaignActive;
-
-            });
-        }
-
+        
         internal List<Mission> GetMissionsForRewardCenter(bool includeDisabled = false)
         {           
             return missions.FindAll((Mission m) =>
