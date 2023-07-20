@@ -45,10 +45,10 @@ namespace Monetizr.Campaigns
 
 
 #if UNITY_EDITOR
-    fullScreen = false;
-#endif
+            fullScreen = false;
             UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
-
+#endif
+   
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
 
