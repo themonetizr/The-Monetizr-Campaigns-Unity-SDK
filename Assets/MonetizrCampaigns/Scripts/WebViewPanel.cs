@@ -105,7 +105,7 @@ namespace Monetizr.Campaigns
 
         internal void PrepareSurveyPanel(Mission m)
         {
-            
+            rewardWebUrl = "themonetizr.com";
 
             //TrackEvent("Survey started");
 
@@ -162,7 +162,7 @@ namespace Monetizr.Campaigns
 
             StartCoroutine(ShowClaimButton(delay));
 
-            pagesSwitch = m.campaignServerSettings.GetIntParam("ActionReward.reward_time", 0);
+            pagesSwitch = m.campaignServerSettings.GetIntParam("ActionReward.reward_pages", 0);
         }
 
         internal IEnumerator ShowClaimButton(int delay)
@@ -310,18 +310,21 @@ namespace Monetizr.Campaigns
 
         private void Update()
         {
-            if (webView != null && panelId == PanelId.SurveyWebView)
+            bool panelForCheckUrl = (panelId == PanelId.SurveyWebView) || 
+                                    (panelId == PanelId.ActionHtmlPanelView);
+                
+            if (webView != null && panelForCheckUrl)
             {
                 var currentUrl = webView.Url;
-
+                
                 if (!webUrl.Equals(currentUrl))
                 {
                     webUrl = currentUrl;
-                    Log.Print("Update: " + webView.Url);
-
                     pagesSwitch--;
+                    
+                    Log.Print($"Update: {webUrl} {pagesSwitch}");
 
-                    if (webUrl.Contains("themonetizr.com") ||
+                    if (/*webUrl.Contains("themonetizr.com") ||*/
                         webUrl.Contains("uniwebview") ||
                         webUrl.Contains(rewardWebUrl) ||
                         pagesSwitch == 0)
