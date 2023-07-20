@@ -223,9 +223,9 @@ namespace Monetizr.Campaigns
 
             var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
 
-            var numText = currentMission.campaignServerSettings.GetParam("teaser.num_text", "%missions_num%");
+            var numText = currentMission.campaignServerSettings.GetParam("teaser.num_text", "%total_missions%");
 
-            numText = numText.Replace("%missions_num%", $"{missions.Count}");
+            numText = numText.Replace("%total_missions%", $"{missions.Count}");
 
             missionsNum.text = numText;
 

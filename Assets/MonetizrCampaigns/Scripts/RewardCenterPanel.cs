@@ -14,6 +14,7 @@ namespace Monetizr.Campaigns
         public MonetizrRewardedItem itemUI;
         private bool hasSponsoredChallenges;
         public Text headerText;
+        public Text moneyText;
         public Image background;
         
         public Image mainBanner;
@@ -275,7 +276,7 @@ namespace Monetizr.Campaigns
         {
             var camp = MonetizrManager.Instance.GetCampaign(currentCampaign);
 
-            var statusText = camp.serverSettings.GetParam("RewardCenter.transform", "Rewards claimed: %claimed_missions%/%total_missions%");
+            var statusText = camp.serverSettings.GetParam("RewardCenter.missions_num_text", "%claimed_missions%/%total_missions%");
  
             int claimed = 0;
 
@@ -288,7 +289,14 @@ namespace Monetizr.Campaigns
             statusText = statusText.Replace("%claimed_missions%",claimed.ToString());
             statusText = statusText.Replace("%total_missions%", missions.Count.ToString());
 
+            var money = camp.serverSettings.GetParam("RewardCenter.money_num_text", "%total_money%");
+
+            var playerMoney = MonetizrManager.gameRewards[RewardType.Coins].GetCurrencyFunc();
+
+            money = money.Replace("%total_money%", $"{MonetizrRewardedItem.ScoreShow(playerMoney)}");
+
             headerText.text = statusText;
+            moneyText.text = money;
         }
 
         private void AddRewardedVideoChallenge(MonetizrRewardedItem item, Mission m, int missionId)
