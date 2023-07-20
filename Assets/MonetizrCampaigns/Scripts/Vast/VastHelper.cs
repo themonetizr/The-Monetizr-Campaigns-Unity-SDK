@@ -15,7 +15,6 @@
                 using UnityEngine.Networking;
 
                 using Monetizr.Campaigns.Vast42;
-                using MiniJSON;
                 using Vector2 = UnityEngine.Vector2;
 
                 namespace Monetizr.Campaigns
@@ -643,9 +642,9 @@
 
                             adp = adp.Replace("\n", "");
 
-                            var dict = Json.Deserialize(adp) as Dictionary<string, object>;
+                            //var dict = Utils.ParseJson(adp); //Json.Deserialize(adp) as Dictionary<string, object>);
 
-                            var parsedDict = Utils.ParseContentString("", dict);
+                            var parsedDict = Utils.ParseContentString(adp);
 
                             foreach (var i in parsedDict)
                             {

@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using System.Net;
-using MiniJSON;
 using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
