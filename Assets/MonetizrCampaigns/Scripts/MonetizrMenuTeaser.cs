@@ -211,7 +211,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            if (uiVersion == 3)
+            if (uiVersion >= 3)
             {
                 //TODO: action without video
                 if (noVideo)
