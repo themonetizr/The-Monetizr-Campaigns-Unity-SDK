@@ -35,6 +35,7 @@ namespace Monetizr.Campaigns
         public PanelId nextPanelId = PanelId.Unknown;
 
         internal bool triggersButtonEventsOnDeactivate = true;
+        internal Dictionary<string, string> additionalEventValues = new Dictionary<string, string>();
 
         internal abstract void PreparePanel(PanelId id, Action<bool> onComplete, Mission m);
         internal abstract void FinalizePanel(PanelId id);
@@ -86,7 +87,8 @@ namespace Monetizr.Campaigns
             {
                 MonetizrManager.Analytics.TrackEvent(currentMission,
                     this,
-                    isSkipped ? MonetizrManager.EventType.ButtonPressSkip : MonetizrManager.EventType.ButtonPressOk);
+                    isSkipped ? MonetizrManager.EventType.ButtonPressSkip : MonetizrManager.EventType.ButtonPressOk,
+                    additionalEventValues);
             }
 
             if (active) //showing

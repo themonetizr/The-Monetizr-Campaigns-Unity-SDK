@@ -274,6 +274,8 @@ namespace Monetizr.Campaigns
 
         private void UpdateStatusBar()
         {
+            //Log.PrintError("UpdateStatusBar");
+
             var camp = MonetizrManager.Instance.GetCampaign(currentCampaign);
 
             var statusText = camp.serverSettings.GetParam("RewardCenter.missions_num_text", "%claimed_missions%/%total_missions%");

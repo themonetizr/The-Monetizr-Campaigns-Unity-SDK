@@ -33,6 +33,9 @@ namespace Monetizr.Campaigns
 
         private int pagesSwitch = -1;
 
+        public string successReason;
+        public bool claimPageReached = false;
+
         internal override AdPlacement? GetAdPlacement()
         {
             return adType;
@@ -160,18 +163,27 @@ namespace Monetizr.Campaigns
 
             int delay = m.campaignServerSettings.GetIntParam("ActionReward.reward_time", 0);
 
-            StartCoroutine(ShowClaimButton(delay));
+            StartCoroutine(ShowClaimButtonCoroutine(delay));
 
             pagesSwitch = m.campaignServerSettings.GetIntParam("ActionReward.reward_pages", 0);
         }
 
-        internal IEnumerator ShowClaimButton(int delay)
+        internal IEnumerator ShowClaimButtonCoroutine(int delay)
         {
             yield return new WaitForSeconds(delay);
 
-            claimButton.SetActive(true);
-            //crossButtonAnimator.enabled = true;
+            successReason = "timer";
+
+            ShowClaimButton();
         }
+
+        internal void ShowClaimButton()
+        {
+            if(!claimButton.activeSelf)
+                claimButton.SetActive(true);
+        }
+
+
 
         private void PrepareHtml5Panel()
         {
@@ -324,11 +336,20 @@ namespace Monetizr.Campaigns
                     
                     Log.Print($"Update: {webUrl} {pagesSwitch}");
 
+                    if(pagesSwitch == 0)
+                    {
+                        successReason = "page_switch";
+
+                        ShowClaimButton();
+                    }
+
                     if (/*webUrl.Contains("themonetizr.com") ||*/
                         webUrl.Contains("uniwebview") ||
-                        webUrl.Contains(rewardWebUrl) ||
-                        pagesSwitch == 0)
+                        webUrl.Contains(rewardWebUrl))
                     {
+                        successReason = "reward_page_reached";
+                        claimPageReached = true;
+
                         OnCompleteEvent();
                         return;
                     }
@@ -345,6 +366,12 @@ namespace Monetizr.Campaigns
             //TrackEvent($"{eventsPrefix} completed");
             isSkipped = false;
 
+            if (panelId == PanelId.ActionHtmlPanelView)
+            {
+                additionalEventValues.Add("success_reason", successReason);
+                additionalEventValues.Add("claim_page_reached", claimPageReached.ToString());
+            }
+            
             ClosePanel();
 
         }
@@ -421,6 +448,8 @@ namespace Monetizr.Campaigns
 
         public void _OnSkipPress()
         {
+            additionalEventValues.Clear();
+
             isSkipped = true;
 
             //MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
