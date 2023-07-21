@@ -1063,11 +1063,9 @@ namespace Monetizr.Campaigns
                     case AdPlacement.EmailEnterInGameRewardScreen:
                     case AdPlacement.EmailEnterCouponRewardScreen:
                     case AdPlacement.EmailEnterSelectionRewardScreen:
+                    case AdPlacement.ActionScreen:
                         return "ActionScreens";
                    
-                    
-                    //case AdPlacement.HtmlPage: return "";
-                    
                     default:
                         return "Other";
 
