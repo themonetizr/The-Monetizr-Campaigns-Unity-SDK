@@ -1088,7 +1088,10 @@ namespace Monetizr.Campaigns
         {
             bool isUpdateNeeded = false;
 
-            if(finishedMission != null)
+            if (finishedMission != null)
+                isUpdateNeeded = true;
+
+            if (finishedMission != null)
             Log.Print($"-----UpdateMissionsActivity for {finishedMission.serverId}");
 
             foreach (var m in missions)
