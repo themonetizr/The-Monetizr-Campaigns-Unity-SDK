@@ -223,7 +223,7 @@ namespace Monetizr.Campaigns
                 if (hasLogo)
                     images[1].sprite = camp.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
 
-                bannerHeight = 1150;
+                bannerHeight = 1250;
             }
             else
             {
