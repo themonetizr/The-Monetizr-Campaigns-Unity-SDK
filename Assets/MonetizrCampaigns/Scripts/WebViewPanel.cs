@@ -305,7 +305,7 @@ namespace Monetizr.Campaigns
 
                 successReason = $"error {statusCode}";
 
-                ClosePanel();
+               _OnSkipPress();
 
                 return;
             }
@@ -321,7 +321,7 @@ namespace Monetizr.Campaigns
 
             successReason = $"error {errorCode}";
 
-            ClosePanel();
+            _OnSkipPress();
         }
 
         private void Update()
@@ -380,6 +380,8 @@ namespace Monetizr.Campaigns
 
         private void ClosePanel()
         {
+            additionalEventValues.Clear();
+
             if (panelId == PanelId.ActionHtmlPanelView)
             {
                 additionalEventValues.Add("success_reason", successReason);
@@ -456,7 +458,7 @@ namespace Monetizr.Campaigns
 
         public void _OnSkipPress()
         {
-            additionalEventValues.Clear();
+            //additionalEventValues.Clear();
 
             isSkipped = true;
 
