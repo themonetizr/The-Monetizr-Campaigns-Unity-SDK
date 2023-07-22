@@ -303,6 +303,8 @@ namespace Monetizr.Campaigns
             {
                 TrackErrorEvent($"{eventsPrefix} error", statusCode);
 
+                successReason = $"error {statusCode}";
+
                 ClosePanel();
 
                 return;
@@ -316,6 +318,8 @@ namespace Monetizr.Campaigns
             Log.Print($"OnPageErrorReceived: {url} code: {errorCode}");
 
             TrackErrorEvent($"{eventsPrefix} error", errorCode);
+
+            successReason = $"error {errorCode}";
 
             ClosePanel();
         }
@@ -347,8 +351,11 @@ namespace Monetizr.Campaigns
                         webUrl.Contains("uniwebview") ||
                         webUrl.Contains(rewardWebUrl))
                     {
-                        successReason = "reward_page_reached";
-                        claimPageReached = true;
+                        if (webUrl.Contains(rewardWebUrl))
+                        {
+                            successReason = "reward_page_reached";
+                            claimPageReached = true;
+                        }
 
                         OnCompleteEvent();
                         return;
@@ -365,12 +372,7 @@ namespace Monetizr.Campaigns
 
             //TrackEvent($"{eventsPrefix} completed");
             isSkipped = false;
-
-            if (panelId == PanelId.ActionHtmlPanelView)
-            {
-                additionalEventValues.Add("success_reason", successReason);
-                additionalEventValues.Add("claim_page_reached", claimPageReached.ToString());
-            }
+                       
             
             ClosePanel();
 
@@ -378,6 +380,12 @@ namespace Monetizr.Campaigns
 
         private void ClosePanel()
         {
+            if (panelId == PanelId.ActionHtmlPanelView)
+            {
+                additionalEventValues.Add("success_reason", successReason);
+                additionalEventValues.Add("claim_page_reached", claimPageReached.ToString());
+            }
+
             Log.Print($"Stopping OMID ad session at time: {Time.time}"); 
 
             webView.StopOMIDAdSession();
