@@ -284,18 +284,35 @@ namespace Monetizr.Campaigns
 
             var missions = MonetizrManager.Instance.missionsManager.missions;
 
+            double totalRewardsValue = 0;
+            double claimedRewardsValue = 0;
+            double possibleRewardsValue = 0;
+
             foreach (var m in missions)
+            {
+                totalRewardsValue += m.reward; 
                 if (m.isClaimed == ClaimState.Claimed)
+                {
                     claimed++;
+                    claimedRewardsValue += m.reward;
+                }
+                else
+                {
+                    possibleRewardsValue += m.reward;
+                }
+            }
 
             statusText = statusText.Replace("%claimed_missions%",claimed.ToString());
             statusText = statusText.Replace("%total_missions%", missions.Count.ToString());
 
-            var money = camp.serverSettings.GetParam("RewardCenter.money_num_text", "%total_money%");
+            var money = camp.serverSettings.GetParam("RewardCenter.money_num_text", "%claimed_reward_value%/%possible_reward_value%");
 
             var playerMoney = MonetizrManager.gameRewards[RewardType.Coins].GetCurrencyFunc();
 
             money = money.Replace("%total_money%", $"{MonetizrRewardedItem.ScoreShow(playerMoney)}");
+            money = money.Replace("%total_rewards_value%", $"{MonetizrRewardedItem.ScoreShow(totalRewardsValue)}");
+            money = money.Replace("%claimed_reward_value%", $"{MonetizrRewardedItem.ScoreShow(claimedRewardsValue)}");
+            money = money.Replace("%possible_reward_value%", $"{MonetizrRewardedItem.ScoreShow(possibleRewardsValue)}");
 
             headerText.text = statusText;
             moneyText.text = money;
