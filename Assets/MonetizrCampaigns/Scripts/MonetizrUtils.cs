@@ -283,5 +283,10 @@ namespace Monetizr.Campaigns
         {
             return (Screen.width > Screen.height);
         }
+
+        public static float SimpleTween(float k)
+        {
+            return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
+        }
     }
 }

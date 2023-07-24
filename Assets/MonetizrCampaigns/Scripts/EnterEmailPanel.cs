@@ -49,7 +49,7 @@ namespace Monetizr.Campaigns
 
         public Toggle termsToggle;
         private bool termsTogglePressed;
-        //private Action onComplete;
+        //private Action _onComplete;
 
         internal override AdPlacement? GetAdPlacement()
         {
@@ -58,7 +58,7 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            this.onComplete = onComplete;
+            this._onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
             this.triggersButtonEventsOnDeactivate = false;

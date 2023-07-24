@@ -460,7 +460,7 @@ namespace Monetizr.Campaigns
             if (m.isVideoShown)
                 needToPlayVideo = false;
 
-            /*Action<bool> onComplete = (bool isSkipped) =>
+            /*Action<bool> _onComplete = (bool isSkipped) =>
             {
                 //OnClaimRewardComplete(m, isSkipped, AddNewUIMissions);
                 //MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);

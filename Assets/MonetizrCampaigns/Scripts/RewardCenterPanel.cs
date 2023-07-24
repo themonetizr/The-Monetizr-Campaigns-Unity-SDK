@@ -110,7 +110,7 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.HideTinyMenuTeaser();
 
-            this.onComplete = onComplete;
+            this._onComplete = onComplete;
 
             UpdateUI();
         }

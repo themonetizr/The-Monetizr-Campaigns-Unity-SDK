@@ -10,8 +10,8 @@ namespace Monetizr.Campaigns
 {
     public static class DebugSettings
     {
-        static public List<string> keys = null;
-        static public Dictionary<string, string> keyNames = null;
+        public static List<string> keys = null;
+        public static Dictionary<string, string> keyNames = null;
     }
 
     internal class DebugPanel : PanelController
@@ -31,7 +31,7 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            this.onComplete = onComplete;
+            this._onComplete = onComplete;
             panelId = id;
 
             keepLocalData.isOn = MonetizrManager.keepLocalClaimData;

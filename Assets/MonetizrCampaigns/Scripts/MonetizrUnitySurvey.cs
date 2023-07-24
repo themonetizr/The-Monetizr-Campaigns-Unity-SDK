@@ -152,7 +152,7 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.HideRewardCenter();
 
-            this.onComplete = onComplete;
+            this._onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
 

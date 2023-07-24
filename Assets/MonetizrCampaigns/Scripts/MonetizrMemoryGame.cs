@@ -124,7 +124,7 @@ namespace Monetizr.Campaigns
             stats.gameStartTime = DateTime.Now;
             stats.lastTapTime = DateTime.Now;
 
-            this.onComplete = onComplete;
+            this._onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
 

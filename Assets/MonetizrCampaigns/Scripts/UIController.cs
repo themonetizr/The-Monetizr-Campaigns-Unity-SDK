@@ -59,7 +59,7 @@ namespace Monetizr.Campaigns
         }
                 
 
-        /*public void PlayVideo(String path, Action<bool> onComplete)
+        /*public void PlayVideo(String path, Action<bool> _onComplete)
         {
             isVideoPlaying = true;
 
@@ -71,7 +71,7 @@ namespace Monetizr.Campaigns
 
             player.Play(path, (bool isSkip) => {
                 
-                    onComplete?.Invoke(isSkip);
+                    _onComplete?.Invoke(isSkip);
 
                     GameObject.Destroy(prefab);
                     isVideoPlaying = false;

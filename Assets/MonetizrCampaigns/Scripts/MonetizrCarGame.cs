@@ -79,7 +79,7 @@ namespace Monetizr.Campaigns
         {
             Log.Print("Prepare panel - car game");
 
-            this.onComplete = onComplete;
+            this._onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
 

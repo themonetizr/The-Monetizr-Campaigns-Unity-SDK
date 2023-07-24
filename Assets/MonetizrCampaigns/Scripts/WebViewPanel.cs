@@ -41,7 +41,7 @@ namespace Monetizr.Campaigns
             return adType;
         }
 
-        //private Action onComplete;
+        //private Action _onComplete;
 #if UNI_WEB_VIEW
         internal void PrepareWebViewComponent(bool fullScreen, bool useSafeFrame)
         {
@@ -198,7 +198,7 @@ namespace Monetizr.Campaigns
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
 #if UNI_WEB_VIEW
-            this.onComplete = onComplete;
+            this._onComplete = onComplete;
             panelId = id;
             currentMission = m;
 

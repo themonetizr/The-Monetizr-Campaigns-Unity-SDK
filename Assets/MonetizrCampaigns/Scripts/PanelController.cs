@@ -19,7 +19,7 @@ namespace Monetizr.Campaigns
 
         private Animator animator;
         private CanvasGroup canvasGroup;
-        public Action<bool> onComplete;
+        public Action<bool> _onComplete = null;
         protected PanelId panelId;
         private State state;
         public UIController uiController;
@@ -166,7 +166,7 @@ namespace Monetizr.Campaigns
 
             gameObject.SetActive(false);
             
-            onComplete?.Invoke(isSkipped);
+            _onComplete?.Invoke(isSkipped);
         }
 
        
