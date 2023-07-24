@@ -304,40 +304,7 @@ namespace Monetizr.Campaigns
 
             return camp;
         }
-
-        /*internal void SetParam(string campaign, string param, string val, bool saveData = true)
-        {
-            var camp = data.GetCampaign(campaign);
-
-            if (camp == null)
-            {
-                data.campaigns.Add(new LocalCampaignSettings()
-                { apiKey = MonetizrManager.Instance.GetCurrentAPIkey(),
-                  sdkVersion = MonetizrManager.SDKVersion,
-                  campId = campaign});
-
-                camp = data.campaigns[data.campaigns.Count - 1];
-            }
-
-            camp.settings[param] = val;
-
-            if(saveData)
-                SaveData();
-        }
-
-        internal string GetParam(string campaign, string param)
-        {
-            var camp = data.GetCampaign(campaign);
-
-            if (camp == null)
-                return "";
-
-            if (!camp.settings.ContainsKey(param))
-                return "";
-
-            return camp.settings[param]; 
-        }*/
-
+        
         internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaign> challenges)
         {
             //load old settings
@@ -530,28 +497,9 @@ namespace Monetizr.Campaigns
         {
             if (Instance != null)
             {
-                //instance.RequestChallenges(onRequestComplete);
                 return Instance;
             }
-
-            if (sponsoredMissions == null)
-            {
-                sponsoredMissions = new List<MissionDescription>()
-                {
-                    //new MissionDescription{ missionType = MissionType.VideoReward, reward = 1000, rewardCurrency = RewardType.Coins },
-                    //new MissionDescription{ missionType = MissionType.MutiplyReward, reward = 500, rewardCurrency = RewardType.Coins },
-                    //new MissionDescription{ mission = MissionType.MutiplyReward, reward = 1000, rewardCurrency = RewardType.Coins },
-                    //new MissionDescription{ mission = MissionType.TwitterReward, reward = 1000, rewardCurrency = RewardType.Coins },
-                    //new MissionDescription{ missionType = MissionType.VideoWithEmailGiveaway, reward = 20, rewardCurrency = RewardType.Coins },
-                    //new MissionDescription(200, RewardType.Coins),
-                };
-            }
-
-            //if (sponsoredMissions.Count > 1)
-            //    sponsoredMissions = sponsoredMissions.GetRange(0, 1);
-
-             
-                
+            
 #if UNITY_EDITOR
             keepLocalClaimData = true;
             serverClaimForCampaigns = false;
@@ -674,10 +622,6 @@ namespace Monetizr.Campaigns
                 missionsManager.AddMissionsToCampaigns();
 
             isMissionsIsOudated = false;
-            //RegisterSponsoredMission(RewardType.Coins, 1000);
-
-            //RegisterSponsoredMission2(RewardType.Coins, 500);
-
         }
 
 
@@ -752,24 +696,6 @@ namespace Monetizr.Campaigns
         private void InitializeUI()
         {
             uiController = new UIController();
-        }
-
-        private static void FillInfo(Mission m)
-        {
-            var ch = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
-
-            /*if (!MonetizrManager.Instance.HasCampaign(ch))
-            {
-                m.brandBanner = MonetizrManager.Instance.LoadSpriteFromCache(m.campaignId, m.brandBannerUrl);
-                m.brandLogo = MonetizrManager.Instance.LoadSpriteFromCache(m.campaignId, m.brandLogoUrl);
-                m.brandRewardBanner = MonetizrManager.Instance.LoadSpriteFromCache(m.campaignId, m.brandRewardBannerUrl);
-                return;
-            }
-
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandBannerSprite);
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandLogoSprite);
-            m.brandName = MonetizrManager.Instance.GetAsset<string>(ch, AssetsType.BrandTitleString);
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(ch, AssetsType.BrandRewardBannerSprite);*/
         }
 
         internal static void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
@@ -861,27 +787,6 @@ namespace Monetizr.Campaigns
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressOk);
 
                 MonetizrManager.Instance.OnClaimRewardComplete(m, false, onComplete, updateUIDelegate);
-
-               /* ShowCongratsNotification((bool _) =>
-                {
-                    //lscreen.SetActive(false);
-
-
-                    m.state = MissionUIState.ToBeHidden;
-
-                    m.isClaimed = ClaimState.Claimed;
-
-                    instance.ClaimMissionData(m);
-
-                    //instance.missionsManager.TryToActivateSurvey(m);
-
-
-                    MonetizrManager.HideTinyMenuTeaser(true);
-
-
-                    _onComplete?.Invoke(false);
-                },
-                m);*/
             };
 
             Action onFail = () =>
@@ -991,10 +896,9 @@ namespace Monetizr.Campaigns
 
             Mission mission = missions[0];
 
-            //manual notification calls, no limis
+            //manual notification calls, no limits
             if (placement == 2)
             {
-                FillInfo(mission);
                 ShowNotification(onComplete, mission, PanelId.StartNotification);
                 return;
             }
@@ -1005,14 +909,14 @@ namespace Monetizr.Campaigns
                 forceSkip = mission.campaignServerSettings.GetParam("no_start_level_notifications") == "true";
 
                 if (forceSkip)
-                    Log.Print($"No notifications on level start defined on serverside");
+                    Log.Print($"No notifications on level start defined on server-side");
             }
             else if (placement == 1)
             {
                 forceSkip = mission.campaignServerSettings.GetParam("no_main_menu_notifications") == "true";
 
                 if (forceSkip)
-                    Log.Print($"No notifications in main menu defined on serverside");
+                    Log.Print($"No notifications in main menu defined on server-side");
             }
 
             // Log.Print($"------ShowStartupNotification 3 {placement}");
@@ -1072,15 +976,8 @@ namespace Monetizr.Campaigns
 
             Instance.localSettings.SaveData();
 
-            //instance.missionsManager.SaveAll();
-
-            //Log.Print($"------ShowStartupNotification 4 {placement}");
-
-            //Log.PrintWarning("!!!!-------");
 
             Log.Print($"Notification shown {currentAmount}/{serverMaxAmount} last time: {lastTime}/{serverDelay}");
-
-            FillInfo(mission);
 
             ShowNotification(onComplete, mission, PanelId.StartNotification);
         }
@@ -1099,121 +996,11 @@ namespace Monetizr.Campaigns
                 Instance.SaveClaimedReward(m);
         }
 
-        internal void ClaimMission(Mission m, bool isSkipped, bool showCongratsScreen, Action onComplete)
-        {
-            if (claimForSkippedCampaigns)
-                isSkipped = false;
-
-            if (isSkipped)
-                return;
-
-
-            //m.isDisabled = true;
-
-            ClaimMissionData(m);
-
-            /*if (Instance.missionsManager.TryToActivateSurvey(m))
-            {
-                //UpdateUI();
-            }*/
-
-            if (!showCongratsScreen)
-            {
-                onComplete?.Invoke();
-                return;
-            }
-
-            ShowCongratsNotification((bool _) =>
-            {
-
-                onComplete?.Invoke();
-
-            }, m);
-
-
-
-        }
-
-
-        public static void RegisterUserDefinedMission(string missionTitle, string missionDescription, Sprite missionIcon, RewardType rt, ulong reward, float progress, Action onClaimButtonPress)
-        {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
-
-            Mission m = new Mission()
-            {
-                missionTitle = missionTitle,
-                missionDescription = missionDescription,
-                //missionIcon = missionIcon,
-                rewardType = rt,
-                reward = reward,
-                progress = progress,
-                isSponsored = false,
-                onClaimButtonPress = onClaimButtonPress,
-                //brandBanner = null,
-            };
-
-            Instance.missionsManager.AddMission(m);
-        }
-
-        //TODO: need to connect now this mission and campaign from the server
-        //next time once we register the mission it should connect with the same campaign
-        /*public static void RegisterSponsoredMission(RewardType rt, ulong rewardAmount)
-        {
-            Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
-
-            Mission m = new Mission()
-            {
-                //sponsoredId = id,
-                rewardType = rt,
-                type = MissionType.VideoReward,
-                //rewardIcon = rewardIcon,
-                reward = rewardAmount,
-                isSponsored = true,
-                // AddPremiumCurrencyAction = AddPremiumCurrencyAction,
-                //rewardTitle = rewardTitle,
-            };
-
-            //
-            instance.missionsManager.AddMissionAndBindToCampaign(m);
-        }*/
-
-        /// <summary>
-        /// You need to earn goal amount of money to double it
-        /// </summary>
-        /// <param name="rewardIcon">Coins icon</param>
-        /// <param name="goalAmount">How much you need to earn</param>
-        /// <param name="rewardTitle">Coins</param>
-        /// <param name="GetNormalCurrencyFunc">Get coins func</param>
-        /// <param name="AddNormalCurrencyAction">Add coins to user account</param>
-        /*public static void RegisterSponsoredMission2(RewardType rt, ulong goalAmount)
-        {
-            Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
-
-            Mission m = new Mission()
-            {
-                //sponsoredId = id,
-                rewardType = rt,
-                startMoney = gameRewards[rt].GetCurrencyFunc(),
-                type = MissionType.MutiplyReward,
-                //rewardIcon = rewardIcon,
-                reward = goalAmount,
-                isSponsored = true,
-                //AddNormalCurrencyAction = AddNormalCurrencyAction,
-                //GetNormalCurrencyFunc = GetNormalCurrencyFunc,
-                //rewardTitle = rewardTitle,
-            };
-
-            //
-            instance.missionsManager.AddMissionAndBindToCampaign(m);
-        }*/
-
-
         internal static void CleanUserDefinedMissions()
         {
             Instance.missionsManager.CleanUserDefinedMissions();
         }
-
-
+        
         public enum OnCompleteStatus
         {
             //if player rejected the offer or haven't seen anything
@@ -1271,13 +1058,6 @@ namespace Monetizr.Campaigns
 
             var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
 
-            /*int i = 1;
-            foreach (var m2 in Instance.missionsManager.missions)
-            {
-                Log.Print($"{i}:{m2.missionTitle}:{m2.campaignId}");
-                i++;
-            }*/
-
             if (missions.Count == 0)
             {
                 onComplete?.Invoke(true);
@@ -1287,10 +1067,7 @@ namespace Monetizr.Campaigns
             bool showRewardCenterForOneMission = missions[0].campaignServerSettings.GetBoolParam("RewardCenter.show_for_one_mission", false);
 
             if (missions.Count == 1 && !showRewardCenterForOneMission)
-            //if (Instance.missionsManager.missions.Count == 1)
             {
-                //Log.Print($"---_PressSingleMission");
-
                 Log.Print($"Only one mission available and showRewardCenterForOneMission is false");
 
                 Instance._PressSingleMission(onComplete, m);
@@ -1670,13 +1447,6 @@ namespace Monetizr.Campaigns
 
         }
 
-        //TODO: shouldn't have possibility to show video directly by game
-        /*internal static void _PlayVideo(string videoPath, Action<bool> _onComplete)
-        {
-            instance.uiController.PlayVideo(videoPath, _onComplete);
-        }*/
-        
-        
         public async void RequestChallenges(Action<bool> onRequestComplete)
         {
             List<ServerCampaign> campaigns = new List<ServerCampaign>();
@@ -1850,62 +1620,15 @@ namespace Monetizr.Campaigns
             activeChallengeId = id;
         }
 
-        public void Enable(bool enable)
-        {
-            isActive = enable;
-        }
-
-        /// <summary>
-        /// Get Asset from the challenge
-        /// </summary>
-        public T _GetAsset<T>(String challengeId, AssetsType t)
-        {
-            if (challengeId == null)
-            {
-                Log.Print($"You requesting asset for empty challenge.");
-                return default(T);
-            }
-
-            if (!campaigns.ContainsKey(challengeId))
-            {
-                Log.Print($"You requesting asset for challenge {challengeId} that not exist!");
-                return default(T);
-            }
-
-            if (!_HasAsset(challengeId, t))
-            {
-                //Log.Print($"{challengeId} has no asset {t}");
-                return default(T);
-            }
-
-            return campaigns[challengeId].GetAsset<T>(t);
-        }
-
-        /*public string GetAssetUrl(String challengeId, AssetsType t)
-        {
-            return campaigns[challengeId].GetAssetUrl(t);
-        }*/
-
-        public bool HasCampaign(String challengeId)
+        public bool HasCampaign(string challengeId)
         {
             return campaigns.ContainsKey(challengeId);
-        }
-
-        public bool _HasAsset(String challengeId, AssetsType t)
-        {
-            if (campaigns == null)
-                return false;
-
-            if (!campaigns.ContainsKey(challengeId))
-                return false;
-
-            return campaigns[challengeId].HasAsset(t);
         }
 
         /// <summary>
         /// Single update for reward and claim
         /// </summary>
-        public async Task ClaimReward(String challengeId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        public async Task ClaimReward(string challengeId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
             var challenge = campaigns[challengeId];
 
