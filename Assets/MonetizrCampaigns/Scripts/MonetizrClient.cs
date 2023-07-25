@@ -66,6 +66,7 @@ namespace Monetizr.Campaigns
         private static async Task RequestEnd(UnityWebRequest request, CancellationToken token)
         {
             request.SendWebRequest();
+
             Log.Print($"Location request sent");
 
             while (!request.isDone)

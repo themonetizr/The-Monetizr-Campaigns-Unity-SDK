@@ -7,12 +7,11 @@ namespace Monetizr.Campaigns
 {
     public class CanvasReferenceScaler : MonoBehaviour
     {
-        private CanvasScaler cs = null;
-        private float aspect = 0;
-        private Vector2 initialRefRes;
+        private CanvasScaler _cs = null;
+        //private float aspect = 0;
+        private Vector2 _initialRefRes;
         private ScreenOrientation _orientation;
         private Vector2Int _displaySize;
-
 
         private void UpdatePortrait()
         {
@@ -20,11 +19,11 @@ namespace Monetizr.Campaigns
 
             if (aspect >= 1.777)
             {
-                cs.referenceResolution = new Vector2(initialRefRes.x, initialRefRes.x * aspect);
+                _cs.referenceResolution = new Vector2(_initialRefRes.x, _initialRefRes.x * aspect);
             }
             else
             {
-                cs.matchWidthOrHeight = 1;
+                _cs.matchWidthOrHeight = 1;
             }
         }
 
@@ -34,7 +33,7 @@ namespace Monetizr.Campaigns
 
             //if (aspect >= 1.777)
             //{
-                cs.referenceResolution = new Vector2(initialRefRes.x*aspect, initialRefRes.x);
+                _cs.referenceResolution = new Vector2(_initialRefRes.x*aspect, _initialRefRes.x);
             //}
             //else
             //{
@@ -45,8 +44,8 @@ namespace Monetizr.Campaigns
         private void Start()
         {
             _displaySize = new Vector2Int(Screen.width,Screen.height);
-            cs = gameObject.GetComponent<CanvasScaler>();
-            initialRefRes = cs.referenceResolution;
+            _cs = gameObject.GetComponent<CanvasScaler>();
+            _initialRefRes = _cs.referenceResolution;
 
             if (Utils.isInLandscapeMode())
                 UpdateLandscape();
@@ -76,7 +75,7 @@ namespace Monetizr.Campaigns
 
         public Vector2 GetScreenReferenceResolution()
         {
-            return cs.referenceResolution;
+            return _cs.referenceResolution;
         }
 
     }

@@ -1142,7 +1142,7 @@ namespace Monetizr.Campaigns
             }
 
         }
-
+        
         /// <summary>
         /// Shows campaign notification and if player press Ok button - he sees an offer
         /// </summary>
@@ -1498,10 +1498,7 @@ namespace Monetizr.Campaigns
 
         public static bool IsActiveAndEnabled()
         {
-            if (Instance == null)
-                return false;
-
-            return Instance.HasCampaignsAndActive();
+            return Instance != null && Instance.HasCampaignsAndActive();
         }
 
         public string GetActiveCampaign()

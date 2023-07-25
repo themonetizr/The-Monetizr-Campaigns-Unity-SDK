@@ -71,7 +71,7 @@ public class SponsoredMissionsManager : MonoBehaviour
         //initialize SDK
         MonetizrManager.Initialize(key, null, () =>
             {
-                if(MonetizrManager.Instance.HasCampaignsAndActive())
+                if(MonetizrManager.IsActiveAndEnabled())
                 {
                     //we can show teaser manually, but better to use TeaserHelper script
                     //see DummyMainUI object in SampleScene

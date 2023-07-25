@@ -20,17 +20,8 @@ namespace Monetizr.Campaigns
         public Text earnText;
         public Image rewardImage;
         public Text rewardText;
-
-        private int state = 0;
-        private float progress = 0f;
-        //private Material m = null;
-        private float delayTimeEnd = 0f;
-        private float speed = 1f;
-        private Rect uvRect = new Rect(0, 0.5f, 1.0f, 0.5f);
-        private bool hasTextureAnimation = false;
-        private bool hasAnimation = true;
-
-        //rivate Mission currentMission;
+        
+        //private Mission currentMission;
 
         public Image singleBackgroundImage;
         public Image watchVideoIcon;

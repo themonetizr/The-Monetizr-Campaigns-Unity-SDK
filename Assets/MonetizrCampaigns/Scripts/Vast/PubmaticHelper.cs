@@ -199,7 +199,7 @@ namespace Monetizr.Campaigns
              return null;
         }
         
-        internal new async Task<(bool isSuccess,List<ServerCampaign> result)> GetProgrammaticCampaign(MonetizrClient monetizrClient)
+        internal async Task<(bool isSuccess,List<ServerCampaign> result)> GetProgrammaticCampaign(MonetizrClient monetizrClient)
         {
             //if (GetVastParams() == null)
             //    return false;
@@ -285,7 +285,7 @@ namespace Monetizr.Campaigns
             Log.Print($"Open RTB response loaded with adm: {adm}");
             
             string vastString = null;
-            string nativeString = null;
+            //string nativeString = null;
             
             /*if (adm.Contains("vasttag"))
             {

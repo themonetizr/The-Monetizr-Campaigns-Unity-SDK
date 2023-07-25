@@ -12,7 +12,7 @@ namespace Monetizr.Campaigns
         public Transform contentRoot;
         public RectTransform contentRect;
         public MonetizrRewardedItem itemUI;
-        private bool hasSponsoredChallenges;
+        //private bool hasSponsoredChallenges;
         public Text headerText;
         public Text moneyText;
         public Image background;
@@ -39,7 +39,7 @@ namespace Monetizr.Campaigns
         private List<Mission> missionsForRewardCenter;
         private string currentCampaign;
 
-        private bool isLandscape = false;
+        //private bool isLandscape = false;
 
         private GameObject bannerObject;
         private RectTransform bannerObjectRect;
@@ -69,7 +69,7 @@ namespace Monetizr.Campaigns
 
             if (MonetizrManager.Instance.HasCampaignsAndActive())
             {
-                hasSponsoredChallenges = true;
+                //hasSponsoredChallenges = true;
                 AddSponsoredChallenges();
             }
 
@@ -93,7 +93,7 @@ namespace Monetizr.Campaigns
             itemUI = (Resources.Load(uiItemPrefab) as GameObject).GetComponent<MonetizrRewardedItem>();
             
 
-            hasSponsoredChallenges = false;
+            //hasSponsoredChallenges = false;
 
             //this.missionsDescriptions = missionsDescriptions;
 
@@ -641,7 +641,7 @@ namespace Monetizr.Campaigns
             if(scrollListHasBanner)
                 bannerObjectRect.anchoredPosition = new Vector2(75 + shiftDelta, -940);
 
-            float screenReferenceSizeX = 1920;
+            //float screenReferenceSizeX = 1920;
             //float screenReferenceSizeY = 1080;
 
             float blockDistanceY = 150;
