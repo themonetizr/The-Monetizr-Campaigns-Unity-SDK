@@ -56,34 +56,7 @@ namespace Monetizr.Campaigns
         {
             missions.Add(m);
         }
-
-       /*internal Mission getCampaignReadyForSurvey()
-        {
-            //Load();
-
-            var claimed = missions.Find((Mission m) =>
-            {
-                if (m.isClaimed == ClaimState.NotClaimed)
-                    return false;
-
-                DateTime t = DateTime.Parse(m.claimedTime);
-                var surveyTime = t.AddSeconds(m.delaySurveyTimeSec);
-                bool timeHasCome = DateTime.Now > surveyTime;
-
-                return m.surveyUrl.Length > 0 && timeHasCome && !m.surveyAlreadyShown;
-
-            });
-
-            if (claimed != null)
-            {
-                claimed.surveyAlreadyShown = true;
-                //SaveAll();
-            }
-
-            return claimed;
-        }*/
-
-        //TODO: add currency
+        
         internal Mission FindMissionInCache(int id, MissionType mt, string ch, ulong reward)
         {
             foreach (var m in missions)
@@ -966,85 +939,6 @@ namespace Monetizr.Campaigns
             serializedMissions.SaveAll();
         }
 
-
-
-       /* private void InitializeNonSerializedFields(Mission m)
-        {
-            m.brandLogo = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandLogoSprite);
-            m.brandRewardBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardBannerSprite);
-            m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
-            m.brandName = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.BrandTitleString);
-            //m.surveyUrl = MonetizrManager.Instance.GetAsset<string>(m.campaignId, AssetsType.SurveyURLString);
-        }*/
-
-        //------------------------
-
-        /*internal void AddMissionAndBindToCampaign(Mission sponsoredMission)
-        {
-            //bind to server campagns
-            var challenges = MonetizrManager.Instance.GetAvailableCampaigns();
-
-            if (challenges.Count == 0)
-                return;
-
-            //check already binded campaigns
-            HashSet<string> bindedCampaigns = new HashSet<string>();
-            missions.ForEach((Mission _m) => { if (_m.campaignId != null) bindedCampaigns.Add(_m.campaignId); });
-
-            var activeChallenge = MonetizrManager.Instance.GetActiveCampaign();
-
-            //bind to active challenge first
-            challenges.Remove(activeChallenge);
-            challenges.Insert(0, activeChallenge);
-
-
-            //search unbinded campaign
-            foreach (string ch in challenges)
-            {
-                if (bindedCampaigns.Contains(ch))
-                    continue;
-
-                sponsoredMission.campaignId = ch;
-
-                if (MonetizrManager.Instance.HasAsset(ch, AssetsType.SurveyURLString))
-                    sponsoredMission.surveyUrl = MonetizrManager.Instance.GetAsset<string>(ch, AssetsType.SurveyURLString);
-
-                break;
-            }
-
-            //no campaings for binding missions
-            if (sponsoredMission.campaignId != null)
-            {
-                Log.Print($"Bind campaign {sponsoredMission.campaignId} to mission {missions.Count}");
-
-                missions.Add(sponsoredMission);
-            }
-        }
-
-        internal bool TryToActivateSurvey(Mission m)
-        {
-            var surveyMission = missions.Find((Mission _m) => { return _m.type == MissionType.SurveyReward && _m.campaignId == m.campaignId && _m.isDisabled; });
-
-            if (surveyMission != null)
-            {
-                Log.Print("Survey activated!");
-
-                //surveyMission.isDisabled = false;
-
-                surveyMission.state = MissionUIState.ToBeShown;
-
-                surveyMission.activateTime = DateTime.Now.AddSeconds(surveyMission.delaySurveyTimeSec);
-                surveyMission.deactivateTime = surveyMission.activateTime.AddSeconds(surveyMission.delaySurveyTimeSec);
-
-                //TODO: Save
-                //SaveReward(m);
-
-                return true;
-            }
-
-            return false;
-        }*/
-
         internal Mission GetMission(string campaignId)
         {
             return missions.Find((Mission m) => { return m.campaignId == campaignId; });
@@ -1086,13 +980,10 @@ namespace Monetizr.Campaigns
         //check activateAfter ranges for all missions and activate them if missions in range already active 
         internal bool UpdateMissionsActivity(Mission finishedMission)
         {
-            bool isUpdateNeeded = false;
+            bool isUpdateNeeded = finishedMission != null;
 
             if (finishedMission != null)
-                isUpdateNeeded = true;
-
-            if (finishedMission != null)
-            Log.Print($"-----UpdateMissionsActivity for {finishedMission.serverId}");
+                Log.Print($"-----UpdateMissionsActivity for {finishedMission.serverId}");
 
             foreach (var m in missions)
             {
@@ -1104,9 +995,7 @@ namespace Monetizr.Campaigns
 
                 if (m.isClaimed == ClaimState.Claimed)
                     continue;
-
                 
-
                 bool hasActivateAfter = m.activateAfter.Count > 0;
 
                 Log.Print($"-----Updating activity for {m.serverId} has {hasActivateAfter}");

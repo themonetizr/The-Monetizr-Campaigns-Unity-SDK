@@ -150,13 +150,11 @@ namespace Monetizr.Campaigns
 
 
                 if(id != PanelId.DebugPanel && m != null)
-                PrepareCustomColors(ctrlPanel.backgroundImage,
+                    PrepareCustomColors(ctrlPanel.backgroundImage,
                     ctrlPanel.backgroundBorderImage,
                     m.campaignServerSettings.dictionary,
                     id);
-
-
-
+                
                 ctrlPanel.uiController = this;
                 ctrlPanel.uiVersion = 0;
 
