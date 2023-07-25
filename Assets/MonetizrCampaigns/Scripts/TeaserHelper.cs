@@ -3,21 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using Monetizr.Campaigns;
 
-public class TeaserHelper : MonoBehaviour
+namespace Monetizr.Campaigns
 {
-    private void Start()
+    public class TeaserHelper : MonoBehaviour
     {
-        //MonetizrManager.SetTeaserRoot(GetComponentInParent<RectTransform>());
-    }
+        private void Start()
+        {
+            //MonetizrManager.SetTeaserRoot(GetComponentInParent<RectTransform>());
+        }
 
-    void OnEnable()
-    {
-        MonetizrManager.OnMainMenuShow();
-    }
+        void OnEnable()
+        {
+            MonetizrManager.OnMainMenuShow();
+        }
 
-    void OnDisable()
-    {
-        //Log.Print("on disable!");
-        MonetizrManager.OnMainMenuHide();
+        void OnDisable()
+        {
+            MonetizrManager.OnMainMenuHide();
+        }
     }
 }
