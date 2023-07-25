@@ -388,6 +388,8 @@ namespace Monetizr.Campaigns
                 additionalEventValues.Add("claim_page_reached", claimPageReached.ToString());
             }
 
+            additionalEventValues.Add("url", webUrl);
+
             Log.Print($"Stopping OMID ad session at time: {Time.time}"); 
 
             webView.StopOMIDAdSession();
@@ -502,19 +504,6 @@ namespace Monetizr.Campaigns
             MonetizrManager.Instance.SoundSwitch(true);
         }
 
-
-
-        //// Start is called before the first frame update
-        //void Start()
-        //{
-
-        //}
-
-        //// Update is called once per frame
-        //void Update()
-        //{
-
-        //}
     }
 
 }
