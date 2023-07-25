@@ -233,7 +233,7 @@ namespace Monetizr.Campaigns
     public class MonetizrManager : MonoBehaviour
     {
         private const float RequestCampaignTime = 5*60;
-        public static readonly string SDKVersion = "0.0.20";
+        public static readonly string SDKVersion = "1.0.0";
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
