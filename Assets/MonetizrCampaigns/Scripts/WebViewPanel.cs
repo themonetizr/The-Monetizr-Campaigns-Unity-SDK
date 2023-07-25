@@ -49,9 +49,13 @@ namespace Monetizr.Campaigns
 
 #if UNITY_EDITOR
             fullScreen = false;
-            UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
+            //UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
 #endif
-   
+
+            if (Log.isVerbose)
+                UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
+
+
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
 
@@ -112,7 +116,7 @@ namespace Monetizr.Campaigns
 
             //TrackEvent("Survey started");
 
-            Log.Print($"currentMissionDesc: {currentMission == null}");
+            Log.PrintV($"currentMissionDesc: {currentMission == null}");
             //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
             // eventsPrefix = "Survey";
 
@@ -250,7 +254,7 @@ namespace Monetizr.Campaigns
             //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
             // Load a URL.
-            Log.Print($"Url to show {webUrl}");
+            Log.PrintV($"Url to show {webUrl}");
             webView.Show();
 
             if (isAnalyticsNeeded)
@@ -271,7 +275,7 @@ namespace Monetizr.Campaigns
 #if UNI_WEB_VIEW
         void OnMessageReceived(UniWebView webView, UniWebViewMessage message)
         {
-            Log.Print($"OnMessageReceived: {message.RawMessage} {message.Args.ToString()}");
+            Log.PrintV($"OnMessageReceived: {message.RawMessage} {message.Args.ToString()}");
 
             if(message.RawMessage.Contains("close"))
             {
@@ -290,12 +294,12 @@ namespace Monetizr.Campaigns
 
         void OnPageStarted(UniWebView webView, string url)
         {
-            Log.Print($"OnPageStarted: { url} ");
+            Log.PrintV($"OnPageStarted: { url} ");
         }
 
         void OnPageFinished(UniWebView webView, int statusCode, string url)
         {
-            Log.Print($"OnPageFinished: {url} code: {statusCode}");
+            Log.PrintV($"OnPageFinished: {url} code: {statusCode}");
 
             webView.AddUrlScheme("mntzr");
 
@@ -315,7 +319,7 @@ namespace Monetizr.Campaigns
 
         void OnPageErrorReceived(UniWebView webView, int errorCode, string url)
         {
-            Log.Print($"OnPageErrorReceived: {url} code: {errorCode}");
+            Log.PrintError($"OnPageErrorReceived: {url} code: {errorCode}");
 
             TrackErrorEvent($"{eventsPrefix} error", errorCode);
 
@@ -338,7 +342,7 @@ namespace Monetizr.Campaigns
                     webUrl = currentUrl;
                     pagesSwitch--;
                     
-                    Log.Print($"Update: {webUrl} {pagesSwitch}");
+                    Log.PrintV($"Update: {webUrl} {pagesSwitch}");
 
                     if(pagesSwitch == 0)
                     {
@@ -390,7 +394,7 @@ namespace Monetizr.Campaigns
 
             additionalEventValues.Add("url", webUrl);
 
-            Log.Print($"Stopping OMID ad session at time: {Time.time}"); 
+            Log.PrintV($"Stopping OMID ad session at time: {Time.time}"); 
 
             webView.StopOMIDAdSession();
 
@@ -404,7 +408,7 @@ namespace Monetizr.Campaigns
 
         private void DestroyWebView()
         {
-            Log.Print($"Destroying webview isSkipped: {isSkipped} current time: {Time.time}");
+            Log.PrintV($"Destroying webview isSkipped: {isSkipped} current time: {Time.time}");
 
             Destroy(webView);
             webView = null;
@@ -423,7 +427,7 @@ namespace Monetizr.Campaigns
        
         public void OnClaimRewardPress()
         {
-            Log.Print("OnClaimRewardPress");
+            Log.PrintV("OnClaimRewardPress");
 
             OnCompleteEvent();
         }

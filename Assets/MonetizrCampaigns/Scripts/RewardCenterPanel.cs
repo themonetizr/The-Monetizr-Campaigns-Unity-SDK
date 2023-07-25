@@ -63,7 +63,7 @@ namespace Monetizr.Campaigns
 
         internal void UpdateUI()
         {
-            Log.Print("UpdateUI");
+            Log.PrintV("UpdateUI");
 
             CleanListView();
 
@@ -483,7 +483,7 @@ namespace Monetizr.Campaigns
                     AddMinigameChallenge(item, m, missionId); break;
             }
 
-            Log.Print(m.missionTitle);
+            Log.PrintV(m.missionTitle);
 
             item.UpdateWithDescription(this, m, missionId);
 

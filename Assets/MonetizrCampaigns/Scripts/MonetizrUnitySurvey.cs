@@ -197,7 +197,7 @@ namespace Monetizr.Campaigns
 
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
 
-            Log.Print($"{m.surveyId}");
+            Log.PrintV($"{m.surveyId}");
 
             if (!Utils.TestJson(surveysContent))
             {
@@ -214,7 +214,7 @@ namespace Monetizr.Campaigns
 
             if (currentSurvey == null)
             {
-                Log.Print($"{m.surveyId} not found in surveys!");
+                Log.PrintError($"{m.surveyId} not found in surveys!");
                 _OnSkipButton();
                 return false;
             }
@@ -559,7 +559,7 @@ namespace Monetizr.Campaigns
                     p.Add("question_text", q.text);
                     MonetizrManager.Analytics._TrackEvent("Survey answer", campaign, false, p);
 
-                    Log.Print($"-------Survey answer {a.response} {currentSurvey.settings.id}");
+                    Log.PrintV($"-------Survey answer {a.response} {currentSurvey.settings.id}");
 
                 });
             });

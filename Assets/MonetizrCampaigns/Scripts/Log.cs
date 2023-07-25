@@ -9,11 +9,12 @@ namespace Monetizr.Campaigns
 {
     public static class Log
     {
-        private static bool _isVerbose = true;
+        public static bool isVerbose { set; get; } = false;
+        
 
-        public static void PrintVerbose(object message)
+        public static void PrintV(object message)
         {
-            if(!_isVerbose)
+            if(!isVerbose)
                 return;
             
             Print(message);

@@ -26,7 +26,7 @@ namespace Monetizr.Campaigns
 
         void OnButtonClicked()
         {
-            Log.Print($"Clicked: {buttonType} id: {id}");
+            Log.PrintV($"Clicked: {buttonType} id: {id}");
 
             clickReceiver.ButtonPressed(this);
             //GameState.GetInstance().ButtonPress(buttonType,id);       

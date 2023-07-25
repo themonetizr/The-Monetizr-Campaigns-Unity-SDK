@@ -67,7 +67,7 @@ namespace Monetizr.Campaigns
         {
             request.SendWebRequest();
 
-            Log.Print($"Location request sent");
+            Log.PrintV($"Location request sent");
 
             while (!request.isDone)
             {
@@ -99,7 +99,7 @@ namespace Monetizr.Campaigns
                 }
                 catch (OperationCanceledException)
                 {
-                    Log.Print("\nTasks cancelled: timed out.\n");
+                    Log.PrintV("\nTasks cancelled: timed out.\n");
                 }
                 finally
                 {
@@ -115,7 +115,7 @@ namespace Monetizr.Campaigns
                 }
 
                 if (ipApiData != null)
-                    Log.Print($"Location: {ipApiData.country_code} {ipApiData.region_code}");
+                    Log.PrintV($"Location: {ipApiData.country_code} {ipApiData.region_code}");
             }
 
             return ipApiData;
@@ -187,7 +187,7 @@ namespace Monetizr.Campaigns
 
             string result = await response.Content.ReadAsStringAsync();
 
-            Log.Print($"Download response is: {result} {response.StatusCode}");
+            Log.PrintV($"Download response is: {result} {response.StatusCode}");
             
             if (!response.IsSuccessStatusCode)
                 return (false,"");
@@ -202,7 +202,7 @@ namespace Monetizr.Campaigns
         {
             var requestMessage = GetHttpRequestMessage(SettingsApiUrl);
 
-            Log.Print($"Sent settings: {requestMessage.ToString()}");
+            Log.PrintV($"Sent settings: {requestMessage.ToString()}");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
 
@@ -213,7 +213,7 @@ namespace Monetizr.Campaigns
             //---
 
             Log.Print($"Settings response is: {response.StatusCode}");
-            Log.Print($"Settings: {resultString}");
+            Log.PrintV($"Settings: {resultString}");
 
             SettingsDictionary<string, string> result = new SettingsDictionary<string, string>();
 
@@ -241,7 +241,7 @@ namespace Monetizr.Campaigns
             
             var loadResult = await GetServerCampaignsFromMonetizr();
             
-            Log.PrintVerbose($"GetServerCampaignsFromMonetizr result {loadResult.isSuccess}");
+            Log.PrintV($"GetServerCampaignsFromMonetizr result {loadResult.isSuccess}");
             
             if(loadResult.isSuccess)
             { 
@@ -412,7 +412,7 @@ namespace Monetizr.Campaigns
         {
             var requestMessage = GetHttpRequestMessage(CampaignsApiUrl);
 
-            Log.Print($"Sent request: {requestMessage.ToString()}");
+            Log.PrintV($"Sent request: {requestMessage.ToString()}");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
 
@@ -423,8 +423,8 @@ namespace Monetizr.Campaigns
             //---
 
 
-            Log.Print($"Response is: {responseOk} {response.StatusCode}");
-            Log.Print(challengesString);
+            Log.Print($"Response is: {response.StatusCode}");
+            Log.PrintV(challengesString);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -447,7 +447,7 @@ namespace Monetizr.Campaigns
             
             foreach (var ch in challenges.challenges)
             {
-                Log.Print($"-----{ch.content}");
+                Log.PrintV($"-----{ch.content}");
                 var localSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(ch.content));
                 ch.serverSettings = localSettings;
                 Log.Print($"Loaded campaign: {ch.id}");
@@ -506,7 +506,7 @@ namespace Monetizr.Campaigns
 
             string s = await response.Content.ReadAsStringAsync();
 
-            Log.Print($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+            Log.PrintV($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -541,13 +541,13 @@ namespace Monetizr.Campaigns
 
                 if (reward == null)
                 {
-                    Log.Print($"Product reward doesn't found for campaign {ingame}");
+                    Log.PrintError($"Product reward doesn't found for campaign {ingame}");
 
                     onFailure?.Invoke();
                     return;
                 }
 
-                Log.Print($"Reward {reward.id} found in_game_only {reward.in_game_only}");
+                Log.PrintV($"Reward {reward.id} found in_game_only {reward.in_game_only}");
 
                 content = $"{{\"email\":\"{MonetizrManager.temporaryEmail}\",\"reward_id\":\"{reward.id}\"}}";
 
@@ -557,13 +557,13 @@ namespace Monetizr.Campaigns
             requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
 
 
-            Log.Print($"Request:\n[{requestMessage}] content:\n[{content}]");
+            Log.PrintV($"Request:\n[{requestMessage}] content:\n[{content}]");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
 
             string s = await response.Content.ReadAsStringAsync();
 
-            Log.Print($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+            Log.PrintV($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
             {

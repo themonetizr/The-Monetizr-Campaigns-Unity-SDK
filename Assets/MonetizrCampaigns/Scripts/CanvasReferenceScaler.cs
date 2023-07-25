@@ -65,7 +65,7 @@ namespace Monetizr.Campaigns
 
         private void OnOrientationChanged(ScreenOrientation orientation)
         {
-            Log.Print("Orientation changed!");
+            Log.PrintV("Orientation changed!");
             
             if (Utils.isInLandscapeMode())
                 UpdateLandscape();

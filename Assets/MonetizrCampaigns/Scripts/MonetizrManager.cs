@@ -298,7 +298,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception ex)
             {
-                Log.Print($"Exception in userDefinedEvent {ex.ToString()}");
+                Log.PrintError($"Exception in userDefinedEvent {ex.ToString()}");
             }
         }
 
@@ -1000,7 +1000,7 @@ namespace Monetizr.Campaigns
 
 
 
-            Log.Print($"ShowRewardCenter with {m?.campaignId}");
+            Log.PrintV($"ShowRewardCenter from campaign: {m?.campaignId}");
 
             string uiItemPrefab = "MonetizrRewardCenterPanel2";
 
@@ -1100,7 +1100,7 @@ namespace Monetizr.Campaigns
             teaserRoot = root;
         }
 
-        public static Action<string, Dictionary<string, object>> ExternalAnalytics
+        public static Action<string, Dictionary<string, string>> ExternalAnalytics
         {
             internal get;
             set;
@@ -1285,13 +1285,13 @@ namespace Monetizr.Campaigns
             if (isSkipped)
                 return;
 
-            Log.Print($"OnClaimRewardComplete for {mission.serverId}");
+            Log.PrintV($"OnClaimRewardComplete for {mission.serverId}");
 
             ShowCongratsNotification((bool _) =>
             {
                 bool updateUI = false;
 
-                Log.Print($"OnClaimRewardComplete --> ShowCongratsNotification {mission.serverId}");
+                Log.PrintV($"OnClaimRewardComplete --> ShowCongratsNotification {mission.serverId}");
 
                 if (mission.campaignServerSettings.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
                 {
@@ -1413,7 +1413,7 @@ namespace Monetizr.Campaigns
                 
                 if (campaign.isLoaded)
                 {
-                    Log.Print($"Campign {campaign.id} successfully loaded");
+                    Log.Print($"Campaign {campaign.id} successfully loaded");
 
                     this.campaigns.Add(campaign.id, campaign);
                     campaignIds.Add(campaign.id);
@@ -1433,7 +1433,7 @@ namespace Monetizr.Campaigns
 
             _activeChallengeId = campaignIds.Count > 0 ? campaignIds[0] : null;
 
-            Log.Print($"Active campaign: {_activeChallengeId}");
+            Log.PrintV($"Active campaign: {_activeChallengeId}");
 
             _isMissionsIsOudated = true;
 
@@ -1442,7 +1442,7 @@ namespace Monetizr.Campaigns
 #endif
             localSettings.LoadOldAndUpdateNew(this.campaigns);
 
-            Log.Print($"RequestCampaigns completed with count: {campaignIds.Count} active: {_activeChallengeId}");
+            Log.Print($"RequestCampaigns completed with {campaignIds.Count} campaigns. Active campaign: {_activeChallengeId}");
 
             if (_activeChallengeId != null)
             {

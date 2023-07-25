@@ -374,39 +374,39 @@ namespace Monetizr.Campaigns
                 zipFolder = path + "/" + fname.Replace(".zip", "");
                 fileToCheck = zipFolder + "/index.html";
 
-                Log.Print($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
+                Log.PrintV($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
             }
 
             byte[] data = null;
             
-            Log.Print($"PreloadAssetToCache: {fname} {fileToCheck}");
+            Log.PrintV($"PreloadAssetToCache: {fname} {fileToCheck}");
 
             if (!File.Exists(fileToCheck))
             {
-                Log.Print($"Downloading archive {asset.url}");
+                Log.PrintV($"Downloading archive {asset.url}");
 
                 data = await DownloadHelper.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
-                    Log.Print("Nothing downloaded! Data == null");
+                    Log.PrintWarning($"Nothing downloaded with an url {asset.url}!");
 
                     if (required)
                     {
                         this.isLoaded = false;
-                        this.loadingError = $"Nothing downloaded with a path {asset.url}";
+                        this.loadingError = $"Nothing downloaded with an url {asset.url}";
                     }
 
                     return;
                 }
 
-                Log.Print($"WriteAllBytes to {fpath} size: {data.Length}");
+                Log.PrintV($"WriteAllBytes to {fpath} size: {data.Length}");
 
                 File.WriteAllBytes(fpath, data);
 
                 if (zipFolder != null)
                 {
-                    Log.Print("Extracting to: " + zipFolder);
+                    Log.PrintV("Extracting to: " + zipFolder);
 
                     if (Directory.Exists(zipFolder))
                         DeleteDirectory(zipFolder);
@@ -443,7 +443,7 @@ namespace Monetizr.Campaigns
                 fpath = $"{path}/{asset.mainAssetName}";
             }
 
-            Log.Print($"Resource {fileString} {fpath}");
+            Log.PrintV($"Resource {fileString} {fpath}");
 
             //Log.Print("zip path to: " + fpath);
 
@@ -457,7 +457,7 @@ namespace Monetizr.Campaigns
         {
             foreach (var asset in assets)
             {
-                Log.Print($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
+                Log.PrintV($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
 
                 switch (asset.type)
                 {

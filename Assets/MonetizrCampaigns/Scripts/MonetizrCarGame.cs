@@ -77,7 +77,7 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            Log.Print("Prepare panel - car game");
+            Log.PrintV("Prepare panel - car game");
 
             this._onComplete = onComplete;
             this.panelId = id;
@@ -242,12 +242,12 @@ namespace Monetizr.Campaigns
 
           
 
-            Log.Print("OnOpenDone" + item);
+            Log.PrintV("OnOpenDone" + item);
         }
 
         internal IEnumerator RestartGame()
         {
-            Log.Print("RestartGame");
+            Log.PrintV("RestartGame");
 
 
             yield return new WaitForSeconds(0.5f);
@@ -311,7 +311,7 @@ namespace Monetizr.Campaigns
 
             
 
-            Log.Print("OnCloseDone" + item);
+            Log.PrintV("OnCloseDone" + item);
         }
 
 

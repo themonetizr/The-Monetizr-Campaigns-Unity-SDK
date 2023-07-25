@@ -83,7 +83,7 @@ namespace Monetizr.Campaigns
 
         public void DropdownValueChanged()
         {
-            Log.Print("Dropdown: " + apiKeysList.value);
+            Log.PrintV("Dropdown: " + apiKeysList.value);
 
         }
 

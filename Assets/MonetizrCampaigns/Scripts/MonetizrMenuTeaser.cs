@@ -154,10 +154,9 @@ namespace Monetizr.Campaigns
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
             rewardText.text = rewardText.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
+            
 
-
-
-            Log.Print($"PreparePanel teaser: {m.campaignId} {m}");
+            Log.PrintV($"PreparePanel teaser: {m.campaignId} {m}");
         }
 
         internal void UpdateTransform(Mission m)

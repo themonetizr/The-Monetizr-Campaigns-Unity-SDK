@@ -183,15 +183,15 @@ namespace Monetizr.Campaigns
             
              var requestMessage = MonetizrClient.GetHttpRequestMessage(generatorUri);
             
-             Log.Print($"Generator message: {requestMessage}");
+             Log.PrintV($"Generator message: {requestMessage}");
 
              HttpResponseMessage response = await client.GetHttpClient().SendAsync(requestMessage);
 
-             Log.Print($"Generator response: {response}");
+             Log.PrintV($"Generator response: {response}");
              
              var result = await response.Content.ReadAsStringAsync();
              
-             Log.Print($"Generator result: {result}");
+             Log.PrintV($"Generator result: {result}");
             
              if (response.IsSuccessStatusCode && result.Length > 0)
                  return result;

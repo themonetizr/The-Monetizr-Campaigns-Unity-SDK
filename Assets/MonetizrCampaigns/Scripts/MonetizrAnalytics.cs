@@ -499,7 +499,7 @@ namespace Monetizr.Campaigns
             Mixpanel.Init();
             Mixpanel.SetToken(apikey);
 
-            Log.Print($"Mixpanel init called {apikey}");
+            Log.PrintV($"Mixpanel init called {apikey}");
         }
 
 
@@ -512,7 +512,7 @@ namespace Monetizr.Campaigns
         {
             if (campaign == null)
             {
-                Log.Print($"MonetizrAnalytics BeginShowAdAsset: MissionUIDescription shouldn't be null");
+                Log.PrintWarning($"MonetizrAnalytics BeginShowAdAsset: MissionUIDescription shouldn't be null");
                 return;
             }
 
@@ -683,7 +683,7 @@ namespace Monetizr.Campaigns
         {
             props["dar_tag_sent"] = darTag.ToString();
 
-            Log.Print($"--->Mixpanel track {eventName}");
+            Log.PrintV($"--->Mixpanel track {eventName}");
 
             Mixpanel.Identify(camp.brand_id);
             Mixpanel.Track(eventName, props);
@@ -694,7 +694,7 @@ namespace Monetizr.Campaigns
 
             if (MonetizrManager.ExternalAnalytics != null)
             {
-                Dictionary<string, object> eventProps = new Dictionary<string, object>();
+                Dictionary<string, string> eventProps = new Dictionary<string, string>();
 
                 foreach (var v in props.GetFieldValue<Dictionary<string, Value>>("_container"))
                 {
@@ -824,7 +824,7 @@ namespace Monetizr.Campaigns
 
         internal void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
         {
-            Log.Print($"------Track event: {currentCampaign} {adPlacement} {eventType}");
+            Log.PrintV($"------Track event: {currentCampaign} {adPlacement} {eventType}");
 
             Debug.Assert(currentCampaign != null);
             
@@ -1095,7 +1095,7 @@ namespace Monetizr.Campaigns
                 if (additionalValues.ContainsKey("$duration")) logString += " duration:" + additionalValues["$duration"];
             }
 
-            Log.Print(logString);
+            Log.PrintV(logString);
 
             var eventName = $"[UNITY_SDK] {name}";
 
@@ -1108,7 +1108,7 @@ namespace Monetizr.Campaigns
 
             if (campaign == null)
             {
-                Log.Print($"MonetizrAnalytics TrackEvent: ServerCampaign shouldn't be null");
+                Log.PrintWarning($"MonetizrAnalytics TrackEvent: ServerCampaign shouldn't be null");
                 return;
             }
 
@@ -1197,7 +1197,7 @@ namespace Monetizr.Campaigns
             props["response_pieces"] = Utils.SplitStringIntoPieces(openRtbResponse,255);
             props["request_pieces"] = Utils.SplitStringIntoPieces(openRtbRequest,255);
             
-            Log.Print($"SendReport: {props}");    
+            Log.PrintV($"SendReport: {props}");    
             Mixpanel.Identify("Programmatic-client");
             Mixpanel.Track("Programmatic-request-client", props);
         }

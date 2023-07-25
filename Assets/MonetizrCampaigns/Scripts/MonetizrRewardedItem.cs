@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,20 +48,23 @@ namespace Monetizr.Campaigns
         private Sprite brandBanner;
         private Sprite missionIcon;
 
-        internal static string ScoreShow(double Score)
+        internal static string ScoreShow(double score)
         {
             string result;
-            string[] ScoreNames = new string[] { "", "k", "M", "B", "T", "aa", "ab", "ac", "ad", "ae", "af", "ag", "ah", "ai", "aj", "ak", "al", "am", "an", "ao", "ap", "aq", "ar", "as", "at", "au", "av", "aw", "ax", "ay", "az", "ba", "bb", "bc", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bk", "bl", "bm", "bn", "bo", "bp", "bq", "br", "bs", "bt", "bu", "bv", "bw", "bx", "by", "bz", };
+            var scoreNames = new string[] { "", "k", "M", "B", "T", "aa", "ab", "ac", "ad", "ae", "af", "ag", "ah", "ai", "aj", "ak", "al", "am", "an", "ao", "ap", "aq", "ar", "as", "at", "au", "av", "aw", "ax", "ay", "az", "ba", "bb", "bc", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bk", "bl", "bm", "bn", "bo", "bp", "bq", "br", "bs", "bt", "bu", "bv", "bw", "bx", "by", "bz", };
             int i;
 
-            for (i = 0; i < ScoreNames.Length; i++)
-                if (Score < 900)
+            for (i = 0; i < scoreNames.Length; i++)
+                if (score < 900)
                     break;
-                else Score = System.Math.Floor(Score / 100f) / 10f;
+                else 
+                    score = System.Math.Floor(score / 100f) / 10f;
 
-            if (Score == System.Math.Floor(Score))
-                result = Score.ToString() + ScoreNames[i];
-            else result = Score.ToString("F1") + ScoreNames[i];
+            if (score == System.Math.Floor(score))
+               result = score.ToString(CultureInfo.InvariantCulture) + scoreNames[i];
+            else 
+                result = score.ToString("F1", CultureInfo.InvariantCulture) + scoreNames[i];
+
             return result;
         }
 

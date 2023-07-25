@@ -625,7 +625,7 @@ namespace Monetizr.Campaigns
 
                     //string surveyUrl = serverSettings.GetParam(_m.survey);
 
-                    Log.Print($"CreateMissionDescriptions:max:{gr.maximumAmount}:real:{rewardAmount2}:percent:{rewardAmount}");
+                    Log.PrintV($"CreateMissionDescriptions:max:{gr.maximumAmount}:real:{rewardAmount2}:percent:{rewardAmount}");
 
                     m.Add(new MissionDescription
                     {
@@ -780,7 +780,7 @@ namespace Monetizr.Campaigns
             int serverDefinedMission = 0;
 
 
-            Log.Print($"AddMissionsToCampaigns count: {campaigns.Count}");
+            Log.PrintV($"AddMissionsToCampaigns count: {campaigns.Count}");
 
             if (campaigns.Count > 0)
             {
@@ -791,7 +791,7 @@ namespace Monetizr.Campaigns
 
                 string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).serverSettings.GetParam("custom_missions");
                                 
-                Log.Print($"Predefined missions from settings: {serverMissionsJson}");
+                Log.PrintV($"Predefined missions from settings: {serverMissionsJson}");
 
                 if (serverMissionsJson?.Length > 0)
                 {
@@ -819,7 +819,7 @@ namespace Monetizr.Campaigns
             //if (prefefinedSponsoredMissions.Count > 1)
             //    prefefinedSponsoredMissions = prefefinedSponsoredMissions.GetRange(serverDefinedMission, 1);
 
-            Log.Print($"Predefined missions has {prefefinedSponsoredMissions.Count} values");
+            Log.Print($"Found {prefefinedSponsoredMissions.Count} predefined missions in campaign");
 
             serializedMissions.Load();
 
@@ -870,7 +870,7 @@ namespace Monetizr.Campaigns
                     }
                     else
                     {
-                        Log.Print($"Found mission {ch}:{i} in local data");
+                        Log.PrintV($"Found mission {ch}:{i} in local data");
                     }
 
                     if (m == null)
@@ -929,7 +929,7 @@ namespace Monetizr.Campaigns
             //remove if mission in save, but not in the predefined list
             missions.RemoveAll(m => m.isToBeRemoved);
 
-            Log.Print($"Total amount of missions {missions.Count}");
+            Log.Print($"Loaded {missions.Count} missions from the campaign");
 
             UpdateMissionsActivity(null);
 
@@ -983,7 +983,7 @@ namespace Monetizr.Campaigns
             bool isUpdateNeeded = finishedMission != null;
 
             if (finishedMission != null)
-                Log.Print($"-----UpdateMissionsActivity for {finishedMission.serverId}");
+                Log.PrintV($"-----UpdateMissionsActivity for {finishedMission.serverId}");
 
             foreach (var m in missions)
             {
@@ -998,7 +998,7 @@ namespace Monetizr.Campaigns
                 
                 bool hasActivateAfter = m.activateAfter.Count > 0;
 
-                Log.Print($"-----Updating activity for {m.serverId} has {hasActivateAfter}");
+                Log.PrintV($"-----Updating activity for {m.serverId} has {hasActivateAfter}");
 
                 //check if mission self referenced in activate after
                 if (hasActivateAfter && m.activateAfter.FindIndex(_id => _id == m.serverId) > 0)
@@ -1028,7 +1028,7 @@ namespace Monetizr.Campaigns
                     {
                         shouldBeDisabled = true;
 
-                        Log.PrintWarning($"------Mission {id} disabled because {_m.serverId} is not active");
+                        Log.PrintV($"------Mission {id} disabled because {_m.serverId} is not active");
                     }
                 }
 
