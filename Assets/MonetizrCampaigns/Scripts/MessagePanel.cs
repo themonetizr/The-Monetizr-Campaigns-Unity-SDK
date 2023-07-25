@@ -15,14 +15,14 @@ namespace Monetizr.Campaigns
         public Text buttonText;
         public Button crossButton;
 
-        [HideInInspector]
-        public Mission currentMission;
+        //[HideInInspector]
+        //public Mission currentMission;
 
-        //private Action onComplete;
+        //private Action _onComplete;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            this.onComplete = onComplete;
+            this._onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
 
@@ -52,7 +52,7 @@ namespace Monetizr.Campaigns
             isSkipped = false;
             SetActive(false);
         }
-
+                
     }
 
 }

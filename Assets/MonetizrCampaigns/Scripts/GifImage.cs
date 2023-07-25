@@ -109,7 +109,7 @@ namespace Monetizr.Campaigns
         {
             if (string.IsNullOrEmpty(url))
             {
-                Debug.LogError("URL is empty.");
+                Log.PrintError("URL is empty.");
                 yield break;
             }
 
@@ -122,7 +122,7 @@ namespace Monetizr.Campaigns
 
             if (state == State.Loading)
             {
-                Debug.LogWarning("Already loading.");
+                Log.PrintWarning("Already loading.");
                 yield break;
             }
 
@@ -130,7 +130,7 @@ namespace Monetizr.Campaigns
 
             if (bytes == null)
             {
-                Debug.LogError("File load error.\n");
+                Log.PrintError("File load error.\n");
                 state = State.None;
                 yield break;
             }
@@ -217,12 +217,12 @@ namespace Monetizr.Campaigns
         {
             if (state != State.Ready)
             {
-                Debug.LogWarning("State is not READY.");
+                Log.PrintWarning("State is not READY.");
                 return;
             }
             if (m_rawImage == null || m_gifTextureList == null || m_gifTextureList.Count <= 0)
             {
-                Debug.LogError($"Raw Image {m_rawImage} or GIF Texture list {m_gifTextureList} is null or empty {m_gifTextureList.Count}.");
+                Log.PrintError($"Raw Image {m_rawImage} or GIF Texture list {m_gifTextureList} is null or empty {m_gifTextureList.Count}.");
                 return;
             }
             state = State.Playing;
@@ -236,7 +236,7 @@ namespace Monetizr.Campaigns
         {
             if (state != State.Playing && state != State.Pause)
             {
-                Debug.LogWarning("State is not Playing and Pause.");
+                Log.PrintWarning("State is not Playing and Pause.");
                 return;
             }
             state = State.Ready;
@@ -246,7 +246,7 @@ namespace Monetizr.Campaigns
         {
             if (state != State.Playing)
             {
-                Debug.LogWarning("State is not Playing.");
+                Log.PrintWarning("State is not Playing.");
                 return;
             }
             state = State.Pause;
@@ -256,7 +256,7 @@ namespace Monetizr.Campaigns
         {
             if (state != State.Pause)
             {
-                Debug.LogWarning("State is not Pause.");
+                Log.PrintWarning("State is not Pause.");
                 return;
             }
             state = State.Playing;

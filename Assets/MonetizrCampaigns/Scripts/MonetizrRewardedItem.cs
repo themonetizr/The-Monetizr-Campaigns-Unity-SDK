@@ -44,6 +44,8 @@ namespace Monetizr.Campaigns
         public RectTransform rect;
 
         public GameObject hideOverlay;
+        private Sprite brandBanner;
+        private Sprite missionIcon;
 
         internal static string ScoreShow(double Score)
         {
@@ -62,19 +64,20 @@ namespace Monetizr.Campaigns
             return result;
         }
 
-        internal void UpdateWithDescription(RewardCenterPanel panel, Mission m)
+        internal void UpdateWithDescription(RewardCenterPanel panel, Mission m, int id = 999)
         {
             rewardCenterPanel = panel;
             mission = m;
 
-            m.brandBanner = null;
+            //brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
+            missionIcon = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
 
-            banner.gameObject.SetActive(m.brandBanner != null);
-            banner.sprite = m.brandBanner;
+            brandBanner = null;
 
-            
-
-            if (m.brandBanner == null)
+            banner.gameObject.SetActive(brandBanner != null);
+            banner.sprite = brandBanner;
+                        
+            if (brandBanner == null)
             {
                 var rect = GetComponent<RectTransform>();
 
@@ -91,7 +94,7 @@ namespace Monetizr.Campaigns
             }
 
 
-            brandIcon.sprite = m.missionIcon;
+            brandIcon.sprite = missionIcon;
             rewardTitle.text = m.missionTitle;
             rewardDescription.text = m.missionDescription;
 
@@ -120,28 +123,13 @@ namespace Monetizr.Campaigns
 
             boosterNumber.text = $"+{ScoreShow(m.reward)}";
 
-            Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
-
-            Sprite customCoin = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.CustomCoinSprite);
-
-            if (m.rewardType == RewardType.Coins && customCoin != null)
-                rewardIcon = customCoin;
-
-            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite) && m.isRewardIngame)
-            {
-                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
-            }
-
-            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.RewardSprite) && !m.isRewardIngame)
-            {
-                rewardIcon = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.RewardSprite);
-            }
+            Sprite rewardIcon = MissionsManager.GetMissionRewardImage(m);;
 
 
             boosterIcon.sprite = rewardIcon == null ? defaultBoosterIcon : rewardIcon;
 
             boosterIcon.gameObject.SetActive(!showGift);
-
+            
             giftIcon.gameObject.SetActive(showGift);
 
             rewardLine.fillAmount = m.progress;
@@ -161,6 +149,7 @@ namespace Monetizr.Campaigns
                 actionButton.gameObject.SetActive(true);
             }
 
+            actionButton.gameObject.name = $"RewardCenterButtonClaim{id}";
             //----
 
             UIController.PrepareCustomColors(backgroundImage, borderImage, m.campaignServerSettings.dictionary, PanelId.RewardCenter);

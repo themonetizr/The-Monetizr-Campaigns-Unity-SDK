@@ -13,11 +13,12 @@ namespace Monetizr.Campaigns
         VideoReward = 1,
         MutiplyReward = 2,
         SurveyReward = 4,
-        TwitterReward = 8,
+        //TwitterReward = 8,
         //GiveawayWithMail = 16,
         VideoWithEmailGiveaway = 32,
         MinigameReward = 64,
         MemoryMinigameReward = 128,
+        ActionReward = 256,
         All = uint.MaxValue,
     }
 
@@ -25,7 +26,7 @@ namespace Monetizr.Campaigns
     {
         internal MissionType missionType;
         internal ulong reward;
-        internal int rewardPercent;
+        internal float rewardPercent;
         internal RewardType rewardCurrency;
         internal List<int> activateAfter = new List<int>();
         internal string surveyUrl;
@@ -34,6 +35,7 @@ namespace Monetizr.Campaigns
         internal int autoStartAfter;
         internal bool alwaysHiddenInRC;
         internal bool hasUnitySurvey;
+        internal string rewardImage;
     }
 
     internal enum MissionUIState
@@ -166,6 +168,20 @@ namespace Monetizr.Campaigns
             dictionary = d;
         }
 
+        public void MergeSettingsFrom(SettingsDictionary<TKey, TValue> addDictionary)
+        {
+            if (dictionary.Count == 0)
+                return;
+            
+            addDictionary.dictionary?.ToList().ForEach(
+                x => dictionary[x.Key] = x.Value);
+        }
+
+        public bool HasParam(TKey p)
+        {
+            return dictionary.ContainsKey(p);
+        }
+        
         public TValue GetParam(TKey p, TValue def = default(TValue))
         {
             if(p == null)
@@ -248,6 +264,25 @@ namespace Monetizr.Campaigns
             return result;
         }
 
+        public float GetFloatParam(TKey p, float defaultParam = 0)
+        {
+            if (p == null)
+                return defaultParam;
+
+            if (!dictionary.ContainsKey(p))
+                return defaultParam;
+
+            float result = 0;
+            string val = dictionary[p].ToString();
+
+            if (!float.TryParse(val, out result))
+            {
+                return defaultParam;
+            }
+
+            return result;
+        }
+
     }
 
     [Serializable]
@@ -258,22 +293,20 @@ namespace Monetizr.Campaigns
         [SerializeField] internal MissionType type;
         [SerializeField] internal ulong startMoney;
    
-        
-
         [SerializeField] internal bool isSponsored;
         [SerializeField] internal string brandName;
         [SerializeField] internal ulong reward;
-        [SerializeField] internal int rewardPercent;
+        [SerializeField] internal float rewardPercent;
 
         [NonSerialized] internal int sponsoredId;
-        [NonSerialized] internal Sprite brandBanner;
+       // [NonSerialized] internal Sprite brandBanner;
         [NonSerialized] internal string missionTitle;
         [NonSerialized] internal string missionDescription;
-        [NonSerialized] internal Sprite missionIcon;
+        //[NonSerialized] internal Sprite missionIcon;
         [NonSerialized] internal float progress;
         [NonSerialized] internal Action onClaimButtonPress;
-        [NonSerialized] internal Sprite brandLogo;
-        [NonSerialized] internal Sprite brandRewardBanner;
+        //[NonSerialized] internal Sprite brandLogo;
+        //[NonSerialized] internal Sprite brandRewardBanner;
         [NonSerialized] internal string claimButtonText;
 
         //Campaign id
@@ -353,6 +386,11 @@ namespace Monetizr.Campaigns
         [SerializeField] internal int autoStartAfter;
         [SerializeField] internal bool alwaysHiddenInRC;
         [SerializeField] internal bool hasUnitySurvey;
+
+        [NonSerialized] internal AdPlacement adPlacement;
+
+        [NonSerialized] internal ServerCampaign campaign;
+        [NonSerialized] public string rewardAssetName;
     }
 
     /*internal class  SurveyMission : Mission

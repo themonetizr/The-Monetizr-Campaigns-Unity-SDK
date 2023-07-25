@@ -33,7 +33,7 @@ public class LinkButton : MonoBehaviour
         });
 
 #if UNITY_EDITOR_WIN
-        //Application.OpenURL(id);
+        Application.OpenURL(url);
 #else
         
 #endif

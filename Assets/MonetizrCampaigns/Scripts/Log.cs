@@ -7,31 +7,42 @@ using UnityEngine;
 
 namespace Monetizr.Campaigns
 {
-    internal static class Log
+    public static class Log
     {
-        internal static void Print(object message)
+        private static bool _isVerbose = true;
+
+        public static void PrintVerbose(object message)
         {
-#if MONETIZR_VERBOSE
-            Debug.Log(message);
+            if(!_isVerbose)
+                return;
+            
+            Print(message);
+        }
+
+        public static void Print(object message)
+        {
+#if UNITY_EDITOR
+            Debug.Log($"Monetizr SDK: {message}");
+#else
+            PrintLine($"Monetizr SDK: {message}");
 #endif
         }
 
-        internal static void PrintToConsole(object message)
+        public static void PrintLine(object message)
         {
-#if MONETIZR_VERBOSE
-            Console.WriteLine(message);
-#endif
+            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message);
         }
 
 
-        internal static void PrintError(object message)
+        // ReSharper disable Unity.PerformanceAnalysis
+        public static void PrintError(object message)
         {
-            Debug.LogError(message);
+            Debug.LogError($"Monetizr SDK: {message}");
         }
 
-        internal static void PrintWarning(object message)
+        public static void PrintWarning(object message)
         {
-            Debug.LogWarning(message);
+            Debug.LogWarning($"Monetizr SDK: {message}");
         }
     }
 }

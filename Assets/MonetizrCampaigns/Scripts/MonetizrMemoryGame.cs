@@ -8,6 +8,44 @@ namespace Monetizr.Campaigns
 {
     internal class MonetizrMemoryGame : MonetizrGameParentBase
     {
+        internal class Stats
+        {
+            public DateTime gameStartTime;
+            public DateTime lastTapTime;
+            public int amountOfTotalTaps;
+            public int amountOfTapsOnKnownCells;
+            public int amountOfTapsOnDisabledCells;
+            public double totalTime;
+            public double avarageTimeBetweenTaps;
+            public double timeBeforeFirstTap;
+            public int firstTapPiece;
+            public bool isSkipped;
+
+            public Dictionary<string, string> GetDictionary()
+            {
+                var result = new Dictionary<string, string>();
+                                
+                result.Add("amount_of_total_taps", amountOfTotalTaps.ToString());
+                result.Add("amount_of_taps_on_known_cells", amountOfTapsOnKnownCells.ToString());
+                result.Add("amount_of_taps_on_disabled_cells", amountOfTapsOnDisabledCells.ToString());
+                result.Add("total_time", totalTime.ToString());
+                result.Add("avarage_time_between_taps", avarageTimeBetweenTaps.ToString());
+                result.Add("time_beforefirsttap", timeBeforeFirstTap.ToString());
+                result.Add("first_tap_piece", firstTapPiece.ToString());
+                result.Add("is_skipped", isSkipped ? "true" : "false");
+
+                return result;
+            }
+
+            public override string ToString()
+            {
+                return $"GameStartTime: {gameStartTime}, LastTapTime: {lastTapTime}, AmountOfTotalTaps: {amountOfTotalTaps}," +
+                       $"AmountOfTapsOnOpenedCells: {amountOfTapsOnKnownCells}, AmountOfTapsOnDisabledCells: {amountOfTapsOnDisabledCells}, TotalTime: {totalTime}, Avarage TimeBetween Taps:" +
+                        $"{avarageTimeBetweenTaps}, TimeBeforeFirstTap:{timeBeforeFirstTap}, FirstTapPiece:{firstTapPiece}," +
+                        $"IsSkipped:{isSkipped}";
+            }
+        }
+
         internal class Item
         {
             public GameObject go;
@@ -21,21 +59,43 @@ namespace Monetizr.Campaigns
             internal bool isFullyOpened;
         }
 
+        public Stats stats = new Stats();
+
         public Sprite[] mapSprites;
         private List<Item> gameItems;
-        private Mission currentMission;
+        //private Mission currentMission;
         public GameObject[] items;
         public Image minigameBackground;
+        public Image logo;
+
+        internal override AdPlacement? GetAdPlacement()
+        {
+            return AdPlacement.Minigame;
+        }
+
+        public void SendStatsEvent()
+        {
+            stats.isSkipped = isSkipped;
+            stats.totalTime = (DateTime.Now - stats.gameStartTime).TotalSeconds;
+
+            if (currentMission.campaignServerSettings.GetBoolParam("more_memory_stats",false))
+            {
+                var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
+
+                MonetizrManager.Analytics._TrackEvent("Minigame stats", campaign, false, stats.GetDictionary());
+            }
+        }
 
         public void OnButtonClick()
         {
             //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
             //MonetizrManager.ShowRewardCenter(null);
-            MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
-
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressSkip);
+            //MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.Minigame), MonetizrManager.EventType.ButtonPressSkip);
 
             isSkipped = true;
+
+            SendStatsEvent();
 
             SetActive(false);
         }
@@ -53,14 +113,37 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            this.onComplete = onComplete;
+            bool hasLogo = m.campaign.TryGetAsset(AssetsType.BrandRewardLogoSprite, out Sprite res);
+            
+            logo.sprite = res;
+            logo.gameObject.SetActive(hasLogo);
+            
+            //logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
+            //logo.gameObject.SetActive(logo.sprite != null);
+
+            stats.gameStartTime = DateTime.Now;
+            stats.lastTapTime = DateTime.Now;
+
+            this._onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
 
-
-            if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite1))
+            AssetsType[] minigameSprites =
             {
-                mapSprites[0] = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.MinigameSprite1);
+                AssetsType.MinigameSprite1,
+                AssetsType.MinigameSprite2,
+                AssetsType.MinigameSprite3
+            };
+
+            for(int i = 0; i < minigameSprites.Length; i++)
+            {
+                if (m.campaign.TryGetAsset<Sprite>(minigameSprites[i], out Sprite res2))
+                    mapSprites[i] = res2;
+            }
+
+            /*if (m.campaign.TryGetAsset<Sprite>(AssetsType.MinigameSprite1,out Sprite res1))
+            {
+                mapSprites[0] = res;
             }
 
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite2))
@@ -71,7 +154,7 @@ namespace Monetizr.Campaigns
             if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.MinigameSprite3))
             {
                 mapSprites[2] = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.MinigameSprite3);
-            }
+            }*/
 
             UIController.SetColorForElement(minigameBackground, m.campaignServerSettings.dictionary, "MemoryGame.bg_color2");
 
@@ -82,6 +165,7 @@ namespace Monetizr.Campaigns
             for (int i = 0; i < items.Length; i++)
             {
                 int i_copy = i;
+                items[i].name = $"GameItem{i}";
                 Button _b = items[i].GetComponent<Button>();
                 _b.onClick.RemoveAllListeners();
                 _b.onClick.AddListener(() => { OnItemClick(i_copy); });
@@ -103,13 +187,13 @@ namespace Monetizr.Campaigns
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
 
-            var adType = AdType.Minigame;
+            //var adType = AdPlacement.Minigame;
 
-            MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
+            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
 
-            MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
+            //MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
 
-            MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
         }
 
         int amountOpened = 0;
@@ -118,16 +202,44 @@ namespace Monetizr.Campaigns
         int totalUnknownOpened = 0;
         int correctCreated = 0;
         int numTapped = 0;
-       
+        
+
         internal void OnItemClick(int item)
         {
+            
+
+            stats.amountOfTotalTaps++;
+
+            double tapTime = (DateTime.Now - stats.lastTapTime).TotalSeconds;
+
+            stats.lastTapTime = DateTime.Now;
+
+            if (stats.amountOfTotalTaps == 1)
+            {
+                stats.timeBeforeFirstTap = (stats.lastTapTime - stats.gameStartTime).TotalSeconds;
+                stats.firstTapPiece = item;
+                stats.avarageTimeBetweenTaps = tapTime;
+            }
+            else
+            {
+                stats.avarageTimeBetweenTaps = (stats.avarageTimeBetweenTaps + tapTime) / 2;
+            }
+
+            if (disabledClick || gameItems[item].isOpened)
+                stats.amountOfTapsOnDisabledCells++;
+
+            Log.Print(stats.ToString());
+
             if (disabledClick)
                 return;
 
             if (gameItems[item].isOpened)
                 return;
 
-            Debug.Log("click" + item);
+            Log.Print("click" + item);
+
+            if (gameItems[item].value != 0)
+                stats.amountOfTapsOnKnownCells++;
 
             if (gameItems[item].value == 0)
             {
@@ -167,7 +279,7 @@ namespace Monetizr.Campaigns
             gameItems[item].isFullyOpened = true;
 
 
-            Debug.Log($"OnOpenDone {item} {gameItems[item].value}");
+            Log.Print($"OnOpenDone {item} {gameItems[item].value}");
 
             if (amountOpened < 2)
                 return;
@@ -245,9 +357,11 @@ namespace Monetizr.Campaigns
 
             SetActive(false);
 
-            MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.Minigame), MonetizrManager.EventType.ButtonPressOk);
+            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.Minigame), MonetizrManager.EventType.ButtonPressOk);
 
-            MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
+            //MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
+
+            SendStatsEvent();
         }
 
         internal override void OnCloseDone(int item)
@@ -258,7 +372,7 @@ namespace Monetizr.Campaigns
 
 
 
-            Debug.Log("OnCloseDone" + item);
+            Log.Print("OnCloseDone" + item);
         }
 
 
@@ -266,7 +380,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            MonetizrManager.Analytics.EndShowAdAsset(AdType.Minigame);
+            //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.Minigame);
         }
     }
 

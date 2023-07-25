@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
-    public class MonetizrSurveyAnswer : MonoBehaviour
+    internal class MonetizrSurveyAnswer : MonoBehaviour
     {
         public string id;
         public Text answer;

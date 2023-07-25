@@ -19,7 +19,7 @@ namespace Monetizr.Campaigns
 
         private Animator animator;
         private CanvasGroup canvasGroup;
-        public Action<bool> onComplete;
+        public Action<bool> _onComplete = null;
         protected PanelId panelId;
         private State state;
         public UIController uiController;
@@ -28,13 +28,22 @@ namespace Monetizr.Campaigns
         public Image backgroundImage;
         public Image backgroundBorderImage;
 
+        [HideInInspector]
+        internal Mission currentMission;
         
-
         [HideInInspector]
         public PanelId nextPanelId = PanelId.Unknown;
 
+        internal bool triggersButtonEventsOnDeactivate = true;
+        internal Dictionary<string, string> additionalEventValues = new Dictionary<string, string>();
+
         internal abstract void PreparePanel(PanelId id, Action<bool> onComplete, Mission m);
         internal abstract void FinalizePanel(PanelId id);
+
+        internal virtual AdPlacement? GetAdPlacement()
+        {
+            return null;
+        }
 
         protected void Awake()
         {
@@ -74,6 +83,14 @@ namespace Monetizr.Campaigns
 
         internal void SetActive(bool active, bool immediately = false)
         {
+            if(!active && !immediately && triggersButtonEventsOnDeactivate)
+            {
+                MonetizrManager.Analytics.TrackEvent(currentMission,
+                    this,
+                    isSkipped ? MonetizrManager.EventType.ButtonPressSkip : MonetizrManager.EventType.ButtonPressOk,
+                    additionalEventValues);
+            }
+
             if (active) //showing
             {
                 if (state != State.Animating && state != State.Visible)
@@ -145,10 +162,14 @@ namespace Monetizr.Campaigns
 
             FinalizePanel(panelId);
 
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
+
             gameObject.SetActive(false);
             
-            onComplete?.Invoke(isSkipped);
+            _onComplete?.Invoke(isSkipped);
         }
+
+       
     }
 
 }

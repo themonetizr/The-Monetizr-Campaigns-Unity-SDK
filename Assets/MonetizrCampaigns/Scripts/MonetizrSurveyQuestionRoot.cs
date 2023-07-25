@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
-    public class MonetizrSurveyQuestionRoot : MonoBehaviour
+    internal class MonetizrSurveyQuestionRoot : MonoBehaviour
     {
         public RectTransform rectTransform;
         public Text question;

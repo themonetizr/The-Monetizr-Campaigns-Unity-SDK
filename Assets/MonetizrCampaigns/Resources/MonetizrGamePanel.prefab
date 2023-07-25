@@ -525,6 +525,7 @@ MonoBehaviour:
   - {fileID: 9022935098083956588}
   - {fileID: 6075635744433265841}
   minigameBackground: {fileID: 7573695880205099527}
+  logo: {fileID: 1576714959345372953}
 --- !u!1 &3876935952929317554
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,9 +716,9 @@ RectTransform:
   m_Father: {fileID: 5686713118393388225}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0.5}
-  m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -195, y: 802}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -235, y: 802}
   m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2335905777049995736
@@ -1039,7 +1040,7 @@ GameObject:
   - component: {fileID: 1715095924489840407}
   - component: {fileID: 3046868277876281524}
   m_Layer: 5
-  m_Name: NoThanksButton
+  m_Name: PanelCloseButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1059,9 +1060,9 @@ RectTransform:
   m_Father: {fileID: 5686713118393388225}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 34.540802, y: 811.99805}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 395.4592, y: 811.99805}
   m_SizeDelta: {x: 135, y: 135}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8492445356203871630

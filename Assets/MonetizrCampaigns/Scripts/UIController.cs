@@ -29,6 +29,7 @@ namespace Monetizr.Campaigns
         MemoryGame,
         SurveyCloseConfirmation,
         SurveyUnityView,
+        ActionHtmlPanelView,
     }
     
     internal class UIController
@@ -58,7 +59,7 @@ namespace Monetizr.Campaigns
         }
                 
 
-        /*public void PlayVideo(String path, Action<bool> onComplete)
+        /*public void PlayVideo(String path, Action<bool> _onComplete)
         {
             isVideoPlaying = true;
 
@@ -70,7 +71,7 @@ namespace Monetizr.Campaigns
 
             player.Play(path, (bool isSkip) => {
                 
-                    onComplete?.Invoke(isSkip);
+                    _onComplete?.Invoke(isSkip);
 
                     GameObject.Destroy(prefab);
                     isVideoPlaying = false;
@@ -90,10 +91,14 @@ namespace Monetizr.Campaigns
 
         public void ShowPanelFromPrefab(String prefab, PanelId id = PanelId.Unknown, Action<bool> onComplete = null, bool rememberPrevious = false, Mission m = null)
         {
-            //Debug.LogWarning($"ShowPanel: {id} Mission: {m==null}");
+            //Log.PrintWarning($"ShowPanel: {id} Mission: {m==null}");
 
             //if (panels.ContainsKey(previousPanel) && previousPanel != PanelId.Unknown)
             //    panels[previousPanel].SetActive(false);
+
+           
+
+
             PanelController ctrlPanel = null;
             GameObject panel = null;
 
@@ -102,6 +107,8 @@ namespace Monetizr.Campaigns
                 panels.Remove(id);
 
                 onComplete?.Invoke(isSkipped);
+
+                //TODO: track end of placement!!!!
 
                 GameObject.Destroy(panel.gameObject);
 
@@ -123,49 +130,45 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                int uiVersion = 0;
-/*
-                if (m != null)
+                string prefabLandscape = prefab + "_landscape";
+                GameObject asset = null;
+                             
+                if (Utils.isInLandscapeMode())
+                {       
+                    //Log.Print("Loading landscape");
+                    asset = Resources.Load(prefabLandscape) as GameObject;
+                }
+
+                if (asset == null)
                 {
-                    //var campaign = MonetizrManager.Instance.GetCampaign(m.campaignId);
-
-                    uiVersion = m.additionalParams.GetIntParam("design_version");
-
-                    //Debug.Log($"-------------{uiVersion}");
-                    */
-                   /* if (id != PanelId.DebugPanel)
-                    {
-                        prefab += "2";
-                    }*/
-                //}
-
-                GameObject asset = Resources.Load(prefab) as GameObject;
+                    //Log.Print("Loading regular prefab");
+                    asset = Resources.Load(prefab) as GameObject;
+                }
 
                 panel = GameObject.Instantiate<GameObject>(asset, mainCanvas.transform);
                 ctrlPanel = panel.GetComponent<PanelController>();
 
 
                 if(id != PanelId.DebugPanel && m != null)
-                PrepareCustomColors(ctrlPanel.backgroundImage,
+                    PrepareCustomColors(ctrlPanel.backgroundImage,
                     ctrlPanel.backgroundBorderImage,
                     m.campaignServerSettings.dictionary,
                     id);
-
-
-
+                
                 ctrlPanel.uiController = this;
-                ctrlPanel.uiVersion = uiVersion;
+                ctrlPanel.uiVersion = 0;
 
                 foreach (var t in ctrlPanel.gameObject.GetComponents<PanelTextItem>())
                     t.InitializeByParent(id, m);
 
                 ctrlPanel.PreparePanel(id, complete, m);
-                               
+
+                MonetizrManager.Analytics.TrackEvent(m, ctrlPanel, MonetizrManager.EventType.Impression);
 
                 panels.Add(id, ctrlPanel);
             }
 
-            
+            ctrlPanel.transform.SetAsLastSibling();
 
             ctrlPanel.SetActive(true);
 
@@ -191,7 +194,7 @@ namespace Monetizr.Campaigns
             Dictionary<string,string> additionalParams,
             PanelId id)
         {
-            //Debug.Log($"--------{id.ToString()}");
+            //Log.Print($"--------{id.ToString()}");
 
             SetColorForElement(background, additionalParams, "bg_color");
             SetColorForElement(border, additionalParams, "bg_border_color");
@@ -226,24 +229,25 @@ namespace Monetizr.Campaigns
                     //screenPos = Vector2.zero;
                 }*/
 
-                if (designVersion == 3)
+                if (designVersion >= 3)
                 {
-                    teaserPrefab = "MonetizrMenuTeaser3";
+                    teaserPrefab = $"MonetizrMenuTeaser{designVersion}";
                     //screenPos = Vector2.zero;
                 }
 
                                
                 var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject,
-                    root ?? mainCanvas.transform);
+                    root != null ? root : mainCanvas.transform);
 
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
 
                 PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.serverSettings.dictionary, PanelId.TinyMenuTeaser);
 
                 teaser.uiVersion = designVersion;
+                teaser.triggersButtonEventsOnDeactivate = false;
+
                 panels.Add(PanelId.TinyMenuTeaser, teaser);
-                
-                                
+                  
             }
             else
             {
@@ -264,6 +268,12 @@ namespace Monetizr.Campaigns
             teaser.SetActive(true);
 
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
+
+            MonetizrManager.Analytics.TrackEvent(m, teaser, MonetizrManager.EventType.Impression);
+
+            //if teaser attached is not attached to user defined root
+            if(root == null)
+                teaser.rectTransform.SetAsFirstSibling();
 
             if (screenPos != null)
             {
