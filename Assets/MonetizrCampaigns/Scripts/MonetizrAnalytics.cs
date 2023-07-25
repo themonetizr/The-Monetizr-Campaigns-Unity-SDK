@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using mixpanel;
 using System;
+using System.Globalization;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using System.Linq;
@@ -378,7 +379,7 @@ namespace Monetizr.Campaigns
             return diagonalInches;
         }
 
-        private static DeviceSizeGroup GetDeviceGroup()
+        internal static DeviceSizeGroup GetDeviceGroup()
         {
 #if UNITY_IOS
     bool deviceIsIpad = UnityEngine.iOS.Device.generation.ToString().Contains("iPad");
@@ -646,7 +647,14 @@ namespace Monetizr.Campaigns
 
             props["ad_id"] = MonetizrAnalytics.advertisingID;
 
-            
+            props["screen_width"] = Screen.width.ToString();
+            props["screen_height"] = Screen.height.ToString();
+            props["screen_dpi"] = Screen.dpi.ToString(CultureInfo.InvariantCulture);
+            props["device_group"] = GetDeviceGroup().ToString().ToLower();
+            props["device_memory"] = SystemInfo.systemMemorySize.ToString();
+            props["device_model"] = SystemInfo.deviceModel;
+            props["device_name"] = SystemInfo.deviceName;
+            props["internet_connection"] = MonetizrAnalytics.GetInternetConnectionType();
 
             if (locationData != null)
             {
@@ -1192,6 +1200,21 @@ namespace Monetizr.Campaigns
             Log.Print($"SendReport: {props}");    
             Mixpanel.Identify("Programmatic-client");
             Mixpanel.Track("Programmatic-request-client", props);
+        }
+
+        public static string GetInternetConnectionType()
+        {
+            switch (Application.internetReachability)
+            {
+                case NetworkReachability.NotReachable:
+                    return "no_connection";
+                case NetworkReachability.ReachableViaCarrierDataNetwork:
+                    return "mobile";
+                case NetworkReachability.ReachableViaLocalAreaNetwork:
+                    return "lan";
+                default:
+                    return "unknown";
+            }
         }
     }
 

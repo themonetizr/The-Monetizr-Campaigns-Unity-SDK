@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -457,7 +458,9 @@ namespace Monetizr.Campaigns
         internal static HttpRequestMessage GetHttpRequestMessage(string uri, bool isPost = false)
         {
             var httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
-            
+
+           
+
             return new HttpRequestMessage
             {
                 Method = httpMethod,
@@ -468,7 +471,15 @@ namespace Monetizr.Campaigns
                     {"app-bundle-id", MonetizrManager.bundleId},
                     {"sdk-version", MonetizrManager.SDKVersion},
                     {"os-group", MonetizrAnalytics.GetOsGroup()},
-                    {"ad-id", MonetizrAnalytics.advertisingID}
+                    {"ad-id", MonetizrAnalytics.advertisingID},
+                    {"screen-width", Screen.width.ToString()},
+                    {"screen-height", Screen.height.ToString()},
+                    {"screen-dpi", Screen.dpi.ToString(CultureInfo.InvariantCulture)},
+                    {"device-group",MonetizrAnalytics.GetDeviceGroup().ToString().ToLower()},
+                    {"device-memory",SystemInfo.systemMemorySize.ToString()},
+                    {"device-model",SystemInfo.deviceModel},
+                    {"device-name",SystemInfo.deviceName},
+                    {"internet-connection",MonetizrAnalytics.GetInternetConnectionType()}
                 }
             };
         }
