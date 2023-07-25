@@ -51,10 +51,6 @@ public class SponsoredMissionsManager : MonoBehaviour
 
         MonetizrManager.SetAdvertisingIds(advertisingID, limitAdvertising);
 
-
-        //good default placement for teaser
-        MonetizrManager.SetTeaserPosition(new Vector2(-230, -765));
-
         //define reward type, name, getter and adder for reward
         MonetizrManager.SetGameCoinAsset(RewardType.Coins, defaultRewardIcon, "Coins", () =>
                 {
@@ -67,6 +63,9 @@ public class SponsoredMissionsManager : MonoBehaviour
                     //GameController.I.AddCoinsTotal(reward);
                 }, 10000);
 
+
+        //good default placement for teaser
+        MonetizrManager.SetTeaserPosition(Utils.isInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
 
         //initialize SDK
         MonetizrManager.Initialize(key, null, () =>
