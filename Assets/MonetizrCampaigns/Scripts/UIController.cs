@@ -260,7 +260,10 @@ namespace Monetizr.Campaigns
             
             var challengeId = MonetizrManager.Instance.GetActiveCampaign();
 
-            Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
+            var missionsList = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+
+            var m = missionsList[0];
 
             foreach (var t in teaser.gameObject.GetComponents<PanelTextItem>())
                 t.InitializeByParent(PanelId.TinyMenuTeaser, m);
