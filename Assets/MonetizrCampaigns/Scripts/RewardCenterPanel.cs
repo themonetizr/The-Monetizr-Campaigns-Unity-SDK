@@ -81,15 +81,7 @@ namespace Monetizr.Campaigns
             currentMission = m;
             currentCampaign =  MonetizrManager.Instance.GetActiveCampaign();
 
-            /*if (Utils.isInLandscapeMode())
-            {
-                scrollViewElement.horizontal = false;
-                scrollViewElement.vertical = true;
-            }*/
-
-
-
-            //MonetizrManager.CallUserDefinedEvent(currentCampaign,
+        //MonetizrManager.CallUserDefinedEvent(currentCampaign,
              //     NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
              //     MonetizrManager.EventType.Impression);
 
@@ -583,8 +575,8 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.RewardsCenterScreen, currentMission);
 
-            //if(MonetizrManager.tinyTeaserCanBeVisible)
-            MonetizrManager.ShowTinyMenuTeaser(null);
+            if(MonetizrManager.tinyTeaserCanBeVisible)
+                MonetizrManager.ShowTinyMenuTeaser(null);
 
             if (!uiController.isVideoPlaying)
             {
