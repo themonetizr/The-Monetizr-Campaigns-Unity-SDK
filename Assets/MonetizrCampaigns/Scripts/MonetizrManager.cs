@@ -232,7 +232,7 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
-        private const float RequestCampaignTime = 5*60;
+        public static float requestCampaignTime = 5*60;
         public static readonly string SDKVersion = "1.0.0";
 
         internal static bool keepLocalClaimData;
@@ -523,7 +523,7 @@ namespace Monetizr.Campaigns
 
             RequestCampaigns(_onRequestComplete);
 
-            StartCoroutine(TryRequestCampaignsLater(RequestCampaignTime));
+            StartCoroutine(TryRequestCampaignsLater(requestCampaignTime));
         }
         
         private IEnumerator TryRequestCampaignsLater(float time)
