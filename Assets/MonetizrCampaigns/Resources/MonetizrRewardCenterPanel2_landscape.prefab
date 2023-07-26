@@ -1093,8 +1093,7 @@ MonoBehaviour:
   banner: {fileID: 1383274709014281344, guid: c9f4a2021bceb744284ecbd7e72dca32, type: 3}
   scrollViewRect: {fileID: 6763667137942680006}
   scrollViewElement: {fileID: 347315250822148342}
-  termsAndCondPrefab: {fileID: 5818141197687585262, guid: 0a3b4f9c4d18fc64ebcc76dff65211be,
-    type: 3}
+  termsAndCondPrefab: {fileID: 0}
   bannerLayoutElement: {fileID: 3271712158805626064}
 --- !u!1 &6320108622927228094
 GameObject:

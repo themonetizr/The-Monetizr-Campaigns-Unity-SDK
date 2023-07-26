@@ -27,7 +27,7 @@ namespace Monetizr.Campaigns
         public GameObject termsAndCondPrefab;
 
 
-        private RectTransform termsAndCondRect;
+        //private RectTransform termsAndCondRect;
 
         private List<MonetizrRewardedItem> missionItems = new List<MonetizrRewardedItem>();
 
@@ -259,9 +259,9 @@ namespace Monetizr.Campaigns
             UpdateStatusBar();
 
 
-            var t = GameObject.Instantiate<GameObject>(termsAndCondPrefab, contentRoot);
+            //var t = GameObject.Instantiate<GameObject>(termsAndCondPrefab, contentRoot);
 
-            termsAndCondRect = t.GetComponent<RectTransform>();
+            //termsAndCondRect = t.GetComponent<RectTransform>();
         }
 
         private void UpdateStatusBar()
