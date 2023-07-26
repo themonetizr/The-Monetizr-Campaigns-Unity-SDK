@@ -73,7 +73,7 @@ namespace Monetizr.Campaigns
 
             var w = Screen.width;
             var h = Screen.width * 1.5f;
-            //var x = 0;
+            var x = 0;
             var y = (Screen.height - h) / 2;
 
             float aspect = (float)Screen.height / (float)Screen.width;
