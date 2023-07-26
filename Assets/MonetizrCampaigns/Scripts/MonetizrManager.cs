@@ -262,11 +262,11 @@ namespace Monetizr.Campaigns
         internal Action<bool> onUIVisible = null;
 
         private bool _isActive = false;
-        private bool _isMissionsIsOudated = true;
+        private bool _isMissionsIsOutdated = true;
 
         //Storing ids in separate list to get faster access (the same as Keys in challenges dictionary below)
-        private List<string> campaignIds = new List<string>();
-        private Dictionary<String, ServerCampaign> campaigns = new Dictionary<String, ServerCampaign>();
+        private List<string> _campaignIds = new List<string>();
+        private Dictionary<string, ServerCampaign> _campaigns = new Dictionary<string, ServerCampaign>();
         internal static bool tinyTeaserCanBeVisible;
 
         internal MissionsManager missionsManager = null;
@@ -290,7 +290,7 @@ namespace Monetizr.Campaigns
         /// </summary>
         public UserDefinedEvent userDefinedEvent = null;
 
-        static internal void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
+        internal static void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
         {
             try
             {
@@ -298,7 +298,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception ex)
             {
-                Log.PrintError($"Exception in userDefinedEvent {ex.ToString()}");
+                Log.PrintError($"Exception in userDefinedEvent {ex}");
             }
         }
 
@@ -532,7 +532,7 @@ namespace Monetizr.Campaigns
             {
                 yield return new WaitForSeconds(time);
                 
-                if (campaigns.Count != 0) continue;
+                if (_campaigns.Count != 0) continue;
 
                 _isActive = false;
                 
@@ -542,10 +542,10 @@ namespace Monetizr.Campaigns
 
         public void initializeBuiltinMissions()
         {
-            if (_isMissionsIsOudated)
+            if (_isMissionsIsOutdated)
                 missionsManager.AddMissionsToCampaigns();
 
-            _isMissionsIsOudated = false;
+            _isMissionsIsOutdated = false;
         }
 
 
@@ -606,8 +606,8 @@ namespace Monetizr.Campaigns
 
             missionsManager.CleanUp();
 
-            campaigns.Clear();
-            campaignIds.Clear();
+            _campaigns.Clear();
+            _campaignIds.Clear();
 
             RequestCampaigns(callRequestComplete ? _onRequestComplete : null);
         }
@@ -1373,7 +1373,7 @@ namespace Monetizr.Campaigns
                 onRequestComplete?.Invoke(false);
             }
 
-            campaignIds.Clear();
+            _campaignIds.Clear();
 
             if (campaigns.Count > 0)
             {
@@ -1402,7 +1402,7 @@ namespace Monetizr.Campaigns
 
             foreach (var campaign in campaigns)
             {
-                if (this.campaigns.ContainsKey(campaign.id))
+                if (this._campaigns.ContainsKey(campaign.id))
                     continue;
 
                 string path = Application.persistentDataPath + "/" + campaign.id;
@@ -1415,8 +1415,8 @@ namespace Monetizr.Campaigns
                 {
                     Log.Print($"Campaign {campaign.id} successfully loaded");
 
-                    this.campaigns.Add(campaign.id, campaign);
-                    campaignIds.Add(campaign.id);
+                    this._campaigns.Add(campaign.id, campaign);
+                    _campaignIds.Add(campaign.id);
                 }
                 else
                 {
@@ -1431,18 +1431,18 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            _activeChallengeId = campaignIds.Count > 0 ? campaignIds[0] : null;
+            _activeChallengeId = _campaignIds.Count > 0 ? _campaignIds[0] : null;
 
             Log.PrintV($"Active campaign: {_activeChallengeId}");
 
-            _isMissionsIsOudated = true;
+            _isMissionsIsOutdated = true;
 
 #if TEST_SLOW_LATENCY
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
-            localSettings.LoadOldAndUpdateNew(this.campaigns);
+            localSettings.LoadOldAndUpdateNew(this._campaigns);
 
-            Log.Print($"RequestCampaigns completed with {campaignIds.Count} campaigns. Active campaign: {_activeChallengeId}");
+            Log.Print($"RequestCampaigns completed with {_campaignIds.Count} campaigns. Active campaign: {_activeChallengeId}");
 
             if (_activeChallengeId != null)
             {
@@ -1473,13 +1473,13 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(chId))
                 return null;
 
-            if (!campaigns.ContainsKey(chId))
+            if (!_campaigns.ContainsKey(chId))
             {
                 Log.PrintWarning($"You're trying to get campaign {chId} which is not exist!");
                 return null;
             }
 
-            return campaigns[chId];
+            return _campaigns[chId];
         }
 
         /// <summary>
@@ -1488,12 +1488,12 @@ namespace Monetizr.Campaigns
         /// <returns></returns>
         public List<string> GetAvailableCampaigns()
         {
-            return campaignIds;
+            return _campaignIds;
         }
 
         public bool HasCampaignsAndActive()
         {
-            return _isActive && campaignIds.Count > 0;
+            return _isActive && _campaignIds.Count > 0;
         }
 
         public static bool IsActiveAndEnabled()
@@ -1513,7 +1513,7 @@ namespace Monetizr.Campaigns
 
         public bool HasCampaign(string challengeId)
         {
-            return campaigns.ContainsKey(challengeId);
+            return _campaigns.ContainsKey(challengeId);
         }
 
         /// <summary>
@@ -1521,7 +1521,7 @@ namespace Monetizr.Campaigns
         /// </summary>
         public async Task ClaimReward(string challengeId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            var challenge = campaigns[challengeId];
+            var challenge = _campaigns[challengeId];
 
             try
             {
