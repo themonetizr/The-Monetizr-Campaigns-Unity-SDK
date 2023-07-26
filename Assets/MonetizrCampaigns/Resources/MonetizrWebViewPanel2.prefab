@@ -622,6 +622,8 @@ MonoBehaviour:
   background: {fileID: 8476186598977400446}
   claimButton: {fileID: 1533164976123071377}
   crossButtonAnimator: {fileID: 1064647577352204778}
+  successReason: 
+  claimPageReached: 0
 --- !u!114 &229776069307991310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -636,6 +638,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 959929017956217512}
   textContent: button_text
+  buttonGrafic: {fileID: 6597715709867690598}
 --- !u!114 &1029560109718835000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -650,6 +653,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 8476186599874992485}
   textContent: loading_text
+  buttonGrafic: {fileID: 0}
 --- !u!1 &8476186599874992487
 GameObject:
   m_ObjectHideFlags: 0

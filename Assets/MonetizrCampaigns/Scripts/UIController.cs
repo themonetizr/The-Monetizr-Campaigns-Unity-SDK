@@ -180,11 +180,12 @@ namespace Monetizr.Campaigns
 
         internal static void SetColorForElement(Graphic i, Dictionary<string, string> additionalParams, string param)
         {
-            Color c;
-            if (additionalParams.ContainsKey(param) && ColorUtility.TryParseHtmlString(additionalParams[param], out c))
+            if (i == null || additionalParams.Count == 0)
+                return;
+
+            if (additionalParams.ContainsKey(param) && ColorUtility.TryParseHtmlString(additionalParams[param], out var c))
             {
-                if (i != null)
-                    i.color = c;
+                i.color = c;
             }
         }
 

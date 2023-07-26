@@ -508,6 +508,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 336197565902944286}
   textContent: button_text
+  buttonGrafic: {fileID: 336197565390321919}
 --- !u!114 &1200273175110356505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -522,6 +523,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 1101338383327312448}
   textContent: header_text
+  buttonGrafic: {fileID: 0}
 --- !u!114 &497403101516821853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -536,6 +538,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 4043938307231625026}
   textContent: content_text
+  buttonGrafic: {fileID: 0}
 --- !u!114 &5729651403457851465
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -895,6 +895,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 0}
   textContent: header_text
+  buttonGrafic: {fileID: 0}
 --- !u!114 &2331839769963241637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -909,6 +910,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 0}
   textContent: content_text
+  buttonGrafic: {fileID: 0}
 --- !u!114 &6117922490522058262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -923,6 +925,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 0}
   textContent: button_text
+  buttonGrafic: {fileID: 4615584038304257281}
 --- !u!1 &3532151617123290258
 GameObject:
   m_ObjectHideFlags: 0
@@ -1258,14 +1261,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.19215688, g: 0.8745099, b: 0.078431375, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 5dd5ff2a03f2149e2accf3b01afc733b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5bd6942b7edf5f048b61141d989d6c14, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
