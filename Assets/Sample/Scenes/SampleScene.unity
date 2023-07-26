@@ -451,6 +451,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultRewardIcon: {fileID: 21300000, guid: 4130416c8fbc44b2a828e35989fe4da4, type: 3}
+  gemsRewardIcon: {fileID: 21300000, guid: 4781ebd9852e048c2916079b2e4e37b4, type: 3}
   dummyUI: {fileID: 1337954304}
 --- !u!4 &1928310070
 Transform:
