@@ -553,7 +553,7 @@ namespace Monetizr.Campaigns
                         asset.fext = Utils.ConvertCreativeToExt("", asset.url);
                         asset.mainAssetName = $"index.html";
 
-                        await PreloadAssetToCache(asset, AssetsType.VideoFilePathString, true);
+                        await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
 
                         await PreloadVideoPlayer(asset);
 
@@ -603,6 +603,8 @@ namespace Monetizr.Campaigns
 
             string zipFolder = campPath + "/" + asset.fpath;
 
+            string indexPath = $"{zipFolder}/index.html";
+
             Log.PrintV($"{campPath} {zipFolder}");
             
             if (!Directory.Exists(zipFolder))
@@ -620,9 +622,7 @@ namespace Monetizr.Campaigns
             File.Delete(zipFolder + "/html.zip");
 
             //--------------
-
-            string indexPath = $"{zipFolder}/index.html";
-
+            
             if (!File.Exists(indexPath))
             {
                 this.isLoaded = false;

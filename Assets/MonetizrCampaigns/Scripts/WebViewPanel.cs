@@ -17,9 +17,9 @@ namespace Monetizr.Campaigns
         public TextAsset closeButtonImageAsset;
         public Button closeButton;
 #if UNI_WEB_VIEW
-        private UniWebView webView;
+        private UniWebView _webView = null;
 #endif
-        private string webUrl;
+        private string _webUrl;
         private string rewardWebUrl;
         //private Mission currentMission;
         private string eventsPrefix;
@@ -35,6 +35,7 @@ namespace Monetizr.Campaigns
 
         public string successReason;
         public bool claimPageReached = false;
+        public string programmaticStatus;
 
         internal override AdPlacement? GetAdPlacement()
         {
@@ -69,7 +70,7 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.Instance.SoundSwitch(false);
 
-            webView = gameObject.AddComponent<UniWebView>();
+            _webView = gameObject.AddComponent<UniWebView>();
 
             var w = Screen.width;
             var h = Screen.width * 1.5f;
@@ -86,7 +87,7 @@ namespace Monetizr.Campaigns
             }
 
 #if UNITY_EDITOR
-            webView.Frame = new Rect(0,0, 600, 800);
+            _webView.Frame = new Rect(0,0, 600, 800);
 #else
             if (fullScreen)
             {
@@ -98,14 +99,14 @@ namespace Monetizr.Campaigns
                 webView.Frame = new Rect(x, y, w, h);
 #endif
 
-            Log.Print($"frame: {fullScreen} {webView.Frame}");
+            Log.Print($"frame: {fullScreen} {_webView.Frame}");
 
-            webView.OnMessageReceived += OnMessageReceived;
-            webView.OnPageStarted += OnPageStarted;
-            webView.OnPageFinished += OnPageFinished;
-            webView.OnPageErrorReceived += OnPageErrorReceived;
+            _webView.OnMessageReceived += OnMessageReceived;
+            _webView.OnPageStarted += OnPageStarted;
+            _webView.OnPageFinished += OnPageFinished;
+            _webView.OnPageErrorReceived += OnPageErrorReceived;
 
-            webView.Alpha = 0;
+            _webView.Alpha = 0;
         }
 #endif
 
@@ -120,9 +121,9 @@ namespace Monetizr.Campaigns
             //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
             // eventsPrefix = "Survey";
 
-            webUrl = m.campaignServerSettings.GetParam(m.surveyId);
+            _webUrl = m.campaignServerSettings.GetParam(m.surveyId);
 
-            webView.Load(webUrl);
+            _webView.Load(_webUrl);
 
         }
 
@@ -133,10 +134,10 @@ namespace Monetizr.Campaigns
             closeButton.gameObject.SetActive(true);
 
             //Log.Print($"currentMissionDesc: {currentMissionDesc == null}");
-            webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
+            _webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
                                  // eventsPrefix = "Survey";
 
-            webView.Load(webUrl);
+            _webView.Load(_webUrl);
 
             //isAnalyticsNeeded = false;
 
@@ -152,16 +153,16 @@ namespace Monetizr.Campaigns
             //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
                                  // eventsPrefix = "Survey";
 
-            webUrl = m.campaignServerSettings.GetParam("ActionReward.url");
+            _webUrl = m.campaignServerSettings.GetParam("ActionReward.url");
 
-            if(string.IsNullOrEmpty(webUrl))
+            if(string.IsNullOrEmpty(_webUrl))
             {
                 Log.PrintError($"ActionReward.url is null");
             }
 
             rewardWebUrl = m.campaignServerSettings.GetParam("ActionReward.reward_url");
 
-            webView.Load(webUrl);
+            _webView.Load(_webUrl);
 
             //isAnalyticsNeeded = false;
 
@@ -189,13 +190,30 @@ namespace Monetizr.Campaigns
 
 
 
-        private void PrepareHtml5Panel()
+        private async void PrepareHtml5Panel()
         {
-            
-            webUrl = "file://" + currentMission.campaign.GetAsset<string>(AssetsType.Html5PathString);
-            // eventsPrefix = "Html5";
+            _webUrl = "file://" + currentMission.campaign.GetAsset<string>(AssetsType.Html5PathString);
 
-            webView.Load(webUrl);
+            var ph = new PubmaticHelper(MonetizrManager.Instance.Client);
+
+            var result = await ph.GetOpenRtbResponseForCampaign(currentMission.campaign);
+
+#if UNITY_EDITOR
+            result = false;
+#endif
+            if (result)
+            {
+                programmaticStatus = "no_programmatic_or_success";
+                _webView.Load(_webUrl);
+                _webView.Show();
+                Log.PrintV($"Url to show {_webUrl}");
+            }
+            else
+            {
+                programmaticStatus = "failed";
+                OnCompleteEvent();
+            }
+
         }
                
 
@@ -205,7 +223,7 @@ namespace Monetizr.Campaigns
             this._onComplete = onComplete;
             panelId = id;
             currentMission = m;
-
+            
             bool fullScreen = true;
             bool useSafeFrame = false;
 
@@ -233,36 +251,60 @@ namespace Monetizr.Campaigns
 
             StartCoroutine(ShowCloseButton(closeButtonDelay));
 
-            if (id == PanelId.Html5WebView)
-                background.color = Color.black;
-            else
-                background.color = Color.white;
+            background.color = id == PanelId.Html5WebView ? Color.black : Color.white;
 
-            switch (id)
-            {
-                case PanelId.SurveyWebView: adType = AdPlacement.Survey; PrepareSurveyPanel(m); break;
-                //case PanelId.VideoWebView: adType = AdType.Video; PrepareVideoPanel(); break;
-                case PanelId.Html5WebView: adType = AdPlacement.Html5; PrepareHtml5Panel(); break;
-                case PanelId.HtmlWebPageView: adType = AdPlacement.HtmlPage; PrepareWebViewPanel(m); break;
-                case PanelId.ActionHtmlPanelView: adType = AdPlacement.ActionScreen; PrepareActionPanel(m); break;
-            }
-
-            //eventsPrefix = MonetizrAnalytics.adTypeNames[adType];
+            adType = getAdPlacement();
 
             eventsPrefix = adType.ToString();
 
-            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
-
-            // Load a URL.
-            Log.PrintV($"Url to show {webUrl}");
-            webView.Show();
-
-            if (isAnalyticsNeeded)
+            switch (id)
             {
-                //TrackEvent($"{eventsPrefix} started");
-                //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMissionDesc);
+                case PanelId.SurveyWebView: 
+                    PrepareSurveyPanel(m); 
+                    break;
+                
+                case PanelId.HtmlWebPageView: 
+                    PrepareWebViewPanel(m); 
+                    break;
+
+                case PanelId.ActionHtmlPanelView: 
+                    PrepareActionPanel(m); 
+                    break;
             }
+
+        
+            if (!string.IsNullOrEmpty(_webUrl))
+            {
+                // Load a URL.
+                Log.PrintV($"Url to show {_webUrl}");
+                _webView.Show();
+            }
+            
+            //Show it separately because it async method
+            if(id == PanelId.Html5WebView)
+                PrepareHtml5Panel();
+            
 #endif
+        }
+
+        internal AdPlacement getAdPlacement()
+        {
+            switch (panelId)
+            {
+                case PanelId.SurveyWebView:
+                    return AdPlacement.Survey;
+
+                case PanelId.Html5WebView:
+                    return AdPlacement.Html5;
+
+                case PanelId.HtmlWebPageView:
+                    return AdPlacement.HtmlPage;
+
+                case PanelId.ActionHtmlPanelView:
+                    return AdPlacement.ActionScreen;
+            }
+
+            return AdPlacement.Html5;
         }
 
         IEnumerator ShowCloseButton(float time)
@@ -333,16 +375,16 @@ namespace Monetizr.Campaigns
             bool panelForCheckUrl = (panelId == PanelId.SurveyWebView) || 
                                     (panelId == PanelId.ActionHtmlPanelView);
                 
-            if (webView != null && panelForCheckUrl)
+            if (_webView != null && panelForCheckUrl)
             {
-                var currentUrl = webView.Url;
+                var currentUrl = _webView.Url;
                 
-                if (!webUrl.Equals(currentUrl))
+                if (!_webUrl.Equals(currentUrl))
                 {
-                    webUrl = currentUrl;
+                    _webUrl = currentUrl;
                     pagesSwitch--;
                     
-                    Log.PrintV($"Update: {webUrl} {pagesSwitch}");
+                    Log.PrintV($"Update: {_webUrl} {pagesSwitch}");
 
                     if(pagesSwitch == 0)
                     {
@@ -352,10 +394,10 @@ namespace Monetizr.Campaigns
                     }
 
                     if (/*webUrl.Contains("themonetizr.com") ||*/
-                        webUrl.Contains("uniwebview") ||
-                        webUrl.Contains(rewardWebUrl))
+                        _webUrl.Contains("uniwebview") ||
+                        _webUrl.Contains(rewardWebUrl))
                     {
-                        if (webUrl.Contains(rewardWebUrl))
+                        if (_webUrl.Contains(rewardWebUrl))
                         {
                             successReason = "reward_page_reached";
                             claimPageReached = true;
@@ -392,11 +434,12 @@ namespace Monetizr.Campaigns
                 additionalEventValues.Add("claim_page_reached", claimPageReached.ToString());
             }
 
-            additionalEventValues.Add("url", webUrl);
+            additionalEventValues.Add("url", _webUrl);
+            additionalEventValues.Add("programmatic_status", programmaticStatus);
 
             Log.PrintV($"Stopping OMID ad session at time: {Time.time}"); 
 
-            webView.StopOMIDAdSession();
+            _webView.StopOMIDAdSession();
 
             float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay",1.0f);
 
@@ -410,8 +453,8 @@ namespace Monetizr.Campaigns
         {
             Log.PrintV($"Destroying webview isSkipped: {isSkipped} current time: {Time.time}");
 
-            Destroy(webView);
-            webView = null;
+            Destroy(_webView);
+            _webView = null;
 
             SetActive(false);
         }
@@ -442,7 +485,7 @@ namespace Monetizr.Campaigns
             }
 
 
-            webView.Hide(true, UniWebViewTransitionEdge.Top, 0.4f, () =>
+            _webView.Hide(true, UniWebViewTransitionEdge.Top, 0.4f, () =>
             {
                 MonetizrManager.ShowMessage((bool _isSkipped) =>
                 {
@@ -452,7 +495,7 @@ namespace Monetizr.Campaigns
                     }
                     else
                     {
-                        webView.Show(true, UniWebViewTransitionEdge.Top, 0.4f);
+                        _webView.Show(true, UniWebViewTransitionEdge.Top, 0.4f);
                     }
                 },
                     this.currentMission,
@@ -487,7 +530,7 @@ namespace Monetizr.Campaigns
 
             Dictionary<string, string> p = new Dictionary<string, string>();
 
-            p.Add("url", webUrl);
+            p.Add("url", _webUrl);
             
             if(statusCode > 0)
                 p.Add("url_status_code", statusCode.ToString());

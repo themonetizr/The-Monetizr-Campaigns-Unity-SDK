@@ -501,12 +501,11 @@ namespace Monetizr.Campaigns
 
         internal void OnVideoPlayPress(Mission m, Action<bool> onComplete)
         {
-            //MonetizrManager.Analytics.TrackEvent("Watch video press", m);
 
-#if UNITY_EDITOR_WIN
+/*#if UNITY_EDITOR_WIN
             onComplete?.Invoke(false);
             return;
-#endif
+#endif*/
 
             var htmlPath = m.campaign.GetAsset<string>(AssetsType.Html5PathString);
 
@@ -516,11 +515,7 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                var videoPath = m.campaign.GetAsset<string>(AssetsType.VideoFilePathString);
-
-                //MonetizrManager._PlayVideo(videoPath, (bool isSkipped) => { OnClaimRewardComplete(m, isSkipped); });
-
-                MonetizrManager.ShowWebVideo((bool isSkipped) => { onComplete(isSkipped); }, m);
+                Log.PrintV("No HTML5 path for the video player");
             }
         }
 
