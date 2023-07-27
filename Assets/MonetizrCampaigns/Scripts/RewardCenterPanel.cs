@@ -593,10 +593,12 @@ namespace Monetizr.Campaigns
 
         void UpdatePortraitMode()
         {
-            if (!scrollListHasBanner && Utils.isInLandscapeMode())
+            if (Utils.isInLandscapeMode())
                 bannerHeight = 0;
+            else if (!scrollListHasBanner)
+                bannerHeight = 260;
 
-                //float z = 0;
+            //float z = 0;
             Vector2 pos = new Vector2(510, -bannerHeight);
 
 
