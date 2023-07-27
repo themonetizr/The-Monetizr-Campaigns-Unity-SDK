@@ -187,10 +187,7 @@ namespace Monetizr.Campaigns
             if(p == null)
                 return def;
 
-            if (!dictionary.ContainsKey(p))
-                return def;
-
-            return dictionary[p];
+            return dictionary.ContainsKey(p) ? dictionary[p] : def;
         }
 
         public bool GetBoolParam(TKey p, bool defaultParam)

@@ -249,7 +249,7 @@ namespace Monetizr.Campaigns
 
         private static Transform teaserRoot;
 
-        internal MonetizrClient _challengesClient { get; private set; }
+        internal MonetizrClient Client { get; private set; }
 
         public List<MissionDescription> sponsoredMissions { get; private set; }
 
@@ -453,7 +453,7 @@ namespace Monetizr.Campaigns
 
         internal static MonetizrManager Instance { get; private set; } = null;
 
-        internal static MonetizrAnalytics Analytics => Instance._challengesClient.analytics;
+        internal static MonetizrAnalytics Analytics => Instance.Client.analytics;
 
         void OnApplicationQuit()
         {
@@ -481,7 +481,7 @@ namespace Monetizr.Campaigns
 
             this._soundSwitch = soundSwitch;
 
-            _challengesClient = new MonetizrClient(apiKey);
+            Client = new MonetizrClient(apiKey);
 
             InitializeUI();
 
@@ -570,28 +570,28 @@ namespace Monetizr.Campaigns
 
         internal string GetCurrentAPIkey()
         {
-            return _challengesClient.currentApiKey;
+            return Client.currentApiKey;
         }
 
         internal void RestartClient()
         {
-            _challengesClient.Close();
+            Client.Close();
 
-            _challengesClient = new MonetizrClient(_challengesClient.currentApiKey);
+            Client = new MonetizrClient(Client.currentApiKey);
 
             RequestCampaigns();
         }
 
         internal bool ChangeAPIKey(string apiKey)
         {
-            if (apiKey == _challengesClient.currentApiKey)
+            if (apiKey == Client.currentApiKey)
                 return true;
 
             Log.Print($"Changing api key to {apiKey}");
 
-            _challengesClient.Close();
+            Client.Close();
 
-            _challengesClient = new MonetizrClient(apiKey);
+            Client = new MonetizrClient(apiKey);
 
             RequestCampaigns();
 
@@ -678,7 +678,7 @@ namespace Monetizr.Campaigns
             {
                 s_cts.CancelAfter(10000);
 
-                await Instance._challengesClient.Reset(campaignId, s_cts.Token);
+                await Instance.Client.Reset(campaignId, s_cts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -1347,21 +1347,21 @@ namespace Monetizr.Campaigns
 
             try
             {
-                campaigns = await _challengesClient.GetList();
+                campaigns = await Client.GetList();
             }
             catch (Exception e)
             {
                 Log.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]} {e}");
                 
-                if (_challengesClient.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
+                if (Client.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
                 {
-                    _challengesClient.SendErrorToRemoteServer("Campaign error",
+                    Client.SendErrorToRemoteServer("Campaign error",
                         "Campaign error",
                         $"Campaign error:\nApp: {bundleId}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{e.ToString()}");
                 }
                 
 #if !UNITY_EDITOR            
-                _challengesClient.SendErrorToRemoteServer("Error",e.Message,e.ToString());
+                _client.SendErrorToRemoteServer("Error",e.Message,e.ToString());
 #endif
 
                 onRequestComplete?.Invoke(false);
@@ -1377,17 +1377,17 @@ namespace Monetizr.Campaigns
 
             if (campaigns.Count > 0)
             {
-                _challengesClient.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
+                Client.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
 
-                _challengesClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Impression);
+                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Impression);
 
 
-                //_challengesClient.analytics.TrackEvent("Get List Started", campaigns[0]);
-                //_challengesClient.analytics.StartTimedEvent("Get List Finished");
+                //_client.analytics.TrackEvent("Get List Started", campaigns[0]);
+                //_client.analytics.StartTimedEvent("Get List Finished");
             }
             else
             {
-                _challengesClient.InitializeMixpanel(false, null);
+                Client.InitializeMixpanel(false, null);
             }
 
 
@@ -1422,9 +1422,9 @@ namespace Monetizr.Campaigns
                 {
                     Log.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
 
-                    if (_challengesClient.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
+                    if (Client.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
                     {
-                        _challengesClient.SendErrorToRemoteServer("Campaign loading assets error",
+                        Client.SendErrorToRemoteServer("Campaign loading assets error",
                             "Campaign loading assets error",
                             $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{campaign.loadingError}");
                     }
@@ -1446,17 +1446,17 @@ namespace Monetizr.Campaigns
 
             if (_activeChallengeId != null)
             {
-                //_challengesClient.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
+                //_client.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
 
-                _challengesClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
+                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
             }
             else
             {
                 if (campaigns.Count > 0)
                 {
-                    //_challengesClient.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
+                    //_client.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
 
-                    _challengesClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Error);
+                    Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Error);
                 }
             }
 
@@ -1527,7 +1527,7 @@ namespace Monetizr.Campaigns
             {
                 //await Task.Delay(15000,ct);
 
-                await _challengesClient.Claim(challenge, ct, onSuccess, onFailure);
+                await Client.Claim(challenge, ct, onSuccess, onFailure);
             }
             catch (Exception e)
             {
