@@ -419,14 +419,15 @@ namespace Monetizr.Campaigns
             }
 
             var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri);
-
+            var openRtbRequest = "";
+            
             if (globalSettings.GetBoolParam("openrtb.send_by_client", false) &&
                 globalSettings.HasParam("openrtb.endpoint") &&
                 globalSettings.HasParam("openrtb.generator_url"))
             {
                 string generatorUri = globalSettings.GetParam("openrtb.generator_url");
 
-                var openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri);
+                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri);
 
                 if (!string.IsNullOrEmpty(openRtbRequest))
                 {
@@ -442,16 +443,14 @@ namespace Monetizr.Campaigns
 
             var response = await MonetizrClient.DownloadUrlAsString(requestMessage);
             
+            
             string res = response.content;
-
-            if (res.Contains("Request failed!"))
+            
+            if (!response.isSuccess || res.Contains("Request failed!"))
             {
-                Log.PrintV($"Request failed with content: {res}");
-                return false;
-            }
-
-            if (!response.isSuccess)
-            {
+                if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
+                    client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent");
+       
                 Log.PrintV($"Response unsuccessful with content: {res}");
                 return false;
             }
@@ -488,10 +487,10 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"GetOpenRTBResponseForCampaign {currentCampaign.id} successfully loaded.");
 
-            /*if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
+            if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
             {
-                monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res);
-            }*/
+                client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res);
+            }
 
             return true;
         }

@@ -12,8 +12,6 @@ using System.Xml;
 using System.Xml.Serialization;
 //using UnityEditor.Android;
 using UnityEngine;
-using UnityEngine.Networking;
-
 using Monetizr.Campaigns.Vast42;
 using Vector2 = UnityEngine.Vector2;
 
@@ -21,7 +19,7 @@ namespace Monetizr.Campaigns
 {
     internal class VastHelper
     {
-        internal MonetizrClient client;
+        internal static MonetizrClient client;
         //internal VastSettings vastSettings;
 
         internal class VastParams
@@ -31,9 +29,9 @@ namespace Monetizr.Campaigns
             internal int pid;
         }
 
-        internal VastHelper(MonetizrClient client)
+        internal VastHelper(MonetizrClient _client)
         {
-            this.client = client;
+            client = _client;
         }
 
         public VastParams GetVastParams()
@@ -561,16 +559,28 @@ namespace Monetizr.Campaigns
                     }
 
                     Linear_Inline_typeMediaFilesMediaFile mediaFile = null;
-                    
 
+                    if (it.MediaFiles.MediaFile.Length == 0)
+                        return false;
+                    
                     if (it.MediaFiles.MediaFile.Length > 1)
                     {
                         mediaFile = Array.Find(it.MediaFiles.MediaFile,
                             (Linear_Inline_typeMediaFilesMediaFile a) => a.Value.Contains(videoName));
                     }
 
+                    //mediaFile = null;
+                    
                     if (mediaFile == null)
-                        return false;
+                    {
+                        string filesList = string.Join("\n",it.MediaFiles.MediaFile.Select(x => $"{x.Value}#{x.bitrate}").ToArray());
+                        
+                        if (client.GlobalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
+                            client.analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media");
+     
+                        mediaFile = it.MediaFiles.MediaFile[0];
+                        //return false;
+                    }
 
                     var videoUrl = mediaFile.Value;
                     var skipOffset = it.skipoffset;

@@ -1361,7 +1361,7 @@ namespace Monetizr.Campaigns
                 }
                 
 #if !UNITY_EDITOR            
-                _client.SendErrorToRemoteServer("Error",e.Message,e.ToString());
+                Client.SendErrorToRemoteServer("Error",e.Message,e.ToString());
 #endif
 
                 onRequestComplete?.Invoke(false);

@@ -92,11 +92,12 @@ namespace Monetizr.Campaigns
             if (fullScreen)
             {
                 //webView.Frame = useSafeFrame ? Screen.safeArea : new Rect(0, 0, Screen.width, Screen.height);
-                webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
+                _webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
             }
             else
-
-                webView.Frame = new Rect(x, y, w, h);
+            {
+                _webView.Frame = new Rect(x, y, w, h);
+            }
 #endif
 
             Log.Print($"frame: {fullScreen} {_webView.Frame}");
@@ -198,7 +199,7 @@ namespace Monetizr.Campaigns
 
             var result = await ph.GetOpenRtbResponseForCampaign(currentMission.campaign);
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR_WIN
             result = false;
 #endif
             if (result)
