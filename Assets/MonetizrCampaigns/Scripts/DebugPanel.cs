@@ -67,7 +67,8 @@ namespace Monetizr.Campaigns
         public void UpdateVersionText()
         {
             versionText.text = $"App version: {Application.version} " +
-             $"OS: {MonetizrAnalytics.osVersion}\n" +
+             $"OS: {MonetizrAnalytics.osVersion} " +
+             $"SDK: {MonetizrManager.SDKVersion}\n" +
              $"ADID: {MonetizrAnalytics.advertisingID}\n" +
              $"UserId: {MonetizrManager.Instance._challengesClient.analytics.GetUserId()}\n" +
              $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +

@@ -992,7 +992,7 @@ namespace Monetizr.Campaigns
 
             if (missions.Count == 1 && !showRewardCenterForOneMission)
             {
-                Log.Print($"Only one mission available and showRewardCenterForOneMission is false");
+                Log.Print($"Only one mission available and RewardCenter.show_for_one_mission is false");
 
                 Instance._PressSingleMission(onComplete, m);
                 return;

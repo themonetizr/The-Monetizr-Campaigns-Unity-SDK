@@ -350,7 +350,7 @@ namespace Monetizr.Campaigns
 
         internal async Task PreloadAssetToCache(ServerCampaign.Asset asset, /*AssetsType urlString,*/ AssetsType fileString, bool required = true)
         {
-            if (asset.url == null || asset.url.Length == 0)
+            if (string.IsNullOrEmpty(asset.url))
             {
                 Log.PrintWarning($"Malformed URL for {fileString} {this.id}");
                 return;
@@ -548,7 +548,14 @@ namespace Monetizr.Campaigns
 
                         break;
                     case "video":
+                        asset.fpath = Utils.ConvertCreativeToFname(asset.url);
+                        asset.fname = "video";
+                        asset.fext = Utils.ConvertCreativeToExt("", asset.url);
+                        asset.mainAssetName = $"index.html";
+
                         await PreloadAssetToCache(asset, AssetsType.VideoFilePathString, true);
+
+                        await PreloadVideoPlayer(asset);
 
                         break;
 
@@ -588,6 +595,51 @@ namespace Monetizr.Campaigns
                 }
 
             }
+        }
+
+        private async Task PreloadVideoPlayer(Asset asset)
+        {
+            string campPath = Application.persistentDataPath + "/" + id;
+
+            string zipFolder = campPath + "/" + asset.fpath;
+
+            Log.PrintV($"{campPath} {zipFolder}");
+            
+            if (!Directory.Exists(zipFolder))
+            {
+                this.isLoaded = false;
+                this.loadingError = $"Folder for video player {zipFolder} doesn't exist";
+            }
+
+            byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+
+            File.WriteAllBytes(zipFolder + "/html.zip", data);
+            
+            Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
+
+            File.Delete(zipFolder + "/html.zip");
+
+            //--------------
+
+            string indexPath = $"{zipFolder}/index.html";
+
+            if (!File.Exists(indexPath))
+            {
+                this.isLoaded = false;
+                this.loadingError = $"Main html for video player {indexPath} doesn't exist";
+            }
+        }
+
+        internal void EmbedVastParametersIntoVideoPlayer(Asset asset)
+        {
+            string campPath = Application.persistentDataPath + "/" + id;
+            var indexPath = campPath + "/" + asset.fpath + "/" + asset.mainAssetName;
+
+            var str = File.ReadAllText(indexPath);
+
+            str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
+
+            File.WriteAllText(indexPath, str);
         }
 
         internal static void DeleteDirectory(string target_dir)

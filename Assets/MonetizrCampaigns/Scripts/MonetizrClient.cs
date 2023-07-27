@@ -250,7 +250,7 @@ namespace Monetizr.Campaigns
 
             //VastHelper v = new VastHelper(this);
             //KevelHelper v = new KevelHelper(this);
-            PubmaticHelper v = new PubmaticHelper(this);
+            /*PubmaticHelper v = new PubmaticHelper(this);
 
             var programmaticCampaignResult = await v.GetProgrammaticCampaign(this);
             if (programmaticCampaignResult.isSuccess && 
@@ -260,7 +260,7 @@ namespace Monetizr.Campaigns
                 MonetizrManager.maximumCampaignAmount = programmaticCampaignResult.result.Count;
                 
                 return programmaticCampaignResult.result;
-            }
+            }*/
 
             return new List<ServerCampaign>();
         }
