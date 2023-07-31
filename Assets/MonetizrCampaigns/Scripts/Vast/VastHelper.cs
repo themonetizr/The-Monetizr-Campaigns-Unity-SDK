@@ -576,7 +576,7 @@ namespace Monetizr.Campaigns
                         string filesList = string.Join("\n",it.MediaFiles.MediaFile.Select(x => $"{x.Value}#{x.bitrate}").ToArray());
                         
                         if (client.GlobalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
-                            client.analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media");
+                            client.analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media",null);
      
                         mediaFile = it.MediaFiles.MediaFile[0];
                         //return false;

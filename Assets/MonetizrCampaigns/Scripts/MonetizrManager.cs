@@ -523,7 +523,8 @@ namespace Monetizr.Campaigns
 
             RequestCampaigns(_onRequestComplete);
 
-            StartCoroutine(TryRequestCampaignsLater(requestCampaignTime));
+            if(requestCampaignTime > 0)
+                StartCoroutine(TryRequestCampaignsLater(requestCampaignTime));
         }
         
         private IEnumerator TryRequestCampaignsLater(float time)

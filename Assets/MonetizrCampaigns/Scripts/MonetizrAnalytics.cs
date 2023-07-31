@@ -1152,43 +1152,41 @@ namespace Monetizr.Campaigns
             Mixpanel.Flush();
         }
 
+        private void NestedDictIteration(string rootName, SimpleJSON.JSONNode p, Value props)
+        {
+            foreach (var key in p)
+            {
+                var value = key.Value;
+                var k = key.Key;
+                    
+                var name = string.IsNullOrEmpty(k) ? rootName : $"{rootName}/{key.Key}";
 
-        public void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse)
+                if (value.IsString || value.IsNumber)
+                {
+                    string v = key.Value.ToString();
+
+                    if (value.IsString)
+                        v = v.Trim('"');
+
+                    props[name] = v;
+                    //Debug.LogError($"{name},{v}");
+                }
+                    
+                NestedDictIteration(name,key.Value,props);
+            }
+        }
+        public void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign)
         {
             var props = new Value();
             
-            AddDefaultMixpanelValues(props, null, null);
-
-            var parameters = SimpleJSON.JSON.Parse(openRtbRequest);
+            AddDefaultMixpanelValues(props, campaign, null);
             
-            void NestedDictIteration(string rootName, SimpleJSON.JSONNode p)
-            {
-                foreach (var key in p)
-                {
-                    var value = key.Value;
-                    var k = key.Key;
-                    
-                    var name = string.IsNullOrEmpty(k) ? rootName : $"{rootName}/{key.Key}";
+            var parameters = SimpleJSON.JSON.Parse(openRtbRequest);
 
-                    if (value.IsString || value.IsNumber)
-                    {
-                        string v = key.Value.ToString();
-
-                        if (value.IsString)
-                            v = v.Trim('"');
-
-                        props[name] = v;
-                        //Debug.LogError($"{name},{v}");
-                    }
-                    
-                    NestedDictIteration(name,key.Value);
-                }
-            }
-
-            NestedDictIteration("",parameters);
+            NestedDictIteration("",parameters, props);
             
             #if UNITY_EDITOR
-                props["test"] = 1;
+                props["editor_test"] = 1;
             #endif
             
             props["request"] = openRtbRequest;

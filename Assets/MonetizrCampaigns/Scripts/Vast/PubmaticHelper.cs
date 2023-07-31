@@ -253,7 +253,7 @@ namespace Monetizr.Campaigns
             {
 //#if !UNITY_EDITOR
                 if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
-                    monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent");
+                    monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", null);
 //#endif                
 
                 return (false,new List<ServerCampaign>());
@@ -326,7 +326,7 @@ namespace Monetizr.Campaigns
 //#if !UNITY_EDITOR            
             if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
             {
-                monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res);
+                monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, null);
             }
 
            /* if (globalSettings.GetBoolParam("openrtb.sent_report_to_slack", false))
@@ -449,7 +449,7 @@ namespace Monetizr.Campaigns
             if (!response.isSuccess || res.Contains("Request failed!"))
             {
                 if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
-                    client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent");
+                    client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
        
                 Log.PrintV($"Response unsuccessful with content: {res}");
                 return false;
@@ -489,7 +489,7 @@ namespace Monetizr.Campaigns
 
             if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
             {
-                client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res);
+                client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
             }
 
             return true;
