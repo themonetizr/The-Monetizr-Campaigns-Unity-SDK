@@ -80,7 +80,7 @@ namespace Monetizr.Campaigns
         LeaderboardBannerSprite,
 
     }
-    
+
     internal static class ExtensionMethods
     {
         public static TaskAwaiter GetAwaiter(this AsyncOperation asyncOp)
@@ -210,7 +210,7 @@ namespace Monetizr.Campaigns
 
             return camp;
         }
-        
+
         internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaign> challenges)
         {
             //load old settings
@@ -232,7 +232,7 @@ namespace Monetizr.Campaigns
     /// </summary>
     public class MonetizrManager : MonoBehaviour
     {
-        public static float requestCampaignTime = 5*60;
+        public static float requestCampaignTime = 5 * 60;
         public static readonly string SDKVersion = "1.0.0";
 
         internal static bool keepLocalClaimData;
@@ -242,7 +242,7 @@ namespace Monetizr.Campaigns
         internal static int maximumCampaignAmount = 1;
 
         internal static bool isVastActive = false;
-               
+
 
         //position relative to center with 1080x1920 screen resolution
         private static Vector2? tinyTeaserPosition = null;
@@ -255,7 +255,7 @@ namespace Monetizr.Campaigns
 
         private UIController _uiController = null;
 
-        private string _activeChallengeId = null;
+        private string _activeCampaignId = null;
 
         private Action<bool> _soundSwitch = null;
         private Action<bool> _onRequestComplete = null;
@@ -389,7 +389,7 @@ namespace Monetizr.Campaigns
         {
             MonetizrAnalytics.isAdvertisingIDDefined = true;
 
-            MonetizrAnalytics.advertisingID = advertisingID;        
+            MonetizrAnalytics.advertisingID = advertisingID;
             MonetizrAnalytics.limitAdvertising = limitAdvertising;
 
             Log.Print($"MonetizrManager SetAdvertisingIds: { MonetizrAnalytics.advertisingID} {MonetizrAnalytics.limitAdvertising}");
@@ -406,7 +406,7 @@ namespace Monetizr.Campaigns
             {
                 return Instance;
             }
-            
+
 #if UNITY_EDITOR
             keepLocalClaimData = true;
             serverClaimForCampaigns = false;
@@ -416,7 +416,7 @@ namespace Monetizr.Campaigns
             serverClaimForCampaigns = true;
             claimForSkippedCampaigns = false;
 #endif
-            if(soundSwitch == null)
+            if (soundSwitch == null)
             {
                 soundSwitch = (bool isOn) =>
                 {
@@ -427,7 +427,7 @@ namespace Monetizr.Campaigns
 
             Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {SDKVersion}");
 
-            if(!MonetizrAnalytics.isAdvertisingIDDefined)
+            if (!MonetizrAnalytics.isAdvertisingIDDefined)
             {
                 Log.PrintError($"MonetizrManager Initialize: Advertising ID is not defined. Be sure you called MonetizrManager.SetAdvertisingIds before Initialize call.");
                 return null;
@@ -496,7 +496,7 @@ namespace Monetizr.Campaigns
                     return;
                 }
 
-                if(MonetizrManager.gameRewards.Count == 0)
+                if (MonetizrManager.gameRewards.Count == 0)
                 {
                     Log.PrintError($"No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
                     return;
@@ -523,28 +523,28 @@ namespace Monetizr.Campaigns
 
             RequestCampaigns(_onRequestComplete);
 
-            if(requestCampaignTime > 0)
+            if (requestCampaignTime > 0)
                 StartCoroutine(TryRequestCampaignsLater(requestCampaignTime));
         }
-        
+
         private IEnumerator TryRequestCampaignsLater(float time)
         {
             while (true)
             {
                 yield return new WaitForSeconds(time);
-                
+
                 if (_campaigns.Count != 0) continue;
 
                 _isActive = false;
-                
+
                 RequestCampaigns(_onRequestComplete);
             }
         }
 
-        public void initializeBuiltinMissions()
+        internal void InitializeBuiltinMissions(ServerCampaign campaign)
         {
             if (_isMissionsIsOutdated)
-                missionsManager.AddMissionsToCampaigns();
+                missionsManager.CreateMissionsFromCampaign(campaign);
 
             _isMissionsIsOutdated = false;
         }
@@ -911,12 +911,12 @@ namespace Monetizr.Campaigns
         {
             ShowNotification(onComplete, m, PanelId.CongratsNotification);
         }
-               
+
 
         internal void ClaimMissionData(Mission m)
         {
             gameRewards[m.rewardType].AddCurrencyAction(m.reward);
-            
+
             if (keepLocalClaimData)
                 Instance.SaveClaimedReward(m);
         }
@@ -925,7 +925,7 @@ namespace Monetizr.Campaigns
         {
             Instance.missionsManager.CleanUserDefinedMissions();
         }
-        
+
         public enum OnCompleteStatus
         {
             //if player rejected the offer or haven't seen anything
@@ -970,7 +970,7 @@ namespace Monetizr.Campaigns
 
             UpdateGameUI?.Invoke();
 
-            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+            var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
 
             var m = Instance.missionsManager.GetMission(challengeId);
 
@@ -1090,7 +1090,7 @@ namespace Monetizr.Campaigns
         {
             _ShowWebView(onComplete, PanelId.VideoWebView, m);
         }
-    
+
         public static void SetTeaserPosition(Vector2 pos)
         {
             tinyTeaserPosition = pos;
@@ -1107,7 +1107,7 @@ namespace Monetizr.Campaigns
             set;
         } = null;
 
-      
+
         /// <summary>
         /// Call this method to show Notification and if player close it teaser will be shown
         /// </summary>
@@ -1122,19 +1122,21 @@ namespace Monetizr.Campaigns
 
             if (!Instance.HasCampaignsAndActive())
                 return;
+            
+            var campaign = MonetizrManager.Instance.GetActiveCampaign();
 
-            Instance.initializeBuiltinMissions();
+            Instance.InitializeBuiltinMissions(campaign);
 
             if (showNotifications)
             {
                 HideTinyMenuTeaser();
-                
+
                 ShowStartupNotification(1, (bool isSkipped) =>
                         {
                             if (isSkipped)
                                 ShowTinyMenuTeaser();
                             else
-                                ShowRewardCenter(null, (bool _) => { ShowTinyMenuTeaser(); });
+                                ShowRewardCenter(null, null);
                         });
             }
             else
@@ -1143,7 +1145,7 @@ namespace Monetizr.Campaigns
             }
 
         }
-        
+
         /// <summary>
         /// Shows campaign notification and if player press Ok button - he sees an offer
         /// </summary>
@@ -1166,7 +1168,9 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            Instance.initializeBuiltinMissions();
+            var campaign = MonetizrManager.Instance.GetActiveCampaign();
+
+            Instance.InitializeBuiltinMissions(campaign);
 
             //Notification is shown
             ShowStartupNotification(2, (bool isSkipped) =>
@@ -1203,8 +1207,11 @@ namespace Monetizr.Campaigns
         public static void ShowTinyMenuTeaser(Action UpdateGameUI = null)
         {
             //Log.Print("ShowTinyMenuTeaser");
+            if (!MonetizrManager.tinyTeaserCanBeVisible)
+                return;
 
             //Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            //
             if (Instance == null)
                 return;
 
@@ -1224,11 +1231,11 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+            var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
             var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
-            
+
             if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) &&
-                !campaign.HasAsset(AssetsType.TeaserGifPathString) && 
+                !campaign.HasAsset(AssetsType.TeaserGifPathString) &&
                 !campaign.HasAsset(AssetsType.BrandRewardLogoSprite))
             {
                 Log.Print("No texture for tiny teaser!");
@@ -1353,15 +1360,15 @@ namespace Monetizr.Campaigns
             catch (Exception e)
             {
                 Log.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]} {e}");
-                
+
                 if (Client.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
                 {
                     Client.SendErrorToRemoteServer("Campaign error",
                         "Campaign error",
                         $"Campaign error:\nApp: {bundleId}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{e.ToString()}");
                 }
-                
-#if !UNITY_EDITOR            
+
+#if !UNITY_EDITOR
                 Client.SendErrorToRemoteServer("Error",e.Message,e.ToString());
 #endif
 
@@ -1398,8 +1405,8 @@ namespace Monetizr.Campaigns
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
             //Color c;
-            
-           
+
+
 
             foreach (var campaign in campaigns)
             {
@@ -1410,8 +1417,8 @@ namespace Monetizr.Campaigns
 
                 Log.Print($"Campaign path: {path}");
 
-                await campaign.LoadCampaignAssets();               
-                
+                await campaign.LoadCampaignAssets();
+
                 if (campaign.isLoaded)
                 {
                     Log.Print($"Campaign {campaign.id} successfully loaded");
@@ -1432,9 +1439,9 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            _activeChallengeId = _campaignIds.Count > 0 ? _campaignIds[0] : null;
+            _activeCampaignId = _campaignIds.Count > 0 ? _campaignIds[0] : null;
 
-            Log.PrintV($"Active campaign: {_activeChallengeId}");
+            Log.PrintV($"Active campaign: {_activeCampaignId}");
 
             _isMissionsIsOutdated = true;
 
@@ -1443,9 +1450,9 @@ namespace Monetizr.Campaigns
 #endif
             localSettings.LoadOldAndUpdateNew(this._campaigns);
 
-            Log.Print($"RequestCampaigns completed with {_campaignIds.Count} campaigns. Active campaign: {_activeChallengeId}");
+            Log.Print($"RequestCampaigns completed with {_campaignIds.Count} campaigns. Active campaign: {_activeCampaignId}");
 
-            if (_activeChallengeId != null)
+            if (_activeCampaignId != null)
             {
                 //_client.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
 
@@ -1474,13 +1481,17 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(chId))
                 return null;
 
-            if (!_campaigns.ContainsKey(chId))
-            {
-                Log.PrintWarning($"You're trying to get campaign {chId} which is not exist!");
-                return null;
-            }
+            if (_campaigns.TryGetValue(chId, out var campaign))
+                return campaign;
 
-            return _campaigns[chId];
+            Log.PrintWarning($"You're trying to get campaign {chId} which is not exist!");
+
+            return null;
+        }
+
+        internal ServerCampaign GetActiveCampaign()
+        {
+            return GetCampaign(_activeCampaignId);
         }
 
         /// <summary>
@@ -1502,14 +1513,14 @@ namespace Monetizr.Campaigns
             return Instance != null && Instance.HasCampaignsAndActive();
         }
 
-        public string GetActiveCampaign()
+        public string GetActiveCampaignId()
         {
-            return _activeChallengeId;
+            return _activeCampaignId;
         }
 
         public void SetActiveCampaignId(string id)
         {
-            _activeChallengeId = id;
+            _activeCampaignId = id;
         }
 
         public bool HasCampaign(string challengeId)
@@ -1537,8 +1548,8 @@ namespace Monetizr.Campaigns
                 onFailure.Invoke();
             }
         }
-        
-        
+
+
 
     }
 

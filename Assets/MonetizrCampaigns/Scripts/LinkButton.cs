@@ -16,7 +16,7 @@ public class LinkButton : MonoBehaviour
     // Update is called once per frame
     public void OnClick()
     {
-        var campaign = MonetizrManager.Instance.GetActiveCampaign();
+        var campaign = MonetizrManager.Instance.GetActiveCampaignId();
         string url = null;
 
         if (campaign != null)

@@ -91,14 +91,6 @@ namespace Monetizr.Campaigns
 
         public void ShowPanelFromPrefab(String prefab, PanelId id = PanelId.Unknown, Action<bool> onComplete = null, bool rememberPrevious = false, Mission m = null)
         {
-            //Log.PrintWarning($"ShowPanel: {id} Mission: {m==null}");
-
-            //if (panels.ContainsKey(previousPanel) && previousPanel != PanelId.Unknown)
-            //    panels[previousPanel].SetActive(false);
-
-           
-
-
             PanelController ctrlPanel = null;
             GameObject panel = null;
 
@@ -259,7 +251,7 @@ namespace Monetizr.Campaigns
                 return;
 
             
-            var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+            var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
 
             //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
             var missionsList = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();

@@ -289,7 +289,7 @@ namespace Monetizr.Campaigns
         {
             yield return new WaitForSeconds(3);
 
-            //var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+            //var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
 
             //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 

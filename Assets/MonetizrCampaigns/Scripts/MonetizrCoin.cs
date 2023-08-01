@@ -17,7 +17,7 @@ public class MonetizrCoin : MonoBehaviour
         if (MonetizrManager.Instance == null || !MonetizrManager.Instance.HasCampaignsAndActive())
             return false;
 
-        var currentCampaign = MonetizrManager.Instance.GetActiveCampaign();
+        var currentCampaign = MonetizrManager.Instance.GetActiveCampaignId();
 
         var campaign = MonetizrManager.Instance.GetCampaign(currentCampaign);
 

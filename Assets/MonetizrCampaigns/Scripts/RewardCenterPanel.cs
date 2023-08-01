@@ -79,7 +79,7 @@ namespace Monetizr.Campaigns
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             currentMission = m;
-            currentCampaign =  MonetizrManager.Instance.GetActiveCampaign();
+            currentCampaign =  MonetizrManager.Instance.GetActiveCampaignId();
 
         //MonetizrManager.CallUserDefinedEvent(currentCampaign,
              //     NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
@@ -128,7 +128,7 @@ namespace Monetizr.Campaigns
         private void AddSponsoredChallenges()
         {
 
-            var campaignId = MonetizrManager.Instance.GetActiveCampaign();
+            var campaignId = MonetizrManager.Instance.GetActiveCampaignId();
 
             var campaign = MonetizrManager.Instance.GetCampaign(campaignId);
 
@@ -562,6 +562,11 @@ namespace Monetizr.Campaigns
                 }
             }
 
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
+
+            if (missions.Count == 0)
+                OnButtonPress();
+
             UpdateStatusBar();
         }
 
@@ -575,13 +580,13 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.RewardsCenterScreen, currentMission);
 
-            if(MonetizrManager.tinyTeaserCanBeVisible)
-                MonetizrManager.ShowTinyMenuTeaser(null);
+            //if(MonetizrManager.tinyTeaserCanBeVisible)
+            MonetizrManager.ShowTinyMenuTeaser(null);
 
-            if (!uiController.isVideoPlaying)
+            /*if (!uiController.isVideoPlaying)
             {
                 MonetizrManager.CleanUserDefinedMissions();
-            }
+            }*/
 
             //if (hasSponsoredChallenges)
             //{

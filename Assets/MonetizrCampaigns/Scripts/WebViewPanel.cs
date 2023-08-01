@@ -169,6 +169,10 @@ namespace Monetizr.Campaigns
 
             int delay = m.campaignServerSettings.GetIntParam("ActionReward.reward_time", 0);
 
+#if UNITY_EDITOR
+            delay = 3;
+#endif
+
             StartCoroutine(ShowClaimButtonCoroutine(delay));
 
             pagesSwitch = m.campaignServerSettings.GetIntParam("ActionReward.reward_pages", 0);
