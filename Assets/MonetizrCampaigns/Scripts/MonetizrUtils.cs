@@ -92,28 +92,14 @@ namespace Monetizr.Campaigns
             return result;
         }
 
-        //Unity FromJson doesn't support Dictionaries
-        public static Dictionary<string, string> ParseContentString(string content, Dictionary<string, object> dict = null)
+         public static Dictionary<string, string> ParseContentString(string content, Dictionary<string, object> dict = null)
         {
-            Dictionary<string, string> res = null;
+            var res =
+                dict != null ? 
+                    dict.ToDictionary(kvp => kvp.Key, kvp => (string)kvp.Value) : 
+                    ParseJson(content);
 
-            if (dict != null)
-            {
-                res = new Dictionary<string, string>();
-
-                foreach (KeyValuePair<string, object> kvp in dict)
-                {
-                    //Log.Print($"-----{kvp.Key} {(string)kvp.Value}");
-
-                    res.Add(kvp.Key, (string)kvp.Value);
-                }
-            }
-            else
-            {
-                res = ParseJson(content);
-            }
-
-            Dictionary<string, string> res2 = new Dictionary<string, string>();
+            var res2 = new Dictionary<string, string>();
 
             foreach (var p in res)
             {

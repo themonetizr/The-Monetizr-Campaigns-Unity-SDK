@@ -72,7 +72,7 @@ namespace Monetizr.Campaigns
              $"ADID: {MonetizrAnalytics.advertisingID}\n" +
              $"UserId: {MonetizrManager.Instance.Client.analytics.GetUserId()}\n" +
              $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +
-             $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()}";
+             $"Active campaign: {MonetizrManager.Instance.GetActiveCampaignId()}";
         }
 
         public void OnToggleChanged(bool _)
@@ -116,7 +116,7 @@ namespace Monetizr.Campaigns
 
         public void OpenGame()
         {
-            //var challengeId = MonetizrManager.Instance.GetActiveCampaign();
+            //var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
 
             //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
 

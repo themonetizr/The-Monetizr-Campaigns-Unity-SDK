@@ -56,7 +56,7 @@ namespace Monetizr.Campaigns
         {
             missions.Add(m);
         }
-        
+
         internal Mission FindMissionInCache(int id, MissionType mt, string ch, ulong reward)
         {
             foreach (var m in missions)
@@ -252,7 +252,7 @@ namespace Monetizr.Campaigns
             if (m == null)
                 return null;
 
-            
+
             m.rewardType = md.rewardCurrency;
             m.startMoney = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc();
             m.reward = md.reward;
@@ -267,7 +267,7 @@ namespace Monetizr.Campaigns
 
             //if(string.IsNullOrEmpty(m.surveyUrl))
 
-            if(!md.hasUnitySurvey)
+            if (!md.hasUnitySurvey)
                 m.surveyUrl = md.surveyUrl;
 
             m.surveyId = md.surveyId;
@@ -379,7 +379,7 @@ namespace Monetizr.Campaigns
             {
                 MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
-                    
+
             return () =>
             {
                 MonetizrManager.ShowActionView(onSurveyComplete, m);
@@ -395,9 +395,9 @@ namespace Monetizr.Campaigns
                 MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
-//#if UNITY_EDITOR_WIN
-//            return () => onSurveyComplete.Invoke(false);
-//#else
+            //#if UNITY_EDITOR_WIN
+            //            return () => onSurveyComplete.Invoke(false);
+            //#else
 
             return () =>
             {
@@ -417,7 +417,7 @@ namespace Monetizr.Campaigns
                            m,
                            PanelId.SurveyNotification);*/
             };
-//#endif
+            //#endif
         }
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
@@ -502,10 +502,10 @@ namespace Monetizr.Campaigns
         internal void OnVideoPlayPress(Mission m, Action<bool> onComplete)
         {
 
-/*#if UNITY_EDITOR_WIN
-            onComplete?.Invoke(false);
-            return;
-#endif*/
+            /*#if UNITY_EDITOR_WIN
+                        onComplete?.Invoke(false);
+                        return;
+            #endif*/
 
             var htmlPath = m.campaign.GetAsset<string>(AssetsType.Html5PathString);
 
@@ -533,7 +533,7 @@ namespace Monetizr.Campaigns
 
         internal static Sprite GetMissionRewardImage(Mission m)
         {
-            
+
             if (!string.IsNullOrEmpty(m.rewardAssetName))
             {
                 if (m.campaign.TryGetSpriteAsset(m.rewardAssetName, out var s))
@@ -542,27 +542,27 @@ namespace Monetizr.Campaigns
                     return s;
                 }
             }
-            
+
             Sprite rewardIcon = MonetizrManager.gameRewards[m.rewardType].icon;
-                
-            if (m.rewardType == RewardType.Coins && 
-                m.campaign.TryGetAsset<Sprite>(AssetsType.CustomCoinSprite,out var customCoin))
+
+            if (m.rewardType == RewardType.Coins &&
+                m.campaign.TryGetAsset<Sprite>(AssetsType.CustomCoinSprite, out var customCoin))
             {
                 rewardIcon = customCoin;
             }
-            
+
             if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.IngameReward &&
                 m.campaign.TryGetAsset<Sprite>(AssetsType.IngameRewardSprite, out var inGameRewardSprite))
             {
                 rewardIcon = inGameRewardSprite;
             }
-            
+
             if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.ProductReward &&
                 m.campaign.TryGetAsset<Sprite>(AssetsType.RewardSprite, out var productRewardSprite))
             {
                 rewardIcon = productRewardSprite;
             }
-            
+
             if (EnterEmailPanel.GetPanelType(m) == EnterEmailType.SelectionReward &&
                 m.campaign.TryGetAsset<Sprite>(AssetsType.UnknownRewardSprite, out var selectionRewardSprite))
             {
@@ -599,8 +599,8 @@ namespace Monetizr.Campaigns
 
                     if (serverMissionType == MissionType.Undefined)
                         return;
-                    
-                    float rewardAmount = _m.GetRewardAmount()/100.0f;
+
+                    float rewardAmount = _m.GetRewardAmount() / 100.0f;
                     RewardType currency = _m.GetRewardType();
 
                     MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(currency);
@@ -763,59 +763,123 @@ namespace Monetizr.Campaigns
         }
 
 
-        internal void AddMissionsToCampaigns()
+        internal void CreateMissionsFromCampaign(ServerCampaign campaign)
         {
+            var predefinedSponsoredMissions = MonetizrManager.Instance.sponsoredMissions;
 
+            if (campaign == null && predefinedSponsoredMissions == null)
+                return;
 
-            //bind to server campagns
-            var campaigns = MonetizrManager.Instance.GetAvailableCampaigns();
+            string serverMissionsJson = campaign.serverSettings.GetParam("custom_missions");
 
-            var prefefinedSponsoredMissions = MonetizrManager.Instance.sponsoredMissions;
+            Log.PrintV($"Predefined missions from settings: {serverMissionsJson}");
 
-            int serverDefinedMission = 0;
+            if (string.IsNullOrEmpty(serverMissionsJson))
+                return;
 
+            serverMissionsJson = serverMissionsJson.Replace('\'', '\"');
 
-            Log.PrintV($"AddMissionsToCampaigns count: {campaigns.Count}");
+            ServerMissionsHelper ic = null;
 
-            if (campaigns.Count > 0)
+            try
             {
-                ServerCampaign sc = MonetizrManager.Instance.GetCampaign(campaigns[0]);
-
-                serverDefinedMission = sc.serverSettings.GetIntParam("server_defined_mission", 0);
-                                
-
-                string serverMissionsJson = MonetizrManager.Instance.GetCampaign(campaigns[0]).serverSettings.GetParam("custom_missions");
-                                
-                Log.PrintV($"Predefined missions from settings: {serverMissionsJson}");
-
-                if (serverMissionsJson?.Length > 0)
-                {
-                    serverMissionsJson = serverMissionsJson.Replace('\'', '\"');
-
-                    ServerMissionsHelper ic = null;
-
-                    try
-                    {
-                        ic = JsonUtility.FromJson<ServerMissionsHelper>(serverMissionsJson);
-
-                    }
-                    catch (Exception e)
-                    {
-                        Log.PrintWarning($"Problem {e.ToString()} with json {serverMissionsJson}");
-                    }
-
-                    if (ic != null)
-                    {
-                        prefefinedSponsoredMissions = ic.CreateMissionDescriptions(prefefinedSponsoredMissions, sc.serverSettings);
-                    }
-                }
+                ic = JsonUtility.FromJson<ServerMissionsHelper>(serverMissionsJson);
             }
+            catch (Exception e)
+            {
+                Log.PrintWarning($"Problem {e.ToString()} with json {serverMissionsJson}");
+            }
+
+            if (ic == null)
+                return;
+
+            predefinedSponsoredMissions = ic.CreateMissionDescriptions(predefinedSponsoredMissions, campaign.serverSettings);
 
             //if (prefefinedSponsoredMissions.Count > 1)
             //    prefefinedSponsoredMissions = prefefinedSponsoredMissions.GetRange(serverDefinedMission, 1);
 
-            Log.Print($"Found {prefefinedSponsoredMissions.Count} predefined missions in campaign");
+            Log.Print($"Found {predefinedSponsoredMissions.Count} predefined missions in campaign");
 
+            /*serializedMissions.Load();
+
+            //check if campaign is alive for current mission
+            foreach (var m in missions)
+            {
+                m.isServerCampaignActive = MonetizrManager.Instance.HasCampaign(m.campaignId);
+
+                //remove if it will not be in the predefined list
+                m.isToBeRemoved = true;
+            }*/
+
+
+            for (int i = 0; i < predefinedSponsoredMissions.Count; i++)
+            {
+                MissionDescription missionDescription = predefinedSponsoredMissions[i];
+
+                Mission m = FindMissionInCache(i, missionDescription.missionType, campaign.id, missionDescription.reward);
+
+                if (m == null)
+                {
+                    //
+                    m = prepareNewMission(i, campaign, missionDescription);
+
+                    if (m != null)
+                    {
+                        serializedMissions.Add(m);
+                    }
+                    else
+                    {
+                        Log.PrintError($"Can't create campaign with type {missionDescription.missionType}");
+                    }
+                }
+                else
+                {
+                    Log.PrintV($"Found mission {campaign.id}:{i} in local data");
+                }
+
+                if (m == null)
+                    continue;
+
+                m.campaign = campaign;
+                m.sdkVersion = MonetizrManager.SDKVersion;
+                m.rewardAssetName = missionDescription.rewardImage;
+
+                if (!missionDescription.hasUnitySurvey)
+                    m.surveyUrl = missionDescription.surveyUrl;
+                else
+                    m.surveyUrl = m.campaign.GetAsset<string>(AssetsType.SurveyURLString);
+
+                m.hasUnitySurvey = missionDescription.hasUnitySurvey;
+                m.surveyId = missionDescription.surveyId;
+                m.isServerCampaignActive = true;
+                m.isToBeRemoved = false;
+                m.campaignServerSettings = m.campaign.serverSettings;
+
+                bool showNotClaimedDisabled = m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
+                if (showNotClaimedDisabled)
+                    m.state = MissionUIState.Visible;
+
+                m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
+                
+                m.amountOfRVOffersShown = m.campaignServerSettings.GetIntParam("amount_of_rv_offers", -1);
+                //m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
+                m.amountOfNotificationsSkipped = m.campaignServerSettings.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
+                m.isVideoShown = false;
+                m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity
+                m.activateAfter = missionDescription.activateAfter;
+
+                m.brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
+            }
+
+           Log.Print($"Loaded {missions.Count} missions from the campaign");
+
+            UpdateMissionsActivity(null);
+            
+            //serializedMissions.SaveAll();
+        }
+
+        internal void LoadMissions()
+        {
             serializedMissions.Load();
 
             //check if campaign is alive for current mission
@@ -826,117 +890,19 @@ namespace Monetizr.Campaigns
                 //remove if it will not be in the predefined list
                 m.isToBeRemoved = true;
             }
+        }
 
-
-            //search unbinded campaign
-            for (int c = 0; c < campaigns.Count; c++)
-            {
-                string ch = campaigns[c];
-                ServerCampaign serverCampaign = MonetizrManager.Instance.GetCampaign(ch);
-
-                if (c >= MonetizrManager.maximumCampaignAmount)
-                {
-                    break;
-                }
-
-                //TODO: check if such mission type already existed for such campaign
-                //if it exist - do not add it
-
-                //TODO: use prefefinedSponsoredMissions for all cases
-                for (int i = 0; i < prefefinedSponsoredMissions.Count; i++)
-                {
-                    MissionDescription md = prefefinedSponsoredMissions[i];
-
-                    Mission m = FindMissionInCache(i, md.missionType, ch, prefefinedSponsoredMissions[i].reward);
-
-                    if (m == null)
-                    {
-                        //
-                        m = prepareNewMission(i, serverCampaign, prefefinedSponsoredMissions[i]);
-
-                        if (m != null)
-                        {
-                            serializedMissions.Add(m);
-                        }
-                        else
-                        {
-                            Log.PrintError($"Can't create campaign with type {prefefinedSponsoredMissions[i].missionType}");
-                        }
-                    }
-                    else
-                    {
-                        Log.PrintV($"Found mission {ch}:{i} in local data");
-                    }
-
-                    if (m == null)
-                        continue;
-
-                    m.campaign = serverCampaign;
-                    
-                    m.sdkVersion = MonetizrManager.SDKVersion;
-
-                    //if (string.IsNullOrEmpty(m.surveyUrl))
-
-                    m.rewardAssetName = md.rewardImage;
-                        
-                    if(!md.hasUnitySurvey)
-                        m.surveyUrl = md.surveyUrl;
-                    else
-                        m.surveyUrl = m.campaign.GetAsset<string>(AssetsType.SurveyURLString);
-
-                    m.hasUnitySurvey = md.hasUnitySurvey;
-
-                    m.surveyId = md.surveyId;
-                                       
-                    m.isServerCampaignActive = true;
-
-                    m.isToBeRemoved = false;
-                    m.campaignServerSettings = m.campaign.serverSettings;
-
-                    bool showNotClaimedDisabled = m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
-
-                    m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
-
-                    if (showNotClaimedDisabled)
-                        m.state = MissionUIState.Visible;
-
-                    //rewrite these parameters here, because otherwise it will be saved in cache
-                    //m.additionalParams = new SerializableDictionary<string,string>(MonetizrManager.Instance.GetCampaign(ch).additional_params);
-
-
-                    m.amountOfRVOffersShown = m.campaignServerSettings.GetIntParam("amount_of_rv_offers", -1);
-                    //m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
-                    m.amountOfNotificationsSkipped = m.campaignServerSettings.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
-                    m.isVideoShown = false;
-                    m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity
-                    m.activateAfter = prefefinedSponsoredMissions[i].activateAfter;
-
-                    m.brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
-
-                    
-                    //InitializeNonSerializedFields(m);
-                }
-
-
-
-            }
-
+        internal void SaveAndRemoveUnused()
+        {
             //remove if mission in save, but not in the predefined list
             missions.RemoveAll(m => m.isToBeRemoved);
-
-            Log.Print($"Loaded {missions.Count} missions from the campaign");
-
-            UpdateMissionsActivity(null);
-
-            //TODO: remove outdated missions from local cache
-            //???
 
             serializedMissions.SaveAll();
         }
 
         internal Mission GetMission(string campaignId)
         {
-            return missions.Find((Mission m) => { return m.campaignId == campaignId; });
+            return missions.Find((Mission m) => m.campaignId == campaignId);
         }
 
         internal bool IsActiveByTime(Mission m)
@@ -944,9 +910,9 @@ namespace Monetizr.Campaigns
             bool r = DateTime.Now >= m.activateTime && DateTime.Now <= m.deactivateTime;
             return r;
         }
-        
-        internal List<Mission> GetMissionsForRewardCenter(bool includeDisabled = false)
-        {           
+
+        internal List<Mission> GetMissionsForRewardCenter(bool includeDisabled)
+        {
             return missions.FindAll((Mission m) =>
             {
 
@@ -965,11 +931,25 @@ namespace Monetizr.Campaigns
             });
         }
 
+        internal List<Mission> GetMissionsForRewardCenter(ServerCampaign campaign, bool includeDisabled = false)
+        {
+            var res = GetMissionsForRewardCenter(includeDisabled);
+
+            return res?.FindAll((Mission m) => m.campaignId == campaign.id);
+        }
+
+        internal int GetActiveMissionsNum(ServerCampaign campaign)
+        {
+            var res = GetMissionsForRewardCenter(campaign);
+       
+            return res?.Count ?? 0;
+        }
+
         internal int GetActiveMissionsNum()
         {
             //var mList = missions.FindAll((Mission m) => { return m.isClaimed != ClaimState.Claimed; });
 
-            return GetMissionsForRewardCenter().Count;
+            return GetMissionsForRewardCenter(false).Count;
         }
 
         //check activateAfter ranges for all missions and activate them if missions in range already active 
@@ -990,7 +970,7 @@ namespace Monetizr.Campaigns
 
                 if (m.isClaimed == ClaimState.Claimed)
                     continue;
-                
+
                 bool hasActivateAfter = m.activateAfter.Count > 0;
 
                 Log.PrintV($"-----Updating activity for {m.serverId} has {hasActivateAfter}");
@@ -1001,7 +981,7 @@ namespace Monetizr.Campaigns
                     Log.PrintWarning($"Mission id {m.serverId} activate after itself!");
                     hasActivateAfter = false;
                 }
-                
+
                 //no activate_after here
                 if (!hasActivateAfter)
                 {
@@ -1055,7 +1035,7 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            if(isUpdateNeeded)
+            if (isUpdateNeeded)
                 serializedMissions.SaveAll();
 
             return isUpdateNeeded;

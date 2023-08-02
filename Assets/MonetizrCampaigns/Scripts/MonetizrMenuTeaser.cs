@@ -67,7 +67,7 @@ namespace Monetizr.Campaigns
                 noVideo = true;
 
             //more than one mission - no video sign
-            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum() > 1)
+            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(m.campaign) > 1)
                 noVideo = true;
 
 
@@ -101,7 +101,7 @@ namespace Monetizr.Campaigns
             }
 
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(m.campaign,true);
 
             var numText = currentMission.campaignServerSettings.GetParam("teaser.num_text", "%total_missions%");
 
