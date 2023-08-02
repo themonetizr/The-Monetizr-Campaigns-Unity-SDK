@@ -251,10 +251,10 @@ namespace Monetizr.Campaigns
                 return;
 
             
-            var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
+            //var campaign = MonetizrManager.Instance.GetActiveCampaign();
 
             //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
-            var missionsList = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+            var missionsList = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(campaign,false);
 
             var m = missionsList[0];
 

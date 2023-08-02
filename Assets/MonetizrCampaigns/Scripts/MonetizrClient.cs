@@ -176,9 +176,9 @@ namespace Monetizr.Campaigns
         }
 
         [Serializable]
-        private class Challenges
+        private class Campaigns
         {
-            public ServerCampaign[] challenges;
+            public List<ServerCampaign> campaigns;
         }
 
         public static async Task<(bool isSuccess,string content)> DownloadUrlAsString(HttpRequestMessage requestMessage)
@@ -241,13 +241,10 @@ namespace Monetizr.Campaigns
             
             var loadResult = await GetServerCampaignsFromMonetizr();
             
-            Log.PrintV($"GetServerCampaignsFromMonetizr result {loadResult.isSuccess}");
+            Log.PrintV($"GetServerCampaignsFromMonetizr result {loadResult.Count}");
             
-            if(loadResult.isSuccess)
-            { 
-                return loadResult.result;
-            }
-
+            return loadResult;
+            
             //VastHelper v = new VastHelper(this);
             //KevelHelper v = new KevelHelper(this);
             /*PubmaticHelper v = new PubmaticHelper(this);
@@ -262,7 +259,7 @@ namespace Monetizr.Campaigns
                 return programmaticCampaignResult.result;
             }*/
 
-            return new List<ServerCampaign>();
+            //return new List<ServerCampaign>();
         }
 
         internal SettingsDictionary<string, string> GlobalSettings { get; private set; }
@@ -408,7 +405,7 @@ namespace Monetizr.Campaigns
             });
         }
 
-        private async Task<(bool isSuccess,List<ServerCampaign> result)> GetServerCampaignsFromMonetizr()
+        private async Task<List<ServerCampaign>> GetServerCampaignsFromMonetizr()
         {
             var requestMessage = GetHttpRequestMessage(CampaignsApiUrl);
 
@@ -416,36 +413,35 @@ namespace Monetizr.Campaigns
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
 
-            var challengesString = await response.Content.ReadAsStringAsync();
+            var responseString = await response.Content.ReadAsStringAsync();
 
             string responseOk = response.IsSuccessStatusCode == true ? "OK" : "Not OK";
 
             //---
 
-
             Log.Print($"Response is: {response.StatusCode}");
-            Log.PrintV(challengesString);
+            Log.PrintV(responseString);
 
             if (!response.IsSuccessStatusCode)
             {
                 //list = result;
-                return (false,new List<ServerCampaign>());
+                return new List<ServerCampaign>();
             }
 
-            if (challengesString.Length == 0)
+            if (responseString.Length == 0)
             {
                 //list = result;
-                return (false, new List<ServerCampaign>());
+                return new List<ServerCampaign>();
             }
             
-            var challenges = JsonUtility.FromJson<Challenges>("{\"challenges\":" + challengesString + "}");
+            var campaigns = JsonUtility.FromJson<Campaigns>("{\"campaigns\":" + responseString + "}");
 
-            if (challenges.challenges.Length == 0)
+            if (campaigns == null)
             {
-                return (false, new List<ServerCampaign>());
+                return new List<ServerCampaign>();
             }
             
-            foreach (var ch in challenges.challenges)
+            foreach (var ch in campaigns.campaigns)
             {
                 Log.PrintV($"-----{ch.content}");
                 var localSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(ch.content));
@@ -453,7 +449,7 @@ namespace Monetizr.Campaigns
                 Log.Print($"Loaded campaign: {ch.id}");
             }
 
-            return (true,new List<ServerCampaign>(challenges.challenges));
+            return campaigns.campaigns;
         }
 
         internal static HttpRequestMessage GetHttpRequestMessage(string uri, bool isPost = false)

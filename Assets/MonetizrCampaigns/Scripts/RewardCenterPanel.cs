@@ -67,13 +67,13 @@ namespace Monetizr.Campaigns
 
             CleanListView();
 
-            if (MonetizrManager.Instance.HasCampaignsAndActive())
+            if (MonetizrManager.Instance.HasActiveCampaign())
             {
                 //hasSponsoredChallenges = true;
                 AddSponsoredChallenges();
             }
 
-            AddUserdefineChallenges();
+            //AddUserdefineChallenges();
         }
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -107,7 +107,7 @@ namespace Monetizr.Campaigns
             UpdateUI();
         }
 
-        private void AddUserdefineChallenges()
+       /* private void AddUserdefineChallenges()
         {
             foreach (var m in MonetizrManager.Instance.missionsManager.missions)
             {
@@ -123,14 +123,12 @@ namespace Monetizr.Campaigns
 
                 item.UpdateWithDescription(this, m);
             }
-        }
+        }*/
 
         private void AddSponsoredChallenges()
         {
 
-            var campaignId = MonetizrManager.Instance.GetActiveCampaignId();
-
-            var campaign = MonetizrManager.Instance.GetCampaign(campaignId);
+            var campaign = MonetizrManager.Instance.GetActiveCampaign();
 
             if (campaign == null)
             {
@@ -160,7 +158,9 @@ namespace Monetizr.Campaigns
 
             showNotClaimedDisabled = campaign.serverSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
 
-            missionsForRewardCenter = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
+            var activeCampaign = MonetizrManager.Instance.GetActiveCampaign();
+
+            missionsForRewardCenter = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign,true);
 
             if (missionsForRewardCenter.Count == 0)
             {
@@ -274,7 +274,7 @@ namespace Monetizr.Campaigns
  
             int claimed = 0;
 
-            var missions = MonetizrManager.Instance.missionsManager.missions;
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(camp,true);
 
             double totalRewardsValue = 0;
             double claimedRewardsValue = 0;
@@ -541,8 +541,13 @@ namespace Monetizr.Campaigns
 
         public void AddNewUIMissions()
         {
+            var activeCampaign = MonetizrManager.Instance.GetActiveCampaign();
+
             //try to update UI
-            foreach (var m in MonetizrManager.Instance.missionsManager.missions)
+            //var ml = MonetizrManager.Instance.missionsManager.missions;
+            var ml = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign, true);
+
+            foreach (var m in ml)
             {
                 if (m.state == MissionUIState.ToBeShown && m.isClaimed != ClaimState.Claimed)
                 {
@@ -561,10 +566,10 @@ namespace Monetizr.Campaigns
                     m.isDisabled = false;
                 }
             }
+            
+            //var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign,true);
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(true);
-
-            if (missions.Count == 0)
+            if (ml.Count == 0)
                 OnButtonPress();
 
             UpdateStatusBar();
@@ -580,20 +585,7 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.RewardsCenterScreen, currentMission);
 
-            //if(MonetizrManager.tinyTeaserCanBeVisible)
             MonetizrManager.ShowTinyMenuTeaser(null);
-
-            /*if (!uiController.isVideoPlaying)
-            {
-                MonetizrManager.CleanUserDefinedMissions();
-            }*/
-
-            //if (hasSponsoredChallenges)
-            //{
-            //    MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner);
-            //}
-
-            
         }
 
         void UpdatePortraitMode()

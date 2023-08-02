@@ -7,59 +7,40 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Image))]
 public class MonetizrCoin : MonoBehaviour
 {
-    Image uiCoin;
-    Sprite defaultSprite;
+    private Image _uiCoin;
+    private Sprite _defaultSprite;
 
-    bool UpdateCoinToCustom()
+    private bool UpdateCoinToCustom()
     {
-        //Log.Print($"------UpdateCoinToCustom-------- {uiCoin}");
+        var campaign = MonetizrManager.Instance?.GetActiveCampaign();
 
-        if (MonetizrManager.Instance == null || !MonetizrManager.Instance.HasCampaignsAndActive())
+        if (campaign == null)
             return false;
 
-        var currentCampaign = MonetizrManager.Instance.GetActiveCampaignId();
-
-        var campaign = MonetizrManager.Instance.GetCampaign(currentCampaign);
-
-        if (campaign.TryGetAsset<Sprite>(AssetsType.CustomCoinSprite, out Sprite coinSprite))
+        if (campaign.TryGetAsset<Sprite>(AssetsType.CustomCoinSprite, out var coinSprite))
         {
-            uiCoin.sprite = coinSprite;
+            _uiCoin.sprite = coinSprite;
         }
         
-        /*if (MonetizrManager.Instance.HasAsset(currentCampaign, AssetsType.CustomCoinSprite))
-        {
-            var coinSprite = MonetizrManager.Instance.GetAsset<Sprite>(currentCampaign, AssetsType.CustomCoinSprite);
-
-            uiCoin.sprite = coinSprite;
-
-            return true;
-        }*/
-
         return false;
     }
-
-
-    void OnEnable()
+    
+    private void OnEnable()
     {
         if(!UpdateCoinToCustom())
         {
-            uiCoin.sprite = defaultSprite;
+            _uiCoin.sprite = _defaultSprite;
         }
     }
 
     // Start is called before the first frame update
-    void Awake()
+    private void Awake()
     {
         
-        uiCoin = GetComponent<Image>();
-        defaultSprite = uiCoin.sprite;
+        _uiCoin = GetComponent<Image>();
+        _defaultSprite = _uiCoin.sprite;
 
         //Log.Print($"------COIN-------- {uiCoin}");
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

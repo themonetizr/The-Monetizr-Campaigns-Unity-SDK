@@ -489,23 +489,6 @@ namespace Monetizr.Campaigns
 
             _onRequestComplete = (bool isOk) =>
             {
-
-                if (!isOk)
-                {
-                    Log.Print("Request complete is not okay!");
-                    return;
-                }
-
-                if (MonetizrManager.gameRewards.Count == 0)
-                {
-                    Log.PrintError($"No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
-                    return;
-                }
-
-                Log.Print("MonetizrManager initialization okay!");
-
-                _isActive = true;
-
                 //moved together with showing teaser, because here in-game logic may not be ready
                 //                createEmbedMissions();
 
@@ -609,6 +592,8 @@ namespace Monetizr.Campaigns
 
             _campaigns.Clear();
             _campaignIds.Clear();
+
+            _activeCampaignId = null;
 
             RequestCampaigns(callRequestComplete ? _onRequestComplete : null);
         }
@@ -788,7 +773,14 @@ namespace Monetizr.Campaigns
             Instance._uiController.ShowPanelFromPrefab("MonetizrDebugPanel", PanelId.DebugPanel);
         }
 
-        public static void ShowStartupNotification(int placement, Action<bool> onComplete)
+        public enum NotificationPlacement
+        {
+            LevelStartNotification = 0, 
+            MainMenuShowNotification = 1,
+            ManualNotification = 2
+        }
+        
+        public static void ShowStartupNotification(NotificationPlacement placement, Action<bool> onComplete)
         {
             if (Instance._uiController.panels.ContainsKey(PanelId.StartNotification))
             {
@@ -800,7 +792,7 @@ namespace Monetizr.Campaigns
 
             //Log.Print($"------ShowStartupNotification 1 {placement}");
 
-            if (Instance == null || !Instance.HasCampaignsAndActive())
+            if (Instance == null || !Instance.HasActiveCampaign())
             {
                 onComplete?.Invoke(true);
                 return;
@@ -811,7 +803,7 @@ namespace Monetizr.Campaigns
             //Log.PrintWarning("ShowStartupNotification");
 
             //Mission sponsoredMsns = instance.missionsManager.missions.Find((Mission item) => { return item.isSponsored; });
-            var missions = Instance.missionsManager.GetMissionsForRewardCenter();
+            var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance.GetActiveCampaign());
 
             if (missions == null || missions?.Count == 0)
             {
@@ -822,21 +814,21 @@ namespace Monetizr.Campaigns
             Mission mission = missions[0];
 
             //manual notification calls, no limits
-            if (placement == 2)
+            if (placement == NotificationPlacement.ManualNotification)
             {
                 ShowNotification(onComplete, mission, PanelId.StartNotification);
                 return;
             }
 
 
-            if (placement == 0)
+            if (placement == NotificationPlacement.LevelStartNotification)
             {
                 forceSkip = mission.campaignServerSettings.GetParam("no_start_level_notifications") == "true";
 
                 if (forceSkip)
                     Log.Print($"No notifications on level start defined on server-side");
             }
-            else if (placement == 1)
+            else if (placement == NotificationPlacement.MainMenuShowNotification)
             {
                 forceSkip = mission.campaignServerSettings.GetParam("no_main_menu_notifications") == "true";
 
@@ -947,7 +939,9 @@ namespace Monetizr.Campaigns
         /// 
         public static void EngagedUserAction(OnComplete onComplete)
         {
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
+            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+
+            var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance?.GetActiveCampaign());
 
             if (missions != null && missions.Count > 0)
             {
@@ -970,24 +964,38 @@ namespace Monetizr.Campaigns
 
             UpdateGameUI?.Invoke();
 
-            var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
+            var campaign = Instance?.FindBestCampaignToActivate();
 
-            var m = Instance.missionsManager.GetMission(challengeId);
+            //has some challanges
+            if (campaign == null)
+            {
+                onComplete?.Invoke(true);
+                Log.Print($"No active campaigns for reward center");
+                return;
+            }
+
+            Instance?.SetActiveCampaign(campaign);
+
+            //var challengeId = Instance.GetActiveCampaignId();
+
+            /*var m = Instance.missionsManager.GetMission(challengeId);
 
             //no missions, consider as a skipped
             if (m == null)
             {
                 onComplete?.Invoke(true);
                 return;
-            }
+            }*/
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter();
-
+            var missions = Instance.missionsManager.GetMissionsForRewardCenter(campaign);
+            
             if (missions.Count == 0)
             {
                 onComplete?.Invoke(true);
                 return;
             }
+
+            var m = missions[0];
 
             bool showRewardCenterForOneMission = missions[0].campaignServerSettings.GetBoolParam("RewardCenter.show_for_one_mission", false);
 
@@ -1120,18 +1128,23 @@ namespace Monetizr.Campaigns
                 return;
 
 
-            if (!Instance.HasCampaignsAndActive())
-                return;
+            //if (!Instance.HasCampaignsAndActive())
+            //    return;
             
-            var campaign = MonetizrManager.Instance.GetActiveCampaign();
+            var campaign = Instance.FindBestCampaignToActivate();
+            
+            Instance.SetActiveCampaign(campaign);
 
-            Instance.InitializeBuiltinMissions(campaign);
+            if (campaign == null)
+                return;
+
+            //Instance.InitializeBuiltinMissions(campaign);
 
             if (showNotifications)
             {
                 HideTinyMenuTeaser();
 
-                ShowStartupNotification(1, (bool isSkipped) =>
+                ShowStartupNotification(NotificationPlacement.MainMenuShowNotification, (bool isSkipped) =>
                         {
                             if (isSkipped)
                                 ShowTinyMenuTeaser();
@@ -1161,19 +1174,19 @@ namespace Monetizr.Campaigns
                 return;
 
             //tinyTeaserCanBeVisible = true;
+            
+            var campaign = MonetizrManager.Instance?.GetActiveCampaign();
 
-            if (!Instance.HasCampaignsAndActive())
+            if (campaign == null)
             {
                 onComplete?.Invoke(OnCompleteStatus.Skipped);
                 return;
             }
-
-            var campaign = MonetizrManager.Instance.GetActiveCampaign();
-
-            Instance.InitializeBuiltinMissions(campaign);
+            
+            //Instance.InitializeBuiltinMissions(campaign);
 
             //Notification is shown
-            ShowStartupNotification(2, (bool isSkipped) =>
+            ShowStartupNotification(NotificationPlacement.ManualNotification, (bool isSkipped) =>
                  {
                      //If notification is closed
                      if (isSkipped)
@@ -1217,22 +1230,26 @@ namespace Monetizr.Campaigns
 
             //tinyTeaserCanBeVisible = true;
 
+            var campaign = Instance?.FindBestCampaignToActivate();
+            
             //has some challanges
-            if (!Instance.HasCampaignsAndActive())
+            if (campaign == null)
             {
                 Log.Print($"No active campaigns for teaser");
                 return;
             }
 
+            Instance?.SetActiveCampaign(campaign);
+
             //has some active missions
-            if (Instance.missionsManager.GetActiveMissionsNum() == 0)
+            if (Instance.missionsManager.GetActiveMissionsNum(campaign) == 0)
             {
                 Log.Print($"No active missions for teaser");
                 return;
             }
 
-            var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
-            var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
+            //var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
+            //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
             if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) &&
                 !campaign.HasAsset(AssetsType.TeaserGifPathString) &&
@@ -1368,10 +1385,6 @@ namespace Monetizr.Campaigns
                         $"Campaign error:\nApp: {bundleId}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{e.ToString()}");
                 }
 
-#if !UNITY_EDITOR
-                Client.SendErrorToRemoteServer("Error",e.Message,e.ToString());
-#endif
-
                 onRequestComplete?.Invoke(false);
             }
 
@@ -1430,6 +1443,11 @@ namespace Monetizr.Campaigns
                 {
                     Log.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
 
+                    Client.analytics.TrackEvent(campaign, null,
+                        AdPlacement.AssetsLoading,
+                        EventType.Error,
+                        new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
+                    
                     if (Client.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
                     {
                         Client.SendErrorToRemoteServer("Campaign loading assets error",
@@ -1439,20 +1457,21 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            _activeCampaignId = _campaignIds.Count > 0 ? _campaignIds[0] : null;
+            campaigns.RemoveAll(c =>  c.isLoaded == false);
 
-            Log.PrintV($"Active campaign: {_activeCampaignId}");
+            // _activeCampaignId = _campaignIds.Count > 0 ? _campaignIds[0] : null;
 
-            _isMissionsIsOutdated = true;
+            //_isMissionsIsOutdated = true;
 
 #if TEST_SLOW_LATENCY
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
             localSettings.LoadOldAndUpdateNew(this._campaigns);
 
-            Log.Print($"RequestCampaigns completed with {_campaignIds.Count} campaigns. Active campaign: {_activeCampaignId}");
+        
+            Log.Print($"RequestCampaigns completed with {_campaignIds.Count} campaigns.");
 
-            if (_activeCampaignId != null)
+            /*if (_activeCampaignId != null)
             {
                 //_client.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
 
@@ -1466,7 +1485,39 @@ namespace Monetizr.Campaigns
 
                     Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Error);
                 }
+            }*/
+
+            if (campaigns.Count > 0)
+                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
+
+           /* if (!isOk)
+            {
+                Log.Print("Request complete is not okay!");
+                return;
+            }*/
+
+            if (gameRewards.Count == 0)
+            {
+                Log.PrintError($"No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
+                return;
             }
+
+            Log.Print("MonetizrManager initialization okay!");
+
+            _isActive = true;
+
+            missionsManager.LoadMissions();
+
+            campaigns.ForEach((c) =>
+            {
+                _isMissionsIsOutdated = true;
+                Instance.InitializeBuiltinMissions(c);
+            });
+
+            missionsManager.SaveAndRemoveUnused();
+
+            SetActiveCampaign(FindBestCampaignToActivate());
+
 
             //Ok, even if response empty
             onRequestComplete?.Invoke(/*challengesId.Count > 0*/true);
@@ -1476,15 +1527,15 @@ namespace Monetizr.Campaigns
         /// Get Challenge by Id
         /// </summary>
         /// <returns></returns>
-        internal ServerCampaign GetCampaign(String chId)
+        internal ServerCampaign GetCampaign(string id)
         {
-            if (string.IsNullOrEmpty(chId))
+            if (string.IsNullOrEmpty(id))
                 return null;
 
-            if (_campaigns.TryGetValue(chId, out var campaign))
+            if (_campaigns.TryGetValue(id, out var campaign))
                 return campaign;
 
-            Log.PrintWarning($"You're trying to get campaign {chId} which is not exist!");
+            Log.PrintWarning($"You're trying to get campaign {id} which is not exist!");
 
             return null;
         }
@@ -1494,16 +1545,39 @@ namespace Monetizr.Campaigns
             return GetCampaign(_activeCampaignId);
         }
 
-        /// <summary>
-        /// Get list of the available challenges
-        /// </summary>
-        /// <returns></returns>
-        public List<string> GetAvailableCampaigns()
+        internal ServerCampaign FindBestCampaignToActivate()
+        {
+            if (!IsActiveAndEnabled())
+                return null;
+
+            if (!string.IsNullOrEmpty(_activeCampaignId))
+            {
+                var campaign = GetActiveCampaign();
+
+                if (campaign.IsCampaignActivate())
+                    return campaign;
+            }
+
+            foreach (var id in _campaignIds)
+            {
+                if (id == _activeCampaignId)
+                    continue;
+
+                var campaign = GetCampaign(id);
+
+                if (campaign.IsCampaignActivate())
+                    return campaign;
+            }
+
+            return null;
+        }
+
+        internal List<string> GetAvailableCampaigns()
         {
             return _campaignIds;
         }
 
-        public bool HasCampaignsAndActive()
+        internal bool HasCampaignsAndActive()
         {
             return _isActive && _campaignIds.Count > 0;
         }
@@ -1513,17 +1587,35 @@ namespace Monetizr.Campaigns
             return Instance != null && Instance.HasCampaignsAndActive();
         }
 
-        public string GetActiveCampaignId()
+        internal string GetActiveCampaignId()
         {
             return _activeCampaignId;
         }
 
-        public void SetActiveCampaignId(string id)
+        internal void SetActiveCampaignId(string id)
         {
+            if (id == _activeCampaignId)
+                return;
+
+            if (id != _activeCampaignId)
+                _isMissionsIsOutdated = true;
+
             _activeCampaignId = id;
+
+            Log.PrintV($"Active campaign: {_activeCampaignId}");
         }
 
-        public bool HasCampaign(string challengeId)
+        internal void SetActiveCampaign(ServerCampaign camp)
+        {
+            SetActiveCampaignId(camp?.id);
+        }
+
+        public bool HasActiveCampaign()
+        {
+            return _isActive && _activeCampaignId != null;
+        }
+
+        internal bool HasCampaign(string challengeId)
         {
             return _campaigns.ContainsKey(challengeId);
         }

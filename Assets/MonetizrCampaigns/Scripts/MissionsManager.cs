@@ -800,7 +800,7 @@ namespace Monetizr.Campaigns
 
             Log.Print($"Found {predefinedSponsoredMissions.Count} predefined missions in campaign");
 
-            serializedMissions.Load();
+            /*serializedMissions.Load();
 
             //check if campaign is alive for current mission
             foreach (var m in missions)
@@ -809,7 +809,7 @@ namespace Monetizr.Campaigns
 
                 //remove if it will not be in the predefined list
                 m.isToBeRemoved = true;
-            }
+            }*/
 
 
             for (int i = 0; i < predefinedSponsoredMissions.Count; i++)
@@ -871,15 +871,32 @@ namespace Monetizr.Campaigns
                 m.brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
             }
 
+           Log.Print($"Loaded {missions.Count} missions from the campaign");
+
+            UpdateMissionsActivity(null);
+            
+            //serializedMissions.SaveAll();
+        }
+
+        internal void LoadMissions()
+        {
+            serializedMissions.Load();
+
+            //check if campaign is alive for current mission
+            foreach (var m in missions)
+            {
+                m.isServerCampaignActive = MonetizrManager.Instance.HasCampaign(m.campaignId);
+
+                //remove if it will not be in the predefined list
+                m.isToBeRemoved = true;
+            }
+        }
+
+        internal void SaveAndRemoveUnused()
+        {
             //remove if mission in save, but not in the predefined list
             missions.RemoveAll(m => m.isToBeRemoved);
 
-            Log.Print($"Loaded {missions.Count} missions from the campaign");
-
-            UpdateMissionsActivity(null);
-
-            //TODO: remove outdated missions from local cache
-            
             serializedMissions.SaveAll();
         }
 
@@ -894,7 +911,7 @@ namespace Monetizr.Campaigns
             return r;
         }
 
-        internal List<Mission> GetMissionsForRewardCenter(bool includeDisabled = false)
+        internal List<Mission> GetMissionsForRewardCenter(bool includeDisabled)
         {
             return missions.FindAll((Mission m) =>
             {
@@ -914,11 +931,25 @@ namespace Monetizr.Campaigns
             });
         }
 
+        internal List<Mission> GetMissionsForRewardCenter(ServerCampaign campaign, bool includeDisabled = false)
+        {
+            var res = GetMissionsForRewardCenter(includeDisabled);
+
+            return res?.FindAll((Mission m) => m.campaignId == campaign.id);
+        }
+
+        internal int GetActiveMissionsNum(ServerCampaign campaign)
+        {
+            var res = GetMissionsForRewardCenter(campaign);
+       
+            return res?.Count ?? 0;
+        }
+
         internal int GetActiveMissionsNum()
         {
             //var mList = missions.FindAll((Mission m) => { return m.isClaimed != ClaimState.Claimed; });
 
-            return GetMissionsForRewardCenter().Count;
+            return GetMissionsForRewardCenter(false).Count;
         }
 
         //check activateAfter ranges for all missions and activate them if missions in range already active 

@@ -78,6 +78,7 @@ namespace Monetizr.Campaigns
         public List<Reward> rewards = new List<Reward>();
         public List<Asset> assets = new List<Asset>();
         public List<Location> locations = new List<Location>();
+        public string end_date;
 
         public ServerCampaign(string id, string darTag, SettingsDictionary<string,string> defaultServerSettings)
         {
@@ -688,6 +689,27 @@ namespace Monetizr.Campaigns
 
             //region found
             return region != null;
+        }
+
+        internal bool IsCampaignActivate()
+        {
+            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(this) == 0)
+                return false;
+
+            var serverMaxAmount = serverSettings.GetIntParam("amount_of_teasers");
+            var currentAmount = MonetizrManager.Instance.localSettings.GetSetting(id).amountTeasersShown;
+
+            bool hasNoTeasers = currentAmount > serverMaxAmount;
+
+            var serverMaxNotificationsAmount = serverSettings.GetIntParam("amount_of_notifications");
+            var currentNotificationsAmount = MonetizrManager.Instance.localSettings.GetSetting(id).amountNotificationsShown;
+
+            bool hasNoNotifications = currentNotificationsAmount > serverMaxNotificationsAmount;
+
+            if (hasNoNotifications && hasNoTeasers)
+                return false;
+
+            return true;
         }
     }
 }
