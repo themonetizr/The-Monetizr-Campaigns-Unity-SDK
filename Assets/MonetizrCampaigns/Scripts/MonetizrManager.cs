@@ -1407,7 +1407,7 @@ namespace Monetizr.Campaigns
                 {
                     Client.SendErrorToRemoteServer("Campaign error",
                         "Campaign error",
-                        $"Campaign error:\nApp: {bundleId}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{e.ToString()}");
+                        $"Campaign error: loading error:\nApp: {bundleId}\nApp version: {Application.version}\nSystem language: {Application.systemLanguage}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{e.ToString()}");
                 }
 
                 onRequestComplete?.Invoke(false);
@@ -1477,7 +1477,8 @@ namespace Monetizr.Campaigns
                     {
                         Client.SendErrorToRemoteServer("Campaign loading assets error",
                             "Campaign loading assets error",
-                            $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{campaign.loadingError}");
+                            $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nApp version: {Application.version}\nSystem language: {Application.systemLanguage}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{campaign.loadingError}");
+                        
                     }
                 }
             }
