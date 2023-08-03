@@ -324,9 +324,34 @@ namespace Monetizr.Campaigns
         {
             internal Sprite icon;
             internal string title;
-            internal Func<ulong> GetCurrencyFunc;
-            internal Action<ulong> AddCurrencyAction;
+            internal Func<ulong> _GetCurrencyFunc;
+            internal Action<ulong> _AddCurrencyAction;
             internal ulong maximumAmount;
+
+            internal ulong GetCurrencyFunc()
+            {
+                try
+                {
+                    return _GetCurrencyFunc();
+                }
+                catch (Exception exception)
+                {
+                    Log.PrintError($"Exception {exception} in getting current amount of {title}");
+                    return 0;
+                }
+            }
+
+            internal void AddCurrencyAction(ulong amount)
+            {
+                try
+                {
+                    _AddCurrencyAction(amount);
+                }
+                catch (Exception exception)
+                {
+                    Log.PrintError($"Exception {exception} in adding {amount} to {title}");
+                }
+            }
         }
 
         public static string temporaryEmail = "";
@@ -355,8 +380,8 @@ namespace Monetizr.Campaigns
             {
                 icon = defaultRewardIcon,
                 title = title,
-                GetCurrencyFunc = GetCurrencyFunc,
-                AddCurrencyAction = AddCurrencyAction,
+                _GetCurrencyFunc = GetCurrencyFunc,
+                _AddCurrencyAction = AddCurrencyAction,
                 maximumAmount = maxAmount,
             };
 

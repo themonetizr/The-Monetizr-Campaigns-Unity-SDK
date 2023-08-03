@@ -107,24 +107,6 @@ namespace Monetizr.Campaigns
             UpdateUI();
         }
 
-       /* private void AddUserdefineChallenges()
-        {
-            foreach (var m in MonetizrManager.Instance.missionsManager.missions)
-            {
-                if (m.isSponsored)
-                    continue;
-
-                var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
-
-                var item = go.GetComponent<MonetizrRewardedItem>();
-
-
-                Log.Print(m.missionTitle);
-
-                item.UpdateWithDescription(this, m);
-            }
-        }*/
-
         private void AddSponsoredChallenges()
         {
 
@@ -346,7 +328,7 @@ namespace Monetizr.Campaigns
                 rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
-            var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
+            Func<ulong> getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} multiply";
             m.missionDescription = $"Earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} and double it with {brandName}";
@@ -373,7 +355,7 @@ namespace Monetizr.Campaigns
                 rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
-            var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
+            Func<ulong> getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} survey";
             m.missionDescription =
@@ -398,7 +380,7 @@ namespace Monetizr.Campaigns
                 rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
-            var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
+            Func<ulong> getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} giveaway";
 
@@ -446,7 +428,7 @@ namespace Monetizr.Campaigns
                 rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
 
-            var getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
+            Func<ulong> getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} challenge";
             m.missionDescription = $"Complete challenge and get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
