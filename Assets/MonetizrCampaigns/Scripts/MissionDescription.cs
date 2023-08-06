@@ -36,6 +36,7 @@ namespace Monetizr.Campaigns
         internal bool alwaysHiddenInRC;
         internal bool hasUnitySurvey;
         internal string rewardImage;
+        internal string activateConditions;
     }
 
     internal enum MissionUIState
@@ -95,9 +96,9 @@ namespace Monetizr.Campaigns
             dictionary.Clear();
 
             if (keys.Count != values.Count)
-                throw new System.Exception(string.Format("there are {0} keys and {1} values after deserialization. Make sure that both key and value types are serializable."));
+                throw new System.Exception(string.Format($"there are {keys.Count} keys and {values.Count} values after deserialization. Make sure that both key and value types are serializable."));
 
-            for (int i = 0; i < keys.Count; i++)
+            for (var i = 0; i < keys.Count; i++)
                 dictionary.Add(keys[i], values[i]);
         }
 
@@ -349,6 +350,9 @@ namespace Monetizr.Campaigns
         [NonSerialized] internal int amountOfNotificationsSkipped;
 
         [SerializeField] internal bool isDisabled;
+
+        [NonSerialized] internal bool isDeactivatedByCondition;
+        [NonSerialized] internal Dictionary<string, string> conditions;
 
         //is video shown already and don't need to be shown again
         [NonSerialized] internal bool isVideoShown;
