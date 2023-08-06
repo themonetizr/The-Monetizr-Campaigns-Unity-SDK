@@ -16,18 +16,18 @@ public class LinkButton : MonoBehaviour
     // Update is called once per frame
     public void OnClick()
     {
-        var campaign = MonetizrManager.Instance.GetActiveCampaignId();
+        var campaign = MonetizrManager.Instance.GetActiveCampaign();
         string url = null;
 
-        if (campaign != null)
-        {
-            url = MonetizrManager.Instance.GetCampaign(campaign).serverSettings.GetParam("GiveawayEmailEnterNotification.terms_url_text");
-        }
-                        
+        if (campaign == null)
+            return;
 
+        url = campaign.serverSettings.GetParam("GiveawayEmailEnterNotification.terms_url_text");
+        
         MonetizrManager.ShowWebPage(null, new Mission
         {
-                campaignId = campaign,
+                campaignId = campaign.id,
+                campaign = campaign,
                 surveyUrl = url ?? id,
                 campaignServerSettings = new SettingsDictionary<string, string>()
         });

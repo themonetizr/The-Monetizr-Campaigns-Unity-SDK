@@ -72,7 +72,7 @@ namespace Monetizr.Campaigns
              $"ADID: {MonetizrAnalytics.advertisingID}\n" +
              $"UserId: {MonetizrManager.Instance.Client.analytics.GetUserId()}\n" +
              $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +
-             $"Active campaign: {MonetizrManager.Instance.GetActiveCampaignId()}";
+             $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()?.id}";
         }
 
         public void OnToggleChanged(bool _)

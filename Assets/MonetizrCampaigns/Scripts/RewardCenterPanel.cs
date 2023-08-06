@@ -37,7 +37,7 @@ namespace Monetizr.Campaigns
 
         private bool showNotClaimedDisabled = false;
         private List<Mission> missionsForRewardCenter;
-        private string currentCampaign;
+        private ServerCampaign currentCampaign;
 
         //private bool isLandscape = false;
 
@@ -79,7 +79,7 @@ namespace Monetizr.Campaigns
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             currentMission = m;
-            currentCampaign =  MonetizrManager.Instance.GetActiveCampaignId();
+            currentCampaign =  MonetizrManager.Instance.GetActiveCampaign();
 
         //MonetizrManager.CallUserDefinedEvent(currentCampaign,
              //     NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
@@ -250,7 +250,10 @@ namespace Monetizr.Campaigns
         {
             //Log.PrintError("UpdateStatusBar");
 
-            var camp = MonetizrManager.Instance.GetCampaign(currentCampaign);
+            var camp = MonetizrManager.Instance.GetActiveCampaign();
+
+            if (camp == null)
+                return;
 
             var statusText = camp.serverSettings.GetParam("RewardCenter.missions_num_text", "%claimed_missions%/%total_missions%");
  

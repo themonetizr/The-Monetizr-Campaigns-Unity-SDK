@@ -275,7 +275,7 @@ namespace Monetizr.Campaigns
                 logo.gameObject.SetActive(false);
 
            
-            var r = MonetizrManager.Instance.GetCampaign(m.campaignId).rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
+            var r = m.campaign.rewards.Find((ServerCampaign.Reward obj) => obj.claimable == true);
 
             rewardImage.sprite = rewardIcon;
 
