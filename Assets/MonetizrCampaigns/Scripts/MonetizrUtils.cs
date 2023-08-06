@@ -274,5 +274,28 @@ namespace Monetizr.Campaigns
         {
             return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
         }
+
+        public static Dictionary<string, string> ParseConditionsString(string conditionsString)
+        {
+            var output = new Dictionary<string, string>();
+
+            var pairs = conditionsString.Split(';');
+
+            // Loop through each pair
+            foreach (var pair in pairs)
+            {
+                // Split the pair by equal sign
+                string[] parts = pair.Split('=');
+
+                // Check if the pair has two parts
+                if (parts.Length == 2)
+                {
+                    // Add the key and value to the dictionary
+                    output.Add(parts[0], parts[1]);
+                }
+            }
+
+            return output;
+        }
     }
 }
