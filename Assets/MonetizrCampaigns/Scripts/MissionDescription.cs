@@ -104,10 +104,7 @@ namespace Monetizr.Campaigns
 
         public TValue GetParam(TKey p)
         {
-            if (!dictionary.ContainsKey(p))
-                return default(TValue);
-
-            return dictionary[p];
+            return dictionary.TryGetValue(p, out var value) ? value : default(TValue);
         }
 
         public int GetIntParam(TKey p, int defaultParam = 0)
@@ -115,10 +112,9 @@ namespace Monetizr.Campaigns
             if (!dictionary.ContainsKey(p))
                 return defaultParam;
 
-            int result = 0;
-            string val = dictionary[p].ToString();
+            var val = dictionary[p].ToString();
 
-            if (!Int32.TryParse(val, out result))
+            if (!int.TryParse(val, out var result))
             {
                 return defaultParam;
             }
@@ -145,7 +141,7 @@ namespace Monetizr.Campaigns
 
         public TValue this[TKey k]
         {
-            get => dictionary[k];
+            get => GetParam(k);
             set => dictionary[k] = value;
         }
 

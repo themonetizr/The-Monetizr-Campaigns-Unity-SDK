@@ -858,14 +858,8 @@ namespace Monetizr.Campaigns
                 m.isServerCampaignActive = true;
                 m.isToBeRemoved = false;
                 m.campaignServerSettings = m.campaign.serverSettings;
-
-                bool showNotClaimedDisabled =
-                    m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
-                if (showNotClaimedDisabled)
-                    m.state = MissionUIState.Visible;
-
-                m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
-
+                
+                
                 m.amountOfRVOffersShown = m.campaignServerSettings.GetIntParam("amount_of_rv_offers", -1);
                 //m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
                 m.amountOfNotificationsSkipped =
@@ -877,17 +871,27 @@ namespace Monetizr.Campaigns
 
                 m.brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
 
+                m.isDeactivatedByCondition = false;
+
                 if (!string.IsNullOrEmpty(missionDescription.activateConditions))
                 {
                     m.conditions = Utils.ParseConditionsString(missionDescription.activateConditions);
 
                     if (!campaign.IsConditionsTrue(m.conditions))
+                    {
+                        m.isDisabled = true;
                         m.isDeactivatedByCondition = true;
+                    }
                 }
-                else
-                {
-                    m.isDeactivatedByCondition = false;
-                }
+
+                m.state = m.isDisabled ? MissionUIState.Hidden : MissionUIState.Visible;
+
+                bool showNotClaimedDisabled =
+                    m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
+
+                if (showNotClaimedDisabled && m.isDisabled && !m.isDeactivatedByCondition)
+                    m.state = MissionUIState.Visible;
+
             }
 
             Log.Print($"Loaded {missions.Count} missions from the campaign");
@@ -942,7 +946,7 @@ namespace Monetizr.Campaigns
 
                 return m.isSponsored &&
                         m.isClaimed != ClaimState.Claimed &&
-                        !m.isDeactivatedByCondition &&
+                        //!m.isDeactivatedByCondition &&
                         !disabled &&
                         IsActiveByTime(m) &&
                         m.isServerCampaignActive &&
@@ -993,13 +997,25 @@ namespace Monetizr.Campaigns
 
                 bool hasActivateAfter = m.activateAfter.Count > 0;
 
-                Log.PrintV($"-----Updating activity for {m.serverId} has {hasActivateAfter}");
+                Log.PrintV($"-----Updating activity for {m.serverId} has {hasActivateAfter} {m.isDeactivatedByCondition}");
 
                 //check if mission self referenced in activate after
                 if (hasActivateAfter && m.activateAfter.FindIndex(_id => _id == m.serverId) > 0)
                 {
                     Log.PrintWarning($"Mission id {m.serverId} activate after itself!");
                     hasActivateAfter = false;
+                }
+
+                if (m.isDeactivatedByCondition)
+                {
+                    if (!m.campaign.IsConditionsTrue(m.conditions))
+                        continue;
+
+                    isUpdateNeeded = true;
+                    m.isDisabled = false;
+                    m.state = MissionUIState.ToBeShown;
+                    m.isDeactivatedByCondition = false;
+                    continue;
                 }
 
                 //no activate_after here
@@ -1013,14 +1029,7 @@ namespace Monetizr.Campaigns
                     continue;
                 }
 
-                if (m.isDeactivatedByCondition && m.campaign.IsConditionsTrue(m.conditions))
-                {
-                    isUpdateNeeded = true;
-                    m.isDisabled = false;
-                    m.state = MissionUIState.ToBeShown;
-                    m.isDeactivatedByCondition = false;
-                    continue;
-                }
+               
 
 
                 bool shouldBeDisabled = false;

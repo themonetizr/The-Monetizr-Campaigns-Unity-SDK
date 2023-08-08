@@ -319,7 +319,6 @@ namespace Monetizr.Campaigns
             contentRoot.sizeDelta = new Vector2(width, 0);
 
             //backButton.interactable = false;
-
             //nextButton.interactable = isFirstQuestionEmpty;
 
             state = State.Idle;
@@ -561,19 +560,11 @@ namespace Monetizr.Campaigns
 
                     var varName = $"{currentSurvey.settings.id}-{q.id}-{a.id}";
                     MonetizrManager.Instance.localSettings.GetSetting(campaign.id).settings[varName] = a.response;
-
-                    MonetizrManager.Instance.localSettings.SaveData();
-
-                    //MonetizrManager.Instance.localSettings.ResetData();
-
-                    //MonetizrManager.Instance.localSettings.Load();
-
-                    //var z = MonetizrManager.Instance.localSettings.GetSetting(campaign.id);
-
-                    //Log.PrintV($"-------Survey answer {a.response} {currentSurvey.settings.id}");
-
                 });
             });
+
+
+            MonetizrManager.Instance.localSettings.SaveData();
         }
 
 

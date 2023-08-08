@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,7 +17,7 @@ namespace Monetizr.Campaigns
         public Text headerText;
         public Text moneyText;
         public Image background;
-        
+
         public Image mainBanner;
         public Image mainLogo;
 
@@ -79,11 +80,11 @@ namespace Monetizr.Campaigns
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             currentMission = m;
-            currentCampaign =  MonetizrManager.Instance.GetActiveCampaign();
+            currentCampaign = MonetizrManager.Instance.GetActiveCampaign();
 
-        //MonetizrManager.CallUserDefinedEvent(currentCampaign,
-             //     NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
-             //     MonetizrManager.EventType.Impression);
+            //MonetizrManager.CallUserDefinedEvent(currentCampaign,
+            //     NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
+            //     MonetizrManager.EventType.Impression);
 
             //string uiItemPrefab = "MonetizrRewardedItem";
 
@@ -91,7 +92,7 @@ namespace Monetizr.Campaigns
             string uiItemPrefab = "MonetizrRewardedItem2";
 
             itemUI = (Resources.Load(uiItemPrefab) as GameObject).GetComponent<MonetizrRewardedItem>();
-            
+
 
             //hasSponsoredChallenges = false;
 
@@ -119,7 +120,7 @@ namespace Monetizr.Campaigns
             }
 
 
-            if (Utils.isInLandscapeMode())
+            if (Utils.IsInLandscapeMode())
             {
                 //r = campaign.serverSettings.GetRectParam("RewardCenter.transform_landscape", new List<float> { 0, 0, 0, 0 });
             }
@@ -142,7 +143,7 @@ namespace Monetizr.Campaigns
 
             var activeCampaign = MonetizrManager.Instance.GetActiveCampaign();
 
-            missionsForRewardCenter = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign,true);
+            missionsForRewardCenter = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign, true);
 
             if (missionsForRewardCenter.Count == 0)
             {
@@ -157,17 +158,17 @@ namespace Monetizr.Campaigns
             amountOfItems = 0;
 
             var hasBanner = camp.HasAsset(AssetsType.BrandBannerSprite);
-                        
-            
-            if (Utils.isInLandscapeMode())
+
+
+            if (Utils.IsInLandscapeMode())
             {
                 if (hasBanner)
                 {
                     mainBanner.sprite = camp.GetAsset<Sprite>(AssetsType.BrandBannerSprite);
-                    
+
                     bool hasLogo = camp.HasAsset(AssetsType.BrandRewardLogoSprite);
 
-                    if(hasLogo)
+                    if (hasLogo)
                     {
                         mainLogo.sprite = camp.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
                     }
@@ -178,7 +179,7 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            scrollListHasBanner = Utils.isInLandscapeMode() ? false : hasBanner;
+            scrollListHasBanner = Utils.IsInLandscapeMode() ? false : hasBanner;
 
             if (scrollListHasBanner)
             {
@@ -210,40 +211,26 @@ namespace Monetizr.Campaigns
             {
                 var ch = m.campaignId;
 
-                m.showHidden = showNotClaimedDisabled && m.isDisabled && m.isClaimed != ClaimState.Claimed;
-                    
+                m.showHidden = m.isDisabled;//showNotClaimedDisabled && m.isDisabled && m.isClaimed != ClaimState.Claimed;
+
                 if (ch == missionsForRewardCenter[0].campaignId)
-                //if (ch == activeChallenge)
                 {
-                   /* var color = MonetizrManager.Instance.GetAsset<Color>(ch, AssetsType.HeaderTextColor);
-
-                    if (color != default(Color))
-                        headerText.color = color;*/
-
-
                     var bgSprite = m.campaign.GetAsset<Sprite>(AssetsType.TiledBackgroundSprite);
 
                     if (bgSprite != default(Sprite))
                         background.sprite = bgSprite;
                 }
-               
+
+                m.rewardCenterItem = null;
+
+                if (m.state == MissionUIState.Hidden)
+                    continue;
+
                 AddSponsoredChallenge(m, amountOfItems);
-
                 amountOfItems++;
-
-                //curChallenge++;
-
-                //if there's no room for sponsored campagn
-                //if (challenges.Count == curChallenge)
-                //    break;
             }
 
             UpdateStatusBar();
-
-
-            //var t = GameObject.Instantiate<GameObject>(termsAndCondPrefab, contentRoot);
-
-            //termsAndCondRect = t.GetComponent<RectTransform>();
         }
 
         private void UpdateStatusBar()
@@ -256,10 +243,10 @@ namespace Monetizr.Campaigns
                 return;
 
             var statusText = camp.serverSettings.GetParam("RewardCenter.missions_num_text", "%claimed_missions%/%total_missions%");
- 
+
             int claimed = 0;
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(camp,true);
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(camp, true);
 
             double totalRewardsValue = 0;
             double claimedRewardsValue = 0;
@@ -267,7 +254,7 @@ namespace Monetizr.Campaigns
 
             foreach (var m in missions)
             {
-                totalRewardsValue += m.reward; 
+                totalRewardsValue += m.reward;
                 if (m.isClaimed == ClaimState.Claimed)
                 {
                     claimed++;
@@ -279,17 +266,21 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            statusText = statusText.Replace("%claimed_missions%",claimed.ToString());
-            statusText = statusText.Replace("%total_missions%", missions.Count.ToString());
+            statusText = new StringBuilder(statusText)
+                .Replace("%claimed_missions%", claimed.ToString())
+                .Replace("%total_missions%", missions.Count.ToString())
+                .ToString();
 
             var money = camp.serverSettings.GetParam("RewardCenter.money_num_text", "%claimed_reward_value%/%possible_reward_value%");
 
             var playerMoney = MonetizrManager.gameRewards[RewardType.Coins].GetCurrencyFunc();
 
-            money = money.Replace("%total_money%", $"{MonetizrRewardedItem.ScoreShow(playerMoney)}");
-            money = money.Replace("%total_rewards_value%", $"{MonetizrRewardedItem.ScoreShow(totalRewardsValue)}");
-            money = money.Replace("%claimed_reward_value%", $"{MonetizrRewardedItem.ScoreShow(claimedRewardsValue)}");
-            money = money.Replace("%possible_reward_value%", $"{MonetizrRewardedItem.ScoreShow(possibleRewardsValue)}");
+            money = new StringBuilder(money)
+                .Replace("%total_money%", $"{Utils.ScoresToString(playerMoney)}")
+                .Replace("%total_rewards_value%", $"{Utils.ScoresToString(totalRewardsValue)}")
+                .Replace("%claimed_reward_value%", $"{Utils.ScoresToString(claimedRewardsValue)}")
+                .Replace("%possible_reward_value%", $"{Utils.ScoresToString(possibleRewardsValue)}")
+                .ToString();
 
             headerText.text = statusText;
             moneyText.text = money;
@@ -309,7 +300,7 @@ namespace Monetizr.Campaigns
 
             //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} video";
-            m.missionDescription = $"Watch video by {brandName} and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}";
+            m.missionDescription = $"Watch video by {brandName} and earn {Utils.ScoresToString(m.reward)} {rewardTitle}";
             m.progress = 1;
             m.brandName = brandName;
             m.claimButtonText = "Watch video";
@@ -325,7 +316,7 @@ namespace Monetizr.Campaigns
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
-                       
+
             if (m.rewardType == RewardType.Coins && m.campaign.HasAsset(AssetsType.CustomCoinString))
             {
                 rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
@@ -334,8 +325,8 @@ namespace Monetizr.Campaigns
             Func<ulong> getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} multiply";
-            m.missionDescription = $"Earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} and double it with {brandName}";
-            m.progress = ((float)(getCurrencyFunc() - m.startMoney))/(float)m.reward;
+            m.missionDescription = $"Earn {Utils.ScoresToString(m.reward)} {rewardTitle} and double it with {brandName}";
+            m.progress = ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Claim reward";
             m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
@@ -362,7 +353,7 @@ namespace Monetizr.Campaigns
 
             m.missionTitle = $"{brandName} survey";
             m.missionDescription =
-                $"Complete survey and earn {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} with {brandName}";
+                $"Complete survey and earn {Utils.ScoresToString(m.reward)} {rewardTitle} with {brandName}";
             m.progress = 1.0f; // ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Start survey";
@@ -394,22 +385,22 @@ namespace Monetizr.Campaigns
 #endif
 
             if (needToPlayVideo)
-                // m.missionDescription = $"Watch video and get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
+                // m.missionDescription = $"Watch video and get {Utils.ScoresToString(m.reward)} {rewardTitle} from {brandName}";
                 m.missionDescription = $"Watch video and get $3 OFF Coupon from {brandName}";
             else
-                m.missionDescription = $"Get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
+                m.missionDescription = $"Get {Utils.ScoresToString(m.reward)} {rewardTitle} from {brandName}";
 
             m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = needToPlayVideo ? "Watch video!" : "Claim reward!";
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m,null,AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
 
             item.showGift = true;
             item.currectProgress = getCurrencyFunc() - m.startMoney;
             item.maxProgress = m.reward;
 
             item.giftIcon.sprite = MissionsManager.GetMissionRewardImage(m);
-            
+
             /*if (m.campaign.HasAsset(AssetsType.RewardSprite))
             {
                 item.giftIcon.sprite = m.campaign.GetAsset<Sprite>(AssetsType.RewardSprite);
@@ -417,7 +408,7 @@ namespace Monetizr.Campaigns
 
         }
 
-        private void AddMinigameChallenge(MonetizrRewardedItem item, Mission m, int missionId)
+        private void AddMission(MonetizrRewardedItem item, Mission m, int missionId)
         {
             string campaignId = m.campaignId;
 
@@ -434,7 +425,7 @@ namespace Monetizr.Campaigns
             Func<ulong> getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} challenge";
-            m.missionDescription = $"Complete challenge and get {MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle} from {brandName}";
+            m.missionDescription = $"Complete challenge and get {Utils.ScoresToString(m.reward)} {rewardTitle} from {brandName}";
             m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Play!";
@@ -447,7 +438,7 @@ namespace Monetizr.Campaigns
         {
             var go = GameObject.Instantiate<GameObject>(itemUI.gameObject, contentRoot);
             go.name = $"MonetizrRewardedItem{missionId}";
-            
+
             var item = go.GetComponent<MonetizrRewardedItem>();
 
             m.rewardCenterItem = item;
@@ -456,25 +447,25 @@ namespace Monetizr.Campaigns
 
             switch (m.type)
             {
-                case MissionType.VideoReward: AddRewardedVideoChallenge(item, m,missionId); break;
-                case MissionType.MutiplyReward: AddMultiplyCoinsChallenge(item, m,missionId); break;
+                case MissionType.VideoReward: AddRewardedVideoChallenge(item, m, missionId); break;
+                case MissionType.MutiplyReward: AddMultiplyCoinsChallenge(item, m, missionId); break;
                 case MissionType.SurveyReward: AddSurveyChallenge(item, m, missionId); break;
-                //case MissionType.TwitterReward: AddTwitterChallenge(item, m, missionId); break;
-                //case MissionType.GiveawayWithMail: AddGiveawayChallenge(item, m, missionId); break;
                 case MissionType.VideoWithEmailGiveaway: AddVideoGiveawayChallenge(item, m, missionId); break;
                 case MissionType.MinigameReward:
                 case MissionType.MemoryMinigameReward:
                 case MissionType.ActionReward:
-                    AddMinigameChallenge(item, m, missionId); break;
+                    AddMission(item, m, missionId); break;
             }
 
             Log.PrintV(m.missionTitle);
 
             item.UpdateWithDescription(this, m, missionId);
 
+            item.gameObject.SetActive(m.state != MissionUIState.Hidden);
+            
         }
 
-        
+
 
         private void CleanListView()
         {
@@ -497,7 +488,7 @@ namespace Monetizr.Campaigns
 
         public void OnDebugMenuPress()
         {
-             MonetizrManager.ShowDebug();
+            MonetizrManager.ShowDebug();
         }
 
         internal void ButtonPressed(ButtonController buttonController, Mission missionDescription)
@@ -536,22 +527,24 @@ namespace Monetizr.Campaigns
             {
                 if (m.state == MissionUIState.ToBeShown && m.isClaimed != ClaimState.Claimed)
                 {
-                    if (!showNotClaimedDisabled)
+                    m.state = MissionUIState.Visible;
+                    m.isDisabled = false;
+                    m.showHidden = m.isDisabled;
+
+                    if (m.rewardCenterItem == null)
                     {
                         AddSponsoredChallenge(m, amountOfItems);
                         amountOfItems++;
-                        
                     }
                     else
                     {
+                        //m.rewardCenterItem.gameObject.SetActive(true);
                         m.rewardCenterItem.hideOverlay.SetActive(false);
                     }
-
-                    m.state = MissionUIState.Visible;
-                    m.isDisabled = false;
+                    
                 }
             }
-            
+
             //var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign,true);
 
             if (ml.Count == 0)
@@ -573,9 +566,9 @@ namespace Monetizr.Campaigns
             MonetizrManager.ShowTinyMenuTeaser(null);
         }
 
-        void UpdatePortraitMode()
+        void UpdateList()
         {
-            if (Utils.isInLandscapeMode())
+            if (Utils.IsInLandscapeMode())
                 bannerHeight = 0;
             else if (!scrollListHasBanner)
                 bannerHeight = 260;
@@ -618,93 +611,9 @@ namespace Monetizr.Campaigns
             contentRect.sizeDelta = -pos;
         }
 
-        void UpdateLandscapeMode()
-        {
-            float shiftDelta = 45;
-
-            if(scrollListHasBanner)
-                bannerObjectRect.anchoredPosition = new Vector2(75 + shiftDelta, -940);
-
-            //float screenReferenceSizeX = 1920;
-            //float screenReferenceSizeY = 1080;
-
-            float blockDistanceY = 150;
-            float blockDistanceX = 50;
-
-            bannerHeight = 970 + shiftDelta;
-
-            if (!scrollListHasBanner)
-                bannerHeight = 0;
-
-            float blockWidth = 1100;
-
-            //float z = 0;
-
-            float startX = bannerHeight + blockWidth / 2 + blockDistanceX;
-
-            Vector2 pos = new Vector2(startX, 0);
-            Vector2 size = Vector2.zero;
-            Vector2 originalSize = contentRect.sizeDelta;
-
-            int id = 0;
-
-            foreach (var it in missionItems)
-            {
-                if (it.mission == null)
-                    continue;
-
-                //if (it.mission.isDisabled)
-                //    continue;
-
-                if (it.mission.state == MissionUIState.Hidden)
-                    continue;
-
-                if (it.mission.state == MissionUIState.ToBeHidden)
-                {
-                    if (it.gameObject.activeSelf)
-                    {
-                        it.gameObject.SetActive(false);
-                        it.mission.isDisabled = true;
-                        it.mission.state = MissionUIState.Hidden;
-                    }
-
-                    continue;
-                }
-
-                it.rect.anchoredPosition = pos;
-
-                if (id % 2 == 0)
-                {
-                    pos.y -= it.rect.sizeDelta.y + blockDistanceY;
-                }
-                else
-                {
-                   
-                    pos.x += it.rect.sizeDelta.x + blockDistanceX;
-                    pos.y = 0;
-                }
-
-                id++;
-            }
-
-            //termsAndCondRect.anchoredPosition = pos;
-
-            //Log.Print(pos);
-            //pos.y -= termsAndCondRect.sizeDelta.y;
-
-            contentRect.sizeDelta = new Vector2(pos.x + blockWidth/2, originalSize.y);
-
-
-        }
-
-        //// Update is called once per frame
         void Update()
         {
-            //if (Utils.isInLandscapeMode())
-            //    UpdateLandscapeMode();
-            //else
-                UpdatePortraitMode();
-
+            UpdateList();
         }
     }
 

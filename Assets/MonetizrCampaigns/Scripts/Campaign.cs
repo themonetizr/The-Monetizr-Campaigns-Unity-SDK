@@ -717,6 +717,9 @@ namespace Monetizr.Campaigns
         {
             var settings = MonetizrManager.Instance.localSettings.GetSetting(id).settings;
 
+            if (settings == null || settings.dictionary.Count == 0)
+                return false;
+
             return mConditions.All(c => settings[c.Key] == c.Value);
         }
     }
