@@ -233,7 +233,8 @@ namespace Monetizr.Campaigns
             Load();
 
             //check if campaign is missing - remove it from data
-            data.campaigns.RemoveAll((LocalCampaignSettings c) => campaigns.FindIndex(camp => camp.id == c.campId) >= 0);
+            data.campaigns.RemoveAll((LocalCampaignSettings localCampaigns) => 
+                campaigns.FindIndex(serverCampaigns => serverCampaigns.id == localCampaigns.campId) < 0);
 
             //add empty campaign into settings
             campaigns.ForEach(c => AddCampaign(c));
