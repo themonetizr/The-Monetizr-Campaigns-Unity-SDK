@@ -125,7 +125,7 @@ namespace Monetizr.Campaigns
                 string prefabLandscape = prefab + "_landscape";
                 GameObject asset = null;
                              
-                if (Utils.isInLandscapeMode())
+                if (Utils.IsInLandscapeMode())
                 {       
                     //Log.Print("Loading landscape");
                     asset = Resources.Load(prefabLandscape) as GameObject;
