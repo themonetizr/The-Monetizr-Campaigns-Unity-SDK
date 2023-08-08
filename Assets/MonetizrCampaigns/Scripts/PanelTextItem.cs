@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -66,10 +67,12 @@ namespace Monetizr.Campaigns
 
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
-            t = t.Replace("%ingame_reward%", $"{MonetizrRewardedItem.ScoreShow(m.reward)} {rewardTitle}");
-            t = t.Replace("%reward_amount%", $"{MonetizrRewardedItem.ScoreShow(m.reward)}");
-            t = t.Replace("%reward_title%", $"{rewardTitle}");
-            t = t.Replace("<br/>", "\n");
+            t = new StringBuilder(t)
+                .Replace("%ingame_reward%", $"{Utils.ScoresToString(m.reward)} {rewardTitle}")
+                .Replace("%reward_amount%", $"{Utils.ScoresToString(m.reward)}")
+                .Replace("%reward_title%", $"{rewardTitle}")
+                .Replace("<br/>", "\n")
+                .ToString();
 
             return t;
         }
