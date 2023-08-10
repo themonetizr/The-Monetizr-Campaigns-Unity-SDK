@@ -69,6 +69,7 @@ namespace Monetizr.Campaigns
         public string id;
         public string brand_id;
         public string application_id;
+        public string device_ip;
         public string title;
         public string content;
         public int progress;

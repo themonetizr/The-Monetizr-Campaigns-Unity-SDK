@@ -13,6 +13,7 @@ using System.Linq;
 using UnityEngine.UIElements;
 
 using System.Reflection;
+using System.Text;
 using SimpleJSON;
 using UnityEditor;
 
@@ -43,23 +44,38 @@ namespace Monetizr.Campaigns
         }
 
     }
+
     internal static class NielsenDar
     {
-        internal static readonly Dictionary<DeviceSizeGroup, string> sizeGroupsDict = new Dictionary<DeviceSizeGroup, string>()
-        {
-            {DeviceSizeGroup.Phone,"PHN"},
-            {DeviceSizeGroup.Tablet,"TAB"},
-            {DeviceSizeGroup.Unknown,"UNWN"},
-        };
+        internal static readonly Dictionary<DeviceSizeGroup, string> sizeGroupsDict =
+            new Dictionary<DeviceSizeGroup, string>()
+            {
+                { DeviceSizeGroup.Phone, "PHN" },
+                { DeviceSizeGroup.Tablet, "TAB" },
+                { DeviceSizeGroup.Unknown, "UNWN" },
+            };
 
         internal static Dictionary<string, string> DARPlacementTags = null;
 
         internal static void Track(ServerCampaign serverCampaign, AdPlacement type)
         {
-            string darTagUrl = serverCampaign.dar_tag;
+            string darTagUrl = ReplaceMacros(serverCampaign.dar_tag,serverCampaign,type,"");
 
-            if (darTagUrl.Length == 0)
-                return;
+            Log.PrintV($"DAR: {darTagUrl}");
+
+#if !UNITY_EDITOR
+            UnityWebRequest www = UnityWebRequest.Get(darTagUrl);
+            UnityWebRequestAsyncOperation operation = www.SendWebRequest();
+
+            operation.completed += BundleOperation_CompletedHandler;
+#endif
+        }
+
+        internal static string ReplaceMacros(string originalString, ServerCampaign serverCampaign, AdPlacement type,
+            string userAgent)
+        {
+            if (string.IsNullOrEmpty(originalString))
+                return originalString;
 
             Dictionary<string, Func<AdPlacement, string>> urlModifiers = new Dictionary<string, Func<AdPlacement, string>>()
             {
@@ -72,30 +88,29 @@ namespace Monetizr.Campaigns
                     { "${APP_VERSION}", GetAppVersion },
                     { "${OS_VERSION}", GetOsVersion },
                     { "${OPT_OUT}", GetOptOut },
-                    { "${VENDOR_ID}", (AdPlacement at) => { return MonetizrAnalytics.deviceIdentifier; } },
+                    { "${VENDOR_ID}", (AdPlacement at) => MonetizrAnalytics.deviceIdentifier },
 
                    // { "${PLACEMENT_ID}", GetPlacementId },
                     { "${CY}", GetCY },
                     { "${CACHEBUSTER}", GetTimeStamp },
-                    { "${CAMP_ID}", (AdPlacement at) => { return serverCampaign.id; } },
+                    { "${CAMP_ID}", (AdPlacement at) => serverCampaign.id },
+                    { "${USER_AGENT}", (AdPlacement at) => userAgent },
+                    { "${DEVICE_IP}", (AdPlacement at) => serverCampaign.device_ip },
+                    { "${DEVICE_OS}", GetDeviceOs },
 
              };
-                        
+
+            var sb = new StringBuilder(originalString);
+
             foreach (var v in urlModifiers)
-            {
-                darTagUrl = darTagUrl.Replace(v.Key, v.Value(type));
+            { 
+                sb.Replace(v.Key, v.Value(type));
             }
 
-            darTagUrl = ReplacePlacementTag(darTagUrl, type);
+            string output = ReplacePlacementTag(sb.ToString(), type);
 
-            Log.Print($"DAR: {darTagUrl}");
-
-#if !UNITY_EDITOR
-            UnityWebRequest www = UnityWebRequest.Get(darTagUrl);
-            UnityWebRequestAsyncOperation operation = www.SendWebRequest();
-
-            operation.completed += BundleOperation_CompletedHandler;
-#endif
+            
+            return output;
 
             ///https://secure-cert.imrworldwide.com/cgi-bin/m?ci=nlsnci535&am=3&at=view&rt=banner&st=image&ca=nlsn13134&
             ///cr=${CREATIVE_ID}&
@@ -117,7 +132,7 @@ namespace Monetizr.Campaigns
 
         //{{PLACEMENT_ID=TinyTeaser:Monetizr_plc0001,NotificationScreen:Monetizr_plc0002,Html5VideoScreen:Monetizr_plc0003,EmailEnterScreen:Monetizr_plc0004,CongratsScreen:Monetizr_plc0005}}
         //{{PLACEMENT_ID=TinyTeaser:Monetizr_plc0001,NotificationScreen:Monetizr_plc0002,Html5VideoScreen:Monetizr_plc0003,EmailEnterScreen:Monetizr_plc0004,CongratsScreen:Monetizr_plc0005}}
-        static string ReplacePlacementTag(string s, AdPlacement t)
+        private static string ReplacePlacementTag(string s, AdPlacement t)
         {
             int startId = s.IndexOf("${{");
             int endId = s.IndexOf("}}");
@@ -172,10 +187,15 @@ namespace Monetizr.Campaigns
 
         static string GetOsGroup(AdPlacement type)
         {
+            return GetDeviceOs(type).ToUpper(CultureInfo.InvariantCulture);
+        }
+
+        static string GetDeviceOs(AdPlacement type)
+        {
 #if UNITY_IOS
-            return "IOS";
+            return "iOS";
 #elif UNITY_ANDROID
-            return "ANDROID";
+            return "Android";
 #else
             return "";
 #endif

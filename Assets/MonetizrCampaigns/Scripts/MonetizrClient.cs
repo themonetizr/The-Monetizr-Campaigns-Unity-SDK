@@ -57,6 +57,8 @@ namespace Monetizr.Campaigns
 
 
         private CancellationTokenSource downloadCancellationTokenSource;
+        
+        public static string currentUserAgent;
 
         internal HttpClient GetHttpClient()
         {
