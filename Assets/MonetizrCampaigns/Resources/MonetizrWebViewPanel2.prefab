@@ -624,6 +624,7 @@ MonoBehaviour:
   crossButtonAnimator: {fileID: 1064647577352204778}
   successReason: 
   claimPageReached: 0
+  programmaticStatus: 
 --- !u!114 &229776069307991310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -653,7 +654,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 8476186599874992485}
   textContent: loading_text
-  buttonGrafic: {fileID: 0}
+  buttonGrafic: {fileID: 8476186598977400446}
 --- !u!1 &8476186599874992487
 GameObject:
   m_ObjectHideFlags: 0

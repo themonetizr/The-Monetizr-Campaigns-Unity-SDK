@@ -636,6 +636,7 @@ namespace Monetizr.Campaigns
                         alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
                         autoStartAfter = _m.GetAutoStartId(),
                         rewardImage = _m.reward_image,
+                        activateConditions = _m.activate_conditions
                     }); ;
 
                 });
@@ -675,6 +676,8 @@ namespace Monetizr.Campaigns
             public string auto_start_after;
 
             public string reward_image;
+
+            public string activate_conditions;
 
             public int GetAutoStartId()
             {
@@ -816,7 +819,8 @@ namespace Monetizr.Campaigns
             {
                 MissionDescription missionDescription = predefinedSponsoredMissions[i];
 
-                Mission m = FindMissionInCache(i, missionDescription.missionType, campaign.id, missionDescription.reward);
+                Mission m = FindMissionInCache(i, missionDescription.missionType, campaign.id,
+                    missionDescription.reward);
 
                 if (m == null)
                 {
@@ -854,31 +858,50 @@ namespace Monetizr.Campaigns
                 m.isServerCampaignActive = true;
                 m.isToBeRemoved = false;
                 m.campaignServerSettings = m.campaign.serverSettings;
-
-                bool showNotClaimedDisabled = m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
-                if (showNotClaimedDisabled)
-                    m.state = MissionUIState.Visible;
-
-                m.state = m.isDisabled ? MissionUIState.Visible : MissionUIState.Hidden;
+                
                 
                 m.amountOfRVOffersShown = m.campaignServerSettings.GetIntParam("amount_of_rv_offers", -1);
                 //m.amountOfNotificationsShown = m.campaignServerSettings.GetIntParam("amount_of_notifications", -1);
-                m.amountOfNotificationsSkipped = m.campaignServerSettings.GetIntParam("startup_skipped_notifications", int.MaxValue - 1); ;// int.MaxValue - 1; //first notification is always visible
+                m.amountOfNotificationsSkipped =
+                    m.campaignServerSettings.GetIntParam("startup_skipped_notifications", int.MaxValue - 1);
+                ; // int.MaxValue - 1; //first notification is always visible
                 m.isVideoShown = false;
                 m.isDisabled = true; //disable everything by default, activate them in UpdateMissionsActivity
                 m.activateAfter = missionDescription.activateAfter;
 
                 m.brandName = m.campaign.GetAsset<string>(AssetsType.BrandTitleString);
+
+                m.isDeactivatedByCondition = false;
+
+                if (!string.IsNullOrEmpty(missionDescription.activateConditions))
+                {
+                    m.conditions = Utils.ParseConditionsString(missionDescription.activateConditions);
+
+                    if (!campaign.IsConditionsTrue(m.conditions))
+                    {
+                        m.isDisabled = true;
+                        m.isDeactivatedByCondition = true;
+                    }
+                }
+
+                m.state = m.isDisabled ? MissionUIState.Hidden : MissionUIState.Visible;
+
+                bool showNotClaimedDisabled =
+                    m.campaignServerSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
+
+                if (showNotClaimedDisabled && m.isDisabled && !m.isDeactivatedByCondition)
+                    m.state = MissionUIState.Visible;
+
             }
 
-           Log.Print($"Loaded {missions.Count} missions from the campaign");
+            Log.Print($"Loaded {missions.Count} missions from the campaign");
 
             UpdateMissionsActivity(null);
             
             //serializedMissions.SaveAll();
         }
 
-        internal void LoadMissions()
+        internal void LoadSerializedMissions()
         {
             serializedMissions.Load();
 
@@ -923,6 +946,7 @@ namespace Monetizr.Campaigns
 
                 return m.isSponsored &&
                         m.isClaimed != ClaimState.Claimed &&
+                        //!m.isDeactivatedByCondition &&
                         !disabled &&
                         IsActiveByTime(m) &&
                         m.isServerCampaignActive &&
@@ -973,13 +997,25 @@ namespace Monetizr.Campaigns
 
                 bool hasActivateAfter = m.activateAfter.Count > 0;
 
-                Log.PrintV($"-----Updating activity for {m.serverId} has {hasActivateAfter}");
+                Log.PrintV($"-----Updating activity for {m.serverId} has {hasActivateAfter} {m.isDeactivatedByCondition}");
 
                 //check if mission self referenced in activate after
                 if (hasActivateAfter && m.activateAfter.FindIndex(_id => _id == m.serverId) > 0)
                 {
                     Log.PrintWarning($"Mission id {m.serverId} activate after itself!");
                     hasActivateAfter = false;
+                }
+
+                if (m.isDeactivatedByCondition)
+                {
+                    if (!m.campaign.IsConditionsTrue(m.conditions))
+                        continue;
+
+                    isUpdateNeeded = true;
+                    m.isDisabled = false;
+                    m.state = MissionUIState.ToBeShown;
+                    m.isDeactivatedByCondition = false;
+                    continue;
                 }
 
                 //no activate_after here
@@ -992,6 +1028,9 @@ namespace Monetizr.Campaigns
                     m.state = MissionUIState.ToBeShown;
                     continue;
                 }
+
+               
+
 
                 bool shouldBeDisabled = false;
 
@@ -1006,23 +1045,6 @@ namespace Monetizr.Campaigns
                         Log.PrintV($"------Mission {id} disabled because {_m.serverId} is not active");
                     }
                 }
-
-
-                /*for(int i = r.start;; i++)
-                {
-                    if (i > r.start + r.length)
-                        break;
-
-                    if (i >= missions.Count)
-                        break;
-
-                    if (missions[i] == finishedMission)
-                        continue;
-
-                    if (missions[i].isClaimed != ClaimState.Claimed)
-                        shouldBeDisabled = true;
-                    
-                }*/
 
                 //activate if all in range claimed
                 if (!shouldBeDisabled)

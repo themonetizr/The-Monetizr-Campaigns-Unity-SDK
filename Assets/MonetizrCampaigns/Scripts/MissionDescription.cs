@@ -36,6 +36,7 @@ namespace Monetizr.Campaigns
         internal bool alwaysHiddenInRC;
         internal bool hasUnitySurvey;
         internal string rewardImage;
+        internal string activateConditions;
     }
 
     internal enum MissionUIState
@@ -95,18 +96,15 @@ namespace Monetizr.Campaigns
             dictionary.Clear();
 
             if (keys.Count != values.Count)
-                throw new System.Exception(string.Format("there are {0} keys and {1} values after deserialization. Make sure that both key and value types are serializable."));
+                throw new System.Exception(string.Format($"there are {keys.Count} keys and {values.Count} values after deserialization. Make sure that both key and value types are serializable."));
 
-            for (int i = 0; i < keys.Count; i++)
+            for (var i = 0; i < keys.Count; i++)
                 dictionary.Add(keys[i], values[i]);
         }
 
         public TValue GetParam(TKey p)
         {
-            if (!dictionary.ContainsKey(p))
-                return default(TValue);
-
-            return dictionary[p];
+            return dictionary.TryGetValue(p, out var value) ? value : default(TValue);
         }
 
         public int GetIntParam(TKey p, int defaultParam = 0)
@@ -114,10 +112,9 @@ namespace Monetizr.Campaigns
             if (!dictionary.ContainsKey(p))
                 return defaultParam;
 
-            int result = 0;
-            string val = dictionary[p].ToString();
+            var val = dictionary[p].ToString();
 
-            if (!Int32.TryParse(val, out result))
+            if (!int.TryParse(val, out var result))
             {
                 return defaultParam;
             }
@@ -144,7 +141,7 @@ namespace Monetizr.Campaigns
 
         public TValue this[TKey k]
         {
-            get => dictionary[k];
+            get => GetParam(k);
             set => dictionary[k] = value;
         }
 
@@ -349,6 +346,9 @@ namespace Monetizr.Campaigns
         [NonSerialized] internal int amountOfNotificationsSkipped;
 
         [SerializeField] internal bool isDisabled;
+
+        [NonSerialized] internal bool isDeactivatedByCondition;
+        [NonSerialized] internal Dictionary<string, string> conditions;
 
         //is video shown already and don't need to be shown again
         [NonSerialized] internal bool isVideoShown;

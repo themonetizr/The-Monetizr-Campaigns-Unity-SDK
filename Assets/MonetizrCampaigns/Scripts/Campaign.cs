@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -710,6 +711,16 @@ namespace Monetizr.Campaigns
                 return false;
 
             return true;
+        }
+
+        public bool IsConditionsTrue(Dictionary<string, string> mConditions)
+        {
+            var settings = MonetizrManager.Instance.localSettings.GetSetting(id).settings;
+
+            if (settings == null || settings.dictionary.Count == 0)
+                return false;
+
+            return mConditions.All(c => settings[c.Key] == c.Value);
         }
     }
 }

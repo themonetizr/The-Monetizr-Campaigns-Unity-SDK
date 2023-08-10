@@ -810,16 +810,12 @@ namespace Monetizr.Campaigns
 
             var adPlacement = panel.GetAdPlacement().Value;
 
-            var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
-
-            TrackEvent(campaign, currentMission, adPlacement, eventType, additionalValues);
+            TrackEvent(currentMission.campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
         internal void TrackEvent(Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
         {
-            var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
-
-            TrackEvent(campaign, currentMission, adPlacement, eventType, additionalValues);
+            TrackEvent(currentMission.campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
         internal void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)

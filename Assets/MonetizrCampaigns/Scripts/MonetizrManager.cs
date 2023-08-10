@@ -134,7 +134,7 @@ namespace Monetizr.Campaigns
         [SerializeField] internal int amountNotificationsShown;
         [SerializeField] internal int amountTeasersShown;
 
-        //[SerializeField] internal SerializableDictionary<string,string> settings = new SerializableDictionary<string, string>();
+        [SerializeField] internal SerializableDictionary<string,string> settings = new SerializableDictionary<string, string>();
     }
 
     [Serializable]
@@ -211,17 +211,33 @@ namespace Monetizr.Campaigns
             return camp;
         }
 
-        internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaign> challenges)
+        /*internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaign> campaigns)
         {
             //load old settings
             //сheck if apikey/sdkversion is old
             Load();
 
             //check if campaign is missing - remove it from data
-            data.campaigns.RemoveAll((LocalCampaignSettings c) => !challenges.ContainsKey(c.campId));
+            data.campaigns.RemoveAll((LocalCampaignSettings c) => !campaigns.ContainsKey(c.campId));
 
             //add empty campaign into settings
-            challenges.Values.ToList().ForEach(c => AddCampaign(c));
+            campaigns.Values.ToList().ForEach(c => AddCampaign(c));
+
+            SaveData();
+        }*/
+
+        internal void LoadOldAndUpdateNew(List<ServerCampaign> campaigns)
+        {
+            //load old settings
+            //сheck if apikey/sdkversion is old
+            Load();
+
+            //check if campaign is missing - remove it from data
+            data.campaigns.RemoveAll((LocalCampaignSettings localCampaigns) => 
+                campaigns.FindIndex(serverCampaigns => serverCampaigns.id == localCampaigns.campId) < 0);
+
+            //add empty campaign into settings
+            campaigns.ForEach(c => AddCampaign(c));
 
             SaveData();
         }
@@ -255,7 +271,7 @@ namespace Monetizr.Campaigns
 
         private UIController _uiController = null;
 
-        private string _activeCampaignId = null;
+        private ServerCampaign _activeCampaignId = null;
 
         private Action<bool> _soundSwitch = null;
         private Action<bool> _onRequestComplete = null;
@@ -264,9 +280,12 @@ namespace Monetizr.Campaigns
         private bool _isActive = false;
         private bool _isMissionsIsOutdated = true;
 
-        //Storing ids in separate list to get faster access (the same as Keys in challenges dictionary below)
-        private List<string> _campaignIds = new List<string>();
-        private Dictionary<string, ServerCampaign> _campaigns = new Dictionary<string, ServerCampaign>();
+        //Storing ids in separate list to get faster access (the same as Keys in campaigns dictionary below)
+        //private List<string> _campaignIds = new List<string>();
+        //private Dictionary<string, ServerCampaign> _campaigns = new Dictionary<string, ServerCampaign>();
+        
+        private List<ServerCampaign> campaigns = new List<ServerCampaign>();
+
         internal static bool tinyTeaserCanBeVisible;
 
         internal MissionsManager missionsManager = null;
@@ -324,9 +343,34 @@ namespace Monetizr.Campaigns
         {
             internal Sprite icon;
             internal string title;
-            internal Func<ulong> GetCurrencyFunc;
-            internal Action<ulong> AddCurrencyAction;
+            internal Func<ulong> _GetCurrencyFunc;
+            internal Action<ulong> _AddCurrencyAction;
             internal ulong maximumAmount;
+
+            internal ulong GetCurrencyFunc()
+            {
+                try
+                {
+                    return _GetCurrencyFunc();
+                }
+                catch (Exception exception)
+                {
+                    Log.PrintError($"Exception {exception} in getting current amount of {title}");
+                    return 0;
+                }
+            }
+
+            internal void AddCurrencyAction(ulong amount)
+            {
+                try
+                {
+                    _AddCurrencyAction(amount);
+                }
+                catch (Exception exception)
+                {
+                    Log.PrintError($"Exception {exception} in adding {amount} to {title}");
+                }
+            }
         }
 
         public static string temporaryEmail = "";
@@ -349,14 +393,15 @@ namespace Monetizr.Campaigns
         public static string bundleId = null;
         private Action _gameOnInitSuccess;
 
-        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
+        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title,
+            Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
         {
             GameReward gr = new GameReward()
             {
                 icon = defaultRewardIcon,
                 title = title,
-                GetCurrencyFunc = GetCurrencyFunc,
-                AddCurrencyAction = AddCurrencyAction,
+                _GetCurrencyFunc = GetCurrencyFunc,
+                _AddCurrencyAction = AddCurrencyAction,
                 maximumAmount = maxAmount,
             };
 
@@ -392,7 +437,8 @@ namespace Monetizr.Campaigns
             MonetizrAnalytics.advertisingID = advertisingID;
             MonetizrAnalytics.limitAdvertising = limitAdvertising;
 
-            Log.Print($"MonetizrManager SetAdvertisingIds: { MonetizrAnalytics.advertisingID} {MonetizrAnalytics.limitAdvertising}");
+            Log.Print(
+                $"MonetizrManager SetAdvertisingIds: {MonetizrAnalytics.advertisingID} {MonetizrAnalytics.limitAdvertising}");
         }
 
         public static MonetizrManager Initialize(string apiKey,
@@ -429,7 +475,8 @@ namespace Monetizr.Campaigns
 
             if (!MonetizrAnalytics.isAdvertisingIDDefined)
             {
-                Log.PrintError($"MonetizrManager Initialize: Advertising ID is not defined. Be sure you called MonetizrManager.SetAdvertisingIds before Initialize call.");
+                Log.PrintError(
+                    $"MonetizrManager Initialize: Advertising ID is not defined. Be sure you called MonetizrManager.SetAdvertisingIds before Initialize call.");
                 return null;
             }
 
@@ -516,7 +563,7 @@ namespace Monetizr.Campaigns
             {
                 yield return new WaitForSeconds(time);
 
-                if (_campaigns.Count != 0) continue;
+                if (campaigns.Count != 0) continue;
 
                 _isActive = false;
 
@@ -526,10 +573,10 @@ namespace Monetizr.Campaigns
 
         internal void InitializeBuiltinMissions(ServerCampaign campaign)
         {
-            if (_isMissionsIsOutdated)
+            //if (_isMissionsIsOutdated)
                 missionsManager.CreateMissionsFromCampaign(campaign);
 
-            _isMissionsIsOutdated = false;
+            //_isMissionsIsOutdated = false;
         }
 
 
@@ -590,8 +637,9 @@ namespace Monetizr.Campaigns
 
             missionsManager.CleanUp();
 
-            _campaigns.Clear();
-            _campaignIds.Clear();
+            campaigns.Clear();
+            //_campaigns.Clear();
+            //_campaignIds.Clear();
 
             _activeCampaignId = null;
 
@@ -681,7 +729,8 @@ namespace Monetizr.Campaigns
             lscreen.SetActive(false);
         }
 
-        internal static async void WaitForEndRequestAndNotify(Action<bool> onComplete, Mission m, Action updateUIDelegate)
+        internal static async void WaitForEndRequestAndNotify(Action<bool> onComplete, Mission m,
+            Action updateUIDelegate)
         {
             //show screen to block
             var lscreen = Instance._uiController.ShowLoadingScreen();
@@ -710,12 +759,9 @@ namespace Monetizr.Campaigns
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.Error);
 
 
-                ShowMessage((bool _) =>
-                {
-                    onComplete?.Invoke(false);
-                },
-                m,
-                PanelId.BadEmailMessageNotification);
+                ShowMessage((bool _) => { onComplete?.Invoke(false); },
+                    m,
+                    PanelId.BadEmailMessageNotification);
 
 
             };
@@ -730,7 +776,7 @@ namespace Monetizr.Campaigns
                 {
                     s_cts.CancelAfter(10000);
 
-                    await Instance.ClaimReward(m.campaignId, s_cts.Token, onSuccess, onFail);
+                    await Instance.ClaimReward(m.campaign, s_cts.Token, onSuccess, onFail);
                 }
                 catch (OperationCanceledException)
                 {
@@ -775,11 +821,11 @@ namespace Monetizr.Campaigns
 
         public enum NotificationPlacement
         {
-            LevelStartNotification = 0, 
+            LevelStartNotification = 0,
             MainMenuShowNotification = 1,
             ManualNotification = 2
         }
-        
+
         public static void ShowStartupNotification(NotificationPlacement placement, Action<bool> onComplete)
         {
             if (Instance._uiController.panels.ContainsKey(PanelId.StartNotification))
@@ -850,7 +896,8 @@ namespace Monetizr.Campaigns
 
             mission.amountOfNotificationsSkipped++;
 
-            if (mission.amountOfNotificationsSkipped <= mission.campaignServerSettings.GetIntParam("amount_of_skipped_notifications"))
+            if (mission.amountOfNotificationsSkipped <=
+                mission.campaignServerSettings.GetIntParam("amount_of_skipped_notifications"))
             {
                 Log.Print($"Amount of skipped notifications less then {mission.amountOfNotificationsSkipped}");
                 forceSkip = true;
@@ -954,7 +1001,8 @@ namespace Monetizr.Campaigns
                 missions[0].amountOfRVOffersShown--;
             }
 
-            MonetizrManager.ShowRewardCenter(null, (bool p) => { onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed); });
+            MonetizrManager.ShowRewardCenter(null,
+                (bool p) => { onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed); });
         }
 
 
@@ -988,7 +1036,7 @@ namespace Monetizr.Campaigns
             }*/
 
             var missions = Instance.missionsManager.GetMissionsForRewardCenter(campaign);
-            
+
             if (missions.Count == 0)
             {
                 onComplete?.Invoke(true);
@@ -997,7 +1045,8 @@ namespace Monetizr.Campaigns
 
             var m = missions[0];
 
-            bool showRewardCenterForOneMission = missions[0].campaignServerSettings.GetBoolParam("RewardCenter.show_for_one_mission", false);
+            bool showRewardCenterForOneMission = missions[0].campaignServerSettings
+                .GetBoolParam("RewardCenter.show_for_one_mission", false);
 
             if (missions.Count == 1 && !showRewardCenterForOneMission)
             {
@@ -1040,11 +1089,18 @@ namespace Monetizr.Campaigns
 
             var panelNames = new Dictionary<MissionType, Tuple<PanelId, string>>()
             {
-                {MissionType.MinigameReward, new Tuple<PanelId, string>(PanelId.CarMemoryGame,"MonetizrCarGamePanel")},
-                {MissionType.MemoryMinigameReward, new Tuple<PanelId, string>(PanelId.MemoryGame,"MonetizrGamePanel")},
+                {
+                    MissionType.MinigameReward,
+                    new Tuple<PanelId, string>(PanelId.CarMemoryGame, "MonetizrCarGamePanel")
+                },
+                {
+                    MissionType.MemoryMinigameReward,
+                    new Tuple<PanelId, string>(PanelId.MemoryGame, "MonetizrGamePanel")
+                },
             };
 
-            Instance._uiController.ShowPanelFromPrefab(panelNames[m.type].Item2, panelNames[m.type].Item1, onComplete, false, m);
+            Instance._uiController.ShowPanelFromPrefab(panelNames[m.type].Item2, panelNames[m.type].Item1, onComplete,
+                false, m);
         }
 
         internal static void ShowUnitySurvey(Action<bool> onComplete, Mission m)
@@ -1054,7 +1110,8 @@ namespace Monetizr.Campaigns
             if (!Instance._isActive)
                 return;
 
-            Instance._uiController.ShowPanelFromPrefab("MonetizrUnitySurveyPanel", PanelId.SurveyUnityView, onComplete, false, m);
+            Instance._uiController.ShowPanelFromPrefab("MonetizrUnitySurveyPanel", PanelId.SurveyUnityView, onComplete,
+                false, m);
         }
 
 
@@ -1109,11 +1166,7 @@ namespace Monetizr.Campaigns
             teaserRoot = root;
         }
 
-        public static Action<string, Dictionary<string, string>> ExternalAnalytics
-        {
-            internal get;
-            set;
-        } = null;
+        public static Action<string, Dictionary<string, string>> ExternalAnalytics { internal get; set; } = null;
 
 
         /// <summary>
@@ -1128,16 +1181,20 @@ namespace Monetizr.Campaigns
                 return;
 
 
-            //if (!Instance.HasCampaignsAndActive())
-            //    return;
-            
+            if (!Instance.HasCampaignsAndActive())
+                return;
+
+
+            Instance.InitializeBuiltinMissionsForAllCampaigns();
+
             var campaign = Instance.FindBestCampaignToActivate();
-            
+
             Instance.SetActiveCampaign(campaign);
 
             if (campaign == null)
                 return;
 
+            
             //Instance.InitializeBuiltinMissions(campaign);
 
             if (showNotifications)
@@ -1145,12 +1202,12 @@ namespace Monetizr.Campaigns
                 HideTinyMenuTeaser();
 
                 ShowStartupNotification(NotificationPlacement.MainMenuShowNotification, (bool isSkipped) =>
-                        {
-                            if (isSkipped)
-                                ShowTinyMenuTeaser();
-                            else
-                                ShowRewardCenter(null, null);
-                        });
+                {
+                    if (isSkipped)
+                        ShowTinyMenuTeaser();
+                    else
+                        ShowRewardCenter(null, null);
+                });
             }
             else
             {
@@ -1173,8 +1230,13 @@ namespace Monetizr.Campaigns
             if (Instance == null)
                 return;
 
+            if (!Instance.HasCampaignsAndActive())
+                return;
+
             //tinyTeaserCanBeVisible = true;
-            
+            Instance.InitializeBuiltinMissionsForAllCampaigns();
+
+
             var campaign = MonetizrManager.Instance?.GetActiveCampaign();
 
             if (campaign == null)
@@ -1182,27 +1244,28 @@ namespace Monetizr.Campaigns
                 onComplete?.Invoke(OnCompleteStatus.Skipped);
                 return;
             }
+
             
             //Instance.InitializeBuiltinMissions(campaign);
 
             //Notification is shown
             ShowStartupNotification(NotificationPlacement.ManualNotification, (bool isSkipped) =>
-                 {
-                     //If notification is closed
-                     if (isSkipped)
-                     {
-                         onComplete?.Invoke(OnCompleteStatus.Skipped);
-                     }
-                     //If notification isn't closed
-                     else
-                     {
-                         ShowRewardCenter(null, (bool isRCSkipped) =>
-                            {
-                                //Does player complete the task?
-                                onComplete?.Invoke(isRCSkipped ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
-                            });
-                     }
-                 });
+            {
+                //If notification is closed
+                if (isSkipped)
+                {
+                    onComplete?.Invoke(OnCompleteStatus.Skipped);
+                }
+                //If notification isn't closed
+                else
+                {
+                    ShowRewardCenter(null, (bool isRCSkipped) =>
+                    {
+                        //Does player complete the task?
+                        onComplete?.Invoke(isRCSkipped ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
+                    });
+                }
+            });
 
 
 
@@ -1231,7 +1294,7 @@ namespace Monetizr.Campaigns
             //tinyTeaserCanBeVisible = true;
 
             var campaign = Instance?.FindBestCampaignToActivate();
-            
+
             //has some challanges
             if (campaign == null)
             {
@@ -1275,9 +1338,10 @@ namespace Monetizr.Campaigns
             Instance.localSettings.GetSetting(campaign.id).amountTeasersShown++;
             Instance.localSettings.SaveData();
 
-            int uiVersion = 4;//campaign.serverSettings.GetIntParam("teaser_design_version", 2);
+            int uiVersion = 4; //campaign.serverSettings.GetIntParam("teaser_design_version", 2);
 
-            Instance._uiController.ShowTinyMenuTeaser(teaserRoot, tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
+            Instance._uiController.ShowTinyMenuTeaser(teaserRoot, tinyTeaserPosition, UpdateGameUI, uiVersion,
+                campaign);
 
         }
 
@@ -1302,7 +1366,8 @@ namespace Monetizr.Campaigns
             Instance._uiController.HidePanel(PanelId.TinyMenuTeaser);
         }
 
-        internal void OnClaimRewardComplete(Mission mission, bool isSkipped, Action<bool> onComplete, Action updateUIDelegate)
+        internal void OnClaimRewardComplete(Mission mission, bool isSkipped, Action<bool> onComplete,
+            Action updateUIDelegate)
         {
             if (claimForSkippedCampaigns)
                 isSkipped = false;
@@ -1342,12 +1407,7 @@ namespace Monetizr.Campaigns
                 {
                     if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
                     {
-                        ClaimReward(mission.campaignId, CancellationToken.None, () =>
-                        {
-                            RequestCampaigns(false);
-
-
-                        });
+                        ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); });
 
                     }
                 }
@@ -1368,7 +1428,7 @@ namespace Monetizr.Campaigns
 
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
-            List<ServerCampaign> campaigns = new List<ServerCampaign>();
+            campaigns = new List<ServerCampaign>();
 
             try
             {
@@ -1394,7 +1454,7 @@ namespace Monetizr.Campaigns
                 onRequestComplete?.Invoke(false);
             }
 
-            _campaignIds.Clear();
+            //_campaignIds.Clear();
 
             if (campaigns.Count > 0)
             {
@@ -1423,8 +1483,8 @@ namespace Monetizr.Campaigns
 
             foreach (var campaign in campaigns)
             {
-                if (this._campaigns.ContainsKey(campaign.id))
-                    continue;
+                //if (this._campaigns.ContainsKey(campaign.id))
+                //    continue;
 
                 string path = Application.persistentDataPath + "/" + campaign.id;
 
@@ -1436,8 +1496,8 @@ namespace Monetizr.Campaigns
                 {
                     Log.Print($"Campaign {campaign.id} successfully loaded");
 
-                    this._campaigns.Add(campaign.id, campaign);
-                    _campaignIds.Add(campaign.id);
+                    //this._campaigns.Add(campaign.id, campaign);
+                    //_campaignIds.Add(campaign.id);
                 }
                 else
                 {
@@ -1447,18 +1507,18 @@ namespace Monetizr.Campaigns
                         AdPlacement.AssetsLoading,
                         EventType.Error,
                         new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
-                    
+
                     if (Client.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
                     {
                         Client.SendErrorToRemoteServer("Campaign loading assets error",
                             "Campaign loading assets error",
                             $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nApp version: {Application.version}\nSystem language: {Application.systemLanguage}\nDevice id: {MonetizrAnalytics.advertisingID}\n\n{campaign.loadingError}");
-                        
+
                     }
                 }
             }
 
-            campaigns.RemoveAll(c =>  c.isLoaded == false);
+            campaigns.RemoveAll(c => c.isLoaded == false);
 
             // _activeCampaignId = _campaignIds.Count > 0 ? _campaignIds[0] : null;
 
@@ -1467,10 +1527,10 @@ namespace Monetizr.Campaigns
 #if TEST_SLOW_LATENCY
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
-            localSettings.LoadOldAndUpdateNew(this._campaigns);
+            localSettings.LoadOldAndUpdateNew(campaigns);
 
-        
-            Log.Print($"RequestCampaigns completed with {_campaignIds.Count} campaigns.");
+
+            Log.Print($"RequestCampaigns completed with {campaigns.Count} campaigns.");
 
             /*if (_activeCampaignId != null)
             {
@@ -1491,44 +1551,53 @@ namespace Monetizr.Campaigns
             if (campaigns.Count > 0)
                 Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
 
-           /* if (!isOk)
-            {
-                Log.Print("Request complete is not okay!");
-                return;
-            }*/
+            /* if (!isOk)
+             {
+                 Log.Print("Request complete is not okay!");
+                 return;
+             }*/
 
             if (gameRewards.Count == 0)
             {
-                Log.PrintError($"No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
+                Log.PrintError(
+                    $"No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
                 return;
             }
 
             Log.Print("MonetizrManager initialization okay!");
 
             _isActive = true;
+            
 
-            missionsManager.LoadMissions();
+            //Ok, even if response empty
+            onRequestComplete?.Invoke( /*challengesId.Count > 0*/true);
+        }
+
+        internal void InitializeBuiltinMissionsForAllCampaigns()
+        {
+            if (!_isMissionsIsOutdated)
+                return;
+
+            missionsManager.LoadSerializedMissions();
 
             campaigns.ForEach((c) =>
             {
-                _isMissionsIsOutdated = true;
+                //_isMissionsIsOutdated = true;
                 Instance.InitializeBuiltinMissions(c);
             });
 
             missionsManager.SaveAndRemoveUnused();
 
             SetActiveCampaign(FindBestCampaignToActivate());
-
-
-            //Ok, even if response empty
-            onRequestComplete?.Invoke(/*challengesId.Count > 0*/true);
+            
+            _isMissionsIsOutdated = false;
         }
 
-        /// <summary>
-        /// Get Challenge by Id
-        /// </summary>
-        /// <returns></returns>
-        internal ServerCampaign GetCampaign(string id)
+    /// <summary>
+    /// Get Challenge by Id
+    /// </summary>
+    /// <returns></returns>
+        /*internal ServerCampaign GetCampaign(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return null;
@@ -1539,11 +1608,11 @@ namespace Monetizr.Campaigns
             Log.PrintWarning($"You're trying to get campaign {id} which is not exist!");
 
             return null;
-        }
+        }*/
 
         internal ServerCampaign GetActiveCampaign()
         {
-            return GetCampaign(_activeCampaignId);
+            return _activeCampaignId;
         }
 
         internal ServerCampaign FindBestCampaignToActivate()
@@ -1551,7 +1620,7 @@ namespace Monetizr.Campaigns
             if (!IsActiveAndEnabled())
                 return null;
 
-            if (!string.IsNullOrEmpty(_activeCampaignId))
+            if (_activeCampaignId != null)
             {
                 var campaign = GetActiveCampaign();
 
@@ -1559,12 +1628,10 @@ namespace Monetizr.Campaigns
                     return campaign;
             }
 
-            foreach (var id in _campaignIds)
+            foreach (var campaign in campaigns)
             {
-                if (id == _activeCampaignId)
+                if (campaign == _activeCampaignId)
                     continue;
-
-                var campaign = GetCampaign(id);
 
                 if (campaign.IsCampaignActivate())
                     return campaign;
@@ -1573,14 +1640,14 @@ namespace Monetizr.Campaigns
             return null;
         }
 
-        internal List<string> GetAvailableCampaigns()
+        /*internal List<string> GetAvailableCampaigns()
         {
             return _campaignIds;
-        }
+        }*/
 
         internal bool HasCampaignsAndActive()
         {
-            return _isActive && _campaignIds.Count > 0;
+            return _isActive && campaigns.Count > 0;
         }
 
         public static bool IsActiveAndEnabled()
@@ -1588,51 +1655,51 @@ namespace Monetizr.Campaigns
             return Instance != null && Instance.HasCampaignsAndActive();
         }
 
-        internal string GetActiveCampaignId()
+       /* internal string GetActiveCampaignId()
         {
             return _activeCampaignId;
-        }
+        }*/
 
-        internal void SetActiveCampaignId(string id)
+        internal void SetActiveCampaign(ServerCampaign camp)
         {
-            if (id == _activeCampaignId)
+            if (camp == _activeCampaignId)
                 return;
 
-            if (id != _activeCampaignId)
+            if (camp != _activeCampaignId)
                 _isMissionsIsOutdated = true;
 
-            _activeCampaignId = id;
+            _activeCampaignId = camp;
 
             Log.PrintV($"Active campaign: {_activeCampaignId}");
         }
 
-        internal void SetActiveCampaign(ServerCampaign camp)
+        /*internal void SetActiveCampaign(ServerCampaign camp)
         {
             SetActiveCampaignId(camp?.id);
-        }
+        }*/
 
         public bool HasActiveCampaign()
         {
             return _isActive && _activeCampaignId != null;
         }
 
-        internal bool HasCampaign(string challengeId)
+        internal bool HasCampaign(string campaignId)
         {
-            return _campaigns.ContainsKey(challengeId);
+            return campaigns.FindIndex(c => c.id == campaignId) >= 0;
         }
 
         /// <summary>
         /// Single update for reward and claim
         /// </summary>
-        public async Task ClaimReward(string challengeId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal async Task ClaimReward(ServerCampaign campaign, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            var challenge = _campaigns[challengeId];
+            //var challenge = _campaigns[challengeId];
 
             try
             {
                 //await Task.Delay(15000,ct);
 
-                await Client.Claim(challenge, ct, onSuccess, onFailure);
+                await Client.Claim(campaign, ct, onSuccess, onFailure);
             }
             catch (Exception e)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -265,14 +266,52 @@ namespace Monetizr.Campaigns
             return pieces;
         }
 
-        public static bool isInLandscapeMode()
+        public static bool IsInLandscapeMode()
         {
             return (Screen.width > Screen.height);
         }
 
-        public static float SimpleTween(float k)
+        public static Dictionary<string, string> ParseConditionsString(string conditionsString)
         {
-            return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
+            var output = new Dictionary<string, string>();
+
+            var pairs = conditionsString.Split(';');
+
+            // Loop through each pair
+            foreach (var pair in pairs)
+            {
+                // Split the pair by equal sign
+                string[] parts = pair.Split('=');
+
+                // Check if the pair has two parts
+                if (parts.Length == 2)
+                {
+                    // Add the key and value to the dictionary
+                    output.Add(parts[0], parts[1]);
+                }
+            }
+
+            return output;
+        }
+
+        internal static string ScoresToString(double scores)
+        {
+            string result;
+            var scoreNames = new string[] { "", "k", "M", "B", "T", "aa", "ab", "ac", "ad", "ae", "af", "ag", "ah", "ai", "aj", "ak", "al", "am", "an", "ao", "ap", "aq", "ar", "as", "at", "au", "av", "aw", "ax", "ay", "az", "ba", "bb", "bc", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bk", "bl", "bm", "bn", "bo", "bp", "bq", "br", "bs", "bt", "bu", "bv", "bw", "bx", "by", "bz", };
+            int i;
+
+            for (i = 0; i < scoreNames.Length; i++)
+                if (scores < 900)
+                    break;
+                else
+                    scores = System.Math.Floor(scores / 100f) / 10f;
+
+            if (scores == System.Math.Floor(scores))
+                result = scores.ToString(CultureInfo.InvariantCulture) + scoreNames[i];
+            else
+                result = scores.ToString("F1", CultureInfo.InvariantCulture) + scoreNames[i];
+
+            return result;
         }
     }
 }

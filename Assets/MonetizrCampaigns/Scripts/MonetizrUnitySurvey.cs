@@ -319,7 +319,6 @@ namespace Monetizr.Campaigns
             contentRoot.sizeDelta = new Vector2(width, 0);
 
             //backButton.interactable = false;
-
             //nextButton.interactable = isFirstQuestionEmpty;
 
             state = State.Idle;
@@ -540,7 +539,7 @@ namespace Monetizr.Campaigns
 
         internal void SubmitResponses()
         {
-            var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
+            var campaign = currentMission.campaign;
 
             currentSurvey.questions.ForEach(q =>
             {
@@ -559,10 +558,13 @@ namespace Monetizr.Campaigns
                     p.Add("question_text", q.text);
                     MonetizrManager.Analytics._TrackEvent("Survey answer", campaign, false, p);
 
-                    Log.PrintV($"-------Survey answer {a.response} {currentSurvey.settings.id}");
-
+                    var varName = $"{currentSurvey.settings.id}-{q.id}-{a.id}";
+                    MonetizrManager.Instance.localSettings.GetSetting(campaign.id).settings[varName] = a.response;
                 });
             });
+
+
+            MonetizrManager.Instance.localSettings.SaveData();
         }
 
 

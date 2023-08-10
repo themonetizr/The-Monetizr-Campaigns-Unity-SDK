@@ -80,9 +80,7 @@ namespace Monetizr.Campaigns
 
             if (currentMission.campaignServerSettings.GetBoolParam("more_memory_stats",false))
             {
-                var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
-
-                MonetizrManager.Analytics._TrackEvent("Minigame stats", campaign, false, stats.GetDictionary());
+                MonetizrManager.Analytics._TrackEvent("Minigame stats", currentMission.campaign, false, stats.GetDictionary());
             }
         }
 
