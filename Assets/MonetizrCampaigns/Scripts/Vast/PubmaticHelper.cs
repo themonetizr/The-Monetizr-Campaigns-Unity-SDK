@@ -164,7 +164,7 @@ namespace Monetizr.Campaigns
             public string vasttag;
         }
 
-        internal PubmaticHelper(MonetizrClient client) : base(client)
+        internal PubmaticHelper(MonetizrClient client, string userAgent) : base(client, userAgent)
         {
         }
 
@@ -173,7 +173,7 @@ namespace Monetizr.Campaigns
              if (string.IsNullOrEmpty(generatorUri))
                 return null;
             
-             var requestMessage = MonetizrClient.GetHttpRequestMessage(generatorUri);
+             var requestMessage = MonetizrClient.GetHttpRequestMessage(generatorUri, userAgent);
             
              Log.PrintV($"Generator message: {requestMessage}");
 
@@ -418,7 +418,7 @@ namespace Monetizr.Campaigns
                 return true;
             }
 
-            var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri);
+            var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri,userAgent);
             var openRtbRequest = "";
             
             if (globalSettings.GetBoolParam("openrtb.send_by_client", false) &&
@@ -427,7 +427,7 @@ namespace Monetizr.Campaigns
             {
                 string generatorUri = globalSettings.GetParam("openrtb.generator_url");
 
-                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri);
+                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrAnalytics.advertisingID}");
 
                 if (!string.IsNullOrEmpty(openRtbRequest))
                 {

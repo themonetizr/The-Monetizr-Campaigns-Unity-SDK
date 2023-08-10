@@ -20,6 +20,8 @@ namespace Monetizr.Campaigns
     internal class VastHelper
     {
         internal static MonetizrClient client;
+
+        internal static string userAgent;
         //internal VastSettings vastSettings;
 
         internal class VastParams
@@ -29,9 +31,10 @@ namespace Monetizr.Campaigns
             internal int pid;
         }
 
-        internal VastHelper(MonetizrClient _client)
+        internal VastHelper(MonetizrClient _client, string _userAgent)
         {
             client = _client;
+            userAgent = _userAgent;
         }
 
         public VastParams GetVastParams()

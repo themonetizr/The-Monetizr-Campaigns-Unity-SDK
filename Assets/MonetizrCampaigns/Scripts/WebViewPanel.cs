@@ -199,10 +199,10 @@ namespace Monetizr.Campaigns
         {
             _webUrl = "file://" + currentMission.campaign.GetAsset<string>(AssetsType.Html5PathString);
 
-            var ph = new PubmaticHelper(MonetizrManager.Instance.Client);
+            var ph = new PubmaticHelper(MonetizrManager.Instance.Client,_webView.GetUserAgent());
 
             var result = await ph.GetOpenRtbResponseForCampaign(currentMission.campaign);
-
+            
 #if UNITY_EDITOR_WIN
             result = false;
 #endif

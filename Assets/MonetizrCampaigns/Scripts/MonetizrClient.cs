@@ -452,13 +452,11 @@ namespace Monetizr.Campaigns
             return campaigns.campaigns;
         }
 
-        internal static HttpRequestMessage GetHttpRequestMessage(string uri, bool isPost = false)
+        internal static HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false)
         {
             var httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
-
-           
-
-            return new HttpRequestMessage
+            
+            var output = new HttpRequestMessage
             {
                 Method = httpMethod,
                 RequestUri = new Uri(uri),
@@ -479,6 +477,14 @@ namespace Monetizr.Campaigns
                     {"internet-connection",MonetizrAnalytics.GetInternetConnectionType()}
                 }
             };
+
+            if (string.IsNullOrEmpty(userAgent)) 
+                return output;
+            
+            Log.PrintError(userAgent);
+            output.Headers.Add("User-Agent", userAgent);
+
+            return output;
         }
         
         internal static HttpRequestMessage GetOpenRtbRequestMessage(string url, string content, HttpMethod method)
@@ -521,7 +527,7 @@ namespace Monetizr.Campaigns
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =
-                GetHttpRequestMessage($"{CampaignsApiUrl}/{challenge.id}/claim",true);
+                GetHttpRequestMessage($"{CampaignsApiUrl}/{challenge.id}/claim","",true);
 
             string content = string.Empty;
 
