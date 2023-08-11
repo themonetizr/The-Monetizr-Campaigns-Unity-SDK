@@ -199,14 +199,24 @@ namespace Monetizr.Campaigns
         {
             _webUrl = "file://" + currentMission.campaign.GetAsset<string>(AssetsType.Html5PathString);
 
-            var ph = new PubmaticHelper(MonetizrManager.Instance.Client,_webView.GetUserAgent());
-
-            var result = await ph.GetOpenRtbResponseForCampaign(currentMission.campaign);
+            var hasProgrammatic = currentMission.campaign.serverSettings.GetBoolParam("programmatic", false);
+            var showWebview = true;
+            //var isSkipped = false;
             
+            if (hasProgrammatic)
+            {
+                var ph = new PubmaticHelper(MonetizrManager.Instance.Client, _webView.GetUserAgent());
+
+                var programmaticOk = await ph.GetOpenRtbResponseForCampaign(currentMission.campaign);
+
+                if (!programmaticOk)
+                    showWebview = false;
+            }
+
 #if UNITY_EDITOR_WIN
             result = false;
 #endif
-            if (result)
+            if (showWebview)
             {
                 programmaticStatus = "no_programmatic_or_success";
                 _webView.Load(_webUrl);
@@ -216,7 +226,8 @@ namespace Monetizr.Campaigns
             else
             {
                 programmaticStatus = "failed";
-                OnCompleteEvent();
+                //OnCompleteEvent();
+                _OnSkipPress();
             }
 
         }
@@ -333,7 +344,7 @@ namespace Monetizr.Campaigns
 
             if (message.RawMessage.Contains("skip"))
             {
-                OnSkipPress();
+                _OnSkipPress();
 
                 //ClosePanel();
             }

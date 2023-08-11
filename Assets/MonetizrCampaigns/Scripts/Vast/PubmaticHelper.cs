@@ -397,25 +397,18 @@ namespace Monetizr.Campaigns
                 //Log.PrintV(asset.ToString());
             }
         }
-
-        public async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign)
+        
+        internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign)
         {
-            if (!currentCampaign.serverSettings.GetBoolParam("programmatic", false))
-            {
-                Log.PrintV($"Campaign {currentCampaign.id} doesn't marked as programmatic!");
-                return true;
-            }
-
             var globalSettings = client.GlobalSettings;
 
-
-            //var apiUrl = globalSettings.GetParam("api_url");
+           //var apiUrl = globalSettings.GetParam("api_url");
             var openRtbUri = globalSettings.GetParam("openrtb.endpoint");
 
             if (string.IsNullOrEmpty(openRtbUri))
             {
                 Log.PrintV($"No programmatic endpoint defined! Programmatic disabled!");
-                return true;
+                return false;
             }
 
             if (DateTime.TryParse(MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id)
@@ -423,8 +416,12 @@ namespace Monetizr.Campaigns
             {
                 var delay = (DateTime.Now - lastTime).TotalSeconds;
 
-                if (delay < currentCampaign.serverSettings.GetIntParam("openrtb.delay",120))
-                    return true;
+                var targetDelay = currentCampaign.serverSettings.GetIntParam("openrtb.delay", 120);
+                if (delay < targetDelay)
+                {
+                    Log.PrintV($"Last programmatic request was earlier than {targetDelay}");
+                    return false;
+                }
             }
 
             MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings["openrtb.last_request"] =
