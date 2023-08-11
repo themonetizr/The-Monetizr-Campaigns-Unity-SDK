@@ -408,6 +408,7 @@ namespace Monetizr.Campaigns
 
             var globalSettings = client.GlobalSettings;
 
+
             //var apiUrl = globalSettings.GetParam("api_url");
             var openRtbUri = globalSettings.GetParam("openrtb.endpoint");
 
@@ -420,12 +421,14 @@ namespace Monetizr.Campaigns
             if (DateTime.TryParse(MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id)
                     .settings["openrtb.last_request"], out var lastTime))
             {
-                if(DateTime.Now.Subtract(lastTime).Seconds < 120)
+                var delay = (DateTime.Now - lastTime).TotalSeconds;
+
+                if (delay < currentCampaign.serverSettings.GetIntParam("openrtb.delay",120))
                     return true;
             }
 
             MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings["openrtb.last_request"] =
-                DateTime.Now.ToString(CultureInfo.InvariantCulture);
+                DateTime.Now.ToString();
             MonetizrManager.Instance.localSettings.SaveData();
 
             var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri, userAgent);
