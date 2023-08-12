@@ -227,6 +227,8 @@ namespace Monetizr.Campaigns
             {
                 programmaticStatus = "failed";
                 //OnCompleteEvent();
+                
+                Log.PrintError("_OnSkipPress");
                 _OnSkipPress();
             }
 
