@@ -416,7 +416,7 @@ namespace Monetizr.Campaigns
             {
                 var delay = (DateTime.Now - lastTime).TotalSeconds;
 
-                var targetDelay = currentCampaign.serverSettings.GetIntParam("openrtb.delay", 120);
+                var targetDelay = currentCampaign.serverSettings.GetIntParam("openrtb.delay", 300);
                 if (delay < targetDelay)
                 {
                     Log.PrintV($"Last programmatic request was earlier than {targetDelay}");
