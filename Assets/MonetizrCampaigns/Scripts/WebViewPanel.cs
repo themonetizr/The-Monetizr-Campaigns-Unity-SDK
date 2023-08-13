@@ -214,7 +214,7 @@ namespace Monetizr.Campaigns
             }
 
 #if UNITY_EDITOR_WIN
-            result = false;
+            showWebview = false;
 #endif
             if (showWebview)
             {
