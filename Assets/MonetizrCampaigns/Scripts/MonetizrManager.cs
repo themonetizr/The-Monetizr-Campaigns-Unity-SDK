@@ -990,19 +990,27 @@ namespace Monetizr.Campaigns
 
             var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance?.GetActiveCampaign());
 
-            if (missions != null && missions.Count > 0)
+            if (missions == null || missions.Count == 0)
             {
-                //no more offers, skipping
-                if (missions[0].amountOfRVOffersShown == 0)
-                {
-                    onComplete(OnCompleteStatus.Skipped);
-                }
-
-                missions[0].amountOfRVOffersShown--;
+                onComplete(OnCompleteStatus.Skipped);
+                return;
             }
 
+            //no more offers, skipping
+            if (missions[0].amountOfRVOffersShown == 0) { 
+                onComplete(OnCompleteStatus.Skipped);
+                return;
+            }
+
+            missions[0].amountOfRVOffersShown--;
+            
+
             MonetizrManager.ShowRewardCenter(null,
-                (bool p) => { onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed); });
+                (bool p) =>
+                {
+                    Log.PrintError("ShowRewardCenter OnComplete!");
+                    onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
+                });
         }
 
 
@@ -1055,8 +1063,6 @@ namespace Monetizr.Campaigns
                 Instance._PressSingleMission(onComplete, m);
                 return;
             }
-
-
 
             Log.PrintV($"ShowRewardCenter from campaign: {m?.campaignId}");
 
@@ -1227,11 +1233,11 @@ namespace Monetizr.Campaigns
         /// </param>
         public static void ShowCampaignNotificationAndEngage(OnComplete onComplete = null)
         {
-            if (Instance == null)
+            if (Instance == null || !Instance.HasCampaignsAndActive())
+            {
+                onComplete?.Invoke(OnCompleteStatus.Skipped);
                 return;
-
-            if (!Instance.HasCampaignsAndActive())
-                return;
+            }
 
             //tinyTeaserCanBeVisible = true;
             Instance.InitializeBuiltinMissionsForAllCampaigns();
@@ -1373,7 +1379,11 @@ namespace Monetizr.Campaigns
                 isSkipped = false;
 
             if (isSkipped)
+            {
+                Log.PrintError("OnClaimRewardComplete");
+                onComplete?.Invoke(true);
                 return;
+            }
 
             Log.PrintV($"OnClaimRewardComplete for {mission.serverId}");
 

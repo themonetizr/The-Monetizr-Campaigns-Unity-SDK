@@ -957,6 +957,9 @@ namespace Monetizr.Campaigns
 
         internal List<Mission> GetMissionsForRewardCenter(ServerCampaign campaign, bool includeDisabled = false)
         {
+            if (campaign == null)
+                return null;
+            
             var res = GetMissionsForRewardCenter(includeDisabled);
 
             return res?.FindAll((Mission m) => m.campaignId == campaign.id);
