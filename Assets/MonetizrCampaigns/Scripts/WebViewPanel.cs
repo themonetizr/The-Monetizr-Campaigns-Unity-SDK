@@ -20,7 +20,7 @@ namespace Monetizr.Campaigns
         private UniWebView _webView = null;
 #endif
         private string _webUrl;
-        private string rewardWebUrl;
+        private string _rewardWebUrl;
         //private Mission currentMission;
         private string eventsPrefix;
         private AdPlacement adType;
@@ -31,11 +31,12 @@ namespace Monetizr.Campaigns
 
         public Animator crossButtonAnimator;
 
-        private int pagesSwitch = -1;
+        private int _pagesSwitchesAmount = -1;
 
         public string successReason;
         public bool claimPageReached = false;
         public string programmaticStatus;
+        private int _claimButtonDelay;
 
         internal override AdPlacement? GetAdPlacement()
         {
@@ -114,7 +115,7 @@ namespace Monetizr.Campaigns
 
         internal void PrepareSurveyPanel(Mission m)
         {
-            rewardWebUrl = "themonetizr.com";
+            _rewardWebUrl = "themonetizr.com";
 
             //TrackEvent("Survey started");
 
@@ -144,38 +145,46 @@ namespace Monetizr.Campaigns
 
         }
 
+        internal void GetActionMissionParameters(Mission m)
+        {
+            _webUrl = m.campaignServerSettings.GetParam("ActionReward.url");
+            _rewardWebUrl = m.campaignServerSettings.GetParam("ActionReward.reward_url");
+            _claimButtonDelay = m.campaignServerSettings.GetIntParam("ActionReward.reward_time", 0);
+            _pagesSwitchesAmount = m.campaignServerSettings.GetIntParam("ActionReward.reward_pages", 0);
+
+            if (string.IsNullOrEmpty(_webUrl))
+            {
+                _webUrl = m.campaignServerSettings.GetParam($"ActionReward.{m.serverId}.url");
+                _rewardWebUrl = m.campaignServerSettings.GetParam($"ActionReward.{m.serverId}.reward_url");
+                _claimButtonDelay = m.campaignServerSettings.GetIntParam($"ActionReward.{m.serverId}.reward_time", 0);
+                _pagesSwitchesAmount = m.campaignServerSettings.GetIntParam($"ActionReward.{m.serverId}.reward_pages", 0);
+            }
+        }
+
         internal void PrepareActionPanel(Mission m)
         {
             //MonetizrManager.Analytics.TrackEvent("Survey webview", currentMissionDesc);
 
             closeButton.gameObject.SetActive(true);
 
-            //Log.Print($"currentMissionDesc: {currentMissionDesc == null}");
-            //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
-                                 // eventsPrefix = "Survey";
-
-            _webUrl = m.campaignServerSettings.GetParam("ActionReward.url");
+            GetActionMissionParameters(m);
 
             if(string.IsNullOrEmpty(_webUrl))
             {
                 Log.PrintError($"ActionReward.url is null");
             }
 
-            rewardWebUrl = m.campaignServerSettings.GetParam("ActionReward.reward_url");
-
             _webView.Load(_webUrl);
 
             //isAnalyticsNeeded = false;
-
-            int delay = m.campaignServerSettings.GetIntParam("ActionReward.reward_time", 0);
-
+            
 #if UNITY_EDITOR
-            delay = 3;
+            _claimButtonDelay = 3;
 #endif
 
-            StartCoroutine(ShowClaimButtonCoroutine(delay));
+            StartCoroutine(ShowClaimButtonCoroutine(_claimButtonDelay));
 
-            pagesSwitch = m.campaignServerSettings.GetIntParam("ActionReward.reward_pages", 0);
+            
         }
 
         internal IEnumerator ShowClaimButtonCoroutine(int delay)
@@ -400,11 +409,11 @@ namespace Monetizr.Campaigns
                 if (!_webUrl.Equals(currentUrl))
                 {
                     _webUrl = currentUrl;
-                    pagesSwitch--;
+                    _pagesSwitchesAmount--;
                     
-                    Log.PrintV($"Update: {_webUrl} {pagesSwitch}");
+                    Log.PrintV($"Update: {_webUrl} {_pagesSwitchesAmount}");
 
-                    if(pagesSwitch == 0)
+                    if(_pagesSwitchesAmount == 0)
                     {
                         successReason = "page_switch";
 
@@ -413,9 +422,9 @@ namespace Monetizr.Campaigns
 
                     if (/*webUrl.Contains("themonetizr.com") ||*/
                         _webUrl.Contains("uniwebview") ||
-                        _webUrl.Contains(rewardWebUrl))
+                        _webUrl.Contains(_rewardWebUrl))
                     {
-                        if (_webUrl.Contains(rewardWebUrl))
+                        if (_webUrl.Contains(_rewardWebUrl))
                         {
                             successReason = "reward_page_reached";
                             claimPageReached = true;

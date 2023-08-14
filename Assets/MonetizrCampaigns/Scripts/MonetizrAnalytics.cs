@@ -850,6 +850,11 @@ namespace Monetizr.Campaigns
 
             //-------
 
+            additionalValues ??= new Dictionary<string, string>();
+
+            if (currentMission != null)
+                additionalValues.Add("mission_id", currentMission.serverId.ToString());
+
             //EmailErrorScreen,
             //Video,
 
@@ -937,14 +942,12 @@ namespace Monetizr.Campaigns
             MonetizrManager.EventType eventType,
             Dictionary<string, string> additionalValues)
         {
-            if (additionalValues == null)
-                additionalValues = new Dictionary<string, string>();
-
+            
             //string placementGroup = GetPlacementGroup(adPlacement);
 
             additionalValues.Add("placement", placementName);
             additionalValues.Add("placement_group", GetPlacementGroup(adPlacement));
-
+            
             //if(MonetizrManager.isVastActive)
             //    TrackOMSDKEvents(eventType, adPlacement, placementGroup);
 
