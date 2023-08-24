@@ -1008,7 +1008,7 @@ namespace Monetizr.Campaigns
             MonetizrManager.ShowRewardCenter(null,
                 (bool p) =>
                 {
-                    Log.PrintError("ShowRewardCenter OnComplete!");
+                    Log.PrintV("ShowRewardCenter OnComplete!");
                     onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
                 });
         }
@@ -1380,7 +1380,7 @@ namespace Monetizr.Campaigns
 
             if (isSkipped)
             {
-                Log.PrintError("OnClaimRewardComplete");
+                Log.PrintV("OnClaimRewardComplete");
                 onComplete?.Invoke(true);
                 return;
             }
