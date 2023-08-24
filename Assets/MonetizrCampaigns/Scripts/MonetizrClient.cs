@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using System.Net;
+using System.Web;
 using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
@@ -478,8 +479,8 @@ namespace Monetizr.Campaigns
                     {"screen-dpi", Screen.dpi.ToString(CultureInfo.InvariantCulture)},
                     {"device-group",MonetizrAnalytics.GetDeviceGroup().ToString().ToLower()},
                     {"device-memory",SystemInfo.systemMemorySize.ToString()},
-                    {"device-model",SystemInfo.deviceModel},
-                    {"device-name",SystemInfo.deviceName},
+                    {"device-model",HttpUtility.HtmlEncode(SystemInfo.deviceModel)},
+                    {"device-name",HttpUtility.HtmlEncode(SystemInfo.deviceName)},
                     {"internet-connection",MonetizrAnalytics.GetInternetConnectionType()}
                 }
             };
