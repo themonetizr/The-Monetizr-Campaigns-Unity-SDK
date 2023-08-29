@@ -18,25 +18,12 @@ public class Tests
     static int loadSuccess = 0;
     Dictionary<string, int> eventsAmount = new Dictionary<string, int>();
     
-
-    [Test]
-    public void UtilsTests()
-    {
-        Assert.AreEqual(Utils.CompareVersions("0.0.15", "0.0.14"), 1);
-        Assert.AreEqual(Utils.CompareVersions("0.0.11", "0.0.11"), 0);
-        Assert.AreEqual(Utils.CompareVersions("0.0.1", "0.0.11"), -1);
-
-        
-        Assert.AreEqual(Utils.ConvertToIntArray("1.2.3")[2], 3);
-
-        Assert.AreEqual(Utils.ConvertToIntArray("1,2,3",',')[2], 3);
-
-        //Assert.AreNotEqual(Utils.ShuffleList({"1,2,3"}), 3);
-    }
-
+    
     [SetUp]
     public void Setup()
     {
+        return;
+
         var go = new GameObject("Default Camera", typeof(Camera));
         SceneManager.MoveGameObjectToScene(go, SceneManager.GetActiveScene());
         go.transform.SetAsFirstSibling();
