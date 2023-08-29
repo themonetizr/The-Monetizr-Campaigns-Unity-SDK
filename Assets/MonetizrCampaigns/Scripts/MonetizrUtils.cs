@@ -83,10 +83,10 @@ namespace Monetizr.Campaigns
                         v = v.Trim('"');
 
                     result[name] = v;
-                    
+
                     //Debug.LogError($"{name},{v}");
                 }
-                      
+
             }
 
             return result;
@@ -165,11 +165,11 @@ namespace Monetizr.Campaigns
         {
             var list = new List<ListType>();
 
-            AddArrayToList(list,array,convertToListType,defaultElement);
+            AddArrayToList(list, array, convertToListType, defaultElement);
 
             return list;
         }
-        
+
         public static void AddArrayToList<ArrayType, ListType>(List<ListType> list, ArrayType[] array, Func<ArrayType, ListType> convertToListType, ListType defaultElement)
         {
             if (array == null && defaultElement != null)
@@ -182,8 +182,8 @@ namespace Monetizr.Campaigns
                     (ArrayType elem) =>
                     {
                         var e = convertToListType(elem);
-                        
-                        if(e != null)
+
+                        if (e != null)
                             list.Add(e);
                     });
             }
@@ -225,7 +225,7 @@ namespace Monetizr.Campaigns
 
             foreach (char c in jsonString)
             {
-                switch(c)   
+                switch (c)
                 {
                     case '\"': quoteCount++; break;
                     case '{': cbCount1++; break;
@@ -242,7 +242,7 @@ namespace Monetizr.Campaigns
 
             return true;
         }
-        
+
         public static string ConvertCreativeToExt(string type, string url)
         {
             if (Path.HasExtension(url))
@@ -272,8 +272,8 @@ namespace Monetizr.Campaigns
 
             for (int i = 0; i < str.Length; i += pieceLen)
             {
-               string piece = str.Substring(i, Math.Min(pieceLen, str.Length - i));
-               pieces.Add(piece);
+                string piece = str.Substring(i, Math.Min(pieceLen, str.Length - i));
+                pieces.Add(piece);
             }
 
             return pieces;
@@ -287,6 +287,30 @@ namespace Monetizr.Campaigns
         public static float SimpleTween(float k)
         {
             return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
+        }
+
+        public static string EncodeStringIntoAscii(string s)
+        {
+            if (s == null)
+                return "";
+
+            if (s.All(c => c < 128))
+                return s;
+
+            var sb = new StringBuilder();
+            foreach (var c in s)
+            {
+                if (c > 127)
+                {
+                    var encodedValue = "\\u" + ((int)c).ToString("x4");
+                    sb.Append(encodedValue);
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
         }
     }
 }

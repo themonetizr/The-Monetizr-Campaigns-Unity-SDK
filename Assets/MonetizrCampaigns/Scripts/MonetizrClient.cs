@@ -479,8 +479,8 @@ namespace Monetizr.Campaigns
                     {"screen-dpi", Screen.dpi.ToString(CultureInfo.InvariantCulture)},
                     {"device-group",MonetizrAnalytics.GetDeviceGroup().ToString().ToLower()},
                     {"device-memory",SystemInfo.systemMemorySize.ToString()},
-                    {"device-model",HttpUtility.HtmlEncode(SystemInfo.deviceModel)},
-                    {"device-name",HttpUtility.HtmlEncode(SystemInfo.deviceName)},
+                    {"device-model",Utils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
+                    {"device-name",Utils.EncodeStringIntoAscii(SystemInfo.deviceName)},
                     {"internet-connection",MonetizrAnalytics.GetInternetConnectionType()}
                 }
             };
