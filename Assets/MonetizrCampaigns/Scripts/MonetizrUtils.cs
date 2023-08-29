@@ -298,17 +298,19 @@ namespace Monetizr.Campaigns
                 return s;
 
             var sb = new StringBuilder();
+            
             foreach (var c in s)
             {
                 if (c > 127)
                 {
-                    var encodedValue = "\\u" + ((int)c).ToString("x4");
-                    sb.Append(encodedValue);
+                    sb.Append("\\u");
+                    sb.Append(((int)c).ToString("x4"));
                 }
                 else
                 {
                     sb.Append(c);
                 }
+                
             }
             return sb.ToString();
         }
