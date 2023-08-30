@@ -33,7 +33,7 @@ namespace Monetizr.Campaigns
         public Sprite backSpriteDisabled;
         public Sprite[] mapSprites;
         public GameObject[] items;
-        public Text movesLeftText;
+        //public Text movesLeftText;
         public MonetizrCar car;
         public Button closeButton;
         public Image logo;
@@ -122,7 +122,7 @@ namespace Monetizr.Campaigns
                 gameItems.Add(new Item { b = _b, go = items[i], value = 0, a = _a, gi = _gi, isOpened = false  });
             }
                       
-            movesLeftText.text = "MOVES LEFT: 4";
+            //movesLeftText.text = "MOVES LEFT: 4";
 
             //Log.PrintWarning($"{m.campaignId} {m}");
             //var adType = AdPlacement.Minigame;
@@ -201,7 +201,7 @@ namespace Monetizr.Campaigns
         {
             amountOpened++;
 
-            movesLeftText.text = $"MOVES LEFT: {4 - amountOpened}";
+            //movesLeftText.text = $"MOVES LEFT: {4 - amountOpened}";
 
             //found finish
             //if (map[item] == 6)

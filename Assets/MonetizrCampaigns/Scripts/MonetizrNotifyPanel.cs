@@ -30,7 +30,7 @@ namespace Monetizr.Campaigns
         private Sprite brandRewardBanner;
         private Sprite brandLogo;
 
-        public Image leaderboardImage;
+        //public Image leaderboardImage;
         private Sprite rewardIcon;
 
         //private Action _onComplete;
@@ -54,8 +54,8 @@ namespace Monetizr.Campaigns
             brandRewardBanner = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardBannerSprite);
             brandBanner = m.campaign.GetAsset<Sprite>(AssetsType.BrandBannerSprite);
 
-            leaderboardImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.LeaderboardBannerSprite);
-            leaderboardImage.gameObject.SetActive(leaderboardImage.sprite != null);
+            //leaderboardImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.LeaderboardBannerSprite);
+            //leaderboardImage.gameObject.SetActive(leaderboardImage.sprite != null);
 
             rewardIcon = MissionsManager.GetMissionRewardImage(m);
             
