@@ -124,16 +124,22 @@ namespace Monetizr.Campaigns
             actionButton.clickReceiver = this;
 
             //actionButton.onClick.AddListener( ()=> { md.onClaimButtonPress.Invoke(); });
-
+            
             boosterNumber.text = $"+{ScoreShow(m.reward)}";
 
             Sprite rewardIcon = MissionsManager.GetMissionRewardImage(m);;
 
 
-            boosterIcon.sprite = rewardIcon == null ? defaultBoosterIcon : rewardIcon;
+            boosterIcon.sprite = rewardIcon;
+            giftIcon.sprite = rewardIcon;
 
+            if (m.reward == 1)
+            {
+                showGift = true;
+            }
+
+            boosterNumber.gameObject.SetActive(!showGift);
             boosterIcon.gameObject.SetActive(!showGift);
-            
             giftIcon.gameObject.SetActive(showGift);
 
             rewardLine.fillAmount = m.progress;
