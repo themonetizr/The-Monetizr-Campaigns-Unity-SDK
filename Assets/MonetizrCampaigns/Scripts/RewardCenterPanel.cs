@@ -578,10 +578,10 @@ namespace Monetizr.Campaigns
             if(MonetizrManager.tinyTeaserCanBeVisible)
                 MonetizrManager.ShowTinyMenuTeaser(null);
 
-            if (!uiController.isVideoPlaying)
+            /*if (!uiController.isVideoPlaying)
             {
                 MonetizrManager.CleanUserDefinedMissions();
-            }
+            }*/
 
             //if (hasSponsoredChallenges)
             //{

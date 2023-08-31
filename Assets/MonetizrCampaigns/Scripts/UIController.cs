@@ -31,56 +31,68 @@ namespace Monetizr.Campaigns
         SurveyUnityView,
         ActionHtmlPanelView,
     }
-    
+
     internal class UIController
-    {       
-        private GameObject mainCanvas;
+    {
+        private GameObject rootUIObject;
+        private Canvas mainCanvas;
         private PanelId previousPanel;
 
 
-        public Dictionary<PanelId, PanelController> panels = null;
-        public bool isVideoPlaying;
+        private Dictionary<PanelId, PanelController> panels = null;
+        //public bool isVideoPlaying;
 
-        public UIController()
+        internal UIController()
         {
             var resCanvas = Resources.Load("MonetizrCanvas");
 
             Assert.IsNotNull(resCanvas);
 
-            mainCanvas = GameObject.Instantiate<GameObject>(resCanvas as GameObject);
+            rootUIObject = GameObject.Instantiate<GameObject>(resCanvas as GameObject);
 
-            GameObject.DontDestroyOnLoad(mainCanvas);
+            mainCanvas = rootUIObject.GetComponent<Canvas>();
 
-            Assert.IsNotNull(mainCanvas);
+            GameObject.DontDestroyOnLoad(rootUIObject);
+
+            Assert.IsNotNull(rootUIObject);
 
             previousPanel = PanelId.Unknown;
 
             panels = new Dictionary<PanelId, PanelController>();
         }
-                
 
-        /*public void PlayVideo(String path, Action<bool> _onComplete)
+        internal Canvas GetMainCanvas()
         {
-            isVideoPlaying = true;
+            return mainCanvas;
+        }
 
-            MonetizrManager.HideRewardCenter();
+        internal bool HasActivePanel(PanelId panel)
+        {
+            return panels.ContainsKey(panel);
+        }
 
-            var prefab = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrVideoPlayer") as GameObject, mainCanvas.transform);
+    /*public void PlayVideo(String path, Action<bool> _onComplete)
+    {
+        isVideoPlaying = true;
 
-            var player = prefab.GetComponent<MonetizrVideoPlayer>();
+        MonetizrManager.HideRewardCenter();
 
-            player.Play(path, (bool isSkip) => {
-                
-                    _onComplete?.Invoke(isSkip);
+        var prefab = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrVideoPlayer") as GameObject, rootUIObject.transform);
 
-                    GameObject.Destroy(prefab);
-                    isVideoPlaying = false;
-            } );
-        }*/
+        var player = prefab.GetComponent<MonetizrVideoPlayer>();
+
+        player.Play(path, (bool isSkip) => {
+            
+                _onComplete?.Invoke(isSkip);
+
+                GameObject.Destroy(prefab);
+                isVideoPlaying = false;
+        } );
+    }*/
 
         internal PanelController ShowLoadingScreen()
         {
-            var go = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrLoadingScreen") as GameObject, mainCanvas.transform);
+            var go = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrLoadingScreen") as GameObject, rootUIObject.transform);
 
             var ctrlPanel = go.GetComponent<PanelController>();
 
@@ -89,7 +101,7 @@ namespace Monetizr.Campaigns
             return ctrlPanel;      
         }
 
-        public void ShowPanelFromPrefab(String prefab, PanelId id = PanelId.Unknown, Action<bool> onComplete = null, bool rememberPrevious = false, Mission m = null)
+        internal void ShowPanelFromPrefab(String prefab, PanelId id = PanelId.Unknown, Action<bool> onComplete = null, bool rememberPrevious = false, Mission m = null)
         {
             //Log.PrintWarning($"ShowPanel: {id} Mission: {m==null}");
 
@@ -145,7 +157,7 @@ namespace Monetizr.Campaigns
                     asset = Resources.Load(prefab) as GameObject;
                 }
 
-                panel = GameObject.Instantiate<GameObject>(asset, mainCanvas.transform);
+                panel = GameObject.Instantiate<GameObject>(asset, rootUIObject.transform);
                 ctrlPanel = panel.GetComponent<PanelController>();
 
 
@@ -204,7 +216,7 @@ namespace Monetizr.Campaigns
             SetColorForElement(border, additionalParams, $"{id.ToString()}.bg_border_color");
         }
 
-        public void DestroyTinyMenuTeaser()
+        internal void DestroyTinyMenuTeaser()
         {
             if (!panels.ContainsKey(PanelId.TinyMenuTeaser))
                 return;
@@ -216,7 +228,7 @@ namespace Monetizr.Campaigns
             panels.Remove(PanelId.TinyMenuTeaser);
         }
 
-        public void ShowTinyMenuTeaser(Transform root, Vector2? screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
+        internal void ShowTinyMenuTeaser(Transform root, Vector2? screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
         {
              MonetizrMenuTeaser teaser;     
 
@@ -238,7 +250,7 @@ namespace Monetizr.Campaigns
 
                                
                 var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject,
-                    root != null ? root : mainCanvas.transform);
+                    root != null ? root : rootUIObject.transform);
 
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
 
@@ -288,8 +300,8 @@ namespace Monetizr.Campaigns
 
 
         }
-        
-        public void HidePanel(PanelId id = PanelId.Unknown)
+
+        internal void HidePanel(PanelId id = PanelId.Unknown)
         {
             if (id == PanelId.Unknown && previousPanel != PanelId.Unknown)
                 id = previousPanel;
