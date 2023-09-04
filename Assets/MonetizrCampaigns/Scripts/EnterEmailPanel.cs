@@ -78,10 +78,24 @@ namespace Monetizr.Campaigns
             PreparePanel(m);
 
             UpdateEnterFieldVisibility(false);
+            
+
+            StartCoroutine(UpdateHorizontalLayoutHack());
+        }
+
+        IEnumerator UpdateHorizontalLayoutHack()
+        {
+            yield return 0;
+
+            var hg = termsToggle.GetComponent<HorizontalLayoutGroup>();
+            hg.enabled = false;
+            hg.enabled = true;
         }
 
         IEnumerator ShowCloseButton(float time)
         {
+            crossButtonAnimator.enabled = false;
+
             yield return new WaitForSeconds(time);
 
             crossButtonAnimator.enabled = true;

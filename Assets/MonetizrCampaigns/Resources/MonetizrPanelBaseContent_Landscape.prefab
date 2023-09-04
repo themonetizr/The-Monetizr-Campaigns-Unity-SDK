@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1373941986590664192}
   - component: {fileID: 8144544780058512537}
   - component: {fileID: 5513149716985117498}
+  - component: {fileID: 5907715209724342733}
   m_Layer: 5
   m_Name: PanelCloseButton
   m_TagString: Untagged
@@ -59,7 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -132,6 +133,27 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!95 &5907715209724342733
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 661432860897580074}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: fb8563d67a54ee444ba6c45ae68f9bcc, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1326023799170614701
 GameObject:
   m_ObjectHideFlags: 0
@@ -358,7 +380,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 1
     m_MinSize: 60
-    m_MaxSize: 70
+    m_MaxSize: 90
     m_Alignment: 7
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -519,4 +541,4 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Find 2 Car Vent Clips and get a 2x time booster
+  m_Text: "Find 2 Car Vent Clips and \nget a 2x time \nbooster"
