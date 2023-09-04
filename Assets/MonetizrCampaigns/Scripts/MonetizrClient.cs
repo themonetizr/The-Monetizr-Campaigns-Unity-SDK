@@ -322,10 +322,18 @@ namespace Monetizr.Campaigns
 #if !UNITY_EDITOR
             //keep campaigns only for allowed devices
 
-            if (!string.IsNullOrEmpty(MonetizrAnalytics.advertisingID))
+            var hasAdId = !string.IsNullOrEmpty(MonetizrAnalytics.advertisingID);
+
+            if (hasAdId)
             {
                 result.RemoveAll(e =>
                 {
+                    /*if (e.testmode)
+                    {
+                        Log.PrintV($"Campaign {e.id} in test mode, no device filtering");
+                        return false;
+                    }*/
+
                     string allowed_device_id = e.serverSettings.GetParam("allowed_ad_id", "");
 
                     if (allowed_device_id.Length == 0)

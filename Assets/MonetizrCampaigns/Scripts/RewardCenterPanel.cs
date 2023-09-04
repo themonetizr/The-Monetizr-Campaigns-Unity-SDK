@@ -563,7 +563,23 @@ namespace Monetizr.Campaigns
         {
             //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.RewardsCenterScreen, currentMission);
 
-            MonetizrManager.ShowTinyMenuTeaser(null);
+
+            //MonetizrManager.ShowTinyMenuTeaser(null);
+
+            if(MonetizrManager.tinyTeaserCanBeVisible)
+                MonetizrManager.ShowTinyMenuTeaser(null);
+
+            /*if (!uiController.isVideoPlaying)
+            {
+                MonetizrManager.CleanUserDefinedMissions();
+            }*/
+
+            //if (hasSponsoredChallenges)
+            //{
+            //    MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner);
+            //}
+           
+
         }
 
         void UpdateList()

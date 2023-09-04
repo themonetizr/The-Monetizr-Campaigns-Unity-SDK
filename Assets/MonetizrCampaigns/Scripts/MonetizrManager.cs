@@ -828,7 +828,7 @@ namespace Monetizr.Campaigns
 
         public static void ShowStartupNotification(NotificationPlacement placement, Action<bool> onComplete)
         {
-            if (Instance._uiController.panels.ContainsKey(PanelId.StartNotification))
+            if (Instance._uiController.HasActivePanel(PanelId.StartNotification))
             {
                 Log.Print($"ShowStartupNotification ContainsKey(PanelId.StartNotification) {placement}");
                 return;
@@ -958,6 +958,13 @@ namespace Monetizr.Campaigns
 
             if (keepLocalClaimData)
                 Instance.SaveClaimedReward(m);
+        }
+
+        public static Canvas GetMainCanvas()
+        {
+            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+
+            return Instance?._uiController?.GetMainCanvas();
         }
 
         internal static void CleanUserDefinedMissions()
