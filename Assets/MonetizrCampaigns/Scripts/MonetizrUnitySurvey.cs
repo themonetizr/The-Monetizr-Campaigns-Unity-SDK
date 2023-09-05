@@ -16,6 +16,7 @@ namespace Monetizr.Campaigns
         public ScrollRect scroll;
         public RectTransform scrollRect;
         public MonetizrSurveyQuestionRoot monetizrQuestionRoot;
+        public MonetizrSurveyQuestionRoot monetizrQuestionRoot_landscape;
         public RectTransform contentRoot;
         public MonetizrSurveyAnswer answerRadioButtonPrefab;
         public MonetizrSurveyAnswer answerEditablePrefab;
@@ -225,7 +226,9 @@ namespace Monetizr.Campaigns
 
             currentSurvey.questions.ForEach(q =>
             {
-                var qObj = GameObject.Instantiate<GameObject>(monetizrQuestionRoot.gameObject, contentRoot);
+                var qObj = GameObject.Instantiate<GameObject>(Utils.IsInLandscapeMode() ? 
+                    monetizrQuestionRoot_landscape.gameObject :
+                    monetizrQuestionRoot.gameObject, contentRoot);
 
                 var questionRoot = qObj.GetComponent<MonetizrSurveyQuestionRoot>();
 
