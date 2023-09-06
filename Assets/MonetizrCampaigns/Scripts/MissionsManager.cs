@@ -607,7 +607,17 @@ namespace Monetizr.Campaigns
 
                     //no such reward
                     if (gr == null)
-                        return;
+                    {
+                        if (serverSettings.GetBoolParam("use_default_reward", true))
+                        {
+                            currency = RewardType.Coins;
+                            gr = MonetizrManager.GetGameReward(currency);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
 
                     //award is too much
                     if (rewardAmount > 100.0f)
@@ -626,7 +636,7 @@ namespace Monetizr.Campaigns
                     {
                         missionType = _m.GetMissionType(),
                         reward = rewardAmount2,
-                        rewardCurrency = _m.GetRewardType(),
+                        rewardCurrency = currency,
                         activateAfter = _m.GetActivateRange(),
                         surveyUrl = serverSettings.GetParam(_m.survey),
                         surveyId = string.IsNullOrEmpty(_m.surveyUnity) ? _m.survey : _m.surveyUnity,
