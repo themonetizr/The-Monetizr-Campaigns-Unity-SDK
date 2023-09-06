@@ -178,7 +178,7 @@ namespace Monetizr.Campaigns
 
             //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
 
-            int closeButtonDelay = m.campaignServerSettings.GetIntParam("SurveyUnityView.close_button_delay", 0);
+            int closeButtonDelay = m.campaignServerSettings.GetIntParam("SurveyUnityView.close_button_delay", 3);
 
             StartCoroutine(ShowCloseButton(closeButtonDelay));
         }
@@ -257,9 +257,14 @@ namespace Monetizr.Campaigns
                     //q.questionRoot.question.alignment = TextAnchor.UpperLeft;
                     //isFirstQuestionEmpty = true;
                 }
-                
-                if(Utils.IsInLandscapeMode() && q.answers.Count != 0)
+
+                if (Utils.IsInLandscapeMode())
+                {
                     q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
+
+                    if (id == 0 && q.answers.Count == 0)
+                        q.questionRoot.question.alignment = TextAnchor.UpperLeft;
+                }
 
 
                 int answerNum = 0;
