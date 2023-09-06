@@ -1,13 +1,13 @@
 {
     "name": "com.monetizr.unityplugin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "displayName": "Monetizr Unity SDK",
     "description": "A plugin to simplify the Unity integration of Monetizr Unity SDK.",
     "repository": {
         "type": "git",
-        "url": "https://github.com/themonetizr/The-Monetizr-Campaigns-Unity-SDK.git?path=/Assets/MonetizrCampaigns"
+        "url": "https://github.com/themonetizr/The-Monetizr-Campaigns-Unity-SDK.git?path=/Assets"
     },
-    "documentationUrl": "https://docs.themonetizr.com/docs/unity-campaigns-sdk-lite-integration",
+    "documentationUrl": "https://docs.themonetizr.com/docs/unity-campaigns-sdk-integration",
     "keywords": [
         "monetizr"
     ],
