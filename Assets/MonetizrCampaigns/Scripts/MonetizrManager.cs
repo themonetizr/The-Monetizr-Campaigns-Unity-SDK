@@ -255,6 +255,8 @@ namespace Monetizr.Campaigns
         internal static bool serverClaimForCampaigns;
         public static bool claimForSkippedCampaigns;
 
+        public static bool closeRewardCenterAfterEveryMission = false;
+
         internal static int maximumCampaignAmount = 1;
 
         internal static bool isVastActive = false;
@@ -538,7 +540,7 @@ namespace Monetizr.Campaigns
             {
                 //moved together with showing teaser, because here in-game logic may not be ready
                 //                createEmbedMissions();
-
+                
                 gameOnInitSuccess?.Invoke();
                 gameOnInitSuccess = null;
 
@@ -1686,6 +1688,10 @@ namespace Monetizr.Campaigns
                 _isMissionsIsOutdated = true;
 
             _activeCampaignId = camp;
+
+            closeRewardCenterAfterEveryMission =
+                camp.serverSettings.GetBoolParam("RewardCenter.close_after_mission_completion",
+                    closeRewardCenterAfterEveryMission);
 
             Log.PrintV($"Active campaign: {_activeCampaignId}");
         }
