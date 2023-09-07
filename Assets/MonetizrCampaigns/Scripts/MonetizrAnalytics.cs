@@ -853,7 +853,7 @@ namespace Monetizr.Campaigns
             additionalValues ??= new Dictionary<string, string>();
 
             if (currentMission != null)
-                additionalValues.Add("mission_id", currentMission.serverId.ToString());
+                additionalValues["mission_id"] = currentMission.serverId.ToString();
 
             //EmailErrorScreen,
             //Video,
