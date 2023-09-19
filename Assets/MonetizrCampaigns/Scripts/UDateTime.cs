@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -29,7 +30,7 @@ namespace Monetizr.Campaigns
 
         public void OnBeforeSerialize()
         {
-            _dateTime = dateTime.ToString();
+            _dateTime = dateTime.ToString(CultureInfo.InvariantCulture);
         }
 
         public UDateTime AddSeconds(double value)
