@@ -618,6 +618,13 @@ namespace Monetizr.Campaigns
 
             byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
 
+            if (data == null)
+            {
+                this.isLoaded = false;
+                this.loadingError = $"Can't download video player";
+                return;
+            }
+
             File.WriteAllBytes(zipFolder + "/html.zip", data);
             
             Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
