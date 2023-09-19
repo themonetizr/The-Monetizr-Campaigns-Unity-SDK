@@ -517,6 +517,12 @@ namespace Monetizr.Campaigns
 
         public void AddNewUIMissions()
         {
+            if (MonetizrManager.closeRewardCenterAfterEveryMission)
+            {
+                OnButtonPress();
+                return;
+            }
+
             var activeCampaign = MonetizrManager.Instance.GetActiveCampaign();
 
             //try to update UI

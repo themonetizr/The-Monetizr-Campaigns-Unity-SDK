@@ -249,11 +249,13 @@ namespace Monetizr.Campaigns
     public class MonetizrManager : MonoBehaviour
     {
         public static float requestCampaignTime = 5 * 60;
-        public static readonly string SDKVersion = "1.0.1";
+        public static readonly string SDKVersion = "1.0.2";
 
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
         public static bool claimForSkippedCampaigns;
+
+        public static bool closeRewardCenterAfterEveryMission = false;
 
         internal static int maximumCampaignAmount = 1;
 
@@ -538,7 +540,7 @@ namespace Monetizr.Campaigns
             {
                 //moved together with showing teaser, because here in-game logic may not be ready
                 //                createEmbedMissions();
-
+                
                 gameOnInitSuccess?.Invoke();
                 gameOnInitSuccess = null;
 
@@ -1686,6 +1688,10 @@ namespace Monetizr.Campaigns
                 _isMissionsIsOutdated = true;
 
             _activeCampaignId = camp;
+
+            closeRewardCenterAfterEveryMission =
+                camp.serverSettings.GetBoolParam("RewardCenter.close_after_mission_completion",
+                    closeRewardCenterAfterEveryMission);
 
             Log.PrintV($"Active campaign: {_activeCampaignId}");
         }
