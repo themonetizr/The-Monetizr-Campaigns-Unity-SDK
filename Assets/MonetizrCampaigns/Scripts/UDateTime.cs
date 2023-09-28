@@ -25,7 +25,7 @@ namespace Monetizr.Campaigns
                
         public void OnAfterDeserialize()
         {
-            DateTime.TryParse(_dateTime, out dateTime);
+            DateTime.TryParse(_dateTime, CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
         }
 
         public void OnBeforeSerialize()
