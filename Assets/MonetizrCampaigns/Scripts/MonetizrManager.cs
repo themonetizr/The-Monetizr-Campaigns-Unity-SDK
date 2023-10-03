@@ -480,7 +480,8 @@ namespace Monetizr.Campaigns
                 return null;
             }
 
-            bundleId ??= Application.identifier;
+            if(string.IsNullOrEmpty(bundleId))
+                bundleId = Application.identifier;
 
             var monetizrObject = new GameObject("MonetizrManager");
             var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();

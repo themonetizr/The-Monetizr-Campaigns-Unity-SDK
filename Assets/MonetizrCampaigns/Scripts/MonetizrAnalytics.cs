@@ -518,6 +518,7 @@ namespace Monetizr.Campaigns
 
             Mixpanel.Init();
             Mixpanel.SetToken(apikey);
+            Mixpanel.Identify(deviceIdentifier);
 
             Log.PrintV($"Mixpanel init called {apikey}");
         }
@@ -705,7 +706,8 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"--->Mixpanel track {eventName}");
 
-            Mixpanel.Identify(camp.brand_id);
+            
+            Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track(eventName, props);
 
             if (camp.serverSettings.GetBoolParam("mixpanel_fast_flush",false))
@@ -850,7 +852,8 @@ namespace Monetizr.Campaigns
 
             //-------
 
-            additionalValues ??= new Dictionary<string, string>();
+            if(additionalValues == null)
+                additionalValues = new Dictionary<string, string>();
 
             if (currentMission != null)
                 additionalValues.Add("mission_id", currentMission.serverId.ToString());
@@ -1214,8 +1217,9 @@ namespace Monetizr.Campaigns
             props["response_pieces"] = Utils.SplitStringIntoPieces(openRtbResponse,255);
             props["request_pieces"] = Utils.SplitStringIntoPieces(openRtbRequest,255);
             
-            Log.PrintV($"SendReport: {props}");    
-            Mixpanel.Identify("Programmatic-client");
+            Log.PrintV($"SendReport: {props}");
+            //Mixpanel.Identify("Programmatic-client");
+            Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track("Programmatic-request-client", props);
         }
 
