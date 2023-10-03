@@ -590,6 +590,9 @@ namespace Monetizr.Campaigns
 
         public void SendErrorToRemoteServer(string type, string shortDescription, string fullDescription)
         {
+            if (!string.IsNullOrEmpty(fullDescription) && fullDescription.Length > 1024)
+                fullDescription = fullDescription.Substring(0, 1024);
+
             string url = $"https://unity-notification-channel-to-slack-stineosy7q-uc.a.run.app/?message=\"{fullDescription}\"";
 
             var requestMessage = MonetizrClient.GetHttpRequestMessage(url);

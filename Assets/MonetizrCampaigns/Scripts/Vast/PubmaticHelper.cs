@@ -400,10 +400,10 @@ namespace Monetizr.Campaigns
         
         internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign)
         {
-            var globalSettings = client.GlobalSettings;
+            var settings = currentCampaign.serverSettings; //client.GlobalSettings;
 
            //var apiUrl = globalSettings.GetParam("api_url");
-            var openRtbUri = globalSettings.GetParam("openrtb.endpoint");
+            var openRtbUri = settings.GetParam("openrtb.endpoint");
 
             if (string.IsNullOrEmpty(openRtbUri))
             {
@@ -430,11 +430,11 @@ namespace Monetizr.Campaigns
 
             var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri, userAgent);
             
-            var openRtbRequest = currentCampaign.serverSettings.GetParam("openrtb.request");
+            var openRtbRequest = settings.GetParam("openrtb.request");
             
-            if (string.IsNullOrEmpty(openRtbRequest) && globalSettings.HasParam("openrtb.generator_url"))
+            if (string.IsNullOrEmpty(openRtbRequest) && settings.HasParam("openrtb.generator_url"))
             {
-                string generatorUri = globalSettings.GetParam("openrtb.generator_url");
+                string generatorUri = settings.GetParam("openrtb.generator_url");
 
                 openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrAnalytics.advertisingID}");
             }
@@ -463,7 +463,7 @@ namespace Monetizr.Campaigns
 
             if (!response.isSuccess || res.Contains("Request failed!"))
             {
-                if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
+                if (settings.HasParam("openrtb.sent_report_to_mixpanel"))
                     client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
 
                 Log.PrintV($"Response unsuccessful with content: {res}");
@@ -502,7 +502,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"GetOpenRTBResponseForCampaign {currentCampaign.id} successfully loaded.");
 
-            if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
+            if (settings.HasParam("openrtb.sent_report_to_mixpanel"))
             {
                 client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
             }
