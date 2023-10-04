@@ -144,8 +144,8 @@ namespace Monetizr.Campaigns
             actionButton.gameObject.name = $"RewardCenterButtonClaim{id}";
             //----
 
-            UIController.PrepareCustomColors(backgroundImage, borderImage, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
-            UIController.PrepareCustomColors(null, backgroundImage2, m.campaignServerSettings.dictionary, PanelId.RewardCenter);
+            UIController.PrepareCustomColors(backgroundImage, borderImage, m.campaignServerSettings, PanelId.RewardCenter);
+            UIController.PrepareCustomColors(null, backgroundImage2, m.campaignServerSettings, PanelId.RewardCenter);
 
 
             foreach (var t in gameObject.GetComponents<PanelTextItem>())

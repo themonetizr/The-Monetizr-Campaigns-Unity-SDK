@@ -154,7 +154,7 @@ namespace Monetizr.Campaigns
                 mapSprites[2] = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.MinigameSprite3);
             }*/
 
-            UIController.SetColorForElement(minigameBackground, m.campaignServerSettings.dictionary, "MemoryGame.bg_color2");
+            UIController.SetColorForElement(minigameBackground, m.campaignServerSettings, "MemoryGame.bg_color2");
 
             //---------------
 

@@ -27,23 +27,23 @@ namespace Monetizr.Campaigns
             var paramWithType = $"{parentId.ToString()}.{m.type.ToString()}.{textContent}";
             var paramWithTypeAndId = $"{parentId.ToString()}.{m.type.ToString()}.{m.serverId}.{textContent}";
 
-            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, "text_color");
+            UIController.SetColorForElement(textElement, m.campaignServerSettings, "text_color");
 
-            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{param}_color");
-            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{paramWithType}_color");
-            UIController.SetColorForElement(textElement, m.campaignServerSettings.dictionary, $"{paramWithTypeAndId}_color");
+            UIController.SetColorForElement(textElement, m.campaignServerSettings, $"{param}_color");
+            UIController.SetColorForElement(textElement, m.campaignServerSettings, $"{paramWithType}_color");
+            UIController.SetColorForElement(textElement, m.campaignServerSettings, $"{paramWithTypeAndId}_color");
 
-            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings.dictionary, "button_bg_color");
+            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, "button_bg_color");
 
-            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings.dictionary, $"{param}_bg_color");
-            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings.dictionary, $"{paramWithType}_bg_color");
-            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings.dictionary, $"{paramWithTypeAndId}_bg_color");
+            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, $"{param}_bg_color");
+            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, $"{paramWithType}_bg_color");
+            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, $"{paramWithTypeAndId}_bg_color");
 
             if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
             {
                 var param2 = $"{parentId.ToString()}.{textContent}2";
 
-                if (m.campaignServerSettings.dictionary.ContainsKey(param2))
+                if (m.campaignServerSettings.ContainsKey(param2))
                 {
                     param = param2;
                 }
@@ -53,7 +53,7 @@ namespace Monetizr.Campaigns
 
             System.Array.ForEach(prm, s =>
             {
-                if (m.campaignServerSettings.dictionary.ContainsKey(s))
+                if (m.campaignServerSettings.ContainsKey(s))
                 {
                     UpdateRewardText(m, s);
                 }

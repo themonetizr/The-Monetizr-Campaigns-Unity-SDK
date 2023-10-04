@@ -686,7 +686,7 @@ namespace Monetizr.Campaigns
 
             if (campaign != null)
             {
-                foreach (var s in campaign.serverSettings.dictionary)
+                foreach (var s in campaign.serverSettings)
                 {
                     string key = s.Key;
 

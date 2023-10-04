@@ -156,7 +156,7 @@ namespace Monetizr.Campaigns
                 if(id != PanelId.DebugPanel && m != null)
                     PrepareCustomColors(ctrlPanel.backgroundImage,
                     ctrlPanel.backgroundBorderImage,
-                    m.campaignServerSettings.dictionary,
+                    m.campaignServerSettings,
                     id);
                 
                 ctrlPanel.uiController = this;
@@ -246,7 +246,7 @@ namespace Monetizr.Campaigns
 
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
 
-                PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.serverSettings.dictionary, PanelId.TinyMenuTeaser);
+                PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.serverSettings, PanelId.TinyMenuTeaser);
 
                 teaser.uiVersion = designVersion;
                 teaser.triggersButtonEventsOnDeactivate = false;

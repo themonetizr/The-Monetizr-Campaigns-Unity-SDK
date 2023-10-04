@@ -151,32 +151,27 @@ namespace Monetizr.Campaigns
         }
     }
 
-    public class SettingsDictionary<TKey, TValue>
+    public class SettingsDictionary<TKey, TValue> : Dictionary<TKey, TValue>
     {
-        public Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
+        //private Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
 
         public SettingsDictionary()
         {
 
         }
 
-        public SettingsDictionary(Dictionary<TKey, TValue> d)
+        public SettingsDictionary(Dictionary<TKey, TValue> d) : base(d)
         {
-            dictionary = d;
+
         }
 
         public void MergeSettingsFrom(SettingsDictionary<TKey, TValue> addDictionary)
         {
-            if (dictionary.Count == 0)
+            if (Count == 0)
                 return;
             
-            addDictionary.dictionary?.ToList().ForEach(
-                x => dictionary[x.Key] = x.Value);
-        }
-
-        public bool HasParam(TKey p)
-        {
-            return dictionary.ContainsKey(p);
+            addDictionary?.ToList().ForEach(
+                x => this[x.Key] = x.Value);
         }
         
         public TValue GetParam(TKey p, TValue def = default(TValue))
@@ -184,7 +179,7 @@ namespace Monetizr.Campaigns
             if(p == null)
                 return def;
 
-            return dictionary.ContainsKey(p) ? dictionary[p] : def;
+            return base.ContainsKey(p) ? this[p] : def;
         }
 
         public bool GetBoolParam(TKey p, bool defaultParam)
@@ -192,11 +187,11 @@ namespace Monetizr.Campaigns
             if (p == null)
                 return defaultParam;
 
-            if (!dictionary.ContainsKey(p))
+            if (!base.ContainsKey(p))
                 return defaultParam;
 
             Boolean result = defaultParam;
-            string val = dictionary[p].ToString();
+            string val = this[p].ToString();
 
             if (!Boolean.TryParse(val, out result))
             {
@@ -211,11 +206,10 @@ namespace Monetizr.Campaigns
             if (p == null)
                 return defaultParam;
 
-            if (!dictionary.ContainsKey(p))
+            if (!base.ContainsKey(p))
                 return defaultParam;
-
-            List<float> result = defaultParam;
-            string val = dictionary[p].ToString();
+            
+            string val = this[p].ToString();
 
             var svals = val.Split(new char[] {';',','});
 
@@ -236,7 +230,7 @@ namespace Monetizr.Campaigns
                 return v;
             }
                        
-            return result;
+            return defaultParam;
         }
 
         public int GetIntParam(TKey p, int defaultParam = 0)
@@ -244,11 +238,11 @@ namespace Monetizr.Campaigns
             if (p == null)
                 return defaultParam;
 
-            if (!dictionary.ContainsKey(p))
+            if (!base.ContainsKey(p))
                 return defaultParam;
 
             int result = 0;
-            string val = dictionary[p].ToString();
+            string val = this[p].ToString();
 
             if (!Int32.TryParse(val, out result))
             {
@@ -263,11 +257,11 @@ namespace Monetizr.Campaigns
             if (p == null)
                 return defaultParam;
 
-            if (!dictionary.ContainsKey(p))
+            if (!base.ContainsKey(p))
                 return defaultParam;
 
             float result = 0;
-            string val = dictionary[p].ToString();
+            string val = this[p].ToString();
 
             if (!float.TryParse(val, out result))
             {
