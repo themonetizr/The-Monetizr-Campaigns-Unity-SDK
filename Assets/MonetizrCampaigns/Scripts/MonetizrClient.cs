@@ -32,7 +32,7 @@ namespace Monetizr.Campaigns
     {
         //public PlayerInfo playerInfo { get; set; }
 
-        private string _baseApiUrl = "https://api.themonetizr.com";
+        private string _baseApiUrl = "https://api-test.themonetizr.com";
 
         private string CampaignsApiUrl
         {
@@ -203,66 +203,30 @@ namespace Monetizr.Campaigns
         
         public async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
         {
-            var requestMessage = GetHttpRequestMessage(SettingsApiUrl);
+            var responseString = await RequestStringFromUrl(SettingsApiUrl);
 
-            Log.PrintV($"Sent settings: {requestMessage.ToString()}");
+            if (string.IsNullOrEmpty(responseString))
+            {
+                Log.PrintV($"Unable to load settings!");
+                return new SettingsDictionary<string, string>();
+            }
 
-            HttpResponseMessage response = await Client.SendAsync(requestMessage);
+            Log.PrintV($"Settings: {responseString}");
 
-            var resultString = await response.Content.ReadAsStringAsync();
-
-            string responseOk = response.IsSuccessStatusCode == true ? "OK" : "Not OK";
-
-            //---
-
-            Log.Print($"Settings response is: {response.StatusCode}");
-            Log.PrintV($"Settings: {resultString}");
-
-            SettingsDictionary<string, string> result = new SettingsDictionary<string, string>();
-
-            if (!response.IsSuccessStatusCode)
-                return result;
-
-            if (resultString.Length == 0)
-                return result;
-
-            //var dict = Json.Deserialize(adp) as Dictionary<string, object>;
-            result.dictionary = Utils.ParseContentString(resultString);
-
-            return result;
+            return new SettingsDictionary<string, string>(Utils.ParseContentString(responseString));
         }
 
         public async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
         {
             MonetizrManager.isVastActive = false;
-            //List<ServerCampaign> result = new List<ServerCampaign>();
 
-            //loading settings
             GlobalSettings = await DownloadGlobalSettings();
-            
-            //load regular campaigns
             
             var loadResult = await GetServerCampaignsFromMonetizr();
             
             Log.PrintV($"GetServerCampaignsFromMonetizr result {loadResult.Count}");
             
             return loadResult;
-            
-            //VastHelper v = new VastHelper(this);
-            //KevelHelper v = new KevelHelper(this);
-            /*PubmaticHelper v = new PubmaticHelper(this);
-
-            var programmaticCampaignResult = await v.GetProgrammaticCampaign(this);
-            if (programmaticCampaignResult.isSuccess && 
-                programmaticCampaignResult.result.Count > 0)
-            {
-                MonetizrManager.isVastActive = true;
-                MonetizrManager.maximumCampaignAmount = programmaticCampaignResult.result.Count;
-                
-                return programmaticCampaignResult.result;
-            }*/
-
-            //return new List<ServerCampaign>();
         }
 
         internal SettingsDictionary<string, string> GlobalSettings { get; private set; }
@@ -416,11 +380,11 @@ namespace Monetizr.Campaigns
             });
         }
 
-        private async Task<List<ServerCampaign>> GetServerCampaignsFromMonetizr()
+        private async Task<string> RequestStringFromUrl(string url)
         {
-            var requestMessage = GetHttpRequestMessage(CampaignsApiUrl);
+            var requestMessage = GetHttpRequestMessage(url);
 
-            Log.PrintV($"Sent request: {requestMessage.ToString()}");
+            Log.PrintV($"Sent request: {requestMessage}");
 
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
 
@@ -428,20 +392,29 @@ namespace Monetizr.Campaigns
 
             string responseOk = response.IsSuccessStatusCode == true ? "OK" : "Not OK";
 
-            //---
-
             Log.Print($"Response is: {response.StatusCode}");
             Log.PrintV(responseString);
 
             if (!response.IsSuccessStatusCode)
             {
-                //list = result;
-                return new List<ServerCampaign>();
+                return "";
             }
 
             if (responseString.Length == 0)
             {
-                //list = result;
+                return "";
+            }
+
+            return responseString;
+        }
+
+
+        private async Task<List<ServerCampaign>> GetServerCampaignsFromMonetizr()
+        {
+            var responseString = await RequestStringFromUrl(CampaignsApiUrl);
+            
+            if (string.IsNullOrEmpty(responseString))
+            {
                 return new List<ServerCampaign>();
             }
             
@@ -451,16 +424,31 @@ namespace Monetizr.Campaigns
             {
                 return new List<ServerCampaign>();
             }
+
+            campaigns.campaigns = await TryRecreateCampaignsFromAdm(campaigns.campaigns);
+
+            campaigns.campaigns.ForEach(c => c.PostCampaignLoad());
             
-            foreach (var ch in campaigns.campaigns)
+            return campaigns.campaigns;
+        }
+
+        internal async Task<List<ServerCampaign>> TryRecreateCampaignsFromAdm(List<ServerCampaign> campaigns)
+        {
+            var admCampaigns = new List<ServerCampaign>();
+
+            var ph = new PubmaticHelper(MonetizrManager.Instance.Client, "");
+
+            foreach (var c in campaigns)
             {
-                Log.PrintV($"-----{ch.content}");
-                var localSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(ch.content));
-                ch.serverSettings = localSettings;
-                Log.Print($"Loaded campaign: {ch.id}");
+                if (string.IsNullOrEmpty(c.adm)) continue;
+
+                var admCampaign = await ph.PrepareServerCampaign(c.id, c.adm, false);
+
+                if(admCampaign != null)
+                    admCampaigns.Add(admCampaign);
             }
 
-            return campaigns.campaigns;
+            return admCampaigns.Count == 0 ? admCampaigns : campaigns;
         }
 
         internal static HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false)

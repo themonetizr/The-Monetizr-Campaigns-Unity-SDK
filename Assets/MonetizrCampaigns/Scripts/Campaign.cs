@@ -40,18 +40,12 @@ namespace Monetizr.Campaigns
             { AssetsType.BrandRewardLogoSprite, typeof(Sprite) },
             { AssetsType.BrandRewardBannerSprite, typeof(Sprite) },
             { AssetsType.SurveyURLString, typeof(String) },
-            //{ AssetsType.VideoURLString, typeof(String) },
             { AssetsType.VideoFilePathString, typeof(String) },
             { AssetsType.BrandTitleString, typeof(String) },
             { AssetsType.TinyTeaserTexture, typeof(Texture2D) },
             { AssetsType.TinyTeaserSprite, typeof(Sprite) },
-            //{ AssetsType.Html5ZipURLString, typeof(String) },
             { AssetsType.Html5PathString, typeof(String) },
-            //{ AssetsType.HeaderTextColor, typeof(Color) },
-            //{ AssetsType.CampaignTextColor, typeof(Color) },
-           // { AssetsType.CampaignHeaderTextColor, typeof(Color) },
             { AssetsType.TiledBackgroundSprite, typeof(Sprite) },
-            //{ AssetsType.CampaignBackgroundColor, typeof(Color) },
             { AssetsType.CustomCoinSprite, typeof(Sprite) },
             { AssetsType.CustomCoinString, typeof(String) },
             { AssetsType.LoadingScreenSprite, typeof(Sprite) },
@@ -81,6 +75,7 @@ namespace Monetizr.Campaigns
         public List<Asset> assets = new List<Asset>();
         public List<Location> locations = new List<Location>();
         public string end_date;
+        public string adm;
 
         public ServerCampaign(string id, string darTag, SettingsDictionary<string,string> defaultServerSettings)
         {
@@ -91,6 +86,7 @@ namespace Monetizr.Campaigns
 
         public ServerCampaign()
         {
+           
         }
 
         [System.NonSerialized]
@@ -729,6 +725,19 @@ namespace Monetizr.Campaigns
                 return false;
 
             return mConditions.All(c => settings[c.Key] == c.Value);
+        }
+
+        internal void PostCampaignLoad()
+        {
+            Log.PrintV($"Content: {content}");
+            Log.PrintV($"Adm: {adm}");
+
+            if (string.IsNullOrEmpty(content))
+                return;
+
+            serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(content));
+
+            Log.Print($"Loaded campaign: {id}");
         }
     }
 }

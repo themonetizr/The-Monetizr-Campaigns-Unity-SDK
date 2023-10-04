@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
@@ -124,6 +125,14 @@ namespace Monetizr.Campaigns
             {
             }
 
+            public VerificationJavaScriptResource(string apiFramework, bool browserOptional, bool browserOptionalSpecified, string value)
+            {
+                this.apiFramework = apiFramework;
+                this.browserOptional = browserOptional;
+                this.browserOptionalSpecified = browserOptionalSpecified;
+                this.value = value;
+            }
+
             public VerificationJavaScriptResource(Verification_typeJavaScriptResource jsr)
             {
                 apiFramework = jsr.apiFramework;
@@ -167,50 +176,48 @@ namespace Monetizr.Campaigns
             }
         }
 
-
-        internal static void AddVastSettings(VastSettings _vastSettings, Verification_type[] adVerifications, string _skipOffset, string _videoUrl)
+        internal static void AddVastVerificationSettings(VastSettings _vastSettings, Verification_type[] adVerifications)
         {
             //adVerifications = null;
 
             if (adVerifications.IsNullOrEmpty())
             {
                 Log.PrintWarning("AdVerifications is not defined in the VAST xml!");
-
+                return;
             }
+            
+            foreach (var av in adVerifications)
+            {
+                //Log.PrintV($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
 
-            if (!adVerifications.IsNullOrEmpty())
-                foreach (var av in adVerifications)
+                var jsrList = Utils.CreateListFromArray<Verification_typeJavaScriptResource, VerificationJavaScriptResource>(
+                    av.JavaScriptResource,
+                    (Verification_typeJavaScriptResource jsr) => { return new VerificationJavaScriptResource(jsr); },
+                    new VerificationJavaScriptResource());
+
+                var trackingList = Utils.CreateListFromArray<TrackingEvents_Verification_typeTracking, TrackingEvent>(
+                    av.TrackingEvents,
+                    (TrackingEvents_Verification_typeTracking te) => { return new TrackingEvent(te); },
+                    new TrackingEvent());
+
+                var execList = Utils.CreateListFromArray<Verification_typeExecutableResource, VerificationExecutableResource>(
+                    av.ExecutableResource,
+                    (Verification_typeExecutableResource er) => { return new VerificationExecutableResource(er); },
+                    new VerificationExecutableResource());
+
+                _vastSettings.adVerifications.Add(new AdVerification()
                 {
-                    //Log.PrintV($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
-
-                    var jsrList = Utils.CreateListFromArray<Verification_typeJavaScriptResource, VerificationJavaScriptResource>(
-                        av.JavaScriptResource,
-                        (Verification_typeJavaScriptResource jsr) => { return new VerificationJavaScriptResource(jsr); },
-                        new VerificationJavaScriptResource());
-
-                    var trackingList = Utils.CreateListFromArray<TrackingEvents_Verification_typeTracking, TrackingEvent>(
-                        av.TrackingEvents,
-                        (TrackingEvents_Verification_typeTracking te) => { return new TrackingEvent(te); },
-                        new TrackingEvent());
-
-                    var execList = Utils.CreateListFromArray<Verification_typeExecutableResource, VerificationExecutableResource>(
-                        av.ExecutableResource,
-                        (Verification_typeExecutableResource er) => { return new VerificationExecutableResource(er); },
-                        new VerificationExecutableResource());
-
-                    _vastSettings.adVerifications.Add(new AdVerification()
-                    {
-                        executableResource = execList,
-                        javaScriptResource = jsrList,
-                        tracking = trackingList,
-                        vendorField = av.vendor,
-                        verificationParameters = av.VerificationParameters
-                    });
-                }
+                    executableResource = execList,
+                    javaScriptResource = jsrList,
+                    tracking = trackingList,
+                    vendorField = av.vendor,
+                    verificationParameters = av.VerificationParameters
+                });
+            }
 
             //string s = Json.Serialize(adv.adVerifications);
 
-            _vastSettings.videoSettings = new VideoSettings() { skipOffset = _skipOffset, videoUrl = _videoUrl };
+            //_vastSettings.videoSettings = new VideoSettings() { skipOffset = _skipOffset, videoUrl = _videoUrl };
 
 
         }
@@ -251,33 +258,34 @@ namespace Monetizr.Campaigns
 
         internal SettingsDictionary<string, string> GetDefaultSettingsForProgrammatic()
         {
-            var serverSettings = new SettingsDictionary<string, string>();
+            var settings = new Dictionary<string, string>()
+            {
+                { "design_version", "2" },
+                { "amount_of_teasers", "100" },
+                { "teaser_design_version", "3" },
+                { "amount_of_notifications", "100" },
+                { "RewardCenter.show_for_one_mission", "true" },
 
-            serverSettings.dictionary.Add("design_version", "2");
-            serverSettings.dictionary.Add("amount_of_teasers", "100");
-            serverSettings.dictionary.Add("teaser_design_version", "3");
-            serverSettings.dictionary.Add("amount_of_notifications", "100");
-            serverSettings.dictionary.Add("RewardCenter.show_for_one_mission", "true");
+                { "bg_color", "#124674" },
+                { "bg_color2", "#124674" },
+                { "link_color", "#AAAAFF" },
+                { "text_color", "#FFFFFF" },
+                { "bg_border_color", "#FFFFFF" },
+                { "RewardCenter.reward_text_color", "#2196F3" },
 
-            serverSettings.dictionary.Add("bg_color", "#124674");
-            serverSettings.dictionary.Add("bg_color2", "#124674");
-            serverSettings.dictionary.Add("link_color", "#AAAAFF");
-            serverSettings.dictionary.Add("text_color", "#FFFFFF");
-            serverSettings.dictionary.Add("bg_border_color", "#FFFFFF");
-            serverSettings.dictionary.Add("RewardCenter.reward_text_color", "#2196F3");
+                { "CongratsNotification.button_text", "Awesome!" },
+                { "CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr" },
+                { "CongratsNotification.header_text", "Get your awesome reward!" },
 
-            serverSettings.dictionary.Add("CongratsNotification.button_text", "Awesome!");
-            serverSettings.dictionary.Add("CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr");
-            serverSettings.dictionary.Add("CongratsNotification.header_text", "Get your awesome reward!");
+                { "StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>" },
+                { "StartNotification.button_text", "Learn more!" },
+                { "StartNotification.content_text", "Join Monetizr<br/>to get game rewards" },
+                { "StartNotification.header_text", "<b>Rewards by Monetizr</b>" },
 
-            serverSettings.dictionary.Add("StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>");
-            serverSettings.dictionary.Add("StartNotification.button_text", "Learn more!");
-            serverSettings.dictionary.Add("StartNotification.content_text", "Join Monetizr<br/>to get game rewards");
-            serverSettings.dictionary.Add("StartNotification.header_text", "<b>Rewards by Monetizr</b>");
+                { "RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%" }
+            };
 
-            serverSettings.dictionary.Add("RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%");
-
-            return serverSettings;
+            return new SettingsDictionary<string, string>(settings);
         }
 
 
@@ -359,6 +367,7 @@ namespace Monetizr.Campaigns
                         AddInlineCreativesIntoAssets();
                         break;
                     case Type.Wrapper:
+                        AddVerificationSettingsFromExtentions();
                         AddWrapperCreativesIntoTrackingEvents();
                         break;
                     case Type.Unknown:
@@ -366,6 +375,9 @@ namespace Monetizr.Campaigns
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
+                if (_baseType.Impression == null)
+                    return;
 
                 foreach (var e in _baseType.Impression)
                 {
@@ -384,6 +396,8 @@ namespace Monetizr.Campaigns
                         result = FindVideoInLinearCreativesAndGrabEvents(videoFileName);
                         break;
                     case Type.Wrapper:
+
+
                         AddWrapperCreativesIntoTrackingEvents();
                         break;
                     case Type.Unknown:
@@ -401,9 +415,56 @@ namespace Monetizr.Campaigns
                 return result;
             }
 
+            private void AddVerificationSettingsFromExtentions()
+            {
+                var adItem = _wrapper;
+
+                if (adItem.Extensions.IsNullOrEmpty()) return;
+
+                foreach (var e in adItem.Extensions)
+                {
+                    if (e.type != "AdVerifications") continue;
+
+                    foreach (var av in e.Any)
+                    {
+                        XmlNode verificationNode = av.SelectSingleNode("Verification");
+                        string vendor = verificationNode.Attributes["vendor"].Value;
+
+                        XmlNode jsResourceNode = verificationNode.SelectSingleNode("JavaScriptResource");
+                        string apiFramework = jsResourceNode.Attributes["apiFramework"].Value;
+
+                        bool browserOptional = false;
+                        bool.TryParse(jsResourceNode.Attributes["browserOptional"].Value, out browserOptional);
+
+                        string jsResource = jsResourceNode.InnerText.Trim();
+
+                        XmlNode verificationParamsNode = verificationNode.SelectSingleNode("VerificationParameters");
+                        string verificationParams = verificationParamsNode.InnerText.Trim();
+
+                        _vastSettings.adVerifications.Add(new AdVerification()
+                        {
+                            //executableResource = execList,
+                            javaScriptResource = new List<VerificationJavaScriptResource>()
+                            {
+                                new VerificationJavaScriptResource(apiFramework,browserOptional,false,jsResource)
+                            },
+                            //tracking = trackingList,
+                            vendorField = vendor,
+                            verificationParameters = verificationParams
+                        });
+
+                    }
+                    
+                    
+                }
+            }
+
             private void AddWrapperCreativesIntoTrackingEvents()
             {
                 var adItem = _wrapper;
+                
+                if (adItem.Creatives == null)
+                    return;
 
                 foreach (var c in adItem.Creatives)
                 {
@@ -420,6 +481,8 @@ namespace Monetizr.Campaigns
                         },
                         new TrackingEvent());
                 }
+
+                
             }
 
             internal string WrapperAdTagUri => _type == Type.Wrapper ? _wrapper.VASTAdTagURI : null;
@@ -428,6 +491,13 @@ namespace Monetizr.Campaigns
             private void AddInlineCreativesIntoAssets()
             {
                 var adItem = _inline;
+
+                //TODO:
+                //Load MonetizrCampaignSettings from extentions
+                //Load AdVerifications from extentions
+                //Load at AdParameters from Linear and NonLinear params
+
+                
 
                 foreach (var c in adItem.Creatives)
                 {
@@ -535,7 +605,9 @@ namespace Monetizr.Campaigns
 
                         LoadCampagnSettingsFromAdParams(it.AdParameters, _serverCampaign);
 
-                        AddVastSettings(_vastSettings, adItem.AdVerifications, skipOffset, videoUrl);
+                        AddVastVerificationSettings(_vastSettings, adItem.AdVerifications);
+
+                        _vastSettings.videoSettings = new VideoSettings() { skipOffset = skipOffset, videoUrl = videoUrl };
 
                     }
 
@@ -578,7 +650,7 @@ namespace Monetizr.Campaigns
                     {
                         string filesList = string.Join("\n",it.MediaFiles.MediaFile.Select(x => $"{x.Value}#{x.bitrate}").ToArray());
                         
-                        if (client.GlobalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
+                        if (client.GlobalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
                             client.analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media",null);
      
                         mediaFile = it.MediaFiles.MediaFile[0];
@@ -601,7 +673,10 @@ namespace Monetizr.Campaigns
 
                     //LoadCampagnSettingsFromAdParams(it.AdParameters, _serverCampaign);
 
-                    AddVastSettings(_vastSettings, adItem.AdVerifications, skipOffset, videoUrl);
+                    _vastSettings.videoSettings = new VideoSettings() { skipOffset = skipOffset, videoUrl = videoUrl };
+
+
+                    AddVastVerificationSettings(_vastSettings, adItem.AdVerifications);
 
                 }
 
@@ -758,14 +833,22 @@ namespace Monetizr.Campaigns
 
             adItem.AssignCreativesIntoAssets();
 
+            //AddVastVerificationSettings(vastSettings, adItem.AdVerifications);
+
             if (!string.IsNullOrEmpty(adItem.WrapperAdTagUri))
             {
                 Log.PrintV($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
 
-                var result = await MonetizrClient.DownloadUrlAsString(new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri));
+                HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri);
+                httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+
+                var result = await MonetizrClient.DownloadUrlAsString(httpRequest);
 
                 if (!result.isSuccess)
+                {
+                    Log.PrintV($"Can't load wrapper with the url {adItem.WrapperAdTagUri}");
                     return false;
+                }
 
                 if (!await LoadVastContent(result.content, videoOnly, serverCampaign, vastSettings,
                         videoTrackingEvents))
@@ -786,7 +869,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            serverCampaign.serverSettings.dictionary.Add("custom_missions",
+            serverCampaign.serverSettings.Add("custom_missions",
                     "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
 
             await DownloadAndPrepareHtmlVideoPlayer(serverCampaign, videoAsset);
@@ -821,7 +904,7 @@ namespace Monetizr.Campaigns
 
             foreach (var i in parsedDict)
             {
-                serverCampaign.serverSettings.dictionary.Add(i.Key, i.Value);
+                serverCampaign.serverSettings.Add(i.Key, i.Value);
 
                 Log.PrintV($"Additional settings from AdParameters [{i.Key}:{i.Value}]");
             }

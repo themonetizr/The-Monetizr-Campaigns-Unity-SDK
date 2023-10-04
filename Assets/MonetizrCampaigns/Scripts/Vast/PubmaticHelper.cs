@@ -211,7 +211,7 @@ namespace Monetizr.Campaigns
             //getting openrtb campaign from monetizr proxy or with ssp endpoind
             //Log.PrintV(globalSettings.dictionary.ToString());
 
-            if (!globalSettings.HasParam("openrtb.endpoint"))
+            if (!globalSettings.ContainsKey("openrtb.endpoint"))
             {
                 Log.PrintV($"No programmatic endpoint defined! Programmatic disabled!");
                 return (false, new List<ServerCampaign>());
@@ -223,8 +223,8 @@ namespace Monetizr.Campaigns
             string openRtbRequest = "";
 
             if (globalSettings.GetBoolParam("openrtb.send_by_client", false) &&
-                globalSettings.HasParam("openrtb.endpoint") &&
-                globalSettings.HasParam("openrtb.generator_url"))
+                globalSettings.ContainsKey("openrtb.endpoint") &&
+                globalSettings.ContainsKey("openrtb.generator_url"))
             {
                 string generatorUri = globalSettings.GetParam("openrtb.generator_url");
 
@@ -251,7 +251,7 @@ namespace Monetizr.Campaigns
             if (!response.isSuccess)
             {
                 //#if !UNITY_EDITOR
-                if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
+                if (globalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
                     monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", null);
                 //#endif                
 
@@ -323,7 +323,7 @@ namespace Monetizr.Campaigns
             }*/
 
             //#if !UNITY_EDITOR            
-            if (globalSettings.HasParam("openrtb.sent_report_to_mixpanel"))
+            if (globalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
             {
                 monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, null);
             }
@@ -343,7 +343,7 @@ namespace Monetizr.Campaigns
 
             return (true, resultCampaignList);
         }
-
+        
         private void LoadAdditionalNativeAssets(string result, ServerCampaign serverCampaign)
         {
             var nativeData = NativeData.Load(result);
@@ -370,7 +370,7 @@ namespace Monetizr.Campaigns
 
                     case AssetType.Data:
                         if (a.data.value.Length > 15)
-                            serverCampaign.serverSettings.dictionary["RewardCenter.VideoReward.content_text"] = a.data.value;
+                            serverCampaign.serverSettings["RewardCenter.VideoReward.content_text"] = a.data.value;
 
                         break;
 
@@ -387,7 +387,7 @@ namespace Monetizr.Campaigns
 
                         break;
                     case AssetType.Title:
-                        serverCampaign.serverSettings.dictionary["TinyMenuTeaser.button_text"] = a.title.text;
+                        serverCampaign.serverSettings["TinyMenuTeaser.button_text"] = a.title.text;
                         break;
                     case AssetType.Video:
                         break;
@@ -432,7 +432,7 @@ namespace Monetizr.Campaigns
             
             var openRtbRequest = settings.GetParam("openrtb.request");
             
-            if (string.IsNullOrEmpty(openRtbRequest) && settings.HasParam("openrtb.generator_url"))
+            if (string.IsNullOrEmpty(openRtbRequest) && settings.ContainsKey("openrtb.generator_url"))
             {
                 string generatorUri = settings.GetParam("openrtb.generator_url");
 
@@ -463,7 +463,7 @@ namespace Monetizr.Campaigns
 
             if (!response.isSuccess || res.Contains("Request failed!"))
             {
-                if (settings.HasParam("openrtb.sent_report_to_mixpanel"))
+                if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
                     client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
 
                 Log.PrintV($"Response unsuccessful with content: {res}");
@@ -502,7 +502,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"GetOpenRTBResponseForCampaign {currentCampaign.id} successfully loaded.");
 
-            if (settings.HasParam("openrtb.sent_report_to_mixpanel"))
+            if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
             {
                 client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
             }
