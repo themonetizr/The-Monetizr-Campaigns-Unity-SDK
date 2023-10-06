@@ -69,6 +69,9 @@ namespace Monetizr.Campaigns
         {
             var result = new Dictionary<string, string>();
 
+            if (string.IsNullOrEmpty(content))
+                return result;
+
             var root = SimpleJSON.JSON.Parse(content);
 
             foreach (var key in root)
@@ -93,12 +96,9 @@ namespace Monetizr.Campaigns
             return result;
         }
 
-         public static Dictionary<string, string> ParseContentString(string content, Dictionary<string, object> dict = null)
+         public static Dictionary<string, string> ParseContentString(string content)
         {
-            var res =
-                dict != null ? 
-                    dict.ToDictionary(kvp => kvp.Key, kvp => (string)kvp.Value) : 
-                    ParseJson(content);
+            var res = ParseJson(content);
 
             var res2 = new Dictionary<string, string>();
 
