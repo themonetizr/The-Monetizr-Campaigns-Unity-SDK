@@ -185,7 +185,7 @@ namespace Monetizr.Campaigns
                 Log.PrintWarning("AdVerifications is not defined in the VAST xml!");
                 return;
             }
-            
+
             foreach (var av in adVerifications)
             {
                 //Log.PrintV($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
@@ -223,7 +223,7 @@ namespace Monetizr.Campaigns
         }
 
         private static string DumpsVastSettings(VastSettings _vastSettings,
-            List<TrackingEvent> _trackingEvents)
+            List<TrackingEvent> _trackingEvents, ServerCampaign serverCampaign)
         {
             string res = JsonUtility.ToJson(_vastSettings);
 
@@ -250,6 +250,38 @@ namespace Monetizr.Campaigns
             trackingEventsJson += "]";
 
             res = res.Insert(res.Length - 1, trackingEventsJson);
+
+            //---
+
+            /* var settingsList = new List<KeyValuePair<string, string>>();
+             foreach (var kwp in serverCampaign.serverSettings)
+             {
+                 settingsList.Add(kwp);
+             }
+
+             var campaignSettingsJson = ",\"campaignSettings\":{";
+
+             //foreach (var te in events)
+             for (int i = 0; i < settingsList.Count; i++)
+             {
+                 var kwp = settingsList[i];
+
+                 campaignSettingsJson += $"\"{kwp.Key}\":\"{kwp.Value}\"";
+
+                 if (i < settingsList.Count - 1)
+                     campaignSettingsJson += ",";
+             }
+
+             campaignSettingsJson += "}";*/
+
+            var campaignSettingsJson = $",\"campaignSettings\":{serverCampaign.content}";
+
+            res = res.Insert(res.Length - 1, campaignSettingsJson);
+
+            //---
+
+
+
 
             Log.PrintV($"settings: {res}");
 
@@ -364,10 +396,12 @@ namespace Monetizr.Campaigns
                 switch (_type)
                 {
                     case Type.Inline:
+                        LoadExtentions(_inline.Extensions);
                         AddInlineCreativesIntoAssets();
                         break;
                     case Type.Wrapper:
-                        AddVerificationSettingsFromExtentions();
+                        //AddVerificationSettingsFromExtentions();
+                        LoadExtentions(_wrapper.Extensions);
                         AddWrapperCreativesIntoTrackingEvents();
                         break;
                     case Type.Unknown:
@@ -415,54 +449,53 @@ namespace Monetizr.Campaigns
                 return result;
             }
 
-            private void AddVerificationSettingsFromExtentions()
+            private void AddVerificationSettingsFromXmlElement(XmlElement element)
             {
-                var adItem = _wrapper;
+                XmlNode verificationNode = element.SelectSingleNode(".//Verification");
 
-                if (adItem.Extensions.IsNullOrEmpty()) return;
+                if (verificationNode == null) return;
+                if (verificationNode.Attributes == null) return;
+                
+                string vendor = verificationNode.Attributes["vendor"]?.Value;
 
-                foreach (var e in adItem.Extensions)
+                XmlNode jsResourceNode = verificationNode.SelectSingleNode("JavaScriptResource");
+                string apiFramework = "";
+                bool browserOptional = false;
+                string jsResource = "";
+
+                if (jsResourceNode != null)
                 {
-                    if (e.type != "AdVerifications") continue;
-
-                    foreach (var av in e.Any)
+                    if (jsResourceNode.Attributes != null)
                     {
-                        XmlNode verificationNode = av.SelectSingleNode("Verification");
-                        string vendor = verificationNode.Attributes["vendor"].Value;
+                        apiFramework = jsResourceNode.Attributes["apiFramework"]?.Value;
+                        bool.TryParse(jsResourceNode.Attributes["browserOptional"]?.Value, out browserOptional);
+                    }
 
-                        XmlNode jsResourceNode = verificationNode.SelectSingleNode("JavaScriptResource");
-                        string apiFramework = jsResourceNode.Attributes["apiFramework"].Value;
+                    jsResource = jsResourceNode.InnerText.Trim();
+                }
 
-                        bool browserOptional = false;
-                        bool.TryParse(jsResourceNode.Attributes["browserOptional"].Value, out browserOptional);
+                XmlNode verificationParamsNode = verificationNode.SelectSingleNode("VerificationParameters");
+                
+                var verificationParams = verificationParamsNode?.InnerText.Trim();
+                
 
-                        string jsResource = jsResourceNode.InnerText.Trim();
-
-                        XmlNode verificationParamsNode = verificationNode.SelectSingleNode("VerificationParameters");
-                        string verificationParams = verificationParamsNode.InnerText.Trim();
-
-                        _vastSettings.adVerifications.Add(new AdVerification()
-                        {
-                            //executableResource = execList,
-                            javaScriptResource = new List<VerificationJavaScriptResource>()
+                _vastSettings.adVerifications.Add(new AdVerification()
+                {
+                    //executableResource = execList,
+                    javaScriptResource = new List<VerificationJavaScriptResource>()
                             {
                                 new VerificationJavaScriptResource(apiFramework,browserOptional,false,jsResource)
                             },
-                            //tracking = trackingList,
-                            vendorField = vendor,
-                            verificationParameters = verificationParams
-                        });
-
-                    }
-                    
-                    
-                }
+                    //tracking = trackingList,
+                    vendorField = vendor,
+                    verificationParameters = verificationParams
+                });
             }
 
             private void AddWrapperCreativesIntoTrackingEvents()
             {
                 var adItem = _wrapper;
-                
+
                 if (adItem.Creatives == null)
                     return;
 
@@ -482,22 +515,51 @@ namespace Monetizr.Campaigns
                         new TrackingEvent());
                 }
 
-                
+
             }
 
             internal string WrapperAdTagUri => _type == Type.Wrapper ? _wrapper.VASTAdTagURI : null;
 
+            private void LoadExtentions(AdDefinitionBase_typeExtension[] extensions)
+            {
+                //var adItem = _inline;
 
+                //if (adItem.Extensions.IsNullOrEmpty()) return;
+                if(extensions.IsNullOrEmpty()) return;
+
+                foreach (var ad in extensions)
+                {
+                    //if (ad.type != "MonetizrCampaign") continue;
+
+                    foreach (var av in ad.Any)
+                    {
+                        if (av.Name == "MonetizrCampaignSettings")
+                        {
+                            string campaignSettings = av.InnerText.Trim();
+
+                            var cs = Utils.ParseContentString(campaignSettings);
+                            
+                            _serverCampaign.content = cs["content"];
+                        }
+                        else
+                        {
+                            AddVerificationSettingsFromXmlElement(av);
+                        }
+                    }
+                }
+            }
+            
             private void AddInlineCreativesIntoAssets()
             {
                 var adItem = _inline;
 
                 //TODO:
-                //Load MonetizrCampaignSettings from extentions
+                //+Load MonetizrCampaignSettings from extentions
                 //Load AdVerifications from extentions
                 //Load at AdParameters from Linear and NonLinear params
+                //+adItem.Extensions
+                //NonLinear - creativeView event?
 
-                
 
                 foreach (var c in adItem.Creatives)
                 {
@@ -517,6 +579,12 @@ namespace Monetizr.Campaigns
                     if (c.Linear != null)
                     {
                         var it = c.Linear;
+
+                        if (it.AdParameters != null && !string.IsNullOrEmpty(it.AdParameters.Value) && Utils.TestJson(it.AdParameters.Value))
+                        {
+                            _serverCampaign.assets.Add(new ServerCampaign.Asset(it.AdParameters.Value));
+                            continue;
+                        }
 
                         if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
                         {
@@ -544,8 +612,8 @@ namespace Monetizr.Campaigns
 
                             int compareSize = Vector2.Distance(v1, prefSize).CompareTo(Vector2.Distance(v2, prefSize));
 
-                                            //if the same size, take a look on bit rate
-                                            if (compareSize == 0)
+                            //if the same size, take a look on bit rate
+                            if (compareSize == 0)
                             {
                                 if (string.IsNullOrEmpty(m1.bitrate) ||
                                     string.IsNullOrEmpty(m2.bitrate))
@@ -624,7 +692,7 @@ namespace Monetizr.Campaigns
                 {
                     //load videos
                     if (c.Linear == null) continue;
-                    
+
                     var it = c.Linear;
 
                     if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
@@ -637,7 +705,7 @@ namespace Monetizr.Campaigns
 
                     if (it.MediaFiles.MediaFile.Length == 0)
                         return false;
-                    
+
                     if (it.MediaFiles.MediaFile.Length > 1)
                     {
                         mediaFile = Array.Find(it.MediaFiles.MediaFile,
@@ -645,14 +713,14 @@ namespace Monetizr.Campaigns
                     }
 
                     //mediaFile = null;
-                    
+
                     if (mediaFile == null)
                     {
-                        string filesList = string.Join("\n",it.MediaFiles.MediaFile.Select(x => $"{x.Value}#{x.bitrate}").ToArray());
-                        
+                        string filesList = string.Join("\n", it.MediaFiles.MediaFile.Select(x => $"{x.Value}#{x.bitrate}").ToArray());
+
                         if (client.GlobalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
-                            client.analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media",null);
-     
+                            client.analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media", null);
+
                         mediaFile = it.MediaFiles.MediaFile[0];
                         //return false;
                     }
@@ -668,7 +736,7 @@ namespace Monetizr.Campaigns
                             return te.Value.IndexOf(".", StringComparison.Ordinal) >= 0 ? new TrackingEvent(te) : null;
                         },
                         new TrackingEvent());
-                    
+
                     var adParameters = it.AdParameters;
 
                     //LoadCampagnSettingsFromAdParams(it.AdParameters, _serverCampaign);
@@ -702,26 +770,24 @@ namespace Monetizr.Campaigns
 
             //-----
 
-            string vastJsonSettings = DumpsVastSettings(vastSettings, videoTrackingEvents);
+            string vastJsonSettings = DumpsVastSettings(vastSettings, videoTrackingEvents, serverCampaign);
 
 
             Log.PrintV($"Vast settings: {vastJsonSettings}");
 
             serverCampaign.vastAdParameters = vastJsonSettings;
+            serverCampaign.vastSettings = vastSettings;
 
             await InitializeOMSDK(serverCampaign.vastAdParameters);
-
-
+            
             await PrepareVideoAsset(serverCampaign);
-
-
-
+            
             return serverCampaign;
         }
 
         internal async Task<bool> InitializeServerCampaignForProgrammatic(ServerCampaign campaign, string vastContent)
         {
-            if (!campaign.TryGetAssetInList("video", out var video)) 
+            if (!campaign.TryGetAssetInList("video", out var video))
                 return false;
 
 
@@ -787,7 +853,7 @@ namespace Monetizr.Campaigns
                 return null;
 
             if (string.IsNullOrEmpty(adItem.WrapperAdTagUri))
-                return DumpsVastSettings(vastSettings, videoTrackingEvents);
+                return DumpsVastSettings(vastSettings, videoTrackingEvents,serverCampaign);
 
             Log.PrintV($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
 
@@ -839,14 +905,17 @@ namespace Monetizr.Campaigns
             {
                 Log.PrintV($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
 
-                HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri);
+                string url = adItem.WrapperAdTagUri;
+                //url = "http://localhost:8080/";
+
+                HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
                 httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
 
                 var result = await MonetizrClient.DownloadUrlAsString(httpRequest);
 
                 if (!result.isSuccess)
                 {
-                    Log.PrintV($"Can't load wrapper with the url {adItem.WrapperAdTagUri}");
+                    Log.PrintV($"Can't load wrapper with the url {url}");
                     return false;
                 }
 
@@ -889,7 +958,7 @@ namespace Monetizr.Campaigns
 
         private static void LoadCampagnSettingsFromAdParams(AdParameters_type adParameters, ServerCampaign serverCampaign)
         {
-            if (adParameters == null) 
+            if (adParameters == null)
                 return;
 
             Log.PrintV(adParameters.Value);
@@ -957,6 +1026,13 @@ namespace Monetizr.Campaigns
         private static void AddCampaignAssetFromNonLinearCreative(NonLinearAd_Inline_type nl, Creative_Inline_type c,
             ServerCampaign serverCampaign)
         {
+            if (nl.AdParameters != null && !string.IsNullOrEmpty(nl.AdParameters.Value) && Utils.TestJson(nl.AdParameters.Value))
+            {
+                serverCampaign.assets.Add(new ServerCampaign.Asset(nl.AdParameters.Value));
+                return;
+            }
+
+
             string adParameters;
 
             //No parameters
@@ -983,27 +1059,19 @@ namespace Monetizr.Campaigns
                 fext = Utils.ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
             };
 
-            //Log.PrintV(asset.ToString());
-
             serverCampaign.assets.Add(asset);
-
-            /*ServerCampaign.Asset a2 = asset.Clone();
-                         a2.type = "banner";
-                         serverCampaign.assets.Add(a2);
-
-                         ServerCampaign.Asset a3 = asset.Clone();
-                         a3.type = "logo";
-                         serverCampaign.assets.Add(a3);*/
         }
 
         //TODO!
         private async Task InitializeOMSDK(string vastAdVerificationParams)
         {
-            byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/omsdk/omsdk-v1.js");
+            var url = "https://image.themonetizr.com/omsdk/omsdk-v1.js";
+
+            byte[] data = await DownloadHelper.DownloadAssetData(url);
 
             if (data == null)
             {
-                Log.PrintWarning("Download of omsdk-v1.js failed!");
+                Log.PrintWarning($"InitializeOMSDK failed! Download of {url} failed!");
                 return;
             }
 
