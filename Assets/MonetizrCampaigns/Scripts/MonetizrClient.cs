@@ -448,7 +448,11 @@ namespace Monetizr.Campaigns
                     admCampaigns.Add(admCampaign);
             }
 
-            return admCampaigns.Count == 0 ? admCampaigns : campaigns;
+            if (admCampaigns.Count <= 0) 
+                return campaigns;
+            
+            campaigns.Clear();
+            return admCampaigns;
         }
 
         internal static HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false)

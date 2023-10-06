@@ -93,6 +93,9 @@ namespace Monetizr.Campaigns
         internal string vastAdParameters = "";
 
         [System.NonSerialized]
+        internal VastHelper.VastSettings vastSettings;
+
+        [System.NonSerialized]
         private Dictionary<AssetsType, object> assetsDict = new Dictionary<AssetsType, object>();
 
         [System.NonSerialized]
@@ -156,6 +159,19 @@ namespace Monetizr.Campaigns
             
             public Sprite spriteAsset;
 
+            internal Asset() { }
+
+            internal Asset(string json)
+            {
+                var d = Utils.ParseJson(json);
+
+                id = d["id"];
+                type = d["type"];
+                title = d["title"];
+                url = d["url"];
+                survey_content = d["survey_content"];
+            }
+
             public Asset Clone()
             {
                 return (Asset)this.MemberwiseClone();
@@ -165,6 +181,8 @@ namespace Monetizr.Campaigns
             {
                 return $"Id: {id}, Type: {type}, Title: {title}, URL: {url}, Survey Content: {survey_content}";
             }
+
+            
         }
 
         internal bool HasAssetInList(string type)
@@ -735,7 +753,10 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(content))
                 return;
 
-            serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(content));
+            content = content.Replace("\\\"", "\"");
+            var cd = Utils.ParseContentString(content);
+
+            serverSettings = new SettingsDictionary<string, string>(cd);
 
             Log.Print($"Loaded campaign: {id}");
         }
