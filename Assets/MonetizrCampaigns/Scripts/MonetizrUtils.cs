@@ -339,5 +339,15 @@ namespace Monetizr.Campaigns
             }
             return sb.ToString();
         }
+
+        public static string UnescapeString(string content)
+        {
+            return Regex.Unescape(content);
+
+            //content = content.Replace("\\\"", "\"");
+            //content = content.Replace("\\\\", "\\");
+
+            //return Uri.UnescapeDataString(content);
+        }
     }
 }

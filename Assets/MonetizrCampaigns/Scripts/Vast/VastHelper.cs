@@ -903,10 +903,13 @@ namespace Monetizr.Campaigns
 
             if (!string.IsNullOrEmpty(adItem.WrapperAdTagUri))
             {
-                Log.PrintV($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
-
                 string url = adItem.WrapperAdTagUri;
-                //url = "http://localhost:8080/";
+
+                Log.PrintV($"Wrapper url {url}");
+
+                url = "http://localhost:8080/";
+
+                Log.PrintV($"Loading wrapper with the url {url}");
 
                 HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
                 httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));

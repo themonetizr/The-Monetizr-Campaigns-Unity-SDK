@@ -752,8 +752,9 @@ namespace Monetizr.Campaigns
 
             if (string.IsNullOrEmpty(content))
                 return;
+            
+            content = Utils.UnescapeString(content);
 
-            content = content.Replace("\\\"", "\"");
             var cd = Utils.ParseContentString(content);
 
             serverSettings = new SettingsDictionary<string, string>(cd);

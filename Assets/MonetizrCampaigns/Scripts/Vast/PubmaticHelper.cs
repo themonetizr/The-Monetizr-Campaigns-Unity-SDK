@@ -63,9 +63,9 @@ namespace Monetizr.Campaigns
                 if (admNode == null)
                     return "";
 
-                string result = admNode.Value.Replace("\\\"", "\"");
+                //string result = admNode.Value.Replace("\\\"", "\"");
 
-                return result;
+                return Utils.UnescapeString(admNode.Value);
             }
 
             public string GetId()
@@ -411,6 +411,7 @@ namespace Monetizr.Campaigns
                 return false;
             }
 
+#if !UNITY_EDITOR
             if (DateTime.TryParse(MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id)
                     .settings["openrtb.last_request"], out var lastTime))
             {
@@ -423,6 +424,7 @@ namespace Monetizr.Campaigns
                     return false;
                 }
             }
+#endif
 
             MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings["openrtb.last_request"] =
                 DateTime.Now.ToString();
@@ -444,11 +446,8 @@ namespace Monetizr.Campaigns
                 Log.PrintV($"Can't create openRTB request!");
                 return false;
             }
-            else
-            {
-                openRtbRequest = openRtbRequest.Replace("\\\"", "\"");
-            }
 
+            openRtbRequest = Utils.UnescapeString(openRtbRequest);
 
             openRtbRequest = NielsenDar.ReplaceMacros(openRtbRequest, currentCampaign, AdPlacement.Html5, userAgent);
 
