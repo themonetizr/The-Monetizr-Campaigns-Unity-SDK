@@ -659,7 +659,14 @@ namespace Monetizr.Campaigns
             string campPath = Application.persistentDataPath + "/" + id;
             var indexPath = campPath + "/" + asset.fpath + "/" + asset.mainAssetName;
 
-            var str = File.ReadAllText(indexPath);
+            var backPath = indexPath + ".back";
+
+            if (!File.Exists(backPath))
+            {
+                File.Copy(indexPath, backPath);
+            }
+            
+            var str = File.ReadAllText(backPath);
 
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
