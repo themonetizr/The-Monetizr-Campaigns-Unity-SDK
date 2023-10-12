@@ -134,7 +134,7 @@ namespace Monetizr.Campaigns
         [SerializeField] internal int amountNotificationsShown;
         [SerializeField] internal int amountTeasersShown;
 
-        [SerializeField] internal SerializableDictionary<string,string> settings = new SerializableDictionary<string, string>();
+        [SerializeField] internal SerializableDictionary<string, string> settings = new SerializableDictionary<string, string>();
     }
 
     [Serializable]
@@ -233,7 +233,7 @@ namespace Monetizr.Campaigns
             Load();
 
             //check if campaign is missing - remove it from data
-            data.campaigns.RemoveAll((LocalCampaignSettings localCampaigns) => 
+            data.campaigns.RemoveAll((LocalCampaignSettings localCampaigns) =>
                 campaigns.FindIndex(serverCampaigns => serverCampaigns.id == localCampaigns.campId) < 0);
 
             //add empty campaign into settings
@@ -282,10 +282,6 @@ namespace Monetizr.Campaigns
         private bool _isActive = false;
         private bool _isMissionsIsOutdated = true;
 
-        //Storing ids in separate list to get faster access (the same as Keys in campaigns dictionary below)
-        //private List<string> _campaignIds = new List<string>();
-        //private Dictionary<string, ServerCampaign> _campaigns = new Dictionary<string, ServerCampaign>();
-        
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
 
         internal static bool tinyTeaserCanBeVisible;
@@ -319,7 +315,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception ex)
             {
-                Log.PrintError($"Exception in userDefinedEvent {ex}");
+                Log.PrintError($"Exception in userDefinedEvent: {ex.Message}");
             }
         }
 
@@ -357,7 +353,7 @@ namespace Monetizr.Campaigns
                 }
                 catch (Exception exception)
                 {
-                    Log.PrintError($"Exception {exception} in getting current amount of {title}");
+                    Log.PrintError($"Exception: {exception.Message} in GetCurrencyFunc of {title}");
                     return 0;
                 }
             }
@@ -370,7 +366,7 @@ namespace Monetizr.Campaigns
                 }
                 catch (Exception exception)
                 {
-                    Log.PrintError($"Exception {exception} in adding {amount} to {title}");
+                    Log.PrintError($"Exception: {exception.Message} in AddCurrencyAction {amount} to {title}");
                 }
             }
         }
@@ -482,11 +478,13 @@ namespace Monetizr.Campaigns
                 return null;
             }
 
-            if(string.IsNullOrEmpty(bundleId))
+            if (string.IsNullOrEmpty(bundleId))
                 bundleId = Application.identifier;
 
             var monetizrObject = new GameObject("MonetizrManager");
             var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
+
+            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
 
             DontDestroyOnLoad(monetizrObject);
             Instance = monetizrManager;
@@ -513,7 +511,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Initialize
         /// </summary>
-        private void Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
+        private async Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
         {
 #if USING_WEBVIEW
             if (!UniWebView.IsWebViewSupported)
@@ -533,6 +531,8 @@ namespace Monetizr.Campaigns
 
             Client = new MonetizrClient(apiKey);
 
+            await Client.GetGlobalSettings();
+
             InitializeUI();
 
             _gameOnInitSuccess = gameOnInitSuccess;
@@ -541,7 +541,7 @@ namespace Monetizr.Campaigns
             {
                 //moved together with showing teaser, because here in-game logic may not be ready
                 //                createEmbedMissions();
-                
+
                 gameOnInitSuccess?.Invoke();
                 gameOnInitSuccess = null;
 
@@ -577,7 +577,7 @@ namespace Monetizr.Campaigns
         internal void InitializeBuiltinMissions(ServerCampaign campaign)
         {
             //if (_isMissionsIsOutdated)
-                missionsManager.CreateMissionsFromCampaign(campaign);
+            missionsManager.CreateMissionsFromCampaign(campaign);
 
             //_isMissionsIsOutdated = false;
         }
@@ -1007,13 +1007,14 @@ namespace Monetizr.Campaigns
             }
 
             //no more offers, skipping
-            if (missions[0].amountOfRVOffersShown == 0) { 
+            if (missions[0].amountOfRVOffersShown == 0)
+            {
                 onComplete(OnCompleteStatus.Skipped);
                 return;
             }
 
             missions[0].amountOfRVOffersShown--;
-            
+
 
             MonetizrManager.ShowRewardCenter(null,
                 (bool p) =>
@@ -1210,7 +1211,7 @@ namespace Monetizr.Campaigns
             if (campaign == null)
                 return;
 
-            
+
             //Instance.InitializeBuiltinMissions(campaign);
 
             if (showNotifications)
@@ -1261,7 +1262,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            
+
             //Instance.InitializeBuiltinMissions(campaign);
 
             //Notification is shown
@@ -1448,6 +1449,7 @@ namespace Monetizr.Campaigns
 
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
+            
             campaigns = new List<ServerCampaign>();
 
             try
@@ -1456,14 +1458,8 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Log.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]} {e}");
+                Log.PrintError($"{MonetizrErrors.msg[ErrorType.ConnectionError]} {e}");
 
-                if (Client.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
-                {
-                    Client.SendErrorToRemoteServer("Campaign error",
-                        "Campaign error",
-                        $"Campaign error: loading error:\nApp: {bundleId}\nApp version: {Application.version}\nSystem language: {Application.systemLanguage}\n\n{e.ToString()}");
-                }
 
                 onRequestComplete?.Invoke(false);
             }
@@ -1587,7 +1583,7 @@ namespace Monetizr.Campaigns
             Log.Print("MonetizrManager initialization okay!");
 
             _isActive = true;
-            
+
 
             //Ok, even if response empty
             onRequestComplete?.Invoke( /*challengesId.Count > 0*/true);
@@ -1609,14 +1605,14 @@ namespace Monetizr.Campaigns
             missionsManager.SaveAndRemoveUnused();
 
             SetActiveCampaign(FindBestCampaignToActivate());
-            
+
             _isMissionsIsOutdated = false;
         }
 
-    /// <summary>
-    /// Get Challenge by Id
-    /// </summary>
-    /// <returns></returns>
+        /// <summary>
+        /// Get Challenge by Id
+        /// </summary>
+        /// <returns></returns>
         /*internal ServerCampaign GetCampaign(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -1675,10 +1671,10 @@ namespace Monetizr.Campaigns
             return Instance != null && Instance.HasCampaignsAndActive();
         }
 
-       /* internal string GetActiveCampaignId()
-        {
-            return _activeCampaignId;
-        }*/
+        /* internal string GetActiveCampaignId()
+         {
+             return _activeCampaignId;
+         }*/
 
         internal void SetActiveCampaign(ServerCampaign camp)
         {
@@ -1727,7 +1723,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Log.Print($"An error occured: {e.Message}");
+                Log.PrintError($"ClaimReward error: {e.Message}");
 
                 onFailure.Invoke();
             }

@@ -113,8 +113,9 @@ namespace Monetizr.Campaigns
                 {
                     ipApiData = IpApiData.CreateFromJSON(webRequest.downloadHandler.text);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Log.PrintError($"IpApiData error: {e.Message}");
                 }
 
                 if (ipApiData != null)
@@ -200,8 +201,8 @@ namespace Monetizr.Campaigns
             
             return (true,result);
         }
-        
-        public async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
+
+        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
         {
             var responseString = await RequestStringFromUrl(SettingsApiUrl);
 
@@ -215,18 +216,24 @@ namespace Monetizr.Campaigns
 
             return new SettingsDictionary<string, string>(Utils.ParseContentString(responseString));
         }
+        
 
-        public async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
+        internal async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
         {
             MonetizrManager.isVastActive = false;
 
-            GlobalSettings = await DownloadGlobalSettings();
+            //await DownloadGlobalSettings();
             
             var loadResult = await GetServerCampaignsFromMonetizr();
             
             Log.PrintV($"GetServerCampaignsFromMonetizr result {loadResult.Count}");
             
             return loadResult;
+        }
+
+        internal async Task GetGlobalSettings()
+        {
+            GlobalSettings = await DownloadGlobalSettings();
         }
 
         internal SettingsDictionary<string, string> GlobalSettings { get; private set; }
@@ -397,11 +404,13 @@ namespace Monetizr.Campaigns
 
             if (!response.IsSuccessStatusCode)
             {
+                Log.PrintError($"RequestStringFromUrl failed with code {response.StatusCode} for {url}");
                 return "";
             }
 
             if (responseString.Length == 0)
             {
+                //Log.PrintError($"RequestStringFromUrl has empty response {response.StatusCode} for {url}");
                 return "";
             }
 

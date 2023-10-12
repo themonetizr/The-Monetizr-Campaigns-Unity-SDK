@@ -206,9 +206,21 @@ namespace Monetizr.Campaigns
 
         private async void PrepareHtml5Panel()
         {
-            _webUrl = "file://" + currentMission.campaign.GetAsset<string>(AssetsType.Html5PathString);
+            var campaign = currentMission.campaign;
 
-            var hasProgrammatic = currentMission.campaign.serverSettings.GetBoolParam("programmatic", false);
+            bool hasVideo = campaign.HasAsset(AssetsType.Html5PathString);
+
+            _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
+
+            var hasProgrammatic = campaign.serverSettings.GetBoolParam("programmatic", false);
+
+            if (!hasProgrammatic && !hasVideo)
+            {
+                Log.PrintError($"Video expected, but didn't loaded for campaign {campaign.id}");
+                _OnSkipPress();
+                return;
+            }
+            
             var showWebview = true;
             //var isSkipped = false;
             
@@ -216,10 +228,17 @@ namespace Monetizr.Campaigns
             {
                 var ph = new PubmaticHelper(MonetizrManager.Instance.Client, _webView.GetUserAgent());
 
-                var programmaticOk = await ph.GetOpenRtbResponseForCampaign(currentMission.campaign);
+                var programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign);
 
                 if (!programmaticOk)
                     showWebview = false;
+
+                if (!hasVideo)
+                {
+                    string fname = Path.GetFileNameWithoutExtension(campaign.vastSettings.videoSettings.videoUrl);
+
+                    _webUrl = "file://" + campaign.GetCampaignPath($"{fname}/index.html");
+                }
             }
 
 #if UNITY_EDITOR_WIN
@@ -237,7 +256,7 @@ namespace Monetizr.Campaigns
                 programmaticStatus = "failed";
                 //OnCompleteEvent();
                 
-                Log.PrintError("_OnSkipPress");
+                //Log.PrintError("_OnSkipPress");
                 _OnSkipPress();
             }
 

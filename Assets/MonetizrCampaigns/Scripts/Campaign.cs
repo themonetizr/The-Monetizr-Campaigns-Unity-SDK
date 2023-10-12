@@ -93,7 +93,7 @@ namespace Monetizr.Campaigns
         internal string vastAdParameters = "";
 
         [System.NonSerialized]
-        internal VastHelper.VastSettings vastSettings;
+        internal VastHelper.VastSettings vastSettings = new VastHelper.VastSettings();
 
         [System.NonSerialized]
         private Dictionary<AssetsType, object> assetsDict = new Dictionary<AssetsType, object>();
@@ -278,6 +278,11 @@ namespace Monetizr.Campaigns
             tex.wrapMode = TextureWrapMode.Clamp;
 
             return Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
+        }
+
+        internal string GetCampaignPath(string fname)
+        {
+            return $"{Application.persistentDataPath}/{this.id}/{fname}/";
         }
 
         /// <summary>
@@ -691,7 +696,67 @@ namespace Monetizr.Campaigns
 
             Directory.Delete(target_dir, false);
         }
-        
+
+        internal string DumpsVastSettings()
+        {
+            string res = JsonUtility.ToJson(vastSettings);
+
+            //,{"trackingEvents":[
+            //{
+            //    "event":"type",
+            //    "url":"url"
+            //},
+            //]}
+
+            /* string trackingEventsJson = ",\"trackingEvents\":[";
+
+             //foreach (var te in events)
+             for (int i = 0; i < _trackingEvents.Count; i++)
+             {
+                 var te = _trackingEvents[i];
+
+                 trackingEventsJson += $"{{\"event\":\"{te.@event}\",\"url\":\"{te.value}\"}}";
+
+                 if (i < _trackingEvents.Count - 1)
+                     trackingEventsJson += ",";
+             }
+
+             trackingEventsJson += "]";
+
+             res = res.Insert(res.Length - 1, trackingEventsJson);*/
+
+            //---
+
+            /* var settingsList = new List<KeyValuePair<string, string>>();
+             foreach (var kwp in serverCampaign.serverSettings)
+             {
+                 settingsList.Add(kwp);
+             }
+
+             var campaignSettingsJson = ",\"campaignSettings\":{";
+
+             //foreach (var te in events)
+             for (int i = 0; i < settingsList.Count; i++)
+             {
+                 var kwp = settingsList[i];
+
+                 campaignSettingsJson += $"\"{kwp.Key}\":\"{kwp.Value}\"";
+
+                 if (i < settingsList.Count - 1)
+                     campaignSettingsJson += ",";
+             }
+
+             campaignSettingsJson += "}";*/
+
+            var campaignSettingsJson = $",\"campaignSettings\":{content}";
+
+            res = res.Insert(res.Length - 1, campaignSettingsJson);
+
+            
+            Log.PrintV($"settings: {res}");
+
+            return res;
+        }
         internal bool IsCampaignInsideLocation(IpApiData locData)
         {
             //no location data

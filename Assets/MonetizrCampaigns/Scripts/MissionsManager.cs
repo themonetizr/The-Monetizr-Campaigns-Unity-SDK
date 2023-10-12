@@ -507,16 +507,16 @@ namespace Monetizr.Campaigns
                         return;
             #endif*/
 
-            var htmlPath = m.campaign.GetAsset<string>(AssetsType.Html5PathString);
+            //var htmlPath = m.campaign.GetAsset<string>(AssetsType.Html5PathString);
 
-            if (htmlPath != null)
-            {
-                MonetizrManager.ShowHTML5((bool isSkipped) => { onComplete(isSkipped); }, m);
-            }
-            else
-            {
-                Log.PrintV("No HTML5 path for the video player");
-            }
+            //if (htmlPath != null)
+            //{
+            MonetizrManager.ShowHTML5((bool isSkipped) => { onComplete(isSkipped); }, m);
+            //}
+            //else
+            //{
+            //    Log.PrintV("No HTML5 path for the video player");
+            //}
         }
 
         internal void UpdateMissionsRewards(RewardType rt, MonetizrManager.GameReward reward)
@@ -800,7 +800,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Log.PrintWarning($"Problem {e.ToString()} with json {serverMissionsJson}");
+                Log.PrintError($"Problem {e.ToString()} with json {serverMissionsJson}");
             }
 
             if (ic == null)
