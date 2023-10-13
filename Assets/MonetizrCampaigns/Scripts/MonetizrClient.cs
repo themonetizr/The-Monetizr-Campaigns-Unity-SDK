@@ -11,6 +11,7 @@ using UnityEngine;
 using System.Text.RegularExpressions;
 using System.Net;
 using System.Web;
+using Mindscape.Raygun4Unity;
 using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
@@ -139,12 +140,6 @@ namespace Monetizr.Campaigns
             Client.Timeout = TimeSpan.FromSeconds(timeout);
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-
-            //Client.DefaultRequestHeaders.Add("player-id", analytics.GetUserId());
-            //Client.DefaultRequestHeaders.Add("app-bundle-id", MonetizrManager.bundleId);
-            //Client.DefaultRequestHeaders.Add("sdk-version", MonetizrManager.SDKVersion);
-            //Client.DefaultRequestHeaders.Add("os-group", MonetizrAnalytics.GetOsGroup());
         }
 
         public void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
@@ -234,6 +229,9 @@ namespace Monetizr.Campaigns
         internal async Task GetGlobalSettings()
         {
             GlobalSettings = await DownloadGlobalSettings();
+
+            RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint",
+                RaygunCrashReportingPostService.defaultApiEndPointForCr);
         }
 
         internal SettingsDictionary<string, string> GlobalSettings { get; private set; }

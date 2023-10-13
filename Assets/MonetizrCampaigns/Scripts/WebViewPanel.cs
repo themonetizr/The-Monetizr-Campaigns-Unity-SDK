@@ -223,26 +223,22 @@ namespace Monetizr.Campaigns
             
             var showWebview = true;
             //var isSkipped = false;
-            
+
             if (hasProgrammatic)
             {
+                showWebview = false;
                 var ph = new PubmaticHelper(MonetizrManager.Instance.Client, _webView.GetUserAgent());
 
                 var programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign);
-
-                if (!programmaticOk)
-                    showWebview = false;
-
-                if (!hasVideo)
+                
+                if (campaign.TryGetAssetInList("programmatic_video", out var videoAsset))
                 {
-                    string fname = Path.GetFileNameWithoutExtension(campaign.vastSettings.videoSettings.videoUrl);
-
-                    _webUrl = "file://" + campaign.GetCampaignPath($"{fname}/index.html");
+                    _webUrl = $"file://{campaign.GetCampaignPath($"/fpath/index.html")}";
+                    showWebview = true;
                 }
             }
-
 #if UNITY_EDITOR_WIN
-            showWebview = false;
+                showWebview = false;
 #endif
             if (showWebview)
             {

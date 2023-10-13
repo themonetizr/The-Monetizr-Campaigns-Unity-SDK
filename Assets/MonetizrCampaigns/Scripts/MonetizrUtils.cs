@@ -342,11 +342,12 @@ namespace Monetizr.Campaigns
 
         public static string UnescapeString(string content)
         {
-            return Regex.Unescape(content);
+            //return Regex.Unescape(content);
 
-            //content = content.Replace("\\\"", "\"");
+            var result  = content.Replace("\\\"", "\"").Replace("\\\\", "\\");
             //content = content.Replace("\\\\", "\\");
 
+            return result;
             //return Uri.UnescapeDataString(content);
         }
     }

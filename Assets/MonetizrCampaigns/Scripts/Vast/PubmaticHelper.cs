@@ -460,7 +460,7 @@ namespace Monetizr.Campaigns
 
             string res = response.content;
 
-            if (!response.isSuccess || res.Contains("Request failed!"))
+            if (!response.isSuccess || res.Contains("Request failed!") || res.Length <= 0)
             {
                 if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
                     client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
@@ -478,20 +478,15 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Open RTB response loaded with adm: {adm}");
 
-            string vastString;
+            //string vastString;
 
-            if (adm.StartsWith("<VAST"))
+            if (!adm.Contains("<VAST"))
             {
-                vastString = adm;
-            }
-            else
-            {
-                Log.PrintV($"Open RTB response is not a VAST");
+                Log.PrintError($"Open RTB response is not a VAST");
                 return false;
             }
-
-
-            var initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, vastString);
+            
+             var initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, adm);
 
             if (!initializeResult)
             {

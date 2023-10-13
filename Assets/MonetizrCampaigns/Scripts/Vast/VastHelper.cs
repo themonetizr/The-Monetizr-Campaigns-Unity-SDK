@@ -472,7 +472,8 @@ namespace Monetizr.Campaigns
 
                             var cs = Utils.ParseContentString(campaignSettings);
                             
-                            _serverCampaign.content = cs["content"];
+                            if(cs.ContainsKey("content"))
+                                _serverCampaign.content = cs["content"];
                         }
                         else
                         {
@@ -515,7 +516,7 @@ namespace Monetizr.Campaigns
 
                         if (it.AdParameters != null && !string.IsNullOrEmpty(it.AdParameters.Value) && Utils.TestJson(it.AdParameters.Value))
                         {
-                            _serverCampaign.assets.Add(new ServerCampaign.Asset(it.AdParameters.Value));
+                            _serverCampaign.assets.Add(new ServerCampaign.Asset(it.AdParameters.Value, true));
                             continue;
                         }
 
@@ -583,7 +584,7 @@ namespace Monetizr.Campaigns
                             fpath = Utils.ConvertCreativeToFname(value),
                             fname = "video",
                             fext = Utils.ConvertCreativeToExt(type, value),
-                            type = "html",
+                            type = "programmatic_video",
                             mainAssetName = $"index.html"
                         };
 
@@ -724,10 +725,13 @@ namespace Monetizr.Campaigns
 
         internal async Task<bool> InitializeServerCampaignForProgrammatic(ServerCampaign campaign, string vastContent)
         {
-          var vastJsonSettings =
+            campaign.RemoveAssetsByTypeFromList("programmatic_video");
+            campaign.vastSettings = new VastSettings();
+
+            var vastJsonSettings =
                 await LoadVastAndFindVideoAsset(vastContent, campaign);
 
-            if (!campaign.TryGetAssetInList("video", out var video))
+            if (!campaign.TryGetAssetInList("programmatic_video", out var video))
             {
                 return false;
             }
@@ -739,6 +743,7 @@ namespace Monetizr.Campaigns
 
             campaign.vastAdParameters = vastJsonSettings;
 
+            await campaign.PreloadVideoPlayerForProgrammatic(video);
 
             campaign.EmbedVastParametersIntoVideoPlayer(video);
 
@@ -961,7 +966,7 @@ namespace Monetizr.Campaigns
         {
             if (string.IsNullOrEmpty(adParametersValue) || !Utils.TestJson(adParametersValue)) return false;
 
-            serverCampaign.assets.Add(new ServerCampaign.Asset(adParametersValue));
+            serverCampaign.assets.Add(new ServerCampaign.Asset(adParametersValue, false));
             return true;
         }
 

@@ -161,7 +161,7 @@ namespace Monetizr.Campaigns
 
             internal Asset() { }
 
-            internal Asset(string json)
+            internal Asset(string json, bool isVideo)
             {
                 var d = Utils.ParseJson(json);
 
@@ -170,6 +170,17 @@ namespace Monetizr.Campaigns
                 title = d["title"];
                 url = d["url"];
                 survey_content = d["survey_content"];
+
+                if(isVideo)
+                    InitializeVideoPaths();
+            }
+
+            internal void InitializeVideoPaths()
+            {
+                fpath = Utils.ConvertCreativeToFname(url);
+                fname = "video";
+                fext = Utils.ConvertCreativeToExt("", url);
+                mainAssetName = $"index.html";
             }
 
             public Asset Clone()
@@ -187,7 +198,7 @@ namespace Monetizr.Campaigns
 
         internal bool HasAssetInList(string type)
         {
-            return assets.Find(a => a.type == type) != null;
+            return assets.FindIndex(a => a.type == type) >= 0;
         }
         
         internal bool TryGetAssetInList(string type, out Asset asset)
@@ -196,7 +207,12 @@ namespace Monetizr.Campaigns
 
             return asset != null;
         }
-        
+
+        public void RemoveAssetsByTypeFromList(string type)
+        {
+            assets.RemoveAll((a) => a.type == type);
+        }
+
         internal bool TryGetSpriteAsset(string spriteTitle, out Sprite res)
         { 
             int index = assets.FindIndex(a => a.title == spriteTitle);
@@ -282,7 +298,7 @@ namespace Monetizr.Campaigns
 
         internal string GetCampaignPath(string fname)
         {
-            return $"{Application.persistentDataPath}/{this.id}/{fname}/";
+            return $"{Application.persistentDataPath}/{this.id}/{fname}";
         }
 
         /// <summary>
@@ -619,7 +635,46 @@ namespace Monetizr.Campaigns
             }
         }
 
-        private async Task PreloadVideoPlayer(Asset asset)
+        internal async Task PreloadVideoPlayerForProgrammatic(Asset asset)
+        {
+            string zipFolder = GetCampaignPath($"{asset.fpath}");
+            
+            string indexPath = $"{zipFolder}/index.html";
+
+            Log.PrintV($"{zipFolder}");
+
+            if (Directory.Exists(zipFolder))
+            {
+                return;
+            }
+            else
+            {
+                Directory.CreateDirectory(zipFolder);
+            }
+
+            byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+
+            if (data == null)
+            {
+                Log.PrintError("Can't download video player for programmatic");
+                return;
+            }
+
+            File.WriteAllBytes(zipFolder + "/html.zip", data);
+
+            Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
+
+            File.Delete(zipFolder + "/html.zip");
+
+            //--------------
+
+            if (!File.Exists(indexPath))
+            {
+                Log.PrintError($"Main html for video player {indexPath} doesn't exist");
+            }
+        }
+
+        internal async Task PreloadVideoPlayer(Asset asset)
         {
             string campPath = Application.persistentDataPath + "/" + id;
 
@@ -661,9 +716,11 @@ namespace Monetizr.Campaigns
 
         internal void EmbedVastParametersIntoVideoPlayer(Asset asset)
         {
-            string campPath = Application.persistentDataPath + "/" + id;
-            var indexPath = campPath + "/" + asset.fpath + "/" + asset.mainAssetName;
+            string fpath = GetCampaignPath(asset.fpath);
 
+            string videoPath = $"{fpath}/video.mp4";
+            string indexPath = $"{fpath}/{asset.mainAssetName}";
+            
             var backPath = indexPath + ".back";
 
             if (!File.Exists(backPath))
@@ -674,6 +731,9 @@ namespace Monetizr.Campaigns
             var str = File.ReadAllText(backPath);
 
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
+
+            if(!File.Exists(videoPath))
+                str = str.Replace("video.mp4", asset.url);
 
             File.WriteAllText(indexPath, str);
         }
@@ -833,5 +893,7 @@ namespace Monetizr.Campaigns
 
             Log.Print($"Loaded campaign: {id}");
         }
+
+        
     }
 }

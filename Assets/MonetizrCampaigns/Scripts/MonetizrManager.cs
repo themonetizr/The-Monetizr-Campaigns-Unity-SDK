@@ -493,9 +493,7 @@ namespace Monetizr.Campaigns
             Instance.onUIVisible = onUIVisible;
 
             monetizrManager.Initialize(apiKey, onRequestComplete, soundSwitch);
-
-
-
+            
             return Instance;
         }
 
@@ -511,7 +509,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Initialize
         /// </summary>
-        private async Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
+        private async Task Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
         {
 #if USING_WEBVIEW
             if (!UniWebView.IsWebViewSupported)
@@ -530,9 +528,7 @@ namespace Monetizr.Campaigns
             this._soundSwitch = soundSwitch;
 
             Client = new MonetizrClient(apiKey);
-
-            await Client.GetGlobalSettings();
-
+            
             InitializeUI();
 
             _gameOnInitSuccess = gameOnInitSuccess;
@@ -1449,7 +1445,14 @@ namespace Monetizr.Campaigns
 
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
-            
+            await Client.GetGlobalSettings();
+
+            //TODO: api endpoint
+            //errors endpoint
+            //mixpanel errors
+            //disable double notifications
+
+
             campaigns = new List<ServerCampaign>();
 
             try

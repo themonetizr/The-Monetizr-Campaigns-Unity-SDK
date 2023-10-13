@@ -85,17 +85,16 @@ namespace Monetizr.Campaigns
 
         Mission prepareVideoMission(MissionType mt, ServerCampaign campaign)
         {
-            bool hasHtml = campaign.HasAsset(AssetsType.Html5PathString);
-            bool hasVideo = campaign.HasAsset(AssetsType.VideoFilePathString);
+            bool hasSomething = campaign.HasAsset(AssetsType.Html5PathString) ||
+                                campaign.HasAsset(AssetsType.VideoFilePathString);
+            
 
-            if (!hasVideo)
+            if (!hasSomething && !campaign.serverSettings.GetBoolParam("programmatic",false))
             {
                 Log.PrintWarning($"campaign {campaign} has no video asset!");
-            }
-
-            if (!hasHtml && !hasVideo)
                 return null;
-
+            }
+            
             return new Mission()
             {
                 //rewardType = RewardType.Coins,
