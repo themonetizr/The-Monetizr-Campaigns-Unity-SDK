@@ -200,7 +200,19 @@ namespace Monetizr.Campaigns
         {
             return assets.FindIndex(a => a.type == type) >= 0;
         }
-        
+
+        internal bool TryGetAssetInList(List<string> types, out Asset asset)
+        {
+            foreach (var t in types)
+            {
+                if (TryGetAssetInList(t, out asset))
+                    return true;
+            }
+
+            asset = null;
+            return false;
+        }
+
         internal bool TryGetAssetInList(string type, out Asset asset)
         {
             asset = assets.Find(a => a.type == type);
@@ -716,6 +728,8 @@ namespace Monetizr.Campaigns
 
         internal void EmbedVastParametersIntoVideoPlayer(Asset asset)
         {
+            vastAdParameters = DumpsVastSettings();
+
             string fpath = GetCampaignPath(asset.fpath);
 
             string videoPath = $"{fpath}/video.mp4";

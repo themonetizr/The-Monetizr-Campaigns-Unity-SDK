@@ -208,13 +208,17 @@ namespace Monetizr.Campaigns
         {
             var campaign = currentMission.campaign;
 
-            bool hasVideo = campaign.HasAsset(AssetsType.Html5PathString);
+            bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
 
-            _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
+            if (hasVideo)
+            {
+                _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
+                campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
+            }
 
-            var hasProgrammatic = campaign.serverSettings.GetBoolParam("programmatic", false);
+            var isProgrammatic = campaign.serverSettings.GetBoolParam("programmatic", false);
 
-            if (!hasProgrammatic && !hasVideo)
+            if (!isProgrammatic && !hasVideo)
             {
                 Log.PrintError($"Video expected, but didn't loaded for campaign {campaign.id}");
                 _OnSkipPress();
@@ -224,21 +228,36 @@ namespace Monetizr.Campaigns
             var showWebview = true;
             //var isSkipped = false;
 
-            if (hasProgrammatic)
+            var oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
+
+            var ph = new PubmaticHelper(MonetizrManager.Instance.Client, _webView.GetUserAgent());
+
+            if (isProgrammatic)
             {
                 showWebview = false;
-                var ph = new PubmaticHelper(MonetizrManager.Instance.Client, _webView.GetUserAgent());
-
+                
                 var programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign);
                 
-                if (campaign.TryGetAssetInList("programmatic_video", out var videoAsset))
+                if (campaign.TryGetAssetInList("programmatic_video", out videoAsset))
                 {
-                    _webUrl = $"file://{campaign.GetCampaignPath($"/fpath/index.html")}";
+                    _webUrl = $"file://{campaign.GetCampaignPath($"/{videoAsset.fpath}/index.html")}";
                     showWebview = true;
                 }
             }
+
+            if (!campaign.vastSettings.IsEmpty())
+            {
+                await ph.DownloadOMSDKServiceContent();
+
+                campaign.vastAdParameters = campaign.DumpsVastSettings();
+
+                campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
+
+                ph.InitializeOMSDK(campaign.vastAdParameters);
+            }
+
 #if UNITY_EDITOR_WIN
-                showWebview = false;
+            showWebview = false;
 #endif
             if (showWebview)
             {
