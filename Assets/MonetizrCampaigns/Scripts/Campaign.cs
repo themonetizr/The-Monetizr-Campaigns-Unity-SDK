@@ -158,6 +158,7 @@ namespace Monetizr.Campaigns
             public string localFullPath;
             
             public Sprite spriteAsset;
+            public string mediaType;
 
             internal Asset() { }
 
@@ -774,54 +775,7 @@ namespace Monetizr.Campaigns
         internal string DumpsVastSettings()
         {
             string res = JsonUtility.ToJson(vastSettings);
-
-            //,{"trackingEvents":[
-            //{
-            //    "event":"type",
-            //    "url":"url"
-            //},
-            //]}
-
-            /* string trackingEventsJson = ",\"trackingEvents\":[";
-
-             //foreach (var te in events)
-             for (int i = 0; i < _trackingEvents.Count; i++)
-             {
-                 var te = _trackingEvents[i];
-
-                 trackingEventsJson += $"{{\"event\":\"{te.@event}\",\"url\":\"{te.value}\"}}";
-
-                 if (i < _trackingEvents.Count - 1)
-                     trackingEventsJson += ",";
-             }
-
-             trackingEventsJson += "]";
-
-             res = res.Insert(res.Length - 1, trackingEventsJson);*/
-
-            //---
-
-            /* var settingsList = new List<KeyValuePair<string, string>>();
-             foreach (var kwp in serverCampaign.serverSettings)
-             {
-                 settingsList.Add(kwp);
-             }
-
-             var campaignSettingsJson = ",\"campaignSettings\":{";
-
-             //foreach (var te in events)
-             for (int i = 0; i < settingsList.Count; i++)
-             {
-                 var kwp = settingsList[i];
-
-                 campaignSettingsJson += $"\"{kwp.Key}\":\"{kwp.Value}\"";
-
-                 if (i < settingsList.Count - 1)
-                     campaignSettingsJson += ",";
-             }
-
-             campaignSettingsJson += "}";*/
-
+            
             var campaignSettingsJson = $",\"campaignSettings\":{content}";
 
             res = res.Insert(res.Length - 1, campaignSettingsJson);
