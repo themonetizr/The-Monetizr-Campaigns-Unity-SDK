@@ -105,12 +105,39 @@ namespace Monetizr.Campaigns
                 return string.IsNullOrEmpty(videoSettings.videoUrl);
             }
 
-            public VastSettings()
+            internal VastSettings()
             {
                 
             }
 
-            public VastSettings(VastSettings settingsToCopy)
+            internal void ReplaceVastTags(VastTagsReplacer replacer)
+            {
+                foreach (var a in adVerifications)
+                {
+                    foreach (var er in a.executableResource)
+                    {
+                        er.value = replacer.Replace(er.value);
+                    }
+
+                    foreach (var jsr in a.javaScriptResource)
+                    {
+                        jsr.value = replacer.Replace(jsr.value);
+                    }
+
+                    foreach (var te in a.tracking)
+                    {
+                        te.value = replacer.Replace(te.value);
+                    }
+                }
+
+                foreach (var vte in videoTrackingEvents)
+                {
+                    vte.value = replacer.Replace(vte.value);
+                }
+            }
+
+
+            internal VastSettings(VastSettings settingsToCopy)
             {
                 vendorName = settingsToCopy.vendorName;
                 sdkVersion = settingsToCopy.sdkVersion;
@@ -666,7 +693,8 @@ namespace Monetizr.Campaigns
                             fname = "video",
                             fext = Utils.ConvertCreativeToExt(type, value),
                             type = "programmatic_video",
-                            mainAssetName = $"index.html"
+                            mainAssetName = $"index.html",
+                            mediaType = type,
                         };
 
                         _serverCampaign.assets.Add(_videoAsset);

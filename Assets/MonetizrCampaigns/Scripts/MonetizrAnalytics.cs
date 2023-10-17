@@ -45,6 +45,64 @@ namespace Monetizr.Campaigns
 
     }
 
+    internal class VastTagsReplacer : TagsReplacer
+    {
+        private readonly ServerCampaign _serverCampaign;
+        private readonly ServerCampaign.Asset _asset;
+        private readonly string _clientUA;
+
+        internal VastTagsReplacer(ServerCampaign serverCampaign, ServerCampaign.Asset asset, string clientUA)
+        {
+            _serverCampaign = serverCampaign;
+            _asset = asset;
+            _clientUA = clientUA;
+
+            var urlModifiers = new Dictionary<string, Func<string>>()
+            {
+                {"APPBUNDLE", () => _serverCampaign.serverSettings.GetParam("app.bundleid",MonetizrManager.bundleId) },
+                {"STOREID", () => _serverCampaign.serverSettings.GetParam("app.storeid","-1") },
+                {"STOREURL", () => _serverCampaign.serverSettings.GetParam("app.storeurl","-1") },
+                {"ADTYPE", () =>  _serverCampaign.serverSettings.GetParam("app.adtype","Video") },
+                {"DEVICEIP", () => _serverCampaign.serverSettings.GetParam("app.deviceip",_serverCampaign.device_ip) },
+                {"DEVICEUA", () => _serverCampaign.serverSettings.GetParam("app.deviceua",_clientUA) },
+                {"CONTENTURI", () =>  _serverCampaign.serverSettings.GetParam("app.contenturi",_asset.url) },
+                {"CONTENTID", () => _serverCampaign.serverSettings.GetParam("app.contentid","-1") },
+                {"SERVERUA", () => _serverCampaign.serverSettings.GetParam("app.serverua","-1") },
+                {"SERVERSIDE", () => _serverCampaign.serverSettings.GetParam("app.serverside","0") },
+                {"CLIENTUA", () => _serverCampaign.serverSettings.GetParam("app.clientua",_clientUA) },
+                {"PLAYBACKMETHODS", () => _serverCampaign.serverSettings.GetParam("app.playbackmethods","1") },
+                {"PLAYERSTATE", () =>  _serverCampaign.serverSettings.GetParam("app.playerstate","fullscreen") },
+                {"IFA", () => MonetizrAnalytics.advertisingID },
+                {"ANDROID_DEVICE_ID", () => MonetizrAnalytics.advertisingID },
+                {"iOS_DEVICE_ID", () => MonetizrAnalytics.advertisingID },
+                {"IN_APP/MOBILE_WEB", () => "IN_APP" },
+                {"ENTER_MOBILE_WEB_OR_IN_APP", () => "IN_APP" },
+
+                {"WIDTHxHEIGHT", () => _serverCampaign.serverSettings.GetParam("app.widthheight","0x0") },
+                {"ENTER_CREATIVE_SIZE", () => _serverCampaign.serverSettings.GetParam("app.creativesize","-1") },
+
+                {"EPSILON_CREATIVE_ID", () => _serverCampaign.serverSettings.GetParam("app.EPSILON_CREATIVE_ID","-1") },
+                {"DMC_PLACEMENT_ID", () => _serverCampaign.serverSettings.GetParam("app.DMC_PLACEMENT_ID","-1") },
+                {"EPSILON_TRANSACTION_ID", () => _serverCampaign.serverSettings.GetParam("app.EPSILON_TRANSACTION_ID","-1") },
+                {"EPSILON_CORRELATION_USER_DATA", () => _serverCampaign.serverSettings.GetParam("app.EPSILON_CORRELATION_USER_DATA","-1") },
+                {"OMIDPARTNER", () => _serverCampaign.serverSettings.GetParam("app.omidpartner","-1") },
+            };
+
+            SetModifiers(urlModifiers);
+        }
+        
+        protected override string UnknownModifier(string tag)
+        {
+            var value = _serverCampaign.serverSettings.GetParam($"app.{tag}");
+
+            if (!string.IsNullOrEmpty(value)) 
+                return value;
+
+            Log.PrintError($"Unknown VAST tag {tag}");
+            return "-1";
+        }
+    }
+
     internal static class NielsenDar
     {
         internal static readonly Dictionary<DeviceSizeGroup, string> sizeGroupsDict =
@@ -97,6 +155,11 @@ namespace Monetizr.Campaigns
                     { "${USER_AGENT}", (AdPlacement at) => userAgent },
                     { "${DEVICE_IP}", (AdPlacement at) => serverCampaign.device_ip },
                     { "${DEVICE_OS}", GetDeviceOs },
+                    
+                    { "${APPBUNDLE}", (AdPlacement at) => MonetizrManager.bundleId },
+                    { "${STOREID}", (AdPlacement at) => serverCampaign.serverSettings.GetParam("app.storeid") },
+                    { "${STOREURL}", (AdPlacement at) => serverCampaign.serverSettings.GetParam("app.storeurl") },
+                    { "${APPNAME}", (AdPlacement at) => serverCampaign.serverSettings.GetParam("app.name") },
 
              };
 
