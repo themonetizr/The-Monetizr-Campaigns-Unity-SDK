@@ -206,6 +206,10 @@ namespace Monetizr.Campaigns
 
         private async void PrepareHtml5Panel()
         {
+            
+
+
+
             var campaign = currentMission.campaign;
 
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
@@ -230,7 +234,10 @@ namespace Monetizr.Campaigns
 
             var oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
 
-            var ph = new PubmaticHelper(MonetizrManager.Instance.Client, _webView.GetUserAgent());
+            string userAgent = _webView.GetUserAgent();
+
+            var ph = new PubmaticHelper(MonetizrManager.Instance.Client, userAgent);
+
 
             if (isProgrammatic)
             {
@@ -247,9 +254,21 @@ namespace Monetizr.Campaigns
 
             if (!campaign.vastSettings.IsEmpty())
             {
+                var str =
+                    "https://dts.innovid.com/clktru/action/vclk?project_hash=1ikti1&client_id=7615&video_id=1142716&channel_id=3568006&publisher_id=1507&placement_tag_id=0&project_state=2&r=1695471331218&placement_hash=1d05ms&audience_id=79878196&action=clktru&click=https%3A%2F%2Fsmart.link%2Fbj5jy0vbg1ksn%3FCreative_size%3D%5BWIDTHxHEIGHT%5D%26adPlatform%3D%5BIN_APP%2FMOBILE_WEB%5D%26adid%3D%5BANDROID_DEVICE_ID%5D%26adid_sha1%3D%7Bgaid%7D%26android_id_sha1%3D%7Bsha1_android_id%7D%26creative_id%3D%5BEPSILON_CREATIVE_ID%5D%26dcm_placement_id%3D%5BDMC_PLACEMENT_ID%5D%26idfa%3D%5BiOS_DEVICE_ID%5D%26idfa_sha1%3D%7Bidfa%7D%26impression_id%3D%5BEPSILON_TRANSACTION_ID%5D%26site_category%3Dnetwork%26site_id%3Dnone-provided%26ud%3D%5BEPSILON_CORRELATION_USER_DATA%5D";
+
+
+                
+                str = new VastTagsReplacer(campaign, videoAsset, userAgent).ReplaceMacros(str);
+
+                //"https://domain.com?key1=value&key2=value&inner-domain.com?key11=val11&key22=val22&key3=value3"
+
                 await ph.DownloadOMSDKServiceContent();
 
                 campaign.vastAdParameters = campaign.DumpsVastSettings();
+
+                campaign.vastAdParameters =
+                    new VastTagsReplacer(campaign, videoAsset, userAgent).ReplaceMacros(campaign.vastAdParameters);
 
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
 

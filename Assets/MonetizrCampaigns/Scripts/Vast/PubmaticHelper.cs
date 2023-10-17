@@ -486,7 +486,7 @@ namespace Monetizr.Campaigns
                 return false;
             }
             
-             var initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, adm);
+            var initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, adm);
 
             if (!initializeResult)
             {

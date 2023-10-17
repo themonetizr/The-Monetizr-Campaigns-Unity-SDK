@@ -179,26 +179,20 @@ namespace Monetizr.Campaigns
             if(p == null)
                 return def;
 
-            return base.ContainsKey(p) ? this[p] : def;
+            return TryGetValue(p, out var value) ? value : def;
         }
 
         public bool GetBoolParam(TKey p, bool defaultParam)
         {
             if (p == null)
                 return defaultParam;
-
-            if (!base.ContainsKey(p))
-                return defaultParam;
-
-            Boolean result = defaultParam;
-            string val = this[p].ToString();
-
-            if (!Boolean.TryParse(val, out result))
+            
+            if (!TryGetValue(p, out var value))
             {
                 return defaultParam;
             }
-
-            return result;
+            
+            return bool.TryParse(value.ToString(), out var result) ? result : defaultParam;
         }
 
         public List<float> GetRectParam(TKey p, List<float> defaultParam)
@@ -206,10 +200,12 @@ namespace Monetizr.Campaigns
             if (p == null)
                 return defaultParam;
 
-            if (!base.ContainsKey(p))
+            if (!TryGetValue(p, out var value))
+            {
                 return defaultParam;
+            }
             
-            string val = this[p].ToString();
+            string val = value.ToString();
 
             var svals = val.Split(new char[] {';',','});
 
@@ -217,20 +213,13 @@ namespace Monetizr.Campaigns
 
             Array.ForEach(svals, s =>
             {
-                float f = 0;
-
-                if (!float.TryParse(s, out f))
+                if (!float.TryParse(s, out var f))
                     return;
 
                 v.Add(f);
             });
 
-            if (v.Count == 4)
-            {
-                return v;
-            }
-                       
-            return defaultParam;
+            return v.Count == 4 ? v : defaultParam;
         }
 
         public int GetIntParam(TKey p, int defaultParam = 0)
@@ -238,37 +227,25 @@ namespace Monetizr.Campaigns
             if (p == null)
                 return defaultParam;
 
-            if (!base.ContainsKey(p))
-                return defaultParam;
-
-            int result = 0;
-            string val = this[p].ToString();
-
-            if (!Int32.TryParse(val, out result))
+            if (!TryGetValue(p, out var value))
             {
                 return defaultParam;
             }
 
-            return result;
+            return int.TryParse(value.ToString(), out var result) ? result : defaultParam;
         }
 
-        public float GetFloatParam(TKey p, float defaultParam = 0)
+        public float GetFloatParam(TKey p, float defaultParam = 0.0f)
         {
             if (p == null)
                 return defaultParam;
 
-            if (!base.ContainsKey(p))
-                return defaultParam;
-
-            float result = 0;
-            string val = this[p].ToString();
-
-            if (!float.TryParse(val, out result))
+            if (!TryGetValue(p, out var value))
             {
                 return defaultParam;
             }
 
-            return result;
+            return float.TryParse(value.ToString(), out var result) ? result : defaultParam;
         }
 
     }
