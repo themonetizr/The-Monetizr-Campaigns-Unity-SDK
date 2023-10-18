@@ -298,6 +298,7 @@ namespace Monetizr.Campaigns
             ButtonPressOk,
             Error,
             ActionSuccess,
+            Notification,
         }
 
         public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
@@ -1479,7 +1480,7 @@ namespace Monetizr.Campaigns
             {
                 Client.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
 
-                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Impression);
+                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
 
 
                 //_client.analytics.TrackEvent("Get List Started", campaigns[0]);
@@ -1568,7 +1569,7 @@ namespace Monetizr.Campaigns
             }*/
 
             if (campaigns.Count > 0)
-                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
+                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
 
             /* if (!isOk)
              {
@@ -1631,6 +1632,9 @@ namespace Monetizr.Campaigns
 
         internal ServerCampaign GetActiveCampaign()
         {
+            if (!IsActiveAndEnabled())
+                return null;
+
             return _activeCampaignId;
         }
 
@@ -1704,6 +1708,16 @@ namespace Monetizr.Campaigns
         public bool HasActiveCampaign()
         {
             return _isActive && _activeCampaignId != null;
+        }
+
+        public static bool IsInitialized()
+        {
+            return Instance != null;
+        }
+
+        public static bool IsActive()
+        {
+            return Instance != null && Instance._isActive;
         }
 
         internal bool HasCampaign(string campaignId)
