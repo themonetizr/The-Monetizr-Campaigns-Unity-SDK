@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Mindscape.Raygun4Unity;
 using UnityEngine;
 
@@ -16,15 +17,46 @@ namespace Monetizr.Campaigns
 
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
-            if (!condition.StartsWith("Monetizr SDK"))
+            if (type != LogType.Exception && type != LogType.Error) return;
+
+            if (!MonetizrManager.IsInitialized())
                 return;
 
-            if (type == LogType.Exception || type == LogType.Error)
+            if (MonetizrManager.Instance.Client == null || MonetizrManager.Instance.Client.GlobalSettings == null)
+                return;
+
+            if (!condition.StartsWith("Monetizr SDK"))
+                return;
+            
+            //Debug.LogError(condition + " " + stackTrace);
+
+            _raygunClient.ApplicationVersion = MonetizrManager.SDKVersion;
+
+            var tags = new List<string>();
+
+            var campaign = MonetizrManager.Instance.GetActiveCampaign();
+
+            var customData = new Dictionary<string, string>() {
+                {"app_name", Application.productName } ,
+                {"app_version", Application.version},
+                {"unity_version", Application.unityVersion},
+                {"bundle_id",MonetizrManager.bundleId},
+                {"os_group",MonetizrAnalytics.GetOsGroup()},
+                {"camp_id", campaign != null ? campaign.id : "none"}
+            };
+
+            if (!string.IsNullOrEmpty(RaygunCrashReportingPostService.defaultApiEndPointForCr))
+                _raygunClient.Send(condition, stackTrace, tags, customData);
+
+            var sendReportToMixpanel =
+                MonetizrManager.Instance.Client.GlobalSettings.GetBoolParam("app.sent_error_reports_to_mixpanel",
+                    false);
+
+            if (sendReportToMixpanel)
             {
-                Debug.LogError(condition + " " + stackTrace);
-                
-                _raygunClient.ApplicationVersion = MonetizrManager.SDKVersion;
-                _raygunClient.Send(condition, stackTrace);
+                MonetizrManager.Instance.Client.analytics.SendErrorToMixpanel(condition,
+                    stackTrace,
+                    MonetizrManager.Instance.GetActiveCampaign());
             }
         }
     }
