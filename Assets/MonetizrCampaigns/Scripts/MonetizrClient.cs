@@ -231,7 +231,7 @@ namespace Monetizr.Campaigns
             GlobalSettings = await DownloadGlobalSettings();
 
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint",
-                RaygunCrashReportingPostService.defaultApiEndPointForCr);
+                "https://api.raygun.com/entries");
         }
 
         internal SettingsDictionary<string, string> GlobalSettings { get; private set; }
