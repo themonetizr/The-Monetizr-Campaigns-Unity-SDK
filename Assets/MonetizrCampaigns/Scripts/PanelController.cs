@@ -40,6 +40,11 @@ namespace Monetizr.Campaigns
         internal abstract void PreparePanel(PanelId id, Action<bool> onComplete, Mission m);
         internal abstract void FinalizePanel(PanelId id);
 
+        internal virtual bool SendImpressionEventManually()
+        {
+            return false;
+        }
+
         internal virtual AdPlacement? GetAdPlacement()
         {
             return null;
@@ -162,7 +167,8 @@ namespace Monetizr.Campaigns
 
             FinalizePanel(panelId);
 
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
+            if(!SendImpressionEventManually())
+                MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
 
             gameObject.SetActive(false);
             

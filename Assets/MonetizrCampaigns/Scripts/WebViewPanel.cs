@@ -37,6 +37,13 @@ namespace Monetizr.Campaigns
         public bool claimPageReached = false;
         public string programmaticStatus;
         private int _claimButtonDelay;
+        private bool impressionStarts = false;
+
+
+        internal override bool SendImpressionEventManually()
+        {
+            return true;
+        }
 
         internal override AdPlacement? GetAdPlacement()
         {
@@ -125,6 +132,8 @@ namespace Monetizr.Campaigns
 
             _webUrl = m.campaignServerSettings.GetParam(m.surveyId);
 
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+
             _webView.Load(_webUrl);
 
         }
@@ -207,9 +216,6 @@ namespace Monetizr.Campaigns
         private async void PrepareHtml5Panel()
         {
             
-
-
-
             var campaign = currentMission.campaign;
 
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
@@ -269,6 +275,8 @@ namespace Monetizr.Campaigns
 
 #if UNITY_EDITOR_WIN
             showWebview = false;
+
+            
 #endif
             if (showWebview)
             {
@@ -276,6 +284,9 @@ namespace Monetizr.Campaigns
                 _webView.Load(_webUrl);
                 _webView.Show();
                 Log.PrintV($"Url to show {_webUrl}");
+
+                MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+                impressionStarts = true;
             }
             else
             {
@@ -332,15 +343,21 @@ namespace Monetizr.Campaigns
             switch (id)
             {
                 case PanelId.SurveyWebView: 
-                    PrepareSurveyPanel(m); 
+                    PrepareSurveyPanel(m);
+                    MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+                    impressionStarts = true;
                     break;
                 
                 case PanelId.HtmlWebPageView: 
-                    PrepareWebViewPanel(m); 
+                    PrepareWebViewPanel(m);
+                    MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+                    impressionStarts = true;
                     break;
 
                 case PanelId.ActionHtmlPanelView: 
                     PrepareActionPanel(m); 
+                    MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+                    impressionStarts = true;
                     break;
             }
 
@@ -509,16 +526,23 @@ namespace Monetizr.Campaigns
             additionalEventValues.Add("url", _webUrl);
             additionalEventValues.Add("programmatic_status", programmaticStatus);
 
-            Log.PrintV($"Stopping OMID ad session at time: {Time.time}"); 
+            Log.PrintV($"Stopping OMID ad session at time: {Time.time}");
 
             _webView.StopOMIDAdSession();
 
-            float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay",1.0f);
+            float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay", 1.0f);
 
             if (panelId != PanelId.Html5WebView)
                 time = 0;
 
             Invoke("DestroyWebView", time);
+
+
+            if (impressionStarts)
+            {
+                MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
+                impressionStarts = false;
+            }
         }
 
         private void DestroyWebView()

@@ -167,7 +167,8 @@ namespace Monetizr.Campaigns
 
                 ctrlPanel.PreparePanel(id, complete, m);
 
-                MonetizrManager.Analytics.TrackEvent(m, ctrlPanel, MonetizrManager.EventType.Impression);
+                if(!ctrlPanel.SendImpressionEventManually())
+                    MonetizrManager.Analytics.TrackEvent(m, ctrlPanel, MonetizrManager.EventType.Impression);
 
                 panels.Add(id, ctrlPanel);
             }
