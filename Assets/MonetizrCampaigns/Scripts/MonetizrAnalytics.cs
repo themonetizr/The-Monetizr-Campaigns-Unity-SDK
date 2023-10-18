@@ -335,6 +335,8 @@ namespace Monetizr.Campaigns
 
         AssetsLoading,
         ActionScreen,
+        AssetsLoadingEnds,
+        AssetsLoadingStarts
     }
 
     internal enum DeviceSizeGroup
@@ -761,8 +763,6 @@ namespace Monetizr.Campaigns
             }
         }
 
-        
-
         private void MixpanelTrackAndMaybeFlush(ServerCampaign camp, string eventName, Value props, bool darTag = false)
         {
             props["dar_tag_sent"] = darTag.ToString();
@@ -940,7 +940,9 @@ namespace Monetizr.Campaigns
                 { AdPlacement.EmailEnterInGameRewardScreen, "Enter email" },
                 { AdPlacement.EmailEnterSelectionRewardScreen, "Enter email" },
                 { AdPlacement.AssetsLoading, "Assets loading" },
-                { AdPlacement.ActionScreen, "Action screen" }
+                { AdPlacement.ActionScreen, "Action screen" },
+                { AdPlacement.AssetsLoadingStarts, "Assets loading starts" },
+                { AdPlacement.AssetsLoadingEnds, "Assets loading ends" },
             };
 
             
@@ -971,7 +973,8 @@ namespace Monetizr.Campaigns
                 { MonetizrManager.EventType.ButtonPressOk, completedOrPressed(adPlacement) },
                 { MonetizrManager.EventType.ButtonPressSkip, "skipped" },
                 { MonetizrManager.EventType.Impression, "shown" },
-                { MonetizrManager.EventType.Error, "failed" }
+                { MonetizrManager.EventType.Error, "failed" },
+                { MonetizrManager.EventType.Notification, "notified" }
             };
 
             TrackNewEvents(currentCampaign, currentMission, adPlacement, placementName, eventType, additionalValues);
@@ -995,7 +998,8 @@ namespace Monetizr.Campaigns
 
             //var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
 
-            _TrackEvent(eventName, currentCampaign, false, additionalValues);
+            if(currentCampaign.serverSettings.GetBoolParam("send_old_events",false))
+                _TrackEvent(eventName, currentCampaign, false, additionalValues);
 
             
         }
@@ -1073,12 +1077,13 @@ namespace Monetizr.Campaigns
                             return true;
                        }
 
-                        return false;
+                       return false;
                     });
 
                     break;
 
                 case MonetizrManager.EventType.Error:
+                case MonetizrManager.EventType.Notification:
                     eventName = eventType.ToString();
                     break;
 
@@ -1281,6 +1286,21 @@ namespace Monetizr.Campaigns
             props["request_pieces"] = Utils.SplitStringIntoPieces(openRtbRequest,255);
             
             Log.PrintV($"SendReport: {props}");
+            //Mixpanel.Identify("Programmatic-client");
+            Mixpanel.Identify(deviceIdentifier);
+            Mixpanel.Track("Programmatic-request-client", props);
+        }
+
+        public void SendErrorToMixpanel(string condition, string callstack, ServerCampaign campaign)
+        {
+            var props = new Value();
+
+            AddDefaultMixpanelValues(props, campaign, null);
+            
+            props["condition"] = condition;
+            props["callstack"] = callstack;
+            
+            Log.PrintV($"SendError: {props}");
             //Mixpanel.Identify("Programmatic-client");
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track("Programmatic-request-client", props);
