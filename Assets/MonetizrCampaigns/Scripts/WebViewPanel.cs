@@ -250,10 +250,13 @@ namespace Monetizr.Campaigns
                 showWebview = false;
                 
                 var programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign);
-                
-                if (campaign.TryGetAssetInList("programmatic_video", out videoAsset))
+
+                ServerCampaign.Asset programmaticVideoAsset = null;
+
+                if (programmaticOk && campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
                 {
                     _webUrl = $"file://{campaign.GetCampaignPath($"{videoAsset.fpath}/index.html")}";
+                    videoAsset = programmaticVideoAsset;
                     showWebview = true;
                 }
             }
