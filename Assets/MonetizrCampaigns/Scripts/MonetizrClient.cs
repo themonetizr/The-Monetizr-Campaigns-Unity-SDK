@@ -33,7 +33,7 @@ namespace Monetizr.Campaigns
     {
         //public PlayerInfo playerInfo { get; set; }
 
-        private string _baseApiUrl = "https://api-test.themonetizr.com";
+        private string _baseApiUrl = "https://api.themonetizr.com";
 
         private string CampaignsApiUrl
         {

@@ -948,7 +948,7 @@ namespace Monetizr.Campaigns
 
                 Log.PrintV($"Wrapper url {url}");
 
-                url = "http://localhost:8080/";
+                //url = "http://localhost:8080/";
 
                 Log.PrintV($"Loading wrapper with the url {url}");
 
