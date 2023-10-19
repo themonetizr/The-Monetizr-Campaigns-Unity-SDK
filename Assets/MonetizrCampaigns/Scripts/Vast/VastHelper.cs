@@ -976,26 +976,26 @@ namespace Monetizr.Campaigns
         {
             Log.PrintV("Loading video player");
 
-            if (!serverCampaign.TryGetAssetInList("html", out var videoAsset))
+            if (!serverCampaign.TryGetAssetInList(new List<string>(){"html","video"}, out var videoAsset))
             {
                 return;
             }
 
-            serverCampaign.serverSettings.Add("custom_missions",
-                    "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
+            //serverCampaign.serverSettings.Add("custom_missions",
+            //        "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
 
             await DownloadAndPrepareHtmlVideoPlayer(serverCampaign, videoAsset);
 
             //---------------
 
-            if (!serverCampaign.HasAssetInList("tiny_teaser"))
+            /*if (!serverCampaign.HasAssetInList("tiny_teaser"))
             {
                 serverCampaign.assets.Add(new ServerCampaign.Asset()
                 {
                     url = "https://image.themonetizr.com/default_assets/monetizr_teaser.gif",
                     type = "tiny_teaser_gif",
                 });
-            }
+            }*/
 
         }
 
@@ -1126,7 +1126,8 @@ namespace Monetizr.Campaigns
         
         internal void InitializeOMSDK(string vastAdVerificationParams)
         {
-            Log.PrintV($"InitializeOMSDK {_omidJsServiceContent}");
+            Log.PrintV($"InitializeOMSDK with {vastAdVerificationParams}");
+            Log.PrintV($"Service content: {_omidJsServiceContent}");
 
             UniWebViewInterface.InitOMSDK(vastAdVerificationParams, _omidJsServiceContent);
         }

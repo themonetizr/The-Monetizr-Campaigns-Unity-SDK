@@ -160,7 +160,8 @@ namespace Monetizr.Campaigns
                     { "${STOREID}", (AdPlacement at) => serverCampaign.serverSettings.GetParam("app.storeid") },
                     { "${STOREURL}", (AdPlacement at) => serverCampaign.serverSettings.GetParam("app.storeurl") },
                     { "${APPNAME}", (AdPlacement at) => serverCampaign.serverSettings.GetParam("app.name") },
-
+                    { "${TAGID}", (AdPlacement at) => serverCampaign.serverSettings.GetParam("imp.tagid") },
+                    { "${APPID}", (AdPlacement at) => serverCampaign.serverSettings.GetParam("app.id") },
              };
 
             var sb = new StringBuilder(originalString);
@@ -766,8 +767,7 @@ namespace Monetizr.Campaigns
         {
             props["dar_tag_sent"] = darTag.ToString();
 
-            Log.PrintV($"--->Mixpanel track {eventName}");
-
+            //Log.PrintV($"--->Mixpanel track {eventName}");
             
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track(eventName, props);
@@ -904,7 +904,7 @@ namespace Monetizr.Campaigns
 
         internal void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
         {
-            Log.PrintV($"------Track event: {currentCampaign} {adPlacement} {eventType}");
+            //Log.PrintV($"------Track event: {currentCampaign} {adPlacement} {eventType}");
 
             Debug.Assert(currentCampaign != null);
             
@@ -978,7 +978,9 @@ namespace Monetizr.Campaigns
 
             TrackNewEvents(currentCampaign, currentMission, adPlacement, placementName, eventType, additionalValues);
 
-            
+            if (!currentCampaign.serverSettings.GetBoolParam("send_old_events", false))
+                return;
+                
             if (eventType == MonetizrManager.EventType.Impression)
             {
                 NielsenDar.Track(currentCampaign, adPlacement);
@@ -997,8 +999,7 @@ namespace Monetizr.Campaigns
 
             //var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
 
-            if(currentCampaign.serverSettings.GetBoolParam("send_old_events",false))
-                _TrackEvent(eventName, currentCampaign, false, additionalValues);
+            _TrackEvent(eventName, currentCampaign, false, additionalValues);
 
             
         }
@@ -1057,6 +1058,9 @@ namespace Monetizr.Campaigns
 
                 case MonetizrManager.EventType.Impression:
                     eventName = "ImpressionStarts";
+                    
+                    NielsenDar.Track(campaign, adPlacement);
+                    
                     //Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {ImpressionEnds}");
                     adNewElements.Add(new AdElement("ImpressionEnds", adPlacement, campaign));
 
@@ -1174,7 +1178,7 @@ namespace Monetizr.Campaigns
         {
             Debug.Assert(isMixpanelInitialized);
 
-            string logString = $"SendEvent: name:{name} id:{campaign.id}";
+            string logString = $"--->SendEvent: {name}";
 
             if(additionalValues != null)
             {
@@ -1183,6 +1187,8 @@ namespace Monetizr.Campaigns
                 if (additionalValues.ContainsKey("action")) logString += " action:" + additionalValues["action"];
                 if (additionalValues.ContainsKey("$duration")) logString += " duration:" + additionalValues["$duration"];
             }
+
+            logString += $" id:{campaign.id}";
 
             Log.PrintV(logString);
 

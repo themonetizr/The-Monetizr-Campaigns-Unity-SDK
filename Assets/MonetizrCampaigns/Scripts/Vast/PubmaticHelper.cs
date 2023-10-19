@@ -420,7 +420,7 @@ namespace Monetizr.Campaigns
                 var targetDelay = currentCampaign.serverSettings.GetIntParam("openrtb.delay", 300);
                 if (delay < targetDelay)
                 {
-                    Log.PrintV($"Last programmatic request was earlier than {targetDelay}");
+                    Log.PrintV($"Last programmatic request was earlier than {targetDelay} {delay}");
                     return false;
                 }
             }

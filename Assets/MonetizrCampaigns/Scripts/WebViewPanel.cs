@@ -239,23 +239,33 @@ namespace Monetizr.Campaigns
             //var isSkipped = false;
 
             var oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
-
+            
             string userAgent = _webView.GetUserAgent();
-
             var ph = new PubmaticHelper(MonetizrManager.Instance.Client, userAgent);
-
 
             if (isProgrammatic)
             {
-                showWebview = false;
+                campaign.vastSettings = new VastHelper.VastSettings();
                 
-                var programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign);
+                showWebview = false;
 
+                var programmaticOk = false;
+                
+                try
+                {
+                    programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign);
+                }
+                catch (Exception e)
+                {
+                    Log.PrintError($"Exception {e} in GetOpenRtbResponseForCampaign in campaign {campaign.id}");
+                    programmaticOk = false;
+                }
+                
                 ServerCampaign.Asset programmaticVideoAsset = null;
 
                 if (programmaticOk && campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
                 {
-                    _webUrl = $"file://{campaign.GetCampaignPath($"{videoAsset.fpath}/index.html")}";
+                    _webUrl = $"file://{campaign.GetCampaignPath($"{programmaticVideoAsset.fpath}/index.html")}";
                     videoAsset = programmaticVideoAsset;
                     showWebview = true;
                 }
@@ -272,10 +282,10 @@ namespace Monetizr.Campaigns
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
 
                 ph.InitializeOMSDK(campaign.vastAdParameters);
-
-                campaign.vastSettings = oldVastSettings;
             }
 
+            campaign.vastSettings = oldVastSettings;
+            
 #if UNITY_EDITOR_WIN
             showWebview = false;
 
@@ -539,10 +549,11 @@ namespace Monetizr.Campaigns
                 time = 0;
 
             Invoke("DestroyWebView", time);
-
+            triggersButtonEventsOnDeactivate = false;
 
             if (impressionStarts)
             {
+                triggersButtonEventsOnDeactivate = true;
                 MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
                 impressionStarts = false;
             }

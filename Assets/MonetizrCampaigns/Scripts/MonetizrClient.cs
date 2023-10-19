@@ -432,7 +432,8 @@ namespace Monetizr.Campaigns
                 return new List<ServerCampaign>();
             }
 
-            campaigns.campaigns = await TryRecreateCampaignsFromAdm(campaigns.campaigns);
+            if(GlobalSettings.GetBoolParam("campaign.use_adm",true))
+                campaigns.campaigns = await TryRecreateCampaignsFromAdm(campaigns.campaigns);
 
             campaigns.campaigns.ForEach(c => c.PostCampaignLoad());
             
@@ -491,7 +492,7 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(userAgent)) 
                 return output;
             
-            Log.PrintError(userAgent);
+            //Log.PrintError(userAgent);
             output.Headers.Add("User-Agent", userAgent);
 
             return output;
