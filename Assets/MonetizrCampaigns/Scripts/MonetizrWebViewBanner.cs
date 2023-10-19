@@ -47,18 +47,16 @@ namespace Monetizr.Campaigns
 
             Log.PrintWarning($"Open RTB response loaded with adm: {adm}");
 
-
             _webView = gameObject.AddComponent<UniWebView>();
             
-
-            _webView.Frame = new Rect(0, 0, Screen.width, Screen.width);
+            _webView.Frame = new Rect((Screen.width - 700)/2, 200, 700, 700);
 
             _webView.OnMessageReceived += OnMessageReceived;
             _webView.OnPageStarted += OnPageStarted;
             _webView.OnPageFinished += OnPageFinished;
             _webView.OnPageErrorReceived += OnPageErrorReceived;
 
-            _webView.Alpha = 0;
+            //_webView.Alpha = 0;
 
             _webView.LoadHTMLString(adm, "https://monetizr.com");
         }
@@ -68,9 +66,17 @@ namespace Monetizr.Campaigns
             
         }
 
+        public void HideBanner()
+        {
+            if(_webView != null)
+                _webView.Hide(true);
+        }
+
         private void OnPageFinished(UniWebView webview, int statuscode, string url)
         {
-            _webView.Alpha = 1;
+            Log.PrintWarning($"Banner OnPageFinished {statuscode}");
+            //_webView.Alpha = 1;
+            _webView.Show(true);
         }
 
         private void OnPageStarted(UniWebView webview, string url)

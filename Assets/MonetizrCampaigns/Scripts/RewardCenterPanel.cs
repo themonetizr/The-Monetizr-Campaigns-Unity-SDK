@@ -478,6 +478,11 @@ namespace Monetizr.Campaigns
 
         public void OnButtonPress()
         {
+            if(gameObject.TryGetComponent<MonetizrWebViewBanner>(out MonetizrWebViewBanner b))
+            {
+                b.HideBanner();
+            }
+            
             isSkipped = true;
             //MonetizrManager.CallUserDefinedEvent(currentCampaign,
             //  NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
@@ -562,8 +567,7 @@ namespace Monetizr.Campaigns
         internal override void FinalizePanel(PanelId id)
         {
             //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.RewardsCenterScreen, currentMission);
-
-
+            
             //MonetizrManager.ShowTinyMenuTeaser(null);
 
             if(MonetizrManager.tinyTeaserCanBeVisible)

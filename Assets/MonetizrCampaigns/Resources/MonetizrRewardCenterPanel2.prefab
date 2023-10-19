@@ -468,7 +468,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8814279830154137442
 RectTransform:
   m_ObjectHideFlags: 0
@@ -495,7 +495,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2574875264046369818}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 06da5464f57adec4cafc466e736c2b0e, type: 3}
   m_Name: 
@@ -759,6 +759,7 @@ GameObject:
   - component: {fileID: 8188348160251737333}
   - component: {fileID: 4964425370316840702}
   - component: {fileID: 3744564071990885423}
+  - component: {fileID: 4742236698714491255}
   m_Layer: 5
   m_Name: MonetizrRewardCenterPanel2
   m_TagString: Untagged
@@ -803,7 +804,7 @@ CanvasGroup:
   m_IgnoreParentGroups: 0
 --- !u!95 &4964425370316840702
 Animator:
-  serializedVersion: 5
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -816,12 +817,10 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &3744564071990885423
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -851,6 +850,18 @@ MonoBehaviour:
   scrollViewElement: {fileID: 347315250822148342}
   termsAndCondPrefab: {fileID: 0}
   bannerLayoutElement: {fileID: 0}
+--- !u!114 &4742236698714491255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6148505464094224599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06da5464f57adec4cafc466e736c2b0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7271394685337403928
 GameObject:
   m_ObjectHideFlags: 0
@@ -1299,12 +1310,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9dd35679f3ff7c9469248cd97ecb0176, type: 3}
---- !u!224 &5716136972003543649 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 3003943133344682894, guid: 9dd35679f3ff7c9469248cd97ecb0176,
-    type: 3}
-  m_PrefabInstance: {fileID: 7414026797626710511}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &8250193142197533514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1485476376152138405, guid: 9dd35679f3ff7c9469248cd97ecb0176,
@@ -1329,3 +1334,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &5716136972003543649 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 3003943133344682894, guid: 9dd35679f3ff7c9469248cd97ecb0176,
+    type: 3}
+  m_PrefabInstance: {fileID: 7414026797626710511}
+  m_PrefabAsset: {fileID: 0}
