@@ -710,11 +710,9 @@ namespace Monetizr.Campaigns
                 props["brand_id"] = campaign.brand_id;
                 props["camp_title"] = campaign.title;
 
-                string brandName = "none";
-                if (campaign.TryGetAsset(AssetsType.BrandTitleString, out string res))
-                {
-                    props["brand_name"] = brandName;
-                }
+                props["brand_name"] = campaign.TryGetAsset(AssetsType.BrandTitleString, out string brandName)
+                    ? brandName
+                    : "none";
             }
 
             props["bundle_id"] = MonetizrManager.bundleId;
