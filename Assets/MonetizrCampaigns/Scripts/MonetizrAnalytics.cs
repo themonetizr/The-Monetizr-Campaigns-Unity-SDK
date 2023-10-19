@@ -701,7 +701,7 @@ namespace Monetizr.Campaigns
 
         }
 
-        private void AddDefaultMixpanelValues(Value props, ServerCampaign campaign, string brandName)
+        private void AddDefaultMixpanelValues(Value props, ServerCampaign campaign)
         {
             if (campaign != null)
             {
@@ -709,6 +709,12 @@ namespace Monetizr.Campaigns
                 props["camp_id"] = campaign.id;
                 props["brand_id"] = campaign.brand_id;
                 props["camp_title"] = campaign.title;
+
+                string brandName = "none";
+                if (campaign.TryGetAsset(AssetsType.BrandTitleString, out string res))
+                {
+                    props["brand_name"] = brandName;
+                }
             }
 
             props["bundle_id"] = MonetizrManager.bundleId;
@@ -717,11 +723,6 @@ namespace Monetizr.Campaigns
             props["application_name"] = Application.productName;
             props["application_version"] = Application.version;
             props["impressions"] = "1";
-
-            if (brandName != null)
-            {
-                props["brand_name"] = brandName;
-            }
 
             //props["type"] = adTypeNames[adAsset.Key];
             //props["type"] = adAsset.Key.ToString();
@@ -1194,25 +1195,17 @@ namespace Monetizr.Campaigns
                 eventName = $"[UNITY_SDK] [TIMED] {name}";
             }
 
-            string brand_name = "none";
+            
 
             if (campaign == null)
             {
                 Log.PrintWarning($"MonetizrAnalytics TrackEvent: ServerCampaign shouldn't be null");
                 return;
             }
-
-
-            var ch = campaign.id;
-
-            if (campaign.TryGetAsset(AssetsType.BrandTitleString, out string res))
-            {
-                brand_name = res;
-            }
-
+            
             var props = new Value();
             
-            AddDefaultMixpanelValues(props, campaign, brand_name);
+            AddDefaultMixpanelValues(props, campaign);
 
             if (additionalValues != null)
             {
@@ -1269,7 +1262,7 @@ namespace Monetizr.Campaigns
         {
             var props = new Value();
             
-            AddDefaultMixpanelValues(props, campaign, null);
+            AddDefaultMixpanelValues(props, campaign);
             
             var parameters = SimpleJSON.JSON.Parse(openRtbRequest);
 
@@ -1295,7 +1288,7 @@ namespace Monetizr.Campaigns
         {
             var props = new Value();
 
-            AddDefaultMixpanelValues(props, campaign, null);
+            AddDefaultMixpanelValues(props, campaign);
             
             props["condition"] = condition;
             props["callstack"] = callstack;
