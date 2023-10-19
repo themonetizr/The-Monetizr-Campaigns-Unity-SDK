@@ -85,7 +85,7 @@ namespace Monetizr.Campaigns
                 {"DMC_PLACEMENT_ID", () => _serverCampaign.serverSettings.GetParam("app.DMC_PLACEMENT_ID","-1") },
                 {"EPSILON_TRANSACTION_ID", () => _serverCampaign.serverSettings.GetParam("app.EPSILON_TRANSACTION_ID","-1") },
                 {"EPSILON_CORRELATION_USER_DATA", () => _serverCampaign.serverSettings.GetParam("app.EPSILON_CORRELATION_USER_DATA","-1") },
-                {"OMIDPARTNER", () => _serverCampaign.serverSettings.GetParam("app.omidpartner","-1") },
+                {"OMIDPARTNER", () => _serverCampaign.serverSettings.GetParam("app.omidpartner", _serverCampaign.vastSettings.vendorName) },
             };
 
             SetModifiers(urlModifiers);
