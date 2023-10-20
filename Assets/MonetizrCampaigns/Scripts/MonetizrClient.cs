@@ -232,6 +232,8 @@ namespace Monetizr.Campaigns
 
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint",
                 "https://api.raygun.com/entries");
+
+            _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
         }
 
         internal SettingsDictionary<string, string> GlobalSettings { get; private set; }
