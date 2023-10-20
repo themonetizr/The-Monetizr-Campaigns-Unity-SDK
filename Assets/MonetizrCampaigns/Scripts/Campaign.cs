@@ -422,7 +422,7 @@ namespace Monetizr.Campaigns
 
             if (fname.Contains("zip"))
             {
-                zipFolder = path + "/" + fname.Replace(".zip", "");
+                zipFolder = path;
                 fileToCheck = zipFolder + "/index.html";
 
                 Log.PrintV($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
@@ -459,11 +459,11 @@ namespace Monetizr.Campaigns
                 {
                     Log.PrintV("Extracting to: " + zipFolder);
 
-                    if (Directory.Exists(zipFolder))
-                        DeleteDirectory(zipFolder);
+                    //if (Directory.Exists(zipFolder))
+                    //    DeleteDirectory(zipFolder);
 
                     //if (!Directory.Exists(zipFolder))
-                    Directory.CreateDirectory(zipFolder);
+                    //Directory.CreateDirectory(zipFolder);
 
                     //ZipFile.ExtractToDirectory(fpath, zipFolder);
                     var unzipResult = Utils.ExtractAllToDirectory(fpath, zipFolder);
@@ -616,6 +616,12 @@ namespace Monetizr.Campaigns
                         break;
 
                     case "html":
+
+                        asset.fpath = Utils.ConvertCreativeToFname(asset.url);
+                        asset.fname = "video";
+                        asset.fext = Utils.ConvertCreativeToExt("", asset.url);
+                        asset.mainAssetName = $"index.html";
+                        
                         await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
 
                         break;
