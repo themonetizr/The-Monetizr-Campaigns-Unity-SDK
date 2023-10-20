@@ -223,7 +223,9 @@ namespace Monetizr.Campaigns
             if (hasVideo)
             {
                 _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
-                campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
+
+                if(campaign.serverSettings.GetBoolParam("omsdk.verify_internal_videos", false))
+                    campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
             var isProgrammatic = campaign.serverSettings.GetBoolParam("programmatic", false);
@@ -271,7 +273,7 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            if (!campaign.vastSettings.IsEmpty())
+            if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
                 await ph.DownloadOMSDKServiceContent();
 
@@ -305,9 +307,15 @@ namespace Monetizr.Campaigns
             {
                 programmaticStatus = "failed";
                 //OnCompleteEvent();
-                
-                //Log.PrintError("_OnSkipPress");
-                _OnSkipPress();
+
+                if (campaign.serverSettings.GetBoolParam("openrtb.give_reward_on_programmatic_fail", true))
+                {
+                    OnCompleteEvent();
+                }
+                else
+                {
+                    _OnSkipPress();
+                }
             }
 
         }
