@@ -398,7 +398,8 @@ namespace Monetizr.Campaigns
             }
         }
         
-        internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign)
+        internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign,
+            string currentMissionOpenRtbRequest)
         {
             var settings = currentCampaign.serverSettings; //client.GlobalSettings;
 
@@ -411,9 +412,15 @@ namespace Monetizr.Campaigns
                 return false;
             }
 
+            var requestParameterName = string.IsNullOrEmpty(currentMissionOpenRtbRequest)
+                ? "openrtb.request"
+                : currentMissionOpenRtbRequest;
+
+            var timeParameterName = $"openrtb.last_request.{requestParameterName}";
+
 #if !UNITY_EDITOR
             if (DateTime.TryParse(MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id)
-                    .settings["openrtb.last_request"], out var lastTime))
+                    .settings[timeParameterName], out var lastTime))
             {
                 var delay = (DateTime.Now - lastTime).TotalSeconds;
 
@@ -426,13 +433,14 @@ namespace Monetizr.Campaigns
             }
 #endif
 
-            MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings["openrtb.last_request"] =
+            MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings[timeParameterName] =
                 DateTime.Now.ToString();
             MonetizrManager.Instance.localSettings.SaveData();
 
-            var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri, userAgent);
+            //var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri, userAgent);
+
             
-            var openRtbRequest = settings.GetParam("openrtb.request");
+            var openRtbRequest = settings.GetParam(requestParameterName);
             
             if (string.IsNullOrEmpty(openRtbRequest) && settings.ContainsKey("openrtb.generator_url"))
             {
@@ -443,7 +451,7 @@ namespace Monetizr.Campaigns
 
             if (string.IsNullOrEmpty(openRtbRequest))
             {
-                Log.PrintV($"Can't create openRTB request!");
+                Log.PrintError($"Can't create openRTB request for campaign {currentCampaign}!");
                 return false;
             }
 
@@ -454,7 +462,7 @@ namespace Monetizr.Campaigns
             Log.PrintV($"OpenRTB request: {openRtbRequest}");
             Log.PrintV($"Requesting OpenRTB campaign with url: {openRtbUri}");
 
-            requestMessage = MonetizrClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
+            var requestMessage = MonetizrClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
             var response = await MonetizrClient.DownloadUrlAsString(requestMessage);
 
 

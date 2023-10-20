@@ -253,7 +253,7 @@ namespace Monetizr.Campaigns
                 
                 try
                 {
-                    programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign);
+                    programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign,currentMission.openRtbRequestForProgrammatic);
                 }
                 catch (Exception e)
                 {

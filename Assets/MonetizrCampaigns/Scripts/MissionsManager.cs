@@ -275,6 +275,7 @@ namespace Monetizr.Campaigns
             m.rewardPercent = md.rewardPercent;
             m.autoStartAfter = md.autoStartAfter;
             m.alwaysHiddenInRC = md.alwaysHiddenInRC;
+            m.openRtbRequestForProgrammatic = md.openRtbRequestForProgrammatic;
 
 
             return m;
@@ -645,7 +646,8 @@ namespace Monetizr.Campaigns
                         alwaysHiddenInRC = _m.IsAlwaysHiddenInRC(),
                         autoStartAfter = _m.GetAutoStartId(),
                         rewardImage = _m.reward_image,
-                        activateConditions = _m.activate_conditions
+                        activateConditions = _m.activate_conditions,
+                        openRtbRequestForProgrammatic = _m.ortb_request
                     }); ;
 
                 });
@@ -687,6 +689,8 @@ namespace Monetizr.Campaigns
             public string reward_image;
 
             public string activate_conditions;
+            
+            public string ortb_request;
 
             public int GetAutoStartId()
             {

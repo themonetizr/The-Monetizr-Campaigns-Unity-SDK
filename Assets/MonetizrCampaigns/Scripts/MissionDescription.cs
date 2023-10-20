@@ -37,6 +37,7 @@ namespace Monetizr.Campaigns
         internal bool hasUnitySurvey;
         internal string rewardImage;
         internal string activateConditions;
+        internal string openRtbRequestForProgrammatic;
     }
 
     internal enum MissionUIState
@@ -359,6 +360,8 @@ namespace Monetizr.Campaigns
 
         [NonSerialized] internal ServerCampaign campaign;
         [NonSerialized] public string rewardAssetName;
+
+        [NonSerialized] public string openRtbRequestForProgrammatic;
     }
 
     /*internal class  SurveyMission : Mission
