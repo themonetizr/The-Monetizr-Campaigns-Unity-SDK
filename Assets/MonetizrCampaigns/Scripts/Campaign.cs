@@ -853,7 +853,7 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(content))
                 return;
             
-            content = Utils.UnescapeString(content);
+            //content = Utils.UnescapeString(content);
 
             var cd = Utils.ParseContentString(content);
 
