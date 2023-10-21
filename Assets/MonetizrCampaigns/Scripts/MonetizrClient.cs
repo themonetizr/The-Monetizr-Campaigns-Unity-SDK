@@ -182,7 +182,17 @@ namespace Monetizr.Campaigns
 
         public static async Task<(bool isSuccess,string content)> DownloadUrlAsString(HttpRequestMessage requestMessage)
         {
-            HttpResponseMessage response = await Client.SendAsync(requestMessage);
+            HttpResponseMessage response = null;
+            
+            try
+            {
+                response = await Client.SendAsync(requestMessage);
+            }
+            catch (Exception e)
+            {
+                Log.PrintError($"DownloadUrlAsString exception\nHttpRequestMessage: {requestMessage}\n{e}");
+                throw;
+            }
 
             string result = await response.Content.ReadAsStringAsync();
 
@@ -232,7 +242,7 @@ namespace Monetizr.Campaigns
 
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint",
                 "https://api.raygun.com/entries");
-
+            
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
         }
 
