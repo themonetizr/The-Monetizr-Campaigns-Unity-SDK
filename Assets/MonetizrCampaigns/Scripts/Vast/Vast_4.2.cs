@@ -1487,7 +1487,8 @@ namespace Monetizr.Campaigns.Vast42
     //[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.iab.com/VAST")]
     public partial class TrackingEvents_typeTracking {
         
-        private TrackingEvents_typeTrackingEvent eventField;
+        //private TrackingEvents_typeTrackingEvent eventField;
+        private string eventField;
         
         private string offsetField;
         
@@ -1495,7 +1496,8 @@ namespace Monetizr.Campaigns.Vast42
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public TrackingEvents_typeTrackingEvent @event {
+        //public TrackingEvents_typeTrackingEvent @event {
+        public string @event {
             get {
                 return this.eventField;
             }
@@ -1613,6 +1615,8 @@ namespace Monetizr.Campaigns.Vast42
         collapse,
         
         fullscreen,
+        
+        exitFullscreen
     }
     
     /// <remarks/>
