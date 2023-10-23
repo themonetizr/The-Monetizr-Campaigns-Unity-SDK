@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
-using Mindscape.Raygun4Unity.Messages;
+using Monetizr.Raygun4Unity.Messages;
 
-namespace Mindscape.Raygun4Unity
+namespace Monetizr.Raygun4Unity
 {
   /// <summary>
   /// Can be used to modify the message before sending, or to cancel the send operation.

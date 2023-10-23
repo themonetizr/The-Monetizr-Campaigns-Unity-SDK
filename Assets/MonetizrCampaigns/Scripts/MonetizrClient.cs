@@ -11,7 +11,7 @@ using UnityEngine;
 using System.Text.RegularExpressions;
 using System.Net;
 using System.Web;
-using Mindscape.Raygun4Unity;
+using Monetizr.Raygun4Unity;
 using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
@@ -257,7 +257,7 @@ namespace Monetizr.Campaigns
             GlobalSettings = await DownloadGlobalSettings();
 
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint",
-                "https://api.raygun.com/entries");
+                "");
             
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
         }

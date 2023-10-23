@@ -64,12 +64,12 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
-using Mindscape.Raygun4Unity.Reflection;
+using Monetizr.Raygun4Unity.Reflection;
 
 // ReSharper disable LoopCanBeConvertedToQuery
 // ReSharper disable RedundantExplicitArrayCreation
 // ReSharper disable SuggestUseVarKeywordEvident
-namespace Mindscape.Raygun4Unity
+namespace Monetizr.Raygun4Unity
 {
   /// <summary>
   /// Represents the json array.
@@ -482,7 +482,7 @@ namespace Mindscape.Raygun4Unity
   }
 }
 
-namespace Mindscape.Raygun4Unity
+namespace Monetizr.Raygun4Unity
 {
   /// <summary>
   /// This class encodes and decodes JSON strings.

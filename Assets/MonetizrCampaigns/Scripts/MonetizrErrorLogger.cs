@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Mindscape.Raygun4Unity;
+using Monetizr.Raygun4Unity;
 using UnityEngine;
 
 namespace Monetizr.Campaigns

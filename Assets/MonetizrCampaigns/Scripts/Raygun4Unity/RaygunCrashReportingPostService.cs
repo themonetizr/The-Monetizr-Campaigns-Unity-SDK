@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Mindscape.Raygun4Unity
+namespace Monetizr.Raygun4Unity
 {
     public class RaygunCrashReportingPostService : SingletonBehaviour<RaygunCrashReportingPostService>
     {

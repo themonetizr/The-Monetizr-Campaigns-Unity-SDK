@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Mindscape.Raygun4Unity.Messages;
+using Monetizr.Raygun4Unity.Messages;
 
-namespace Mindscape.Raygun4Unity
+namespace Monetizr.Raygun4Unity
 {
   public interface IRaygunMessageBuilder
   {

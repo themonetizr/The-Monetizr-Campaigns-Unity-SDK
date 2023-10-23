@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Mindscape.Raygun4Unity
+namespace Monetizr.Raygun4Unity
 {
   public class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
   {
