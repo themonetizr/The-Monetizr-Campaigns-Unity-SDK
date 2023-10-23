@@ -316,7 +316,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception ex)
             {
-                Log.PrintError($"Exception in userDefinedEvent: {ex.Message}");
+                Log.PrintError($"Exception in _CallUserDefinedEvent\n{ex}");
             }
         }
 
@@ -354,7 +354,7 @@ namespace Monetizr.Campaigns
                 }
                 catch (Exception exception)
                 {
-                    Log.PrintError($"Exception: {exception.Message} in GetCurrencyFunc of {title}");
+                    Log.PrintError($"Exception in GetCurrencyFunc of {title}\n{exception.Message}");
                     return 0;
                 }
             }
@@ -367,7 +367,7 @@ namespace Monetizr.Campaigns
                 }
                 catch (Exception exception)
                 {
-                    Log.PrintError($"Exception: {exception.Message} in AddCurrencyAction {amount} to {title}");
+                    Log.PrintError($"Exception in AddCurrencyAction {amount} to {title}\n{exception}");
                 }
             }
         }
@@ -1462,9 +1462,8 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Log.PrintError($"{MonetizrErrors.msg[ErrorType.ConnectionError]} {e}");
-
-
+                Log.PrintError($"Exception while getting list of campaigns\n{e}");
+                
                 onRequestComplete?.Invoke(false);
             }
 
@@ -1530,9 +1529,9 @@ namespace Monetizr.Campaigns
 
                     if (Client.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
                     {
-                        Client.SendErrorToRemoteServer("Campaign loading assets error",
-                            "Campaign loading assets error",
-                            $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nApp version: {Application.version}\nSystem language: {Application.systemLanguage}\n\n{campaign.loadingError}");
+                        //Client.SendErrorToRemoteServer("Campaign loading assets error",
+                        //    "Campaign loading assets error",
+                        //    $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nApp version: {Application.version}\nSystem language: {Application.systemLanguage}\n\n{campaign.loadingError}");
 
                     }
                 }
@@ -1740,7 +1739,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Log.PrintError($"ClaimReward error: {e.Message}");
+                Log.PrintError($"Exception in Client.Claim for {campaign.id}\n{e}");
 
                 onFailure.Invoke();
             }

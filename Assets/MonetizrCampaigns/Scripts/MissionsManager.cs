@@ -803,7 +803,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Log.PrintError($"Problem {e.ToString()} with json {serverMissionsJson}");
+                Log.PrintError($"Exception in CreateMissionsFromCampaign with json {serverMissionsJson}\n{e}");
             }
 
             if (ic == null)
