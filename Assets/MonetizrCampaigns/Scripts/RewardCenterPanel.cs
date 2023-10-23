@@ -27,9 +27,6 @@ namespace Monetizr.Campaigns
 
         public GameObject termsAndCondPrefab;
 
-
-        //private RectTransform termsAndCondRect;
-
         private List<MonetizrRewardedItem> missionItems = new List<MonetizrRewardedItem>();
 
         private int amountOfItems = 0;
@@ -46,10 +43,6 @@ namespace Monetizr.Campaigns
         private RectTransform bannerObjectRect;
 
         public GameObject bannerLayoutElement;
-
-        //private Mission currentMission;
-
-        //public List<MissionUIDescription> missionsDescriptions;
 
         private new void Awake()
         {
@@ -82,24 +75,9 @@ namespace Monetizr.Campaigns
             currentMission = m;
             currentCampaign = MonetizrManager.Instance.GetActiveCampaign();
 
-            //MonetizrManager.CallUserDefinedEvent(currentCampaign,
-            //     NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
-            //     MonetizrManager.EventType.Impression);
-
-            //string uiItemPrefab = "MonetizrRewardedItem";
-
-            //if (uiVersion == 2)
             string uiItemPrefab = "MonetizrRewardedItem2";
 
             itemUI = (Resources.Load(uiItemPrefab) as GameObject).GetComponent<MonetizrRewardedItem>();
-
-
-            //hasSponsoredChallenges = false;
-
-            //this.missionsDescriptions = missionsDescriptions;
-
-            //MonetizrManager.Analytics.BeginShowAdAsset(AdPlacement.RewardsCenterScreen, m);
-            //MonetizrManager.Analytics.TrackEvent("Reward center opened",m);
 
             MonetizrManager.HideTinyMenuTeaser();
 
@@ -479,10 +457,6 @@ namespace Monetizr.Campaigns
         public void OnButtonPress()
         {
             isSkipped = true;
-            //MonetizrManager.CallUserDefinedEvent(currentCampaign,
-            //  NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
-            //  MonetizrManager.EventType.ButtonPressSkip);
-
             SetActive(false);
         }
 
@@ -496,10 +470,6 @@ namespace Monetizr.Campaigns
             if (!missionDescription.isSponsored)
                 MonetizrManager.CleanUserDefinedMissions();
 
-            //MonetizrManager.CallUserDefinedEvent(currentCampaign,
-            //  NielsenDar.GetPlacementName(AdPlacement.RewardsCenterScreen),
-            //  MonetizrManager.EventType.ButtonPressOk);
-
             MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ButtonPressOk);
 
             //play video or claim ready user-defined mission
@@ -509,12 +479,10 @@ namespace Monetizr.Campaigns
                 UpdateUI();
 
         }
-
         public void OnClaimRewardComplete(Mission mission, bool isSkipped, Action updateUIDelegate)
         {
             MonetizrManager.Instance.OnClaimRewardComplete(mission, isSkipped, null, updateUIDelegate);
         }
-
         public void AddNewUIMissions()
         {
             if (MonetizrManager.closeRewardCenterAfterEveryMission)
@@ -567,24 +535,8 @@ namespace Monetizr.Campaigns
         //TODO: not sure if everything correct here
         internal override void FinalizePanel(PanelId id)
         {
-            //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.RewardsCenterScreen, currentMission);
-
-
-            //MonetizrManager.ShowTinyMenuTeaser(null);
-
             if(MonetizrManager.tinyTeaserCanBeVisible)
                 MonetizrManager.ShowTinyMenuTeaser(null);
-
-            /*if (!uiController.isVideoPlaying)
-            {
-                MonetizrManager.CleanUserDefinedMissions();
-            }*/
-
-            //if (hasSponsoredChallenges)
-            //{
-            //    MonetizrManager.Analytics.EndShowAdAsset(AdType.IntroBanner);
-            //}
-           
 
         }
 

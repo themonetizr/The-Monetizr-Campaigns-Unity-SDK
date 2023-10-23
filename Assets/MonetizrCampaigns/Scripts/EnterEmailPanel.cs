@@ -254,21 +254,12 @@ namespace Monetizr.Campaigns
                 rewardIcon = customCoin;
             }
 
-           
-
-            //title.text = $"Get {giveawayTitle}!";
-            //text.text = $"<color=#F05627>Enter your e-mail</color> to get giveaway from {brandTitle}.\nDon't miss out!";
-
-            //buttonText.text = "Learn More";
-            //buttonText.text = "Claim!";
-
             string url = m.campaign.serverSettings.GetParam("GiveawayEmailEnterNotification.terms_url_text");
 
             if (url == null)
                 termsToggle.gameObject.SetActive(false);
 
-
-
+            
             text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
 
             if (type == EnterEmailType.ProductReward)
@@ -312,13 +303,6 @@ namespace Monetizr.Campaigns
             rewardImageBackgroud.gameObject.SetActive(false);
             noThanksButton?.gameObject.SetActive(true);
 
-            //rewardImage.sprite = rewardIcon;
-
-            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
-
-            //MonetizrManager.Analytics.TrackEvent("Enter email shown", m);
-            //MonetizrManager.Analytics.BeginShowAdAsset(adType, currentMission);
-
         }
 
         private new void Awake()
@@ -330,10 +314,6 @@ namespace Monetizr.Campaigns
 
         public void _OnNoThanksPress()
         {
-            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
-
-            //MonetizrManager.Analytics.TrackEvent("Enter email skipped", currentMission);
-
             isSkipped = true;
             SetActive(false);
         }
@@ -349,17 +329,11 @@ namespace Monetizr.Campaigns
                 },
                 this.currentMission,
                 PanelId.EmailEnterCloseConfirmation);
-
-
-            
+           
         }
 
         public void OnButtonPress()
         {
-            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
-
-            //MonetizrManager.Analytics._TrackEvent("Enter email submitted", currentMission);
-
             isSkipped = false;
             SetActive(false);
         }

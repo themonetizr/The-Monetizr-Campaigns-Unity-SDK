@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Monetizr.Campaigns
 {
-
+    //TODO: This class must be improved
     internal class MissionsManager
     {
         internal List<Mission> missions => serializedMissions.GetMissions();

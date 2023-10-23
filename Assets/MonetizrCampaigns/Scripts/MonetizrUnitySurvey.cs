@@ -9,8 +9,6 @@ namespace Monetizr.Campaigns
 {
     internal class MonetizrUnitySurvey : PanelController
     {
-        //private Mission currentMission;
-
         public Button closeButton;
         public Image logo;
         public ScrollRect scroll;
@@ -151,33 +149,18 @@ namespace Monetizr.Campaigns
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            //MonetizrManager.HideRewardCenter();
-
             this._onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
 
             if (!LoadSurvey(m))
                 return;
-
-            //logo.sprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandRewardLogoSprite); ;
-            //logo.gameObject.SetActive(logo.sprite != null && currentSurvey.settings.showLogo);
-
+            
             bool hasLogo = m.campaign.TryGetAsset(AssetsType.BrandRewardLogoSprite, out Sprite res);
             
             logo.sprite = res;
             logo.gameObject.SetActive(hasLogo && currentSurvey.settings.showLogo);
             
-            //adType = AdPlacement.Survey;
-
-            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
-
-            //MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
-
-            //MonetizrManager.Analytics.TrackEvent("Survey started", currentMission);
-
-            //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
-
             int closeButtonDelay = m.campaignServerSettings.GetIntParam("SurveyUnityView.close_button_delay", 3);
 
             StartCoroutine(ShowCloseButton(closeButtonDelay));
@@ -359,11 +342,6 @@ namespace Monetizr.Campaigns
 
             if (!currentSurvey.settings.hideReward)
             {
-               /* Sprite rewardSprite = MonetizrManager.gameRewards[m.rewardType].icon;
-
-                if (MonetizrManager.Instance.HasAsset(m.campaignId, AssetsType.IngameRewardSprite))
-                    rewardSprite = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.IngameRewardSprite);
-*/
                 rewardImage.sprite = MissionsManager.GetMissionRewardImage(m);;
             }
 
@@ -531,13 +509,6 @@ namespace Monetizr.Campaigns
         
         public void _OnSkipButton()
         {
-
-            //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
-            //MonetizrManager.ShowRewardCenter(null);
-            //MonetizrManager.Analytics.TrackEvent("Survey skipped", currentMission);
-
-            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.Survey), MonetizrManager.EventType.ButtonPressSkip);
-
             isSkipped = true;
 
             HideSelf();
@@ -569,11 +540,6 @@ namespace Monetizr.Campaigns
             HideSelf();
 
             SubmitResponses();
-
-            //MonetizrManager.Analytics.TrackEvent("Survey completed", currentMission);
-
-            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
-            //MonetizrManager.ShowCongratsNotification(null, m);
         }
 
         internal void SubmitResponses()
@@ -609,8 +575,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            
-            //MonetizrManager.Analytics.EndShowAdAsset(adType);
+
         }
     }
 

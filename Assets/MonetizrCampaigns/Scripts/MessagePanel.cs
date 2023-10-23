@@ -15,11 +15,6 @@ namespace Monetizr.Campaigns
         public Text buttonText;
         public Button crossButton;
 
-        //[HideInInspector]
-        //public Mission currentMission;
-
-        //private Action _onComplete;
-
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             this._onComplete = onComplete;

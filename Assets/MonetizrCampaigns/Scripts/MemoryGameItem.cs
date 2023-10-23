@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
-
     internal class MemoryGameItem : MonoBehaviour
     {
         internal int id = 0;
@@ -28,22 +27,18 @@ namespace Monetizr.Campaigns
         {
             hasEvents = true;
 
-            if (bonus != null)
-            {
-                bonus.SetActive(false);
-                bonusAnimator = bonus.GetComponent<Animator>();
-            }
-        }
+            if (bonus == null) return;
 
-        // Update is called once per frame
-        void Update()
-        {
-
+            bonus.SetActive(false);
+            bonusAnimator = bonus.GetComponent<Animator>();
         }
 
         public void PlayOnBonus(string anim)
         {
-            bonusAnimator?.Play(anim);
+            if (bonusAnimator != null)
+            {
+                bonusAnimator.Play(anim);
+            }
         }
 
         public void OnOpenDone()
@@ -53,19 +48,18 @@ namespace Monetizr.Campaigns
             if (hasEvents)
                 parent.OnOpenDone(id);
         }
-
+        
         public void OnCloseDone()
         {
-
             if (hasEvents)
                 parent.OnCloseDone(id);
         }
 
         public void OnMiddle()
         {
-            if (hasBonus)
+            if (hasBonus && bonus != null)
             {
-                bonus?.SetActive(isOpening);
+                bonus.SetActive(isOpening);
             }
 
             if (middleAnimSprite != null)

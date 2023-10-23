@@ -74,12 +74,11 @@ namespace Monetizr.Campaigns
 
         }
 
-        public SerializableDictionary(Dictionary<TKey,TValue> d)
+        public SerializableDictionary(Dictionary<TKey, TValue> d)
         {
             dictionary = d;
         }
 
-        // save the dictionary to lists
         public void OnBeforeSerialize()
         {
             keys.Clear();
@@ -91,7 +90,6 @@ namespace Monetizr.Campaigns
             }
         }
 
-        // load dictionary from lists
         public void OnAfterDeserialize()
         {
             dictionary.Clear();
@@ -154,8 +152,6 @@ namespace Monetizr.Campaigns
 
     public class SettingsDictionary<TKey, TValue> : Dictionary<TKey, TValue>
     {
-        //private Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
-
         public SettingsDictionary()
         {
 
@@ -170,14 +166,14 @@ namespace Monetizr.Campaigns
         {
             if (Count == 0)
                 return;
-            
+
             addDictionary?.ToList().ForEach(
                 x => this[x.Key] = x.Value);
         }
-        
+
         public TValue GetParam(TKey p, TValue def = default(TValue))
         {
-            if(p == null)
+            if (p == null)
                 return def;
 
             return TryGetValue(p, out var value) ? value : def;
@@ -187,12 +183,12 @@ namespace Monetizr.Campaigns
         {
             if (p == null)
                 return defaultParam;
-            
+
             if (!TryGetValue(p, out var value))
             {
                 return defaultParam;
             }
-            
+
             return bool.TryParse(value.ToString(), out var result) ? result : defaultParam;
         }
 
@@ -205,10 +201,10 @@ namespace Monetizr.Campaigns
             {
                 return defaultParam;
             }
-            
+
             string val = value.ToString();
 
-            var svals = val.Split(new char[] {';',','});
+            var svals = val.Split(new char[] { ';', ',' });
 
             var v = new List<float>(0);
 
@@ -251,6 +247,7 @@ namespace Monetizr.Campaigns
 
     }
 
+    //TODO: simplify this!
     [Serializable]
     public class Mission
     {
@@ -258,14 +255,14 @@ namespace Monetizr.Campaigns
 
         [SerializeField] internal MissionType type;
         [SerializeField] internal ulong startMoney;
-   
+
         [SerializeField] internal bool isSponsored;
         [SerializeField] internal string brandName;
         [SerializeField] internal ulong reward;
         [SerializeField] internal float rewardPercent;
 
         [NonSerialized] internal int sponsoredId;
-       // [NonSerialized] internal Sprite brandBanner;
+        // [NonSerialized] internal Sprite brandBanner;
         [NonSerialized] internal string missionTitle;
         [NonSerialized] internal string missionDescription;
         //[NonSerialized] internal Sprite missionIcon;
@@ -289,7 +286,7 @@ namespace Monetizr.Campaigns
 
         [SerializeField] internal UDateTime activateTime;
 
-        
+
         //Delay, when campaign must be shown
         [SerializeField] internal int delaySurveyTimeSec;
 
@@ -334,9 +331,6 @@ namespace Monetizr.Campaigns
         //Do we have this campaign active on the server now or it's just in a local cache
         [NonSerialized] internal bool isServerCampaignActive;
 
-        //Field for campaign 
-        //[SerializeField] internal SerializableDictionary<string, string> additionalParams;
-
         [NonSerialized] internal SettingsDictionary<string, string> campaignServerSettings;
 
         [SerializeField] internal string sdkVersion;
@@ -364,12 +358,5 @@ namespace Monetizr.Campaigns
         [NonSerialized] public string openRtbRequestForProgrammatic;
     }
 
-    /*internal class  SurveyMission : Mission
-    {
-
-    }*/
-
-
-    
 
 }

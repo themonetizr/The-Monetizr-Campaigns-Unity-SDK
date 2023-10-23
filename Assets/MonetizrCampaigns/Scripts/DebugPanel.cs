@@ -15,7 +15,7 @@ namespace Monetizr.Campaigns
     }
 
     internal class DebugPanel : PanelController
-    {   
+    {
         public Button closeButton;
         public Dropdown apiKeysList;
 
@@ -25,8 +25,8 @@ namespace Monetizr.Campaigns
 
         public Text versionText;
 
-        
-        
+
+
         private bool isIDChanged;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -44,18 +44,13 @@ namespace Monetizr.Campaigns
 
             apiKeysList.ClearOptions();
 
-            //List<string> k2 = new List<string>();
-
-            //for (int i = 0; i < keys.Count; i++)
-            //    k2.Add($"{(i+1).ToString()}. {keys[i]}");
-
             apiKeysList.AddOptions(new List<string>(DebugSettings.keyNames.Values));
 
             UpdateVersionText();
 
             var k = new List<string>(DebugSettings.keyNames.Values);
 
-            apiKeysList.value = k.FindIndex(0, (string v)=>
+            apiKeysList.value = k.FindIndex(0, (string v) =>
                 {
                     if (!DebugSettings.keyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
                         return false;
@@ -87,7 +82,6 @@ namespace Monetizr.Campaigns
             Log.PrintV("Dropdown: " + apiKeysList.value);
 
         }
-
         public void ResetLocalClaimData()
         {
             MonetizrManager.Instance.CleanRewardsClaims();
@@ -113,17 +107,7 @@ namespace Monetizr.Campaigns
 
             obj.GetComponent<Canvas>().enabled = !obj.GetComponent<Canvas>().enabled;
         }
-
-        public void OpenGame()
-        {
-            //var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
-
-            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
-
-            //MonetizrManager.ShowMinigame(null, PanelId.CarMemoryGame, null);
-        }
-
-
+        
         private void ClosePanel()
         {
             SetActive(false);
@@ -156,18 +140,7 @@ namespace Monetizr.Campaigns
             if (isIDChanged && !changed)
                 MonetizrManager.Instance.RestartClient();
         }
-
-        //// Start is called before the first frame update
-        //void Start()
-        //{
-
-        //}
-
-        //// Update is called once per frame
-        //void Update()
-        //{
-
-        //}
+        
     }
 
 }

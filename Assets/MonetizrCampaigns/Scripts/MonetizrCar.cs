@@ -7,10 +7,13 @@ namespace Monetizr.Campaigns
     internal class MonetizrCar : MonoBehaviour
     {
         internal MonetizrCarGame parent;
-        
+
         void AnimationEvent()
         {
-            parent?.OnBonusTaken();
+            if (parent != null)
+            {
+                parent.OnBonusTaken();
+            }
         }
     }
 }

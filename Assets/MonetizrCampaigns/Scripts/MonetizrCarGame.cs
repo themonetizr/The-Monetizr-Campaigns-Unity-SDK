@@ -26,50 +26,41 @@ namespace Monetizr.Campaigns
             internal bool isOpened;
         }
 
-        private List<Item> gameItems;
-        //private Mission currentMission;
+        private List<Item> _gameItems;
+        private int _bonusTaken = 0;
+
+        private int _amountOpened = 0;
+        private bool _disabledClick = false;
+        private readonly int[] _map = { 0, 0, 11, 7, 8, 1, 5, 9, 10 };
+        private readonly List<int>[] _openFields = {
+            new List<int>{ 1, 3 },
+            new List<int>{ 2, 4 },
+            new List<int>{ -1 },
+            new List<int>{ 6 },
+            new List<int>{ 5 },
+            new List<int>{ 4, 8 },
+            new List<int>{ -1 },
+            new List<int>{ -1 },
+            new List<int>{ 7 },
+        };
+        private readonly int[] _bonusIds = { 0, 4, 7 };
+
 
         public Sprite backSprite;
         public Sprite backSpriteDisabled;
         public Sprite[] mapSprites;
         public GameObject[] items;
-        //public Text movesLeftText;
         public MonetizrCar car;
         public Button closeButton;
         public Image logo;
-
-        private int bonusTaken = 0;
-
-        void Update()
-        {
-            
-
-        }
-
+        
         internal override AdPlacement? GetAdPlacement()
         {
             return AdPlacement.Minigame;
         }
 
-        void SetProgress(float a)
-        {
-            //uvRect.y = 0.5f * (1.0f - Tween(a));
-            //teaserImage.uvRect = uvRect;
-        }
-
-        float Tween(float k)
-        {
-            return 0.5f * (1f - Mathf.Cos(Mathf.PI * k));
-        }
-
         public void OnButtonClick()
         {
-            //MonetizrManager.Analytics.TrackEvent("Minigame pressed", currentMission);
-            //MonetizrManager.ShowRewardCenter(null);
-            //MonetizrManager.Analytics.TrackEvent("Minigame skipped", currentMission);
-
-            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.Minigame), MonetizrManager.EventType.ButtonPressSkip);
-
             isSkipped = true;
 
             SetActive(false);
@@ -83,11 +74,8 @@ namespace Monetizr.Campaigns
             this.panelId = id;
             this.currentMission = m;
 
-            bonusTaken = 0;
+            _bonusTaken = 0;
             car.parent = this;
-
-            //logo.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite); ;
-            //logo.gameObject.SetActive(logo.sprite != null);
 
             bool hasLogo = m.campaign.TryGetAsset(AssetsType.BrandRewardLogoSprite, out Sprite res);
             
@@ -95,116 +83,66 @@ namespace Monetizr.Campaigns
             logo.gameObject.SetActive(hasLogo);
             
 
-            gameItems = new List<Item>(9);
+            _gameItems = new List<Item>(9);
 
             for (int i = 0; i < items.Length; i++)
             {
-                int i_copy = i;
-                Button _b = items[i].GetComponent<Button>();
+                int iCopy = i;
+                Button b = items[i].GetComponent<Button>();
                 items[i].name = $"GameItem{i}";
-                _b.onClick.RemoveAllListeners();
-                _b.onClick.AddListener( ()=>{ OnItemClick(i_copy); });
-                Animator _a = items[i].GetComponent<Animator>();
+                b.onClick.RemoveAllListeners();
+                b.onClick.AddListener( ()=>{ OnItemClick(iCopy); });
+                Animator a = items[i].GetComponent<Animator>();
                           
                 if (i != 0)
-                    _b.interactable = false;
+                    b.interactable = false;
 
-                MemoryGameItem _gi = items[i].GetComponent<MemoryGameItem>();
+                MemoryGameItem gi = items[i].GetComponent<MemoryGameItem>();
                                 
-                _gi.parent = this;
-                _gi.id = i;
+                gi.parent = this;
+                gi.id = i;
 
-                if(!_b.interactable)
-                    _gi.image.sprite = backSpriteDisabled;
+                if(!b.interactable)
+                    gi.image.sprite = backSpriteDisabled;
                 else
-                    _gi.image.sprite = backSprite;
+                    gi.image.sprite = backSprite;
 
-                gameItems.Add(new Item { b = _b, go = items[i], value = 0, a = _a, gi = _gi, isOpened = false  });
+                _gameItems.Add(new Item { b = b, go = items[i], value = 0, a = a, gi = gi, isOpened = false  });
             }
-                      
-            //movesLeftText.text = "MOVES LEFT: 4";
-
-            //Log.PrintWarning($"{m.campaignId} {m}");
-            //var adType = AdPlacement.Minigame;
-
-            //MonetizrManager.CallUserDefinedEvent(m.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.Impression);
-
-            //MonetizrManager.Analytics.BeginShowAdAsset(adType, m);
-
-            //MonetizrManager.Analytics.TrackEvent("Minigame started", currentMission);
-
-            //MonetizrManager.Analytics.TrackEvent("Minigame shown", m);
+           
         }
-
-        int amountOpened = 0;
-        //int phase = 0;
-        bool disabledClick = false;
-        //int totalUnknownOpened = 0;
-
-        //int[] map = { 0, 0, 1, 2, 3, 4, 5, 6, 5 };
-
-        int[] map = { 0, 0, 11, 7, 8, 1, 5, 9, 10 };
-
-        /*List<int> []openFields = {
-            new List<int>{ 1, 3 },
-            new List<int>{ 2, 4 },
-            new List<int>{ 5 },
-            new List<int>{ 6, 4 },
-            new List<int>{ 1, 3, 5, 7 },
-            new List<int>{ 2, 4, 8 },
-        };*/
-
-        List<int>[] openFields = {
-            new List<int>{ 1, 3 },
-            new List<int>{ 2, 4 },
-            new List<int>{ -1 },
-            new List<int>{ 6 },
-            new List<int>{ 5 },
-            new List<int>{ 4, 8 },
-            new List<int>{ -1 },
-            new List<int>{ -1 },
-            new List<int>{ 7 },
-        };
-
-
-       
-        int[] bonusIds = { 0, 4, 7 };
-
+        
         internal void OnItemClick(int item)
         {
-            if (disabledClick)
+            if (_disabledClick)
                 return;
 
-            if (gameItems[item].isOpened)
+            if (_gameItems[item].isOpened)
                 return;
 
 
-            gameItems[item].a.Play("MonetizrMemoryGameTap2");
-            gameItems[item].gi.middleAnimSprite = mapSprites[map[item]];
-            gameItems[item].gi.hasEvents = true;
+            _gameItems[item].a.Play("MonetizrMemoryGameTap2");
+            _gameItems[item].gi.middleAnimSprite = mapSprites[_map[item]];
+            _gameItems[item].gi.hasEvents = true;
 
 
-            gameItems[item].isOpened = true;
+            _gameItems[item].isOpened = true;
 
-            gameItems[item].gi.hasBonus = Array.FindIndex(bonusIds, i => i == item) != -1;
-            gameItems[item].gi.isOpening = true;
+            _gameItems[item].gi.hasBonus = Array.FindIndex(_bonusIds, i => i == item) != -1;
+            _gameItems[item].gi.isOpening = true;
         }
 
         internal void OnBonusTaken()
         {
-            gameItems[bonusIds[bonusTaken]].gi.PlayOnBonus("BonusDisappear");
+            _gameItems[_bonusIds[_bonusTaken]].gi.PlayOnBonus("BonusDisappear");
 
-            bonusTaken++;
+            _bonusTaken++;
         }
 
         internal override void OnOpenDone(int item)
         {
-            amountOpened++;
-
-            //movesLeftText.text = $"MOVES LEFT: {4 - amountOpened}";
-
-            //found finish
-            //if (map[item] == 6)
+            _amountOpened++;
+            
             if(item == 7)
             {
                 car.gameObject.GetComponent<Animator>().Play("CarDrive2");
@@ -212,36 +150,29 @@ namespace Monetizr.Campaigns
                 StartCoroutine(OnGameVictory());
                 return;
             }
-
-            //failed
-            //if(false)
-            //*
-            if (map[item] == 5 || map[item] == 11)
-            //if(amountOpened >= 4)
+                        
+            if (_map[item] == 5 || _map[item] == 11)
             {
-                amountOpened = 0;
-                disabledClick = true;
+                _amountOpened = 0;
+                _disabledClick = true;
 
                 StartCoroutine(RestartGame());
 
                 return;
             }
-            //*/
-
+            
             //open something
-            if (item < openFields.Length)
+            if (item < _openFields.Length)
             {
-                openFields[item].ForEach((int i) => {
-                    if (i > 0 && !gameItems[i].isOpened)
+                _openFields[item].ForEach((int i) => {
+                    if (i > 0 && !_gameItems[i].isOpened)
                     {
-                        gameItems[i].b.interactable = true;
-                        gameItems[i].gi.image.sprite = backSprite;
+                        _gameItems[i].b.interactable = true;
+                        _gameItems[i].gi.image.sprite = backSprite;
                     }
                 });
             }
-
-          
-
+            
             Log.PrintV("OnOpenDone" + item);
         }
 
@@ -252,7 +183,7 @@ namespace Monetizr.Campaigns
 
             yield return new WaitForSeconds(0.5f);
 
-            gameItems.ForEach((Item i) => {
+            _gameItems.ForEach((Item i) => {
                 if (i.b.interactable)
                 {
 
@@ -278,8 +209,8 @@ namespace Monetizr.Campaigns
 
                     i.gi.onCloseDone = () =>
                     {
-                        disabledClick = false;
-                        amountOpened = 0;
+                        _disabledClick = false;
+                        _amountOpened = 0;
                     };
                 }
             });
@@ -289,27 +220,14 @@ namespace Monetizr.Campaigns
         {
             yield return new WaitForSeconds(3);
 
-            //var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
-
-            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
-
             isSkipped = false;
 
             SetActive(false);
-
-            //MonetizrManager.Analytics.TrackEvent("Minigame completed", currentMission);
-
-            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdPlacement.Minigame), MonetizrManager.EventType.ButtonPressOk);
-            //MonetizrManager.ShowCongratsNotification(null, m);
         }
 
         internal override void OnCloseDone(int item)
         {
-            //disabledClick = false;
-
-            gameItems[item].isOpened = false;
-
-            
+            _gameItems[item].isOpened = false;
 
             Log.PrintV("OnCloseDone" + item);
         }
@@ -319,7 +237,7 @@ namespace Monetizr.Campaigns
 
         internal override void FinalizePanel(PanelId id)
         {
-            //MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.Minigame);
+
         }
     }
 

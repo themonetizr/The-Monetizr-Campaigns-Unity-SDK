@@ -44,13 +44,7 @@ namespace Monetizr.Campaigns
         }
         public void OnButtonClick()
         {
-            //MonetizrManager.Analytics.TrackEvent(currentMission, AdPlacement.TinyTeaser, MonetizrManager.EventType.ButtonPressOk);
-
-            //MonetizrManager.CallUserDefinedEvent(currentMission.campaignId, NielsenDar.GetPlacementName(AdType.TinyTeaser), MonetizrManager.EventType.ButtonPressOk);
-
             MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ButtonPressOk);
-
-            //MonetizrManager.Analytics.TrackEvent("Tiny teaser pressed", currentMission);
             MonetizrManager.ShowRewardCenter(null);
         }
 

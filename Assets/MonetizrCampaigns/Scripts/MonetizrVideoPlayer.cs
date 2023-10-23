@@ -13,17 +13,9 @@ namespace Monetizr.Campaigns
         Action<bool> onComplete;
         private bool isSkipped = false;
 
-        void Awake()
-        {
-
-        }
-
         public void Play(string videoPath, Action<bool> onComplete)
         {
             this.onComplete = onComplete;
-            //var videoPath = MonetizrManager.Instance.GetAsset<string>(MonetizrManager.Instance.GetActiveChallenge(), AssetsType.VideoFilePathString);
-
-          
             var videoPlayer = GetComponent<VideoPlayer>();
 
             videoPlayer.playOnAwake = false;
@@ -32,7 +24,7 @@ namespace Monetizr.Campaigns
             videoPlayer.url = videoPath;
             videoPlayer.frame = 100;
             videoPlayer.isLooping = false;
-                       
+
             videoPlayer.loopPointReached += EndReached;
 
             videoPlayer.Play();
@@ -51,8 +43,6 @@ namespace Monetizr.Campaigns
             MonetizrManager.Instance.SoundSwitch(true);
 
             onComplete.Invoke(isSkipped);
-
-            //GameObject.Destroy(this);
         }
 
         public void OnSkip()
@@ -63,19 +53,7 @@ namespace Monetizr.Campaigns
 
             EndReached(videoPlayer);
         }
-    
 
-    // Start is called before the first frame update
-    //void Start()
-    //{
-
-    //}
-
-    //// Update is called once per frame
-    //void Update()
-    //{
-
-    //}
-}
+    }
 
 }

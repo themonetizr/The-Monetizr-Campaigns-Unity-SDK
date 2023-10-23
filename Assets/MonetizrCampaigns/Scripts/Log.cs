@@ -11,7 +11,6 @@ namespace Monetizr.Campaigns
     {
         public static bool isVerbose { set; get; } = false;
         
-
         public static void PrintV(object message)
         {
             if(!isVerbose)
@@ -34,8 +33,6 @@ namespace Monetizr.Campaigns
             Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message);
         }
 
-
-        // ReSharper disable Unity.PerformanceAnalysis
         public static void PrintError(object message)
         {
             Debug.LogError($"Monetizr SDK: {message}");

@@ -24,25 +24,8 @@ namespace Monetizr.Campaigns
 
             instance = go.AddComponent<T>();
 
-            //instance.Initialize();
-
             return instance;
         }
-
-
-        /*public void Awake()
-        {
-            if (instance == null )
-            {
-                instance = this as T;
-                //Log.Print("Creating.." + gameObject.name);
-            }
-            else {
-                if (instance != this) {
-                    Destroy (gameObject);
-                }
-            }
-        }*/
     }
 
 }
