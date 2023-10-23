@@ -116,7 +116,7 @@ namespace Monetizr.Campaigns
                 }
                 catch (Exception e)
                 {
-                    Log.PrintError($"IpApiData error: {e.Message}");
+                    Log.PrintError($"Exception in IpApiData.CreateFromJSON from {webRequest.downloadHandler.text}\n{e}");
                 }
 
                 if (ipApiData != null)
@@ -138,8 +138,8 @@ namespace Monetizr.Campaigns
             analytics = new MonetizrAnalytics();
 
             Client.Timeout = TimeSpan.FromSeconds(timeout);
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            //Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
@@ -180,6 +180,23 @@ namespace Monetizr.Campaigns
             public List<ServerCampaign> campaigns;
         }
 
+        internal class DownloadUrlAsStringException : Exception
+        {
+            public DownloadUrlAsStringException()
+            {
+            }
+
+            public DownloadUrlAsStringException(string message)
+                : base(message)
+            {
+            }
+
+            public DownloadUrlAsStringException(string message, Exception inner)
+                : base(message, inner)
+            {
+            }
+        }
+
         public static async Task<(bool isSuccess,string content)> DownloadUrlAsString(HttpRequestMessage requestMessage)
         {
             HttpResponseMessage response = null;
@@ -190,8 +207,7 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Log.PrintError($"DownloadUrlAsString exception\nHttpRequestMessage: {requestMessage}\n{e}");
-                throw;
+                throw new DownloadUrlAsStringException($"DownloadUrlAsString exception\nHttpRequestMessage: {requestMessage}\n{e}", e);
             }
 
             string result = await response.Content.ReadAsStringAsync();
@@ -475,7 +491,7 @@ namespace Monetizr.Campaigns
             return admCampaigns;
         }
 
-        internal static HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false)
+        internal HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false)
         {
             var httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
             
@@ -501,6 +517,11 @@ namespace Monetizr.Campaigns
                 }
             };
 
+            output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", MonetizrManager.Instance.Client.currentApiKey);
+            output.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            //Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
             if (string.IsNullOrEmpty(userAgent)) 
                 return output;
             
@@ -514,6 +535,7 @@ namespace Monetizr.Campaigns
         {
             HttpRequestMessage httpRequest = new HttpRequestMessage(method, url);
             httpRequest.Headers.Add("x-openrtb-version", "2.5");
+            httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             httpRequest.Content = new StringContent(content, Encoding.UTF8, "application/json");
             return httpRequest;
         }
@@ -600,7 +622,7 @@ namespace Monetizr.Campaigns
             }
         }
 
-        public void SendErrorToRemoteServer(string type, string shortDescription, string fullDescription)
+        /*public void SendErrorToRemoteServer(string type, string shortDescription, string fullDescription)
         {
             if (!string.IsNullOrEmpty(fullDescription) && fullDescription.Length > 1024)
                 fullDescription = fullDescription.Substring(0, 1024);
@@ -610,7 +632,7 @@ namespace Monetizr.Campaigns
             var requestMessage = MonetizrClient.GetHttpRequestMessage(url);
 
             _ = Client.SendAsync(requestMessage);
-        }
+        }*/
 
         public void SendReportToMixpanel(string openRtbRequest, string res)
         {
