@@ -183,7 +183,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"{m.surveyId}");
 
-            if (!Utils.TestJson(surveysContent))
+            if (!Utils.ValidateJson(surveysContent))
             {
                 Log.PrintError($"Json isn't properly formatted.");
                 Log.PrintWarning($"{surveysContent}");

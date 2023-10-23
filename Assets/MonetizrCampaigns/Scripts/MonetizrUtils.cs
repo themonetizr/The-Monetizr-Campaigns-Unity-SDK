@@ -308,36 +308,34 @@ namespace Monetizr.Campaigns
             }
             catch (Exception e)
             {
-                Log.PrintError($"Extract {zipPath} to directory {extractPath} failed with error {e.ToString()}");
+                Log.PrintError($"Exception in ExtractAllToDirectory. Extracting {zipPath} to directory {extractPath} failed with error\n{e}");
 
                 return false;
             }
         }
 
-        public static bool TestJson(string jsonString)
+        public static bool ValidateJson(string jsonString)
         {
-            int quoteCount = 0;
-            int cbCount1 = 0;
-            int cbCount2 = 0;
+            if (string.IsNullOrEmpty(jsonString))
+                return false;
 
+            int quoteCount = 0;
+            int cbCount = 0;
+           
             foreach (char c in jsonString)
             {
                 switch (c)
                 {
                     case '\"': quoteCount++; break;
-                    case '{': cbCount1++; break;
-                    case '}': cbCount2++; break;
-                    default: break;
+                    case '{': cbCount++; break;
+                    case '}': cbCount--; break;
                 }
+
+                if (cbCount < 0) 
+                    return false;
             }
 
-            if (quoteCount % 2 != 0)
-                return false;
-
-            if (cbCount1 != cbCount2)
-                return false;
-
-            return true;
+            return quoteCount % 2 == 0 && cbCount == 0;
         }
 
         public static string ConvertCreativeToExt(string type, string url)
