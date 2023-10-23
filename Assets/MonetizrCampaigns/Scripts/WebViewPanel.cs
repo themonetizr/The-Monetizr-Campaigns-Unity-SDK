@@ -95,7 +95,7 @@ namespace Monetizr.Campaigns
             }
 
 #if UNITY_EDITOR
-            _webView.Frame = new Rect(0,0, 600, 800);
+            _webView.Frame = new Rect(0, 0, 600, 800);
 #else
             if (fullScreen)
             {
@@ -123,35 +123,19 @@ namespace Monetizr.Campaigns
         internal void PrepareSurveyPanel(Mission m)
         {
             _rewardWebUrl = "themonetizr.com";
-
-            //TrackEvent("Survey started");
-
+            
             Log.PrintV($"currentMissionDesc: {currentMission == null}");
-            //webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
-            // eventsPrefix = "Survey";
 
             _webUrl = m.campaignServerSettings.GetParam(m.surveyId);
-
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
-
             _webView.Load(_webUrl);
-
         }
 
         internal void PrepareWebViewPanel(Mission m)
         {
-            //MonetizrManager.Analytics.TrackEvent("Survey webview", currentMissionDesc);
-
             closeButton.gameObject.SetActive(true);
 
-            //Log.Print($"currentMissionDesc: {currentMissionDesc == null}");
-            _webUrl = m.surveyUrl;//MonetizrManager.Instance.GetAsset<string>(currentMissionDesc.campaignId, AssetsType.SurveyURLString);
-                                 // eventsPrefix = "Survey";
-
+            _webUrl = m.surveyUrl;
             _webView.Load(_webUrl);
-
-            //isAnalyticsNeeded = false;
-
         }
 
         internal void GetActionMissionParameters(Mission m)
@@ -172,28 +156,22 @@ namespace Monetizr.Campaigns
 
         internal void PrepareActionPanel(Mission m)
         {
-            //MonetizrManager.Analytics.TrackEvent("Survey webview", currentMissionDesc);
-
             closeButton.gameObject.SetActive(true);
 
             GetActionMissionParameters(m);
 
-            if(string.IsNullOrEmpty(_webUrl))
+            if (string.IsNullOrEmpty(_webUrl))
             {
                 Log.PrintError($"ActionReward.url is null");
             }
 
             _webView.Load(_webUrl);
-
-            //isAnalyticsNeeded = false;
             
 #if UNITY_EDITOR
             _claimButtonDelay = 3;
 #endif
 
             StartCoroutine(ShowClaimButtonCoroutine(_claimButtonDelay));
-
-            
         }
 
         internal IEnumerator ShowClaimButtonCoroutine(int delay)
@@ -207,7 +185,7 @@ namespace Monetizr.Campaigns
 
         internal void ShowClaimButton()
         {
-            if(!claimButton.activeSelf)
+            if (!claimButton.activeSelf)
                 claimButton.SetActive(true);
         }
 
@@ -215,7 +193,7 @@ namespace Monetizr.Campaigns
 
         private async void PrepareHtml5Panel()
         {
-            
+
             var campaign = currentMission.campaign;
 
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
@@ -224,7 +202,7 @@ namespace Monetizr.Campaigns
             {
                 _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
 
-                if(campaign.serverSettings.GetBoolParam("omsdk.verify_internal_videos", false))
+                if (campaign.serverSettings.GetBoolParam("omsdk.verify_internal_videos", false))
                     campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
@@ -236,33 +214,39 @@ namespace Monetizr.Campaigns
                 _OnSkipPress();
                 return;
             }
-            
+
             var showWebview = true;
             //var isSkipped = false;
 
             var oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
-            
+
             string userAgent = _webView.GetUserAgent();
             var ph = new PubmaticHelper(MonetizrManager.Instance.Client, userAgent);
 
             if (isProgrammatic)
             {
                 campaign.vastSettings = new VastHelper.VastSettings();
-                
+
                 showWebview = false;
 
                 var programmaticOk = false;
-                
+
                 try
                 {
-                    programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign,currentMission.openRtbRequestForProgrammatic);
+                    programmaticOk =
+                        await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic);
+                }
+                catch (MonetizrClient.DownloadUrlAsStringException e)
+                {
+                    Log.PrintError($"Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
+                    programmaticOk = false;
                 }
                 catch (Exception e)
                 {
-                    Log.PrintError($"Exception {e} in GetOpenRtbResponseForCampaign in campaign {campaign.id}");
+                    Log.PrintError($"Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
                     programmaticOk = false;
                 }
-                
+
                 ServerCampaign.Asset programmaticVideoAsset = null;
 
                 if (programmaticOk && campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
@@ -273,25 +257,27 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            if (!campaign.vastSettings.IsEmpty() && showWebview)
+            bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
+
+            if (!campaign.vastSettings.IsEmpty() && showWebview && verifyWithOMSDK)
             {
                 await ph.DownloadOMSDKServiceContent();
 
-                campaign.vastSettings.ReplaceVastTags(new VastTagsReplacer(campaign,videoAsset, userAgent));
+                campaign.vastSettings.ReplaceVastTags(new VastTagsReplacer(campaign, videoAsset, userAgent));
 
                 campaign.vastAdParameters = campaign.DumpsVastSettings();
-                
+
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
 
                 ph.InitializeOMSDK(campaign.vastAdParameters);
             }
 
             campaign.vastSettings = oldVastSettings;
-            
+
 #if UNITY_EDITOR_WIN
             showWebview = false;
 
-            
+
 #endif
             if (showWebview)
             {
@@ -319,7 +305,7 @@ namespace Monetizr.Campaigns
             }
 
         }
-               
+
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
@@ -327,7 +313,7 @@ namespace Monetizr.Campaigns
             this._onComplete = onComplete;
             panelId = id;
             currentMission = m;
-            
+
             bool fullScreen = true;
             bool useSafeFrame = false;
 
@@ -340,7 +326,7 @@ namespace Monetizr.Campaigns
                 useSafeFrame = true;
             }
 
-            if(id == PanelId.ActionHtmlPanelView)
+            if (id == PanelId.ActionHtmlPanelView)
             {
                 fullScreen = false;
             }
@@ -363,37 +349,37 @@ namespace Monetizr.Campaigns
 
             switch (id)
             {
-                case PanelId.SurveyWebView: 
+                case PanelId.SurveyWebView:
                     PrepareSurveyPanel(m);
                     MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
                     impressionStarts = true;
                     break;
-                
-                case PanelId.HtmlWebPageView: 
+
+                case PanelId.HtmlWebPageView:
                     PrepareWebViewPanel(m);
                     MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
                     impressionStarts = true;
                     break;
 
-                case PanelId.ActionHtmlPanelView: 
-                    PrepareActionPanel(m); 
+                case PanelId.ActionHtmlPanelView:
+                    PrepareActionPanel(m);
                     MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
                     impressionStarts = true;
                     break;
             }
 
-        
+
             if (!string.IsNullOrEmpty(_webUrl))
             {
                 // Load a URL.
                 Log.PrintV($"Url to show {_webUrl}");
                 _webView.Show();
             }
-            
+
             //Show it separately because it async method
-            if(id == PanelId.Html5WebView)
+            if (id == PanelId.Html5WebView)
                 PrepareHtml5Panel();
-            
+
 #endif
         }
 
@@ -429,7 +415,7 @@ namespace Monetizr.Campaigns
         {
             Log.PrintV($"OnMessageReceived: {message.RawMessage} {message.Args.ToString()}");
 
-            if(message.RawMessage.Contains("close"))
+            if (message.RawMessage.Contains("close"))
             {
                 OnCompleteEvent();
 
@@ -461,7 +447,7 @@ namespace Monetizr.Campaigns
 
                 successReason = $"error {statusCode}";
 
-               _OnSkipPress();
+                _OnSkipPress();
 
                 return;
             }
@@ -482,21 +468,21 @@ namespace Monetizr.Campaigns
 
         private void Update()
         {
-            bool panelForCheckUrl = (panelId == PanelId.SurveyWebView) || 
+            bool panelForCheckUrl = (panelId == PanelId.SurveyWebView) ||
                                     (panelId == PanelId.ActionHtmlPanelView);
-                
+
             if (_webView != null && panelForCheckUrl)
             {
                 var currentUrl = _webView.Url;
-                
+
                 if (!_webUrl.Equals(currentUrl))
                 {
                     _webUrl = currentUrl;
                     _pagesSwitchesAmount--;
-                    
+
                     Log.PrintV($"Update: {_webUrl} {_pagesSwitchesAmount}");
 
-                    if(_pagesSwitchesAmount == 0)
+                    if (_pagesSwitchesAmount == 0)
                     {
                         successReason = "page_switch";
 
@@ -524,14 +510,8 @@ namespace Monetizr.Campaigns
 
         private void OnCompleteEvent()
         {
-            //MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressOk);
-
-            //TrackEvent($"{eventsPrefix} completed");
             isSkipped = false;
-                       
-            
             ClosePanel();
-
         }
 
         private void ClosePanel()
@@ -585,7 +565,7 @@ namespace Monetizr.Campaigns
 
         }
 
-       
+
         public void OnClaimRewardPress()
         {
             Log.PrintV("OnClaimRewardPress");
@@ -620,19 +600,12 @@ namespace Monetizr.Campaigns
                     PanelId.SurveyCloseConfirmation);
 
             });
-            
+
         }
 
         public void _OnSkipPress()
         {
-            //additionalEventValues.Clear();
-
             isSkipped = true;
-
-            //MonetizrManager.CallUserDefinedEvent(currentMissionDesc.campaignId, NielsenDar.GetPlacementName(adType), MonetizrManager.EventType.ButtonPressSkip);
-
-            //TrackEvent($"{eventsPrefix} skipped");
-
             ClosePanel();
         }
 
@@ -640,32 +613,22 @@ namespace Monetizr.Campaigns
 #endif
         private void TrackErrorEvent(string eventName, int statusCode = 0)
         {
-            //if (!isAnalyticsNeeded)
-            //    return;
-
             if (currentMission.campaignId == null)
                 return;
 
             Dictionary<string, string> p = new Dictionary<string, string>();
 
             p.Add("url", _webUrl);
-            
-            if(statusCode > 0)
+
+            if (statusCode > 0)
                 p.Add("url_status_code", statusCode.ToString());
 
-            //var campaign = MonetizrManager.Instance.GetCampaign(currentMission.campaignId);
-
             MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Error, p);
-
-            //MonetizrManager.Analytics.TrackEvent(eventName, currentMissionDesc);
         }
 
 
         internal override void FinalizePanel(PanelId id)
         {
-            //if (isAnalyticsNeeded)
-            //    MonetizrManager.Analytics.EndShowAdAsset(adType, currentMissionDesc);
-
             MonetizrManager.Instance.SoundSwitch(true);
         }
 

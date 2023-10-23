@@ -174,7 +174,7 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(generatorUri))
                 return null;
 
-            var requestMessage = MonetizrClient.GetHttpRequestMessage(generatorUri, userAgent);
+            var requestMessage = client.GetHttpRequestMessage(generatorUri, userAgent);
 
             Log.PrintV($"Generator message: {requestMessage}");
 
@@ -219,7 +219,8 @@ namespace Monetizr.Campaigns
 
             string uri = globalSettings.GetParam("openrtb.endpoint");
 
-            var requestMessage = MonetizrClient.GetHttpRequestMessage(uri);
+            var requestMessage = client.GetHttpRequestMessage(uri);
+
             string openRtbRequest = "";
 
             if (globalSettings.GetBoolParam("openrtb.send_by_client", false) &&

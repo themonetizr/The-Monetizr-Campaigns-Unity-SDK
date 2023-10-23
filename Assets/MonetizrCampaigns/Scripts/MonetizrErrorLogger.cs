@@ -45,8 +45,10 @@ namespace Monetizr.Campaigns
                 {"camp_id", campaign != null ? campaign.id : "none"}
             };
 
+#if !UNITY_EDITOR
             if (!string.IsNullOrEmpty(RaygunCrashReportingPostService.defaultApiEndPointForCr))
                 _raygunClient.Send(condition, stackTrace, tags, customData);
+#endif
 
             var sendReportToMixpanel =
                 MonetizrManager.Instance.Client.GlobalSettings.GetBoolParam("app.sent_error_reports_to_mixpanel",
