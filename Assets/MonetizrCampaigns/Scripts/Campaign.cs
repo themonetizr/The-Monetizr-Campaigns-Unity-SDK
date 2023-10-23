@@ -140,6 +140,22 @@ namespace Monetizr.Campaigns
 
             internal Asset() { }
 
+            internal static bool ValidateAssetJson(string json)
+            {
+                if (string.IsNullOrEmpty(json))
+                    return false;
+
+                if (!Utils.ValidateJson(json))
+                    return false;
+
+                var d = Utils.ParseJson(json);
+
+                if (d.Count == 0)
+                    return false;
+
+                return d.ContainsKey("id") && d.ContainsKey("type") && d.ContainsKey("title") && d.ContainsKey("url");
+            }
+
             internal Asset(string json, bool isVideo)
             {
                 var d = Utils.ParseJson(json);

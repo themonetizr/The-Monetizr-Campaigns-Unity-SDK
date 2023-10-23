@@ -605,7 +605,7 @@ namespace Monetizr.Campaigns
 
                 foreach (var c in adItem.Creatives)
                 {
-                    //load non linear campaions
+                    //load non linear companions
                     if (c.NonLinearAds != null && !_loadVideoOnly)
                     {
                         var it = c.NonLinearAds;
@@ -622,9 +622,9 @@ namespace Monetizr.Campaigns
                     {
                         var it = c.Linear;
 
-                        if (it.AdParameters != null && !string.IsNullOrEmpty(it.AdParameters.Value) && Utils.TestJson(it.AdParameters.Value))
+                        if (ServerCampaign.Asset.ValidateAssetJson(it.AdParameters?.Value))
                         {
-                            _serverCampaign.assets.Add(new ServerCampaign.Asset(it.AdParameters.Value, true));
+                            _serverCampaign.assets.Add(new ServerCampaign.Asset(it.AdParameters?.Value, true));
                             continue;
                         }
 
@@ -1068,8 +1068,9 @@ namespace Monetizr.Campaigns
 
         private static bool AddAssetFromAdParameters(string adParametersValue, ServerCampaign serverCampaign)
         {
-            if (string.IsNullOrEmpty(adParametersValue) || !Utils.TestJson(adParametersValue)) return false;
-
+            if (!ServerCampaign.Asset.ValidateAssetJson(adParametersValue))
+                return false;
+            
             serverCampaign.assets.Add(new ServerCampaign.Asset(adParametersValue, false));
             return true;
         }
