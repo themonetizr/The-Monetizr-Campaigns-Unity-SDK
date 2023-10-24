@@ -729,7 +729,7 @@ namespace Monetizr.Campaigns
 
         internal void EmbedVastParametersIntoVideoPlayer(Asset asset)
         {
-            vastAdParameters = DumpsVastSettings();
+            //vastAdParameters = DumpsVastSettings();
 
             string fpath = GetCampaignPath(asset.fpath);
 

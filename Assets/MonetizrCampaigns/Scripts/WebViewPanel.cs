@@ -259,17 +259,19 @@ namespace Monetizr.Campaigns
 
             bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
 
-            if (!campaign.vastSettings.IsEmpty() && showWebview && verifyWithOMSDK)
+            if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
-                await ph.DownloadOMSDKServiceContent();
-
                 campaign.vastSettings.ReplaceVastTags(new VastTagsReplacer(campaign, videoAsset, userAgent));
 
                 campaign.vastAdParameters = campaign.DumpsVastSettings();
 
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
 
-                ph.InitializeOMSDK(campaign.vastAdParameters);
+                if (verifyWithOMSDK)
+                {
+                    await ph.DownloadOMSDKServiceContent();
+                    ph.InitializeOMSDK(campaign.vastAdParameters);
+                }
             }
 
             campaign.vastSettings = oldVastSettings;
@@ -529,7 +531,10 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Stopping OMID ad session at time: {Time.time}");
 
-            _webView.StopOMIDAdSession();
+            bool verifyWithOMSDK = currentMission.campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
+
+            if(verifyWithOMSDK)
+                _webView.StopOMIDAdSession();
 
             float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay", 1.0f);
 
