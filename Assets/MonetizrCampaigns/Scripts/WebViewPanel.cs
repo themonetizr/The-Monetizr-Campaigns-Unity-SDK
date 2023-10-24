@@ -202,8 +202,8 @@ namespace Monetizr.Campaigns
             {
                 _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
 
-                if (campaign.serverSettings.GetBoolParam("omsdk.verify_internal_videos", false))
-                    campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
+                //if (campaign.serverSettings.GetBoolParam("omsdk.verify_internal_videos", false))
+                campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
             var isProgrammatic = campaign.serverSettings.GetBoolParam("programmatic", false);
