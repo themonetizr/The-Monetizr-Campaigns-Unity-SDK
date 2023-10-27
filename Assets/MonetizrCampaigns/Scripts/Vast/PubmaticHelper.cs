@@ -407,6 +407,8 @@ namespace Monetizr.Campaigns
            //var apiUrl = globalSettings.GetParam("api_url");
             var openRtbUri = settings.GetParam("openrtb.endpoint");
 
+            //openRtbUri = "http://localhost:8080/openrtb_json";
+
             if (string.IsNullOrEmpty(openRtbUri))
             {
                 Log.PrintV($"No programmatic endpoint defined! Programmatic disabled!");
@@ -462,6 +464,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"OpenRTB request: {openRtbRequest}");
             Log.PrintV($"Requesting OpenRTB campaign with url: {openRtbUri}");
+            
 
             var requestMessage = MonetizrClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
             var response = await MonetizrClient.DownloadUrlAsString(requestMessage);
@@ -477,6 +480,8 @@ namespace Monetizr.Campaigns
                 Log.PrintV($"Response unsuccessful with content: {res}");
                 return false;
             }
+
+            currentCampaign.openRtbRawResponse = res;
 
             var openRtbResponse = OpenRTBResponse.Load(res);
 

@@ -85,6 +85,9 @@ namespace Monetizr.Campaigns
         [System.NonSerialized]
         public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
 
+        [System.NonSerialized]
+        public string openRtbRawResponse = "";
+
         [System.Serializable]
         public class Location
         {
@@ -656,11 +659,10 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"{zipFolder}");
 
-            if (Directory.Exists(zipFolder))
-            {
-                return;
-            }
-            else
+            //if (Directory.Exists(zipFolder))
+            //    Directory.Delete(zipFolder);
+            
+            if (!Directory.Exists(zipFolder))
             {
                 Directory.CreateDirectory(zipFolder);
             }
@@ -736,16 +738,23 @@ namespace Monetizr.Campaigns
             string videoPath = $"{fpath}/video.mp4";
             string indexPath = $"{fpath}/{asset.mainAssetName}";
             
-            var backPath = indexPath + ".back";
+            /*var backPath = indexPath + ".back";
 
             if (!File.Exists(backPath))
             {
                 File.Copy(indexPath, backPath);
             }
+            else
+            {
+                File.Delete(indexPath);
+            }*/
             
-            var str = File.ReadAllText(backPath);
+            var str = File.ReadAllText(indexPath);
 
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
+
+            if(!string.IsNullOrEmpty(openRtbRawResponse))
+                str = str.Replace("\"${VAST_RESPONSE}\"",openRtbRawResponse);
 
             if(!File.Exists(videoPath))
                 str = str.Replace("video.mp4", asset.url);
