@@ -510,7 +510,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Initialize
         /// </summary>
-        private async Task Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
+        private void Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
         {
 #if USING_WEBVIEW
             if (!UniWebView.IsWebViewSupported)

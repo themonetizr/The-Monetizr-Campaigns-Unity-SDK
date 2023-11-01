@@ -44,23 +44,25 @@ namespace Monetizr.Campaigns
 
         internal virtual async Task GetGlobalSettings()
         {
+            await new Task(() => { });
         }
 
         internal virtual async Task<List<ServerCampaign>> GetList()
         {
+            await new Task(() => { });
             return new List<ServerCampaign>();
         }
 
         internal virtual async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null,
             Action onFailure = null)
         {
-            
+            await new Task(() => { });
         }
 
         internal virtual async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null,
             Action onFailure = null)
         {
-
+            await new Task(() => { });
         }
     }
 
@@ -573,7 +575,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Reset the challenge as claimed by the player.
         /// </summary>
-        public async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null,
+        internal override async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null,
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =

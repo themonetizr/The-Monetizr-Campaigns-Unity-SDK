@@ -343,10 +343,27 @@ namespace Monetizr.Campaigns
         internal abstract void SendErrorToMixpanel(string condition, string stackTrace, ServerCampaign getActiveCampaign);
         internal abstract void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign);
         internal abstract void InitializeMixpanel(string key);
-        internal abstract void TrackEvent(Mission mission, PanelController panel, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null);
+        internal abstract void TrackEvent(Mission mission, 
+            PanelController panel,
+            MonetizrManager.EventType eventType, 
+            Dictionary<string, string> additionalValues = null);
 
-        internal abstract void TrackEvent(Mission currentMission, AdPlacement adPlacement,
-            MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null);
+        internal abstract void TrackEvent(Mission currentMission, 
+            AdPlacement adPlacement,
+            MonetizrManager.EventType eventType, 
+            Dictionary<string, string> additionalValues = null);
+
+        internal abstract void TrackEvent(ServerCampaign currentCampaign, 
+            Mission currentMission,
+            AdPlacement adPlacement, 
+            MonetizrManager.EventType eventType,
+            Dictionary<string, string> additionalValues = null);
+
+        internal abstract void _TrackEvent(string name,
+            ServerCampaign campaign,
+            bool timed = false,
+            Dictionary<string, string> additionalValues = null,
+            double duration = -1.0);
 
         internal abstract void OnApplicationQuit();
        
@@ -713,7 +730,7 @@ namespace Monetizr.Campaigns
             TrackEvent(currentMission.campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
-        internal void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
+        internal override void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             //Log.PrintV($"------Track event: {currentCampaign} {adPlacement} {eventType}");
 
@@ -980,7 +997,7 @@ namespace Monetizr.Campaigns
 
         }
 
-        internal void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string, string> additionalValues = null, double duration = -1.0)
+        internal override void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string, string> additionalValues = null, double duration = -1.0)
         {
             Debug.Assert(isMixpanelInitialized);
 
