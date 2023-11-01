@@ -20,7 +20,7 @@ namespace Monetizr.Campaigns
 {
     internal class VastHelper
     {
-        internal static MonetizrClient client;
+        internal static MonetizrClient httpClient;
 
         internal static string userAgent;
 
@@ -34,21 +34,21 @@ namespace Monetizr.Campaigns
             internal int pid;
         }
 
-        internal VastHelper(MonetizrClient _client, string _userAgent)
+        internal VastHelper(MonetizrClient httpClient, string _userAgent)
         {
-            client = _client;
+            VastHelper.httpClient = httpClient;
             userAgent = _userAgent;
         }
 
         public VastParams GetVastParams()
         {
-            if (string.IsNullOrEmpty(client.currentApiKey))
+            if (string.IsNullOrEmpty(httpClient.currentApiKey))
                 return null;
 
-            if (client.currentApiKey.Length == 43)
+            if (httpClient.currentApiKey.Length == 43)
                 return null;
 
-            var p = Array.ConvertAll(client.currentApiKey.Split('-'), int.Parse);
+            var p = Array.ConvertAll(httpClient.currentApiKey.Split('-'), int.Parse);
 
             if (p.Length != 3)
                 return null;
@@ -763,8 +763,8 @@ namespace Monetizr.Campaigns
                     {
                         string filesList = string.Join("\n", it.MediaFiles.MediaFile.Select(x => $"{x.Value}#{x.bitrate}").ToArray());
 
-                        if (client.GlobalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
-                            client.analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media", null);
+                        if (httpClient.GlobalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
+                            httpClient.Analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media", null);
 
                         mediaFile = it.MediaFiles.MediaFile[0];
                         //return false;
@@ -873,9 +873,9 @@ namespace Monetizr.Campaigns
             if (!(vastData.Items[0] is VASTAD vad))
                 return;
 
-            int prefBitRate = client.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
-            int prefWidth = client.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
-            int prefHeight = client.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
+            int prefBitRate = httpClient.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
+            int prefWidth = httpClient.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
+            int prefHeight = httpClient.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
 
             var adItem = new VastAdItem(vad.Item,
                 serverCampaign,
@@ -899,7 +899,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
 
-            var result = await MonetizrClient.DownloadUrlAsString(new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri));
+            var result = await MonetizrHttpClient.DownloadUrlAsString(new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri));
 
             if (!result.isSuccess)
                 return;
@@ -926,9 +926,9 @@ namespace Monetizr.Campaigns
             if (!(vastData.Items[0] is VASTAD vad))
                 return false;
 
-            int prefBitRate = client.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
-            int prefWidth = client.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
-            int prefHeight = client.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
+            int prefBitRate = httpClient.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
+            int prefWidth = httpClient.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
+            int prefHeight = httpClient.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
 
             var adItem = new VastAdItem(vad.Item,
                 serverCampaign,
@@ -955,7 +955,7 @@ namespace Monetizr.Campaigns
                 HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
                 httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
 
-                var result = await MonetizrClient.DownloadUrlAsString(httpRequest);
+                var result = await MonetizrHttpClient.DownloadUrlAsString(httpRequest);
 
                 if (!result.isSuccess)
                 {
@@ -1164,7 +1164,7 @@ namespace Monetizr.Campaigns
             return vastData;
         }
 
-        /*internal async Task GetCampaign(List<ServerCampaign> campList, HttpClient httpClient)
+        /*internal async Task GetCampaign(List<ServerCampaign> campList, ConnectionsClient httpClient)
         {
             VastParams vp = GetVastParams();
 
@@ -1185,7 +1185,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Requesting VAST campaign with url {uri}");
 
-            var requestMessage = MonetizrClient.GetHttpRequestMessage(uri);
+            var requestMessage = MonetizrHttpClient.GetHttpRequestMessage(uri);
 
             HttpResponseMessage response = await httpClient.SendAsync(requestMessage);
 

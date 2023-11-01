@@ -439,7 +439,7 @@ namespace Monetizr.Campaigns
                 //MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, updateUIDelegate);
             };*/
 
-            //MonetizrManager.Analytics.TrackEvent("Claim pressed", m);
+            //MonetizrManager.analytics.TrackEvent("Claim pressed", m);
 
             Action<bool> onVideoComplete = (bool isVideoSkipped) =>
             {
@@ -450,7 +450,7 @@ namespace Monetizr.Campaigns
 
                 if (isVideoSkipped)
                 {
-                    //MonetizrManager.Analytics.TrackEvent("Video skipped", m);
+                    //MonetizrManager.analytics.TrackEvent("Video skipped", m);
 
                     onComplete?.Invoke(isVideoSkipped);
                     return;
@@ -464,7 +464,7 @@ namespace Monetizr.Campaigns
                     {
                         if (isMailSkipped)
                         {
-                            //MonetizrManager.Analytics.TrackEvent("Email enter skipped", m);
+                            //MonetizrManager.analytics.TrackEvent("Email enter skipped", m);
 
                             MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressSkip);
 

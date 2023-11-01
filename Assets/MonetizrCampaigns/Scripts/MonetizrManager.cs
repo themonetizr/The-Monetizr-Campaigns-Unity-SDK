@@ -267,7 +267,7 @@ namespace Monetizr.Campaigns
 
         private static Transform teaserRoot;
 
-        internal MonetizrClient Client { get; private set; }
+        internal MonetizrClient ConnectionsClient { get; private set; }
 
         public List<MissionDescription> sponsoredMissions { get; private set; }
 
@@ -431,13 +431,13 @@ namespace Monetizr.Campaigns
 
         public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
         {
-            MonetizrAnalytics.isAdvertisingIDDefined = true;
+            MonetizrMobileAnalytics.isAdvertisingIDDefined = true;
 
-            MonetizrAnalytics.advertisingID = advertisingID;
-            MonetizrAnalytics.limitAdvertising = limitAdvertising;
+            MonetizrMobileAnalytics.advertisingID = advertisingID;
+            MonetizrMobileAnalytics.limitAdvertising = limitAdvertising;
 
             Log.Print(
-                $"MonetizrManager SetAdvertisingIds: {MonetizrAnalytics.advertisingID} {MonetizrAnalytics.limitAdvertising}");
+                $"MonetizrManager SetAdvertisingIds: {MonetizrMobileAnalytics.advertisingID} {MonetizrMobileAnalytics.limitAdvertising}");
         }
 
         public static MonetizrManager Initialize(string apiKey,
@@ -472,7 +472,7 @@ namespace Monetizr.Campaigns
 
             Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {SDKVersion}");
 
-            if (!MonetizrAnalytics.isAdvertisingIDDefined)
+            if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
                 Log.PrintError(
                     $"MonetizrManager Initialize: Advertising ID is not defined. Be sure you called MonetizrManager.SetAdvertisingIds before Initialize call.");
@@ -500,7 +500,7 @@ namespace Monetizr.Campaigns
 
         internal static MonetizrManager Instance { get; private set; } = null;
 
-        internal static MonetizrAnalytics Analytics => Instance.Client.analytics;
+        internal static MonetizrAnalytics Analytics => Instance.ConnectionsClient.Analytics;
 
         void OnApplicationQuit()
         {
@@ -528,7 +528,7 @@ namespace Monetizr.Campaigns
 
             this._soundSwitch = soundSwitch;
 
-            Client = new MonetizrClient(apiKey);
+            ConnectionsClient = new MonetizrHttpClient(apiKey);
             
             InitializeUI();
 
@@ -601,28 +601,28 @@ namespace Monetizr.Campaigns
 
         internal string GetCurrentAPIkey()
         {
-            return Client.currentApiKey;
+            return ConnectionsClient.currentApiKey;
         }
 
         internal void RestartClient()
         {
-            Client.Close();
+            ConnectionsClient.Close();
 
-            Client = new MonetizrClient(Client.currentApiKey);
+            ConnectionsClient = new MonetizrHttpClient(ConnectionsClient.currentApiKey);
 
             RequestCampaigns();
         }
 
         internal bool ChangeAPIKey(string apiKey)
         {
-            if (apiKey == Client.currentApiKey)
+            if (apiKey == ConnectionsClient.currentApiKey)
                 return true;
 
             Log.Print($"Changing api key to {apiKey}");
 
-            Client.Close();
+            ConnectionsClient.Close();
 
-            Client = new MonetizrClient(apiKey);
+            ConnectionsClient = new MonetizrHttpClient(apiKey);
 
             RequestCampaigns();
 
@@ -712,7 +712,7 @@ namespace Monetizr.Campaigns
             {
                 s_cts.CancelAfter(10000);
 
-                await Instance.Client.Reset(campaignId, s_cts.Token);
+                await Instance.ConnectionsClient.Reset(campaignId, s_cts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -741,7 +741,7 @@ namespace Monetizr.Campaigns
             {
                 Log.Print("SUCCESS!");
 
-                //MonetizrManager.Analytics.TrackEvent("Enter email succeeded", m);
+                //MonetizrManager.analytics.TrackEvent("Enter email succeeded", m);
 
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressOk);
 
@@ -752,9 +752,9 @@ namespace Monetizr.Campaigns
             {
                 Log.Print("FAIL!");
 
-                //MonetizrManager.Analytics.TrackEvent("Email enter failed", m);
+                //MonetizrManager.analytics.TrackEvent("Email enter failed", m);
 
-                //MonetizrManager.Analytics.TrackEvent(m, AdPlacement.EmailEnterInGameRewardScreen, MonetizrManager.EventType.Error);
+                //MonetizrManager.analytics.TrackEvent(m, AdPlacement.EmailEnterInGameRewardScreen, MonetizrManager.EventType.Error);
 
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.Error);
 
@@ -1373,9 +1373,9 @@ namespace Monetizr.Campaigns
             if (!Instance._isActive)
                 return;
 
-            // MonetizrManager.Analytics.EndShowAdAsset(AdPlacement.TinyTeaser);
+            // MonetizrManager.analytics.EndShowAdAsset(AdPlacement.TinyTeaser);
 
-            //MonetizrManager.Analytics.TrackEvent(null, null, EventType.ImpressionEnds);
+            //MonetizrManager.analytics.TrackEvent(null, null, EventType.ImpressionEnds);
 
             Instance._uiController.HidePanel(PanelId.TinyMenuTeaser);
         }
@@ -1446,7 +1446,7 @@ namespace Monetizr.Campaigns
 
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
-            await Client.GetGlobalSettings();
+            await ConnectionsClient.GetGlobalSettings();
 
             //TODO: api endpoint
             //errors endpoint
@@ -1458,7 +1458,7 @@ namespace Monetizr.Campaigns
 
             try
             {
-                campaigns = await Client.GetList();
+                campaigns = await ConnectionsClient.GetList();
             }
             catch (Exception e)
             {
@@ -1477,17 +1477,17 @@ namespace Monetizr.Campaigns
 
             if (campaigns.Count > 0)
             {
-                Client.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
+                ConnectionsClient.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
 
-                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
+                ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
 
 
-                //_client.analytics.TrackEvent("Get List Started", campaigns[0]);
-                //_client.analytics.StartTimedEvent("Get List Finished");
+                //httpClient.analytics.TrackEvent("Get List Started", campaigns[0]);
+                //httpClient.analytics.StartTimedEvent("Get List Finished");
             }
             else
             {
-                Client.InitializeMixpanel(false, null);
+                ConnectionsClient.InitializeMixpanel(false, null);
             }
 
 
@@ -1522,14 +1522,14 @@ namespace Monetizr.Campaigns
                 {
                     Log.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
 
-                    Client.analytics.TrackEvent(campaign, null,
+                    ConnectionsClient.Analytics.TrackEvent(campaign, null,
                         AdPlacement.AssetsLoading,
                         EventType.Error,
                         new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
 
-                    if (Client.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
+                    if (ConnectionsClient.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
                     {
-                        //Client.SendErrorToRemoteServer("Campaign loading assets error",
+                        //ConnectionsClient.SendErrorToRemoteServer("Campaign loading assets error",
                         //    "Campaign loading assets error",
                         //    $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nApp version: {Application.version}\nSystem language: {Application.systemLanguage}\n\n{campaign.loadingError}");
 
@@ -1553,22 +1553,22 @@ namespace Monetizr.Campaigns
 
             /*if (_activeCampaignId != null)
             {
-                //_client.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
+                //httpClient.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
 
-                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
+                ConnectionsClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
             }
             else
             {
                 if (campaigns.Count > 0)
                 {
-                    //_client.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
+                    //httpClient.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
 
-                    Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Error);
+                    ConnectionsClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Error);
                 }
             }*/
 
             if (campaigns.Count > 0)
-                Client.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
+                ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
 
             /* if (!isOk)
              {
@@ -1735,11 +1735,11 @@ namespace Monetizr.Campaigns
             {
                 //await Task.Delay(15000,ct);
 
-                await Client.Claim(campaign, ct, onSuccess, onFailure);
+                await ConnectionsClient.Claim(campaign, ct, onSuccess, onFailure);
             }
             catch (Exception e)
             {
-                Log.PrintError($"Exception in Client.Claim for {campaign.id}\n{e}");
+                Log.PrintError($"Exception in ConnectionsClient.Claim for {campaign.id}\n{e}");
 
                 onFailure.Invoke();
             }

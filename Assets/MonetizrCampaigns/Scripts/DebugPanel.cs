@@ -62,11 +62,11 @@ namespace Monetizr.Campaigns
         public void UpdateVersionText()
         {
             versionText.text = $"App version: {Application.version} " +
-             $"OS: {MonetizrAnalytics.osVersion} " +
+             $"OS: {MonetizrMobileAnalytics.osVersion} " +
              $"SDK: {MonetizrManager.SDKVersion}\n" +
-             $"ADID: {MonetizrAnalytics.advertisingID}\n" +
-             $"UserId: {MonetizrManager.Instance.Client.analytics.GetUserId()}\n" +
-             $"Limit ad tracking: {MonetizrAnalytics.limitAdvertising}\n" +
+             $"ADID: {MonetizrMobileAnalytics.advertisingID}\n" +
+             $"UserId: {MonetizrManager.Instance.ConnectionsClient.Analytics.GetUserId()}\n" +
+             $"Limit ad tracking: {MonetizrMobileAnalytics.limitAdvertising}\n" +
              $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()?.id}";
         }
 
@@ -94,7 +94,7 @@ namespace Monetizr.Campaigns
 
         public void ResetId()
         {
-            MonetizrManager.Instance.Client.analytics.RandomizeUserId();
+            MonetizrManager.Instance.ConnectionsClient.Analytics.RandomizeUserId();
 
             UpdateVersionText();
 

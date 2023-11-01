@@ -24,7 +24,6 @@ namespace Monetizr.Campaigns
         //private Mission currentMission;
         private string eventsPrefix;
         private AdPlacement adType;
-        private bool isAnalyticsNeeded = true;
         public Image background;
 
         public GameObject claimButton;
@@ -221,7 +220,7 @@ namespace Monetizr.Campaigns
             var oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
 
             string userAgent = _webView.GetUserAgent();
-            var ph = new PubmaticHelper(MonetizrManager.Instance.Client, userAgent);
+            var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, userAgent);
 
             if (isProgrammatic)
             {
@@ -236,7 +235,7 @@ namespace Monetizr.Campaigns
                     programmaticOk =
                         await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic);
                 }
-                catch (MonetizrClient.DownloadUrlAsStringException e)
+                catch (MonetizrHttpClient.DownloadUrlAsStringException e)
                 {
                     Log.PrintError($"Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
                     programmaticOk = false;

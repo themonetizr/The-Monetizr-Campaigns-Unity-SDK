@@ -22,7 +22,7 @@ namespace Monetizr.Campaigns
             if (!MonetizrManager.IsInitialized())
                 return;
 
-            if (MonetizrManager.Instance.Client == null || MonetizrManager.Instance.Client.GlobalSettings == null)
+            if (MonetizrManager.Instance.ConnectionsClient == null || MonetizrManager.Instance.ConnectionsClient.GlobalSettings == null)
                 return;
 
             if (!condition.StartsWith("Monetizr SDK"))
@@ -41,7 +41,7 @@ namespace Monetizr.Campaigns
                 {"app_version", Application.version},
                 {"unity_version", Application.unityVersion},
                 {"bundle_id",MonetizrManager.bundleId},
-                {"os_group",MonetizrAnalytics.GetOsGroup()},
+                {"os_group",MonetizrMobileAnalytics.GetOsGroup()},
                 {"camp_id", campaign != null ? campaign.id : "none"}
             };
 
@@ -51,12 +51,12 @@ namespace Monetizr.Campaigns
 #endif
 
             var sendReportToMixpanel =
-                MonetizrManager.Instance.Client.GlobalSettings.GetBoolParam("app.sent_error_reports_to_mixpanel",
+                MonetizrManager.Instance.ConnectionsClient.GlobalSettings.GetBoolParam("app.sent_error_reports_to_mixpanel",
                     false);
 
             if (sendReportToMixpanel)
             {
-                MonetizrManager.Instance.Client.analytics.SendErrorToMixpanel(condition,
+                MonetizrManager.Instance.ConnectionsClient.Analytics.SendErrorToMixpanel(condition,
                     stackTrace,
                     MonetizrManager.Instance.GetActiveCampaign());
             }

@@ -33,12 +33,12 @@ namespace Monetizr.Campaigns
 
             MonetizrManager.Instance.SoundSwitch(false);
 
-            //MonetizrManager.Analytics.BeginShowAdAsset(AdType.Video,null);
+            //MonetizrManager.analytics.BeginShowAdAsset(AdType.Video,null);
         }
 
         void EndReached(VideoPlayer vp)
         {
-            //MonetizrManager.Analytics.EndShowAdAsset(AdType.Video,null);
+            //MonetizrManager.analytics.EndShowAdAsset(AdType.Video,null);
 
             MonetizrManager.Instance.SoundSwitch(true);
 

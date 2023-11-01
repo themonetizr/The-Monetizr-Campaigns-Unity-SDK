@@ -154,7 +154,7 @@ namespace Monetizr.Campaigns
             MonetizrManager.temporaryEmail = result;
             MonetizrManager.temporaryRewardTypeSelection = selection;
 
-            //MonetizrManager.Analytics.EndShowAdAsset(adType, currentMission);
+            //MonetizrManager.analytics.EndShowAdAsset(adType, currentMission);
         }
 
         static internal EnterEmailType GetPanelType(Mission m)

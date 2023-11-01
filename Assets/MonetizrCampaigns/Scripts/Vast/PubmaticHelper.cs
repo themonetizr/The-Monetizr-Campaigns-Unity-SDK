@@ -165,7 +165,7 @@ namespace Monetizr.Campaigns
             public string vasttag;
         }
 
-        internal PubmaticHelper(MonetizrClient client, string userAgent) : base(client, userAgent)
+        internal PubmaticHelper(MonetizrClient httpClient, string userAgent) : base(httpClient, userAgent)
         {
         }
 
@@ -174,11 +174,11 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(generatorUri))
                 return null;
 
-            var requestMessage = client.GetHttpRequestMessage(generatorUri, userAgent);
+            var requestMessage = httpClient.GetHttpRequestMessage(generatorUri, userAgent);
 
             Log.PrintV($"Generator message: {requestMessage}");
 
-            HttpResponseMessage response = await client.GetHttpClient().SendAsync(requestMessage);
+            HttpResponseMessage response = await httpClient.GetHttpClient().SendAsync(requestMessage);
 
             Log.PrintV($"Generator response: {response}");
 
@@ -192,21 +192,21 @@ namespace Monetizr.Campaigns
             return null;
         }
 
-        internal async Task<(bool isSuccess, List<ServerCampaign> result)> GetProgrammaticCampaign(MonetizrClient monetizrClient)
+        internal async Task<(bool isSuccess, List<ServerCampaign> result)> GetProgrammaticCampaign(MonetizrHttpClient monetizrHttpClient)
         {
             //if (GetVastParams() == null)
             //    return false;
 
             var resultCampaignList = new List<ServerCampaign>();
 
-            var globalSettings = client.GlobalSettings;
+            var globalSettings = httpClient.GlobalSettings;
             //
             var testmode = globalSettings.GetBoolParam("mixpanel.testmode", false);
             var mixpanelKey = globalSettings.GetParam("mixpanel.apikey", "");
             var apiUrl = globalSettings.GetParam("api_url");
             var videoOnly = globalSettings.GetBoolParam("openrtb.video_only", true);
 
-            monetizrClient.InitializeMixpanel(testmode, mixpanelKey, apiUrl);
+            monetizrHttpClient.InitializeMixpanel(testmode, mixpanelKey, apiUrl);
 
             //getting openrtb campaign from monetizr proxy or with ssp endpoind
             //Log.PrintV(globalSettings.dictionary.ToString());
@@ -219,7 +219,7 @@ namespace Monetizr.Campaigns
 
             string uri = globalSettings.GetParam("openrtb.endpoint");
 
-            var requestMessage = client.GetHttpRequestMessage(uri);
+            var requestMessage = httpClient.GetHttpRequestMessage(uri);
 
             string openRtbRequest = "";
 
@@ -239,21 +239,21 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Requesting OpenRTB campaign with url: {uri}");
 
-            requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, openRtbRequest, HttpMethod.Post);
+            requestMessage = MonetizrHttpClient.GetOpenRtbRequestMessage(uri, openRtbRequest, HttpMethod.Post);
 
-            var response = await MonetizrClient.DownloadUrlAsString(requestMessage);
+            var response = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
 
             /*#if UNITY_EDITOR
                         uri = "http://127.0.0.1:8000/?test=3";
-                        requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, "", HttpMethod.Post);
-                        response = await MonetizrClient.DownloadUrlAsString(requestMessage);
+                        requestMessage = MonetizrHttpClient.GetOpenRtbRequestMessage(uri, "", HttpMethod.Post);
+                        response = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
             #endif*/
 
             if (!response.isSuccess)
             {
                 //#if !UNITY_EDITOR
                 if (globalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
-                    monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", null);
+                    monetizrHttpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", null);
                 //#endif                
 
                 return (false, new List<ServerCampaign>());
@@ -326,12 +326,12 @@ namespace Monetizr.Campaigns
             //#if !UNITY_EDITOR            
             if (globalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
             {
-                monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, null);
+                monetizrHttpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, null);
             }
 
             /* if (globalSettings.GetBoolParam("openrtb.sent_report_to_slack", false))
              {
-                 monetizrClient.SendErrorToRemoteServer("Notify",
+                 monetizrHttpClient.SendErrorToRemoteServer("Notify",
                      "Openrtb request successfully received",
                                  $"Notify: Openrtb request successfully received (test mode: {testmode}) ");
              }*/
@@ -402,7 +402,7 @@ namespace Monetizr.Campaigns
         internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign,
             string currentMissionOpenRtbRequest)
         {
-            var settings = currentCampaign.serverSettings; //client.GlobalSettings;
+            var settings = currentCampaign.serverSettings; //httpClient.GlobalSettings;
 
            //var apiUrl = globalSettings.GetParam("api_url");
             var openRtbUri = settings.GetParam("openrtb.endpoint");
@@ -440,7 +440,7 @@ namespace Monetizr.Campaigns
                 DateTime.Now.ToString();
             MonetizrManager.Instance.localSettings.SaveData();
 
-            //var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri, userAgent);
+            //var requestMessage = MonetizrHttpClient.GetHttpRequestMessage(openRtbUri, userAgent);
 
             
             var openRtbRequest = settings.GetParam(requestParameterName);
@@ -449,7 +449,7 @@ namespace Monetizr.Campaigns
             {
                 string generatorUri = settings.GetParam("openrtb.generator_url");
 
-                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrAnalytics.advertisingID}");
+                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrMobileAnalytics.advertisingID}");
             }
 
             if (string.IsNullOrEmpty(openRtbRequest))
@@ -466,8 +466,8 @@ namespace Monetizr.Campaigns
             Log.PrintV($"Requesting OpenRTB campaign with url: {openRtbUri}");
             
 
-            var requestMessage = MonetizrClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
-            var response = await MonetizrClient.DownloadUrlAsString(requestMessage);
+            var requestMessage = MonetizrHttpClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
+            var response = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
 
 
             string res = response.content;
@@ -475,7 +475,7 @@ namespace Monetizr.Campaigns
             if (!response.isSuccess || res.Contains("Request failed!") || res.Length <= 0)
             {
                 if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
-                    client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
+                    httpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
 
                 Log.PrintV($"Response unsuccessful with content: {res}");
                 return false;
@@ -512,7 +512,7 @@ namespace Monetizr.Campaigns
 
             if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
             {
-                client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
+                httpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
             }
 
             return true;

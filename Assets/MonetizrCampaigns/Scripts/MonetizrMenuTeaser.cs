@@ -202,7 +202,7 @@ namespace Monetizr.Campaigns
         internal override void FinalizePanel(PanelId id)
         {
             //Moved to HideTinyMenuTeaser
-            //MonetizrManager.Analytics.EndShowAdAsset(AdType.TinyTeaser);
+            //MonetizrManager.analytics.EndShowAdAsset(AdType.TinyTeaser);
         }
 
 

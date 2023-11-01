@@ -29,7 +29,42 @@ namespace Monetizr.Campaigns
         }
     }
 
-    internal class MonetizrClient
+    internal abstract class MonetizrClient
+    {
+        public string currentApiKey;
+
+        internal SettingsDictionary<string, string> GlobalSettings { get; set; } =
+            new SettingsDictionary<string, string>();
+
+        internal MonetizrAnalytics Analytics { get; set; } = null;
+        internal abstract HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false);
+        internal abstract HttpClient GetHttpClient();
+        internal abstract void Close();
+        internal abstract void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey, string apiUri = null);
+
+        internal virtual async Task GetGlobalSettings()
+        {
+        }
+
+        internal virtual async Task<List<ServerCampaign>> GetList()
+        {
+            return new List<ServerCampaign>();
+        }
+
+        internal virtual async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null,
+            Action onFailure = null)
+        {
+            
+        }
+
+        internal virtual async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null,
+            Action onFailure = null)
+        {
+
+        }
+    }
+
+    internal class MonetizrHttpClient : MonetizrClient
     {
         //public PlayerInfo playerInfo { get; set; }
 
@@ -53,16 +88,13 @@ namespace Monetizr.Campaigns
 
         private readonly string _baseTestApiUrl = "https://api-test.themonetizr.com";
         private static readonly HttpClient Client = new HttpClient();
-
-        public MonetizrAnalytics analytics { get; private set; }
-        public string currentApiKey;
-
-
+        
+        
         private CancellationTokenSource downloadCancellationTokenSource;
         
         public static string currentUserAgent;
 
-        internal HttpClient GetHttpClient()
+        internal override HttpClient GetHttpClient()
         {
             return Client;
         }
@@ -126,7 +158,7 @@ namespace Monetizr.Campaigns
             return ipApiData;
         }
 
-        public MonetizrClient(string apiKey, int timeout = 30)
+        public MonetizrHttpClient(string apiKey, int timeout = 30)
         {
             System.Net.ServicePointManager.SecurityProtocol |=
                 SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
@@ -135,14 +167,14 @@ namespace Monetizr.Campaigns
 
             GlobalSettings = new SettingsDictionary<string, string>();
                 
-            analytics = new MonetizrAnalytics();
+            Analytics = new MonetizrMobileAnalytics();
 
             Client.Timeout = TimeSpan.FromSeconds(timeout);
-            //Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            //Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //ConnectionsClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            //ConnectionsClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
+        internal override void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
         {
             string key = "cda45517ed8266e804d4966a0e693d0d";
             
@@ -166,10 +198,10 @@ namespace Monetizr.Campaigns
                 key = mixPanelApiKey;
             }
 
-            analytics.InitializeMixpanel(key);
+            Analytics.InitializeMixpanel(key);
         }
 
-        public void Close()
+        internal override void Close()
         {
             Client.CancelPendingRequests();
         }
@@ -252,7 +284,7 @@ namespace Monetizr.Campaigns
             return loadResult;
         }
 
-        internal async Task GetGlobalSettings()
+        internal override async Task GetGlobalSettings()
         {
             GlobalSettings = await DownloadGlobalSettings();
 
@@ -262,9 +294,7 @@ namespace Monetizr.Campaigns
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
         }
 
-        internal SettingsDictionary<string, string> GlobalSettings { get; private set; }
-
-        public async Task<List<ServerCampaign>> GetList()
+        internal override async Task<List<ServerCampaign>> GetList()
         {
             var result = await LoadCampaignsListFromServer();
             
@@ -283,7 +313,7 @@ namespace Monetizr.Campaigns
             return result;
         }
 
-        private async Task FilterCampaignsByLocation(List<ServerCampaign> result)
+        /*private async Task FilterCampaignsByLocation(List<ServerCampaign> result)
         {
             if (result.Count > 0)
             {
@@ -291,11 +321,11 @@ namespace Monetizr.Campaigns
 
                 if (needFilter)
                 {
-                    analytics.locationData = await GetIpApiData();
+                    Analytics.locationData = await GetIpApiData();
 
-                    if (analytics.locationData != null)
+                    if (Analytics.locationData != null)
                     {
-                        result.RemoveAll(e => { return !e.IsCampaignInsideLocation(analytics.locationData); });
+                        result.RemoveAll(e => { return !e.IsCampaignInsideLocation(Analytics.locationData); });
 
                         if (result.Count > 0)
                         {
@@ -312,14 +342,14 @@ namespace Monetizr.Campaigns
                     Log.Print($"Geo-filtering disabled");
                 }
             }
-        }
+        }*/
 
         private static void CheckAllowedDevices(List<ServerCampaign> result)
         {
 #if !UNITY_EDITOR
             //keep campaigns only for allowed devices
 
-            var hasAdId = !string.IsNullOrEmpty(MonetizrAnalytics.advertisingID);
+            var hasAdId = !string.IsNullOrEmpty(MonetizrMobileAnalytics.advertisingID);
 
             if (hasAdId)
             {
@@ -346,23 +376,23 @@ namespace Monetizr.Campaigns
 
                         Array.ForEach(allowed_device_id.Split(';'), id =>
                         {
-                            if (id == MonetizrAnalytics.advertisingID)
+                            if (id == MonetizrMobileAnalytics.advertisingID)
                                 isKeyFound = true;
                         });
 
-                        //if (!allowed_device_id.Contains(MonetizrAnalytics.advertisingID))
+                        //if (!allowed_device_id.Contains(MonetizrMobileAnalytics.advertisingID))
                         if (!isKeyFound)
                         {
-                            Log.Print($"Device {MonetizrAnalytics.advertisingID} isn't allowed for campaign {e.id}");
+                            Log.Print($"Device {MonetizrMobileAnalytics.advertisingID} isn't allowed for campaign {e.id}");
                             return true;
                         }
                         else
                         {
-                            Log.Print($"Device {MonetizrAnalytics.advertisingID} is OK for campaign {e.id}");
+                            Log.Print($"Device {MonetizrMobileAnalytics.advertisingID} is OK for campaign {e.id}");
                             return false;
                         }
 
-                        //return !allowed_device_id.Contains(MonetizrAnalytics.advertisingID);
+                        //return !allowed_device_id.Contains(MonetizrMobileAnalytics.advertisingID);
                     }
                 });
             }
@@ -472,7 +502,7 @@ namespace Monetizr.Campaigns
         {
             var admCampaigns = new List<ServerCampaign>();
 
-            var ph = new PubmaticHelper(MonetizrManager.Instance.Client, "");
+            var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
 
             foreach (var c in campaigns)
             {
@@ -491,7 +521,7 @@ namespace Monetizr.Campaigns
             return admCampaigns;
         }
 
-        internal HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false)
+        internal override HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false)
         {
             var httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
             
@@ -501,26 +531,26 @@ namespace Monetizr.Campaigns
                 RequestUri = new Uri(uri),
                 Headers =
                 {
-                    {"player-id", MonetizrAnalytics.deviceIdentifier},
+                    {"player-id", MonetizrMobileAnalytics.deviceIdentifier},
                     {"app-bundle-id", MonetizrManager.bundleId},
                     {"sdk-version", MonetizrManager.SDKVersion},
-                    {"os-group", MonetizrAnalytics.GetOsGroup()},
-                    {"ad-id", MonetizrAnalytics.advertisingID},
+                    {"os-group", MonetizrMobileAnalytics.GetOsGroup()},
+                    {"ad-id", MonetizrMobileAnalytics.advertisingID},
                     {"screen-width", Screen.width.ToString()},
                     {"screen-height", Screen.height.ToString()},
                     {"screen-dpi", Screen.dpi.ToString(CultureInfo.InvariantCulture)},
-                    {"device-group",MonetizrAnalytics.GetDeviceGroup().ToString().ToLower()},
+                    {"device-group",MonetizrMobileAnalytics.GetDeviceGroup().ToString().ToLower()},
                     {"device-memory",SystemInfo.systemMemorySize.ToString()},
                     {"device-model",Utils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
                     {"device-name",Utils.EncodeStringIntoAscii(SystemInfo.deviceName)},
-                    {"internet-connection",MonetizrAnalytics.GetInternetConnectionType()}
+                    {"internet-connection",MonetizrMobileAnalytics.GetInternetConnectionType()}
                 }
             };
 
-            output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", MonetizrManager.Instance.Client.currentApiKey);
+            output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", MonetizrManager.Instance.ConnectionsClient.currentApiKey);
             output.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            //Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            //Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //ConnectionsClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            //ConnectionsClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             if (string.IsNullOrEmpty(userAgent)) 
                 return output;
@@ -568,7 +598,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Marks the challenge as claimed by the player.
         /// </summary>
-        public async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null,
+        internal override async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null,
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =
@@ -629,9 +659,9 @@ namespace Monetizr.Campaigns
 
             string url = $"https://unity-notification-channel-to-slack-stineosy7q-uc.a.run.app/?message=\"{fullDescription}\"";
 
-            var requestMessage = MonetizrClient.GetHttpRequestMessage(url);
+            var requestMessage = MonetizrHttpClient.GetHttpRequestMessage(url);
 
-            _ = Client.SendAsync(requestMessage);
+            _ = ConnectionsClient.SendAsync(requestMessage);
         }*/
 
         public void SendReportToMixpanel(string openRtbRequest, string res)
