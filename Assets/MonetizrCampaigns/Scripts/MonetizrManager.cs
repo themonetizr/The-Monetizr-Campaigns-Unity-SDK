@@ -447,10 +447,29 @@ namespace Monetizr.Campaigns
             Action<bool> onUIVisible = null,
             UserDefinedEvent userEvent = null)
         {
-            if (Instance != null)
-            {
-                return Instance;
-            }
+            return _Initialize(apiKey, sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, null);
+        }
+
+        internal static MonetizrManager InitializeForTests(string apiKey,
+            List<MissionDescription> sponsoredMissions = null,
+            Action onRequestComplete = null,
+            Action<bool> soundSwitch = null,
+            Action<bool> onUIVisible = null,
+            UserDefinedEvent userEvent = null,
+            MonetizrClient connectionClient = null)
+        {
+            return _Initialize(apiKey, sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, connectionClient);
+        }
+
+        private static MonetizrManager _Initialize(string apiKey,
+            List<MissionDescription> sponsoredMissions,
+            Action onRequestComplete,
+            Action<bool> soundSwitch,
+            Action<bool> onUIVisible,
+            UserDefinedEvent userEvent,
+            MonetizrClient connectionClient)
+        {
+            if (Instance != null) return Instance;
 
 #if UNITY_EDITOR
             keepLocalClaimData = true;
@@ -493,8 +512,8 @@ namespace Monetizr.Campaigns
             Instance.userDefinedEvent = userEvent;
             Instance.onUIVisible = onUIVisible;
 
-            monetizrManager.Initialize(apiKey, onRequestComplete, soundSwitch);
-            
+            monetizrManager.Initialize(apiKey, onRequestComplete, soundSwitch, connectionClient);
+
             return Instance;
         }
 
@@ -510,7 +529,7 @@ namespace Monetizr.Campaigns
         /// <summary>
         /// Initialize
         /// </summary>
-        private void Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch)
+        private void Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
         {
 #if USING_WEBVIEW
             if (!UniWebView.IsWebViewSupported)
@@ -528,8 +547,10 @@ namespace Monetizr.Campaigns
 
             this._soundSwitch = soundSwitch;
 
-            ConnectionsClient = new MonetizrHttpClient(apiKey);
+            ConnectionsClient = connectionClient ?? new MonetizrHttpClient(apiKey);
             
+            ConnectionsClient.Initialize();
+
             InitializeUI();
 
             _gameOnInitSuccess = gameOnInitSuccess;
@@ -1477,7 +1498,9 @@ namespace Monetizr.Campaigns
 
             if (campaigns.Count > 0)
             {
-                ConnectionsClient.InitializeMixpanel(campaigns[0].testmode, campaigns[0].panel_key);
+                ConnectionsClient.SetTestMode(campaigns[0].testmode);
+
+                ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key);
 
                 ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
 
@@ -1487,7 +1510,7 @@ namespace Monetizr.Campaigns
             }
             else
             {
-                ConnectionsClient.InitializeMixpanel(false, null);
+                ConnectionsClient.Analytics.Initialize(false, null);
             }
 
 

@@ -336,13 +336,22 @@ namespace Monetizr.Campaigns
         }
     }
 
+    internal class TrackingEvent
+    {
+        private Mission mission;
+        private AdPlacement adPlacement;
+        private MonetizrManager.EventType eventType;
+        private Dictionary<string, string> additionalValues;
+
+    }
+
     internal abstract class MonetizrAnalytics
     {
         internal abstract string GetUserId();
         internal abstract void RandomizeUserId();
         internal abstract void SendErrorToMixpanel(string condition, string stackTrace, ServerCampaign getActiveCampaign);
         internal abstract void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign);
-        internal abstract void InitializeMixpanel(string key);
+        internal abstract void Initialize(bool testEnvironment, string mixPanelApiKey, string apiUri = null);
         internal abstract void TrackEvent(Mission mission, 
             PanelController panel,
             MonetizrManager.EventType eventType, 
@@ -371,7 +380,7 @@ namespace Monetizr.Campaigns
 
     internal class MonetizrMobileAnalytics : MonetizrAnalytics
     {
-        internal IpApiData locationData = null;
+        internal MonetizrHttpClient.IpApiData locationData = null;
 
         public static string osVersion;
         public static string advertisingID = "";
@@ -501,7 +510,8 @@ namespace Monetizr.Campaigns
 
 
 #if USING_FACEBOOK
-            if (FB.IsInitialized)
+            if (FB.Is
+            d)
             {
                 FB.ActivateApp();
             }
@@ -517,18 +527,34 @@ namespace Monetizr.Campaigns
 #endif
         }
 
-        internal override void InitializeMixpanel(string apikey)
+        internal override void Initialize(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
         {
+            string key = "cda45517ed8266e804d4966a0e693d0d";
+            
+            if (testEnvironment)
+            {
+                key = "d4de97058730720b3b8080881c6ba2e0";
+            }
+
+            if (!string.IsNullOrEmpty(mixPanelApiKey))
+            {
+                //checking corrupted mixpanel key
+                if (mixPanelApiKey.IndexOf("\n", StringComparison.Ordinal) >= 0)
+                    mixPanelApiKey = null;
+
+                key = mixPanelApiKey;
+            }
+
             if (isMixpanelInitialized)
                 return;
 
             isMixpanelInitialized = true;
 
             Mixpanel.Init();
-            Mixpanel.SetToken(apikey);
+            Mixpanel.SetToken(key);
             Mixpanel.Identify(deviceIdentifier);
 
-            Log.PrintV($"Mixpanel init called {apikey}");
+            Log.PrintV($"Mixpanel init called {key}");
         }
 
         private void BeginShowAdAsset(string eventName, AdPlacement placement, ServerCampaign campaign)
@@ -1021,9 +1047,7 @@ namespace Monetizr.Campaigns
             {
                 eventName = $"[UNITY_SDK] [TIMED] {name}";
             }
-
-
-
+            
             if (campaign == null)
             {
                 Log.PrintWarning($"MonetizrMobileAnalytics TrackEvent: ServerCampaign shouldn't be null");

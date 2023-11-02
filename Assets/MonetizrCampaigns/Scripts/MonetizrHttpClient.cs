@@ -16,90 +16,60 @@ using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
 {
-    [Serializable]
-    internal class IpApiData
-    {
-        public string country_name;
-        public string country_code;
-        public string region_code;
-
-        public static IpApiData CreateFromJSON(string jsonString)
-        {
-            return JsonUtility.FromJson<IpApiData>(jsonString);
-        }
-    }
-
     internal abstract class MonetizrClient
     {
-        public string currentApiKey;
-
-        internal SettingsDictionary<string, string> GlobalSettings { get; set; } =
-            new SettingsDictionary<string, string>();
+        internal string currentApiKey;
+        public string userAgent;
 
         internal MonetizrAnalytics Analytics { get; set; } = null;
-        internal abstract HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false);
-        internal abstract HttpClient GetHttpClient();
-        internal abstract void Close();
-        internal abstract void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey, string apiUri = null);
+        internal SettingsDictionary<string, string> GlobalSettings { get; set; } = new SettingsDictionary<string, string>();
 
-        internal virtual async Task GetGlobalSettings()
-        {
-            await new Task(() => { });
-        }
+        //----
 
-        internal virtual async Task<List<ServerCampaign>> GetList()
-        {
-            await new Task(() => { });
-            return new List<ServerCampaign>();
-        }
+        internal void SetUserAgent(string _userAgent) { this.userAgent = _userAgent; }
 
-        internal virtual async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null,
-            Action onFailure = null)
-        {
-            await new Task(() => { });
-        }
+        internal virtual void Close() { }
 
-        internal virtual async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null,
-            Action onFailure = null)
-        {
-            await new Task(() => { });
-        }
+        internal abstract Task GetGlobalSettings();
+
+        internal abstract Task<List<ServerCampaign>> GetList();
+
+        internal abstract Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null);
+
+        internal abstract Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null);
+
+        internal abstract void Initialize();
+
+        internal virtual void SetTestMode(bool testMode) {}
+
+        internal abstract Task<string> GetStringFromUrl(string generatorUri);
     }
 
     internal class MonetizrHttpClient : MonetizrClient
     {
+        [Serializable]
+        internal class IpApiData
+        {
+            public string country_name;
+            public string country_code;
+            public string region_code;
+
+            public static IpApiData CreateFromJSON(string jsonString)
+            {
+                return JsonUtility.FromJson<IpApiData>(jsonString);
+            }
+        }
         //public PlayerInfo playerInfo { get; set; }
 
         private string _baseApiUrl = "https://api.themonetizr.com";
 
-        private string CampaignsApiUrl
-        {
-            get
-            {
-                return _baseApiUrl + "/api/campaigns";
-            }
-        }
-        
-        private string SettingsApiUrl
-        {
-            get
-            {
-                return _baseApiUrl + "/settings";
-            }
-        }
+        private string CampaignsApiUrl => _baseApiUrl + "/api/campaigns";
+        private string SettingsApiUrl => _baseApiUrl + "/settings";
 
         private readonly string _baseTestApiUrl = "https://api-test.themonetizr.com";
         private static readonly HttpClient Client = new HttpClient();
         
-        
         private CancellationTokenSource downloadCancellationTokenSource;
-        
-        public static string currentUserAgent;
-
-        internal override HttpClient GetHttpClient()
-        {
-            return Client;
-        }
         
         private static async Task RequestEnd(UnityWebRequest request, CancellationToken token)
         {
@@ -166,42 +136,27 @@ namespace Monetizr.Campaigns
                 SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
             currentApiKey = apiKey;
-
-            GlobalSettings = new SettingsDictionary<string, string>();
-                
-            Analytics = new MonetizrMobileAnalytics();
-
+            
             Client.Timeout = TimeSpan.FromSeconds(timeout);
             //ConnectionsClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             //ConnectionsClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        internal override void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
+        internal override void Initialize()
         {
-            string key = "cda45517ed8266e804d4966a0e693d0d";
-            
-            //k_BaseUri = "https://api.themonetizr.com/api/campaigns";
-
-            if (!string.IsNullOrEmpty(apiUri))
-                _baseApiUrl = apiUri;
-
-            if (testEnvironment)
-            {
-                key = "d4de97058730720b3b8080881c6ba2e0";
-                _baseApiUrl = _baseTestApiUrl;
-            }
-            
-            if (!string.IsNullOrEmpty(mixPanelApiKey))
-            {
-                //checking corrupted mixpanel key
-                if (mixPanelApiKey.IndexOf("\n", StringComparison.Ordinal) >= 0)
-                    mixPanelApiKey = null;
-
-                key = mixPanelApiKey;
-            }
-
-            Analytics.InitializeMixpanel(key);
+            Analytics = new MonetizrMobileAnalytics();
         }
+
+        internal override void SetTestMode(bool testEnvironment)
+        {
+            if (testEnvironment)
+                _baseApiUrl = _baseTestApiUrl;
+        }
+
+        /*internal override void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey)
+        {
+            Analytics.Initialize(testEnvironment, mixPanelApiKey,apiUri);
+        }*/
 
         internal override void Close()
         {
@@ -259,7 +214,7 @@ namespace Monetizr.Campaigns
 
         private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
         {
-            var responseString = await RequestStringFromUrl(SettingsApiUrl);
+            var responseString = await GetStringFromUrl(SettingsApiUrl);
 
             if (string.IsNullOrEmpty(responseString))
             {
@@ -294,6 +249,8 @@ namespace Monetizr.Campaigns
                 "");
             
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
+
+            Log.PrintWarning($"Api endpoint: {_baseApiUrl}");
         }
 
         internal override async Task<List<ServerCampaign>> GetList()
@@ -445,7 +402,7 @@ namespace Monetizr.Campaigns
             });
         }
 
-        private async Task<string> RequestStringFromUrl(string url)
+        internal override async Task<string> GetStringFromUrl(string url)
         {
             var requestMessage = GetHttpRequestMessage(url);
 
@@ -462,13 +419,13 @@ namespace Monetizr.Campaigns
 
             if (!response.IsSuccessStatusCode)
             {
-                Log.PrintError($"RequestStringFromUrl failed with code {response.StatusCode} for {url}");
+                Log.PrintError($"GetStringFromUrl failed with code {response.StatusCode} for {url}");
                 return "";
             }
 
             if (responseString.Length == 0)
             {
-                //Log.PrintError($"RequestStringFromUrl has empty response {response.StatusCode} for {url}");
+                //Log.PrintError($"GetStringFromUrl has empty response {response.StatusCode} for {url}");
                 return "";
             }
 
@@ -478,7 +435,7 @@ namespace Monetizr.Campaigns
 
         private async Task<List<ServerCampaign>> GetServerCampaignsFromMonetizr()
         {
-            var responseString = await RequestStringFromUrl(CampaignsApiUrl);
+            var responseString = await GetStringFromUrl(CampaignsApiUrl);
             
             if (string.IsNullOrEmpty(responseString))
             {
@@ -523,7 +480,7 @@ namespace Monetizr.Campaigns
             return admCampaigns;
         }
 
-        internal override HttpRequestMessage GetHttpRequestMessage(string uri, string userAgent = null, bool isPost = false)
+        private HttpRequestMessage GetHttpRequestMessage(string uri, bool isPost = false)
         {
             var httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
             
@@ -604,7 +561,7 @@ namespace Monetizr.Campaigns
             Action onFailure = null)
         {
             HttpRequestMessage requestMessage =
-                GetHttpRequestMessage($"{CampaignsApiUrl}/{challenge.id}/claim","",true);
+                GetHttpRequestMessage($"{CampaignsApiUrl}/{challenge.id}/claim",true);
 
             string content = string.Empty;
 

@@ -794,7 +794,7 @@ namespace Monetizr.Campaigns
 
             return res;
         }
-        internal bool IsCampaignInsideLocation(IpApiData locData)
+        internal bool IsCampaignInsideLocation(MonetizrHttpClient.IpApiData locData)
         {
             //no location data
             if (locData == null)
