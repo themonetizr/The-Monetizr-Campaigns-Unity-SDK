@@ -10,110 +10,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using static Monetizr.Campaigns.ServerCampaign;
 using Button = UnityEngine.UI.Button;
 using Toggle = UnityEngine.UI.Toggle;
 
 namespace MonetizrCampaigns.Tests
 {
-    internal class MonetizrTestAnalytics : MonetizrAnalytics
-    {
-        internal override string GetUserId()
-        {
-            return "";
-        }
-
-        internal override void RandomizeUserId()
-        {
-            
-        }
-
-        internal override void SendErrorToMixpanel(string condition, string stackTrace, ServerCampaign getActiveCampaign)
-        {
-            
-        }
-
-        internal override void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign)
-        {
-            
-        }
-
-        internal override void Initialize(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
-        {
-            
-        }
-
-        internal override void TrackEvent(Mission mission, PanelController panel, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
-        {
-            
-        }
-
-        internal override void TrackEvent(Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType,
-            Dictionary<string, string> additionalValues = null)
-        {
-            
-        }
-
-        internal override void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType,
-            Dictionary<string, string> additionalValues = null)
-        {
-            
-        }
-
-        internal override void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string, string> additionalValues = null,
-            double duration = -1)
-        {
-           
-        }
-
-        internal override void OnApplicationQuit()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    internal class MonetizrTestClient : MonetizrClient
-    {
-        internal override void Close()
-        {
-        
-        }
-    
-        internal override Task GetGlobalSettings()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override Task<List<ServerCampaign>> GetList()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Initialize()
-        {
-            Analytics = new MonetizrTestAnalytics();
-        }
-
-        internal override void SetTestMode(bool testmode)
-        {
-        
-        }
-
-        internal override Task<string> GetStringFromUrl(string generatorUri)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class Tests
     {
         static int loadSuccess = 0;
