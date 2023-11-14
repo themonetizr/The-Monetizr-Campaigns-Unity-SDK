@@ -584,21 +584,22 @@ namespace Monetizr.Campaigns
         }
 
         [Serializable]
-        public class ServerMissionsHelper
+        internal class ServerMissionsHelper
         {
-            public ServerDefinedMissions[] missions;
-
-            public List<MissionDescription> CreateMissionDescriptions(List<MissionDescription> originalList, SettingsDictionary<string, string> serverSettings)
+            public List<ServerDefinedMissions> missions = new List<ServerDefinedMissions>();
+            
+            internal List<MissionDescription> CreateMissionDescriptions(List<MissionDescription> originalList, SettingsDictionary<string, string> serverSettings)
             {
                 List<MissionDescription> m = new List<MissionDescription>();
 
-                Array.ForEach(missions, (ServerDefinedMissions _m) =>
+                //Array.ForEach(missions, (ServerDefinedMissions _m) =>
+                foreach(var _m in missions)
                 {
 
                     MissionType serverMissionType = _m.GetMissionType();
 
                     if (serverMissionType == MissionType.Undefined)
-                        return;
+                        continue;
 
                     float rewardAmount = _m.GetRewardAmount() / 100.0f;
                     RewardType currency = _m.GetRewardType();
@@ -615,13 +616,13 @@ namespace Monetizr.Campaigns
                         }
                         else
                         {
-                            return;
+                            continue;
                         }
                     }
 
                     //award is too much
                     if (rewardAmount > 100.0f)
-                        return;
+                        continue;
 
                     ulong rewardAmount2 = (ulong)Math.Ceiling(gr.maximumAmount * rewardAmount);
                     //}
@@ -650,9 +651,34 @@ namespace Monetizr.Campaigns
                         openRtbRequestForProgrammatic = _m.ortb_request
                     }); ;
 
-                });
+                }
 
                 return m;
+            }
+
+            public static ServerMissionsHelper CreateFromJson(string json)
+            {
+                var result = new ServerMissionsHelper();
+
+                if (!Utils.ValidateJson(json))
+                    return result;
+
+                //JsonUtility doesn't work with escaped jsons
+                json = Utils.UnescapeJson(json);
+
+                if(json.Contains("\'"))
+                    json = json.Replace('\'', '\"');
+
+                try
+                {
+                    result = JsonUtility.FromJson<ServerMissionsHelper>(json);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+
+                return result;
             }
         }
 
@@ -790,16 +816,11 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Predefined missions from settings: {serverMissionsJson}");
 
-            if (string.IsNullOrEmpty(serverMissionsJson))
-                return;
-
-            serverMissionsJson = serverMissionsJson.Replace('\'', '\"');
-
             ServerMissionsHelper ic = null;
 
             try
             {
-                ic = JsonUtility.FromJson<ServerMissionsHelper>(serverMissionsJson);
+                ic = ServerMissionsHelper.CreateFromJson(serverMissionsJson);
             }
             catch (Exception e)
             {

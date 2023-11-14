@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
 using mixpanel;
 using UnityEngine;
 using static Monetizr.Campaigns.MonetizrUnitySurvey;
@@ -174,6 +175,38 @@ namespace Monetizr.Campaigns
                             .Select(v => regxColon.Split(v))
                             .ToDictionary(v => v.First().Trim(trimmedChars), v => v.Last().Trim(trimmedChars));
         }
+        
+        public static StringBuilder UnescapeString(StringBuilder content)
+        {
+            return content.Replace("\\\"", "\"").Replace("\\\\", "\\");
+        }
+
+        public static string UnescapeJson(string json)
+        {
+            int bracketIndex = json.IndexOf("{", StringComparison.Ordinal);
+            int quoteIndex = json.IndexOf('\"', bracketIndex);
+
+            if (quoteIndex - bracketIndex == 1)
+                return json;
+
+            int escapeLevel = 0;
+            for (int i = bracketIndex; i < quoteIndex; i++)
+                if (json[i] == '\\')
+                    escapeLevel++;
+
+            if (escapeLevel == 0)
+                return json;
+
+            var sb = new StringBuilder(json);
+
+            while (escapeLevel > 0)
+            {
+                sb = UnescapeString(sb);
+                escapeLevel--;
+            }
+
+            return sb.ToString();
+        }
 
         public static Dictionary<string, string> ParseJson(string content)
         {
@@ -182,14 +215,17 @@ namespace Monetizr.Campaigns
             if (string.IsNullOrEmpty(content))
                 return result;
 
+            //have to unescape json, as SimpleJSON doesn't work properly with macros such as ${} and ''
+            content = UnescapeJson(content);
+
             var root = SimpleJSON.JSON.Parse(content);
 
             foreach (var key in root)
             {
                 var value = key.Value;
                 var name = key.Key;
-
-                if (value.IsString || value.IsNumber)
+                
+                if (value.IsString || value.IsNumber || value.IsBoolean)
                 {
                     string v = key.Value.ToString();
 
@@ -198,6 +234,7 @@ namespace Monetizr.Campaigns
 
                     result[name] = v;
 
+                    //Debug.LogWarning($"{name}={value}");
                     //Debug.LogError($"{name},{v}");
                 }
 
