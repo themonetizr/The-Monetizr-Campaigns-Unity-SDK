@@ -358,7 +358,8 @@ namespace Monetizr.Campaigns
 
             int quoteCount = 0;
             int cbCount = 0;
-           
+            int sbCount = 0;
+
             foreach (char c in jsonString)
             {
                 switch (c)
@@ -366,13 +367,39 @@ namespace Monetizr.Campaigns
                     case '\"': quoteCount++; break;
                     case '{': cbCount++; break;
                     case '}': cbCount--; break;
+                    case '[': sbCount++; break;
+                    case ']': sbCount--; break;
                 }
 
-                if (cbCount < 0) 
+                if (cbCount < 0)
+                {
+                    Log.PrintV("Curly bracket problem");
                     return false;
+                }
+
+                if (sbCount < 0)
+                {
+                    Log.PrintV("Square bracket problem");
+                    return false;
+                }
             }
 
-            return quoteCount % 2 == 0 && cbCount == 0;
+            if (quoteCount % 2 != 0)
+            {
+                Log.PrintV($"Quote problem {quoteCount}");
+            }
+
+            if (cbCount != 0)
+            {
+                Log.PrintV("Curly bracket problem");
+            }
+
+            if (sbCount != 0)
+            {
+                Log.PrintV("Square bracket problem");
+            }
+
+            return quoteCount % 2 == 0 && cbCount == 0 && sbCount == 0;
         }
 
         public static string ConvertCreativeToExt(string type, string url)
