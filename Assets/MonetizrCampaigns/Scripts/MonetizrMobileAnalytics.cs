@@ -1158,7 +1158,7 @@ namespace Monetizr.Campaigns
             Log.PrintV($"SendError: {props}");
             //Mixpanel.Identify("Programmatic-client");
             Mixpanel.Identify(deviceIdentifier);
-            Mixpanel.Track("Programmatic-request-client", props);
+            Mixpanel.Track("[UNITY_SDK] Error", props);
         }
     }
 
