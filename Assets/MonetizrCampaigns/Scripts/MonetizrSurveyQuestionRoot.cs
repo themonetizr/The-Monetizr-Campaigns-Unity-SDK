@@ -14,6 +14,7 @@ namespace Monetizr.Campaigns
         public VerticalLayoutGroup verticalLayout;
         public GridLayoutGroup gridLayout;
         public RectTransform gridLayoutRoot;
+        public RectTransform imageGridLayoutRoot;
     }
 
 }

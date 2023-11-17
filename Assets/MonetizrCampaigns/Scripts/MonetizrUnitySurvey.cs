@@ -21,6 +21,7 @@ namespace Monetizr.Campaigns
         public MonetizrSurveyAnswer answerRadioButtonPrefab;
         public MonetizrSurveyAnswer answerEditablePrefab;
         public MonetizrSurveyAnswer answerCheckButtonPrefab;
+        public MonetizrSurveyAnswer answerImageButtonPrefab;
         public Image rewardImage;
 
         public Button backButton;
@@ -110,6 +111,8 @@ namespace Monetizr.Campaigns
             public Question previousQuestion;
             public Question nextQuestion;
             public int questionNumber;
+            public bool hasImages = false;
+            public bool isQuiz;
 
             internal Type ParseType(string type)
             {
@@ -156,6 +159,7 @@ namespace Monetizr.Campaigns
             public string text;
             public bool disabled;
             public bool requiredAnswer = false;
+            public string image;
 
             [NonSerialized] internal MonetizrSurveyAnswer answerRoot;
             [NonSerialized] internal Question question;
@@ -256,6 +260,17 @@ namespace Monetizr.Campaigns
                 {
                     a.question = q;
                     a.survey = currentSurvey;
+
+                    if (!string.IsNullOrEmpty(a.image))
+                    {
+                        q.hasImages = true;
+                    }
+
+                    if (a.requiredAnswer)
+                    {
+                        q.isQuiz = true;
+                    }
+
                 });
             });
 
@@ -264,18 +279,12 @@ namespace Monetizr.Campaigns
             currentSurvey.questions.ForEach(q =>
            {
                id++;
-
-               if (id == 0)
-               {
-                   return;
-               }
-
+               
                if (q.IsQuestionAlreadyAnswered(campaignSettings))
                {
                    return;
                }
-
-
+               
                q.questionNumber = ++currentSurvey.activeQuestionsAmount;
 
                if (startQuestion == null)
@@ -306,29 +315,37 @@ namespace Monetizr.Campaigns
                    ShuffleAnswersList(q);
                }
 
-               if (q.questionRoot.verticalLayout != null)
+               q.questionRoot.verticalLayout.childAlignment = TextAnchor.MiddleCenter;
+
+               //no vertical truncate and upper left aligment
+               if (id == 0 && q.answers.Count == 0)
                {
-                   q.questionRoot.verticalLayout.childAlignment = TextAnchor.MiddleCenter;
+                   q.questionRoot.question.verticalOverflow = VerticalWrapMode.Overflow;
 
-                   //no vertical truncate and upper left aligment
-                   if (id == 0 && q.answers.Count == 0)
-                   {
-                       q.questionRoot.question.verticalOverflow = VerticalWrapMode.Overflow;
-
-                       //if (Utils.IsInLandscapeMode())
-                       //    q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
-                       //q.questionRoot.question.alignment = TextAnchor.UpperLeft;
-                       //isFirstQuestionEmpty = true;
-                   }
-
-                   if (Utils.IsInLandscapeMode())
-                   {
-                       q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
-
-                       if (id == 0 && q.answers.Count == 0)
-                           q.questionRoot.question.alignment = TextAnchor.UpperLeft;
-                   }
+                   //if (Utils.IsInLandscapeMode())
+                   //    q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
+                   //q.questionRoot.question.alignment = TextAnchor.UpperLeft;
+                   //isFirstQuestionEmpty = true;
                }
+
+               questionRoot.imageGridLayoutRoot.gameObject.SetActive(false);
+
+               if (q.hasImages)
+               {
+                   q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
+
+                   questionRoot.gridLayoutRoot = questionRoot.imageGridLayoutRoot;
+                   questionRoot.imageGridLayoutRoot.gameObject.SetActive(true);
+               }
+
+               if (Utils.IsInLandscapeMode())
+               {
+                   q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
+
+                   if (id == 0 && q.answers.Count == 0)
+                       q.questionRoot.question.alignment = TextAnchor.UpperLeft;
+               }
+
 
 
                int answerNum = 0;
@@ -354,18 +371,38 @@ namespace Monetizr.Campaigns
                    if (questionRoot.gridLayoutRoot == null)
                        questionRoot.gridLayoutRoot = questionRoot.rectTransform;
 
-                   if (q.enumType == Type.Editable)
-                       aObj = GameObject.Instantiate<GameObject>(answerEditablePrefab.gameObject, questionRoot.rectTransform);
-                   else if (q.enumType == Type.Multiple)
-                       aObj = GameObject.Instantiate<GameObject>(answerCheckButtonPrefab.gameObject, questionRoot.gridLayoutRoot);
+                   if (q.hasImages)
+                   {
+                       aObj = GameObject.Instantiate<GameObject>(answerImageButtonPrefab.gameObject,
+                           questionRoot.gridLayoutRoot);
+                   }
                    else
-                       aObj = GameObject.Instantiate<GameObject>(answerRadioButtonPrefab.gameObject, questionRoot.gridLayoutRoot);
+                   {
+                       if (q.enumType == Type.Editable)
+                           aObj = GameObject.Instantiate<GameObject>(answerEditablePrefab.gameObject,
+                               questionRoot.rectTransform);
+                       else if (q.enumType == Type.Multiple)
+                           aObj = GameObject.Instantiate<GameObject>(answerCheckButtonPrefab.gameObject,
+                               questionRoot.gridLayoutRoot);
+                       else
+                           aObj = GameObject.Instantiate<GameObject>(answerRadioButtonPrefab.gameObject,
+                               questionRoot.gridLayoutRoot);
+                   }
+
+
 
                    answerRoot = aObj.GetComponent<MonetizrSurveyAnswer>();
 
                    answerRoot.answer.text = PanelTextItem.ReplacePredefinedItemsInText(m, a.text);
                    answerRoot.id = a.id;
 
+                   if (q.hasImages)
+                   {
+                       if (m.campaign.TryGetSpriteAsset(a.image, out var s))
+                       {
+                           answerRoot.image.sprite = s;
+                       }
+                   }
 
                    if (q.enumType != Type.Editable)
                    {
@@ -458,9 +495,18 @@ namespace Monetizr.Campaigns
                 pressedAnswer.response = "";
 
             if (qType != Type.Editable)
-                pressedAnswer.answerRoot.greenBackground.enabled = pressedAnswer.answerRoot.toggle.isOn;
+            {
+                pressedAnswer.answerRoot.greenBackground.enabled = 
+                    pressedAnswer.answerRoot.toggle.isOn;
 
-            if (qType == Type.One && CanMoveForward(pressedAnswer.question))
+                if (pressedAnswer.answerRoot.redBackground)
+                pressedAnswer.answerRoot.redBackground.enabled =
+                    pressedAnswer.answerRoot.toggle.isOn && !pressedAnswer.requiredAnswer;
+
+               
+            }
+
+            if (qType == Type.One && CanMoveForward(pressedAnswer.question) && !pressedAnswer.question.isQuiz)
                 OnNextButton();
             else
                 UpdateButtons();
@@ -474,7 +520,7 @@ namespace Monetizr.Campaigns
             if (currentQuestion.previousQuestion == null)
                 return;
 
-            nextQuestion = currentQuestion.previousQuestion; 
+            nextQuestion = currentQuestion.previousQuestion;
 
             state = State.Moving;
 
@@ -535,7 +581,16 @@ namespace Monetizr.Campaigns
             //check required answers
             question.answers.ForEach(a =>
             {
+                if (!question.isQuiz)
+                    return;
+
                 if (!a.disabled && a.answerRoot.toggle.isOn == false && a.requiredAnswer == true)
+                {
+                    result = false;
+                    return;
+                }
+
+                if (!a.disabled && a.answerRoot.toggle.isOn == true && a.requiredAnswer == false)
                 {
                     result = false;
                     return;
@@ -551,7 +606,7 @@ namespace Monetizr.Campaigns
             backButton.interactable = currentQuestion.previousQuestion != null;
 
             nextButton.interactable = CanMoveForward(currentQuestion);
-            
+
             progressText.text = $"{currentQuestion.questionNumber} / {currentSurvey.activeQuestionsAmount}";
         }
 
@@ -575,10 +630,10 @@ namespace Monetizr.Campaigns
                 return;
 
             progress += Time.deltaTime / 0.4f;
-            
+
             float p1 = (float)(currentQuestion.questionNumber - 1) / (currentSurvey.activeQuestionsAmount - 1);
             float p2 = (float)(nextQuestion.questionNumber - 1) / (currentSurvey.activeQuestionsAmount - 1);
-            
+
             scrollNormalizedPosition = Mathf.Lerp(p1, p2, Tween(progress));
 
             float step = 1.0f / (currentSurvey.activeQuestionsAmount);

@@ -876,12 +876,15 @@ MonoBehaviour:
     type: 3}
   monetizrQuestionRootLandscape: {fileID: 438670725962131499, guid: 00b524256d8ea854383300c45f2712a3,
     type: 3}
+  monetizrImageQuestionRoot: {fileID: 0}
   contentRoot: {fileID: 5372975771931447222}
   answerRadioButtonPrefab: {fileID: 1078911199964884273, guid: f79ae88e268c24e4c9cdcaa627f93078,
     type: 3}
   answerEditablePrefab: {fileID: 1078911199964884273, guid: f22d3b9c6556a47b9a4b4035ccf2c223,
     type: 3}
   answerCheckButtonPrefab: {fileID: 1078911199964884273, guid: a90f4734210724bedaebbd808bcac3fa,
+    type: 3}
+  answerImageButtonPrefab: {fileID: 1078911199964884273, guid: 1d9f80f1b2ac5ee469021717047a7d80,
     type: 3}
   rewardImage: {fileID: 5869862455584807433}
   backButton: {fileID: 4344017537882115212}

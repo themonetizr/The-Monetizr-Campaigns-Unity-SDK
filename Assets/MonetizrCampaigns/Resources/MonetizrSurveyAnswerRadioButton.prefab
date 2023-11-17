@@ -417,6 +417,8 @@ MonoBehaviour:
   enteredAnswer: {fileID: 0}
   inputField: {fileID: 0}
   greenBackground: {fileID: 5491389720374971800}
+  redBackground: {fileID: 0}
+  image: {fileID: 0}
 --- !u!1 &8485631635543316545
 GameObject:
   m_ObjectHideFlags: 0

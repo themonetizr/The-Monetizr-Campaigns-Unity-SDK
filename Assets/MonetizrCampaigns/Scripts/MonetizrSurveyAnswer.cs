@@ -13,6 +13,8 @@ namespace Monetizr.Campaigns
         public Text enteredAnswer;
         public InputField inputField;
         public Image greenBackground;
+        public Image redBackground;
+        public Image image;
     }
 }
     

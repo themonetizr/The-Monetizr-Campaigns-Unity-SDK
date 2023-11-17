@@ -366,7 +366,7 @@ CanvasGroup:
   m_IgnoreParentGroups: 0
 --- !u!95 &5087530922797124350
 Animator:
-  serializedVersion: 3
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -379,10 +379,12 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &8970457607965500597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -483,9 +485,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.5407715, y: 408.9}
-  m_SizeDelta: {x: 638.9484, y: 212.3}
-  m_Pivot: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: -1.5407715, y: 302.75012}
+  m_SizeDelta: {x: 638.9484, y: 113.2}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4653339585416628672
 CanvasRenderer:
   m_ObjectHideFlags: 0
