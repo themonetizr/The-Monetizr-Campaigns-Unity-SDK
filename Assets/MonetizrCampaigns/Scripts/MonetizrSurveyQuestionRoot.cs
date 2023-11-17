@@ -12,6 +12,7 @@ namespace Monetizr.Campaigns
         public string id;
         public ToggleGroup toggleGroup;
         public VerticalLayoutGroup verticalLayout;
+        public GridLayoutGroup gridLayout;
         public RectTransform gridLayoutRoot;
     }
 

@@ -15,6 +15,8 @@ namespace Monetizr.Campaigns
         public RectTransform scrollRect;
         public MonetizrSurveyQuestionRoot monetizrQuestionRoot;
         public MonetizrSurveyQuestionRoot monetizrQuestionRootLandscape;
+        public MonetizrSurveyQuestionRoot monetizrImageQuestionRoot;
+
         public RectTransform contentRoot;
         public MonetizrSurveyAnswer answerRadioButtonPrefab;
         public MonetizrSurveyAnswer answerEditablePrefab;
@@ -304,25 +306,28 @@ namespace Monetizr.Campaigns
                    ShuffleAnswersList(q);
                }
 
-               q.questionRoot.verticalLayout.childAlignment = TextAnchor.MiddleCenter;
-
-               //no vertical truncate and upper left aligment
-               if (id == 0 && q.answers.Count == 0)
+               if (q.questionRoot.verticalLayout != null)
                {
-                   q.questionRoot.question.verticalOverflow = VerticalWrapMode.Overflow;
+                   q.questionRoot.verticalLayout.childAlignment = TextAnchor.MiddleCenter;
 
-                   //if (Utils.IsInLandscapeMode())
-                   //    q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
-                   //q.questionRoot.question.alignment = TextAnchor.UpperLeft;
-                   //isFirstQuestionEmpty = true;
-               }
-
-               if (Utils.IsInLandscapeMode())
-               {
-                   q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
-
+                   //no vertical truncate and upper left aligment
                    if (id == 0 && q.answers.Count == 0)
-                       q.questionRoot.question.alignment = TextAnchor.UpperLeft;
+                   {
+                       q.questionRoot.question.verticalOverflow = VerticalWrapMode.Overflow;
+
+                       //if (Utils.IsInLandscapeMode())
+                       //    q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
+                       //q.questionRoot.question.alignment = TextAnchor.UpperLeft;
+                       //isFirstQuestionEmpty = true;
+                   }
+
+                   if (Utils.IsInLandscapeMode())
+                   {
+                       q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
+
+                       if (id == 0 && q.answers.Count == 0)
+                           q.questionRoot.question.alignment = TextAnchor.UpperLeft;
+                   }
                }
 
 
