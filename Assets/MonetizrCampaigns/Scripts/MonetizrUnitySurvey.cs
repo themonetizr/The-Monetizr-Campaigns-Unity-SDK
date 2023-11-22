@@ -496,14 +496,31 @@ namespace Monetizr.Campaigns
 
             if (qType != Type.Editable)
             {
-                pressedAnswer.answerRoot.greenBackground.enabled = 
-                    pressedAnswer.answerRoot.toggle.isOn;
+                if (!pressedAnswer.question.isQuiz)
+                {
+                    pressedAnswer.answerRoot.background.sprite =
+                        pressedAnswer.answerRoot.toggle.isOn
+                            ? pressedAnswer.answerRoot.greenBorder
+                            : pressedAnswer.answerRoot.grayBorder;
+                }
+                else
+                {
+                    bool isOn = pressedAnswer.answerRoot.toggle.isOn;
 
-                if (pressedAnswer.answerRoot.redBackground)
-                pressedAnswer.answerRoot.redBackground.enabled =
-                    pressedAnswer.answerRoot.toggle.isOn && !pressedAnswer.requiredAnswer;
+                    if(pressedAnswer.requiredAnswer)
+                        pressedAnswer.answerRoot.background.sprite =
+                         isOn ? pressedAnswer.answerRoot.greenBorder : pressedAnswer.answerRoot.grayBorder;
+                    else
+                        pressedAnswer.answerRoot.background.sprite =
+                            isOn ? pressedAnswer.answerRoot.redBorder : pressedAnswer.answerRoot.grayBorder;
 
-               
+                    pressedAnswer.answerRoot.markImage.sprite =
+                        pressedAnswer.requiredAnswer && isOn ? pressedAnswer.answerRoot.greenRoundMark : pressedAnswer.answerRoot.redSquareMark;
+
+                    pressedAnswer.answerRoot.markImage.enabled = isOn;
+                }
+
+
             }
 
             if (qType == Type.One && CanMoveForward(pressedAnswer.question) && !pressedAnswer.question.isQuiz)
