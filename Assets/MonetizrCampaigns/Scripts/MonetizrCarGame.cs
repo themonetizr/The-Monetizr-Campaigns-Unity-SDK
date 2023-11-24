@@ -78,7 +78,15 @@ namespace Monetizr.Campaigns
             car.parent = this;
 
             bool hasLogo = m.campaign.TryGetAsset(AssetsType.BrandRewardLogoSprite, out Sprite res);
-            
+
+            for (int i = 0; i < mapSprites.Length; i++)
+            {
+                if (m.campaign.TryGetSpriteAsset($"cargame{i}", out var s))
+                 {
+                    mapSprites[i] = s;
+                }
+            }
+
             logo.sprite = res;
             logo.gameObject.SetActive(hasLogo);
             
