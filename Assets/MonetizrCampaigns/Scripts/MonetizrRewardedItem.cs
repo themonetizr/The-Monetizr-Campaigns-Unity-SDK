@@ -115,7 +115,7 @@ namespace Monetizr.Campaigns
             boosterIcon.sprite = rewardIcon;
             giftIcon.sprite = rewardIcon;
 
-            if (m.reward == 1)
+            if (m.reward == 1 || m.reward == 0)
             {
                 showGift = true;
             }
