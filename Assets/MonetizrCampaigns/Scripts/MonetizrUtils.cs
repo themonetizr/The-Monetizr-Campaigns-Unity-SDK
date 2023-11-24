@@ -268,12 +268,12 @@ namespace Monetizr.Campaigns
 
                     string result = value.Substring(startId + 1, endId - startId - 1);
 
-                    //Log.Print($"-----{startId} {endId} {result}");
+                    if (result.Equals(value))
+                        break;
 
-                    if (res.ContainsKey(result))
+                    if (res.TryGetValue(result, out var re))
                     {
-                        value = value.Replace($"%{result}%", res[result]);
-                        //Log.Print($"-----replace {result} {res[result]}");
+                        value = value.Replace($"%{result}%", re);
                     }
 
                 }
@@ -448,17 +448,13 @@ namespace Monetizr.Campaigns
             var output = new Dictionary<string, string>();
 
             var pairs = conditionsString.Split(';');
-
-            // Loop through each pair
+            
             foreach (var pair in pairs)
             {
-                // Split the pair by equal sign
                 string[] parts = pair.Split('=');
-
-                // Check if the pair has two parts
+                
                 if (parts.Length == 2)
                 {
-                    // Add the key and value to the dictionary
                     output.Add(parts[0], parts[1]);
                 }
             }

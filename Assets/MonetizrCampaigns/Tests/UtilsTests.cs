@@ -26,7 +26,6 @@ namespace MonetizrCampaigns.Tests
 
 
             Assert.AreEqual(Utils.ConvertToIntArray("1.2.3")[2], 3);
-
             Assert.AreEqual(Utils.ConvertToIntArray("1,2,3", ',')[2], 3);
 
 
@@ -138,6 +137,119 @@ namespace MonetizrCampaigns.Tests
             }
             
         }
+
+        [Test]
+        public void ParseContentStringTest()
+        {
+            string jsonContent = "";
+            Dictionary<string, string> expected = new Dictionary<string, string>();
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = null;
+            expected = new Dictionary<string, string>();
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+            
+            jsonContent = "{\"key1\":\"value1\",\"key2\":\"%key1%\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "value1" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"value1\",\"key2\":\"%key3%\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "%key3%" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"%key2%\",\"key2\":\"%key3%\",\"key3\":\"value\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "value" },
+                { "key2", "value" },
+                { "key3", "value" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"value1\",\"key2\":\"%key1\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "%key1" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"%key2%\",\"key2\":\"%key3%\",\"key3\":\"value\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "value" },
+                { "key2", "value" },
+                { "key3", "value" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"%key2%\",\"key2\":\"%key3%\",\"key3\":\"%key4%\",\"key4\":\"finalValue\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "finalValue" },
+                { "key2", "finalValue" },
+                { "key3", "finalValue" },
+                { "key4", "finalValue" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"%key2%\",\"key2\":\"%key1%\"}"; 
+            
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "%key1%" }, 
+                { "key2", "%key2%" }
+            };
+            
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"%key2%\",\"key2\":\"%key3% value\",\"key3\":\"Hello\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "Hello value" },
+                { "key2", "Hello value" },
+                { "key3", "Hello" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+
+            jsonContent = "{\"key1\":\"Hello %key2%\",\"key2\":\"world with %key3%\",\"key3\":\"additional %key4%\",\"key4\":\"content\"}";
+            expected = new Dictionary<string, string>
+            {
+                { "key1", "Hello world with additional content" },
+                { "key2", "world with additional content" },
+                { "key3", "additional content" },
+                { "key4", "content" }
+            };
+
+            Assert.AreEqual(expected, Utils.ParseContentString(jsonContent));
+        }
+
 
     }
 }
