@@ -437,6 +437,8 @@ MonoBehaviour:
   nextPanelId: -1
   backSprite: {fileID: 21300000, guid: 97651fa639b2846a8bd8a2f22bdc6bed, type: 3}
   backSpriteDisabled: {fileID: 21300000, guid: 11fcc8c5752924fe29dcebafcd9c105d, type: 3}
+  bonusSprite: {fileID: 0}
+  finishSprite: {fileID: 0}
   mapSprites:
   - {fileID: 21300000, guid: 1f0da526fc095455f9ea8143f8753e93, type: 3}
   - {fileID: 21300000, guid: 7de94b348f1c64604bfb9fef50919302, type: 3}
@@ -463,6 +465,7 @@ MonoBehaviour:
   car: {fileID: 7204929523215732072}
   closeButton: {fileID: 0}
   logo: {fileID: 4495103262733870895}
+  finishImage: {fileID: 4410038832436055590}
 --- !u!1 &6222281424124019900
 GameObject:
   m_ObjectHideFlags: 0
@@ -777,7 +780,7 @@ GameObject:
   - component: {fileID: 7858459305896788767}
   - component: {fileID: 4410038832436055590}
   m_Layer: 5
-  m_Name: StartBg (2)
+  m_Name: FinishBg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

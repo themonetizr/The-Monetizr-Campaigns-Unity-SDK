@@ -48,11 +48,15 @@ namespace Monetizr.Campaigns
 
         public Sprite backSprite;
         public Sprite backSpriteDisabled;
+        public Sprite bonusSprite;
+        public Sprite finishSprite;
+
         public Sprite[] mapSprites;
         public GameObject[] items;
         public MonetizrCar car;
         public Button closeButton;
         public Image logo;
+        public Image finishImage;
         
         internal override AdPlacement? GetAdPlacement()
         {
@@ -79,14 +83,37 @@ namespace Monetizr.Campaigns
 
             bool hasLogo = m.campaign.TryGetAsset(AssetsType.BrandRewardLogoSprite, out Sprite res);
 
+            Sprite s;
+
             for (int i = 0; i < mapSprites.Length; i++)
             {
-                if (m.campaign.TryGetSpriteAsset($"cargame{i}", out var s))
-                 {
+                if (m.campaign.TryGetSpriteAsset($"cargame{i}", out s))
+                {
                     mapSprites[i] = s;
                 }
             }
 
+            if (m.campaign.TryGetSpriteAsset($"cargame_back", out s))
+            {
+                backSprite = s;
+            }
+
+            if (m.campaign.TryGetSpriteAsset($"cargame_back_disabled", out s))
+            {
+                backSpriteDisabled = s;
+            }
+
+            if (m.campaign.TryGetSpriteAsset($"cargame_bonus", out s))
+            {
+                bonusSprite = s;
+            }
+
+            if (m.campaign.TryGetSpriteAsset($"cargame_finish", out s))
+            {
+                finishSprite = s;
+                finishImage.sprite = finishSprite;
+            }
+            
             logo.sprite = res;
             logo.gameObject.SetActive(hasLogo);
             
@@ -109,6 +136,9 @@ namespace Monetizr.Campaigns
                                 
                 gi.parent = this;
                 gi.id = i;
+
+                if(bonusSprite != null)
+                    gi.bonusImage.sprite = bonusSprite;
 
                 if(!b.interactable)
                     gi.image.sprite = backSpriteDisabled;

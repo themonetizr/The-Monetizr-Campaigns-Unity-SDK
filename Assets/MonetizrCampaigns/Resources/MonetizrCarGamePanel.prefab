@@ -667,7 +667,7 @@ CanvasGroup:
   m_IgnoreParentGroups: 0
 --- !u!95 &5087530922797124350
 Animator:
-  serializedVersion: 3
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -680,10 +680,12 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &6572120955561666976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -698,6 +700,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 3816175783834833260}
   textContent: header_text
+  buttonGrafic: {fileID: 0}
 --- !u!114 &2331839769963241637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -712,6 +715,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 4387190133157259847}
   textContent: content_text
+  buttonGrafic: {fileID: 0}
 --- !u!114 &6117922490522058262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -726,6 +730,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textElement: {fileID: 7234977449560703399}
   textContent: button_text
+  buttonGrafic: {fileID: 0}
 --- !u!114 &7193099466277540619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -744,6 +749,8 @@ MonoBehaviour:
   nextPanelId: -1
   backSprite: {fileID: 21300000, guid: 97651fa639b2846a8bd8a2f22bdc6bed, type: 3}
   backSpriteDisabled: {fileID: 21300000, guid: 11fcc8c5752924fe29dcebafcd9c105d, type: 3}
+  bonusSprite: {fileID: 0}
+  finishSprite: {fileID: 0}
   mapSprites:
   - {fileID: 21300000, guid: 1f0da526fc095455f9ea8143f8753e93, type: 3}
   - {fileID: 21300000, guid: 7de94b348f1c64604bfb9fef50919302, type: 3}
@@ -767,10 +774,10 @@ MonoBehaviour:
   - {fileID: 6503291534958183054}
   - {fileID: 6941464653383782735}
   - {fileID: 6497288518818038542}
-  movesLeftText: {fileID: 6613589259444476690}
   car: {fileID: 7204929523215732072}
   closeButton: {fileID: 0}
   logo: {fileID: 1576714959345372953}
+  finishImage: {fileID: 4410038832436055590}
 --- !u!1 &3876935952929317554
 GameObject:
   m_ObjectHideFlags: 0
@@ -1233,7 +1240,7 @@ MonoBehaviour:
   m_PixelsPerUnitMultiplier: 1
 --- !u!95 &1090432218218106887
 Animator:
-  serializedVersion: 3
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1246,10 +1253,12 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &7204929523215732072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1529,7 +1538,7 @@ GameObject:
   - component: {fileID: 7858459305896788767}
   - component: {fileID: 4410038832436055590}
   m_Layer: 5
-  m_Name: StartBg (2)
+  m_Name: FinishBg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

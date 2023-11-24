@@ -15,6 +15,7 @@ namespace Monetizr.Campaigns
 
         public Image image = null;
         public GameObject bonus = null;
+        public Image bonusImage = null;
 
         internal Action onCloseDone = null;
         internal bool hasBonus = false;
