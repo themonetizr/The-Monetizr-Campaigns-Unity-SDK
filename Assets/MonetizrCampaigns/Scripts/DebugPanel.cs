@@ -137,7 +137,7 @@ namespace Monetizr.Campaigns
 
             var changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.keys[apiKeysList.value]);
 
-            if (isIDChanged && !changed)
+            if (isIDChanged || changed)
                 MonetizrManager.Instance.RestartClient();
         }
         

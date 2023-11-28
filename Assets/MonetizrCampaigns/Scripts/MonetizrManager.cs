@@ -631,28 +631,30 @@ namespace Monetizr.Campaigns
 
             ConnectionsClient = new MonetizrHttpClient(ConnectionsClient.currentApiKey);
 
+            ConnectionsClient.Initialize();
+            
             RequestCampaigns();
         }
 
         internal bool ChangeAPIKey(string apiKey)
         {
             if (apiKey == ConnectionsClient.currentApiKey)
-                return true;
+                return false;
 
             Log.Print($"Changing api key to {apiKey}");
 
-            ConnectionsClient.Close();
+            //RestartClient();
 
-            ConnectionsClient = new MonetizrHttpClient(apiKey);
+            //RequestCampaigns();
 
-            RequestCampaigns();
-
-            return false;
+            return true;
         }
 
         internal void RequestCampaigns(bool callRequestComplete = true)
         {
             _isActive = false;
+
+            _isMissionsIsOutdated = true;
 
             _uiController.DestroyTinyMenuTeaser();
 
