@@ -71,24 +71,14 @@ namespace Monetizr.Campaigns
         }
 
         internal string ReplaceAngularMacros(string str)
-        {
-            Debug.Log($"----1: {str}");
-            
+        {            
             if (!str.Contains("<<") || !str.Contains(">>") )
                 return str;
             
             str = str.Replace("<<","[").Replace(">>", "]");
             
-            Debug.Log($"----2: {str}");
-            
             var macrosList = FindMacrosInSquareBrackets(str);
-            
-            Debug.Log($"----3: {macrosList[0]}");
-            
             str = ReplaceMacros(str, macrosList);
-            
-            Debug.Log($"----4: {str}");
-            
             return Uri.EscapeDataString(str);
         }
         
