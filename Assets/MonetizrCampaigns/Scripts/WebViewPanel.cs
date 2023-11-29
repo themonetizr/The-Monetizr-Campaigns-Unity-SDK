@@ -260,9 +260,11 @@ namespace Monetizr.Campaigns
 
             if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
-                campaign.vastSettings.ReplaceVastTags(new VastTagsReplacer(campaign, videoAsset, userAgent));
+                var replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
+                
+                campaign.vastSettings.ReplaceVastTags(replacer);
 
-                campaign.vastAdParameters = campaign.DumpsVastSettings();
+                campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
 
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
 

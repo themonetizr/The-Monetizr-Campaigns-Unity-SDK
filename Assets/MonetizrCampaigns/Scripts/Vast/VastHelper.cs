@@ -110,7 +110,7 @@ namespace Monetizr.Campaigns
                 
             }
 
-            internal void ReplaceVastTags(VastTagsReplacer replacer)
+            internal void ReplaceVastTags(TagsReplacer replacer)
             {
                 foreach (var a in adVerifications)
                 {
@@ -817,7 +817,7 @@ namespace Monetizr.Campaigns
 
             //-----
 
-            string vastJsonSettings = serverCampaign.DumpsVastSettings();
+            string vastJsonSettings = serverCampaign.DumpsVastSettings(null);
 
 
             Log.PrintV($"Vast settings: {vastJsonSettings}");

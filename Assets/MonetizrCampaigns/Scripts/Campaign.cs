@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -781,11 +782,37 @@ namespace Monetizr.Campaigns
             Directory.Delete(target_dir, false);
         }
 
-        internal string DumpsVastSettings()
+        [Serializable]
+        public struct KeyValue
+        {
+            [SerializeField] public string key;
+            [SerializeField] public string value;
+        }
+        
+        internal string DumpCampaignSettings(TagsReplacer tagsReplacer)
+        {
+            var values = new List<KeyValue>();
+
+            string result = string.Join(",", serverSettings.Select(kvp =>
+            {
+                var v = tagsReplacer == null ? kvp.Value : tagsReplacer.ReplaceAngularMacros(kvp.Value);
+
+                Debug.Log($"----{kvp.Key} {kvp.Value} {v}");
+                
+                return $"\"{kvp.Key}\":\"{v}\"";
+            }));
+
+            return $"{{{result}}}";
+        }
+        
+        internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
         {
             string res = JsonUtility.ToJson(vastSettings);
+
+            var campaignSettings = DumpCampaignSettings(vastTagsReplacer);
             
-            var campaignSettingsJson = $",\"campaignSettings\":{content}";
+            var campaignSettingsJson = $",\"campaignSettings\":{campaignSettings}";
+            //var campaignSettingsJson = $",\"campaignSettings\":{content}";
 
             res = res.Insert(res.Length - 1, campaignSettingsJson);
 
