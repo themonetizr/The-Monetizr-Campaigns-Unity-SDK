@@ -251,5 +251,47 @@ namespace MonetizrCampaigns.Tests
         }
 
 
+        [Test]
+        public void ScoreConvertTest()
+        {
+            double score = 1234.5;
+            string expected = "1.2k";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+            score = 5;
+            expected = "5";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+            score = 123;
+            expected = "123";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+            score = 1234.5678;
+            expected = "1.2k";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+            score = 1_000_000;
+            expected = "1M";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+            score = 1_123_000;
+            expected = "1.1M";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+            score = 1e+30;
+            expected = "1af";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+            score = 0;
+            expected = "0";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+            score = -1500;
+            expected = "-1.5k";
+            Assert.AreEqual(expected, Utils.ScoresToString(score));
+
+
+        }
+
     }
 }
