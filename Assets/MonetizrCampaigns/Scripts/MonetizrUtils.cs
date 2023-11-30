@@ -70,6 +70,19 @@ namespace Monetizr.Campaigns
             return sb.ToString();
         }
 
+        internal string ReplaceAngularMacros(string str)
+        {            
+            if (!str.Contains("<<") || !str.Contains(">>") )
+                return str;
+            
+            str = str.Replace("<<","[").Replace(">>", "]");
+            
+            var macrosList = FindMacrosInSquareBrackets(str);
+            str = ReplaceMacros(str, macrosList);
+            return Uri.EscapeDataString(str);
+        }
+        
+        
         internal string Replace(string url)
         {
             if (!url.Contains('.') || !url.Contains('[') )
