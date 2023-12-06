@@ -474,26 +474,26 @@ namespace Monetizr.Campaigns
 
             return output;
         }
+        
+        private static readonly string[] ScoreNames = { "", "k", "M", "B", "T", "aa", "ab", "ac", "ad", "ae", "af", "ag", "ah", "ai", "aj", "ak", "al", "am", "an", "ao", "ap", "aq", "ar", "as", "at", "au", "av", "aw", "ax", "ay", "az", "ba", "bb", "bc", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bk", "bl", "bm", "bn", "bo", "bp", "bq", "br", "bs", "bt", "bu", "bv", "bw", "bx", "by", "bz" };
 
-        internal static string ScoresToString(double scores)
+        public static string ScoresToString(double scores)
         {
-            string result;
-            var scoreNames = new string[] { "", "k", "M", "B", "T", "aa", "ab", "ac", "ad", "ae", "af", "ag", "ah", "ai", "aj", "ak", "al", "am", "an", "ao", "ap", "aq", "ar", "as", "at", "au", "av", "aw", "ax", "ay", "az", "ba", "bb", "bc", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bk", "bl", "bm", "bn", "bo", "bp", "bq", "br", "bs", "bt", "bu", "bv", "bw", "bx", "by", "bz", };
-            int i;
+            int index = 0;
 
-            for (i = 0; i < scoreNames.Length; i++)
-                if (scores < 900)
-                    break;
-                else
-                    scores = System.Math.Floor(scores / 100f) / 10f;
+            while (Math.Abs(scores) >= 1000 && index < ScoreNames.Length - 1)
+            {
+                scores /= 1000;
+                index++;
+            }
 
-            if (scores == System.Math.Floor(scores))
-                result = scores.ToString(CultureInfo.InvariantCulture) + scoreNames[i];
-            else
-                result = scores.ToString("F1", CultureInfo.InvariantCulture) + scoreNames[i];
+            string scoreString = (scores % 1 == 0) ? 
+                scores.ToString("N0", CultureInfo.InvariantCulture) : 
+                scores.ToString("F1", CultureInfo.InvariantCulture);
 
-            return result;
+            return scoreString + ScoreNames[index];
         }
+
 
         public static string EncodeStringIntoAscii(string s)
         {
@@ -524,12 +524,9 @@ namespace Monetizr.Campaigns
         public static string UnescapeString(string content)
         {
             //return Regex.Unescape(content);
-
-            var result  = content.Replace("\\\"", "\"").Replace("\\\\", "\\");
-            //content = content.Replace("\\\\", "\\");
-
-            return result;
             //return Uri.UnescapeDataString(content);
+
+            return content.Replace("\\\"", "\"").Replace("\\\\", "\\");
         }
     }
 }
