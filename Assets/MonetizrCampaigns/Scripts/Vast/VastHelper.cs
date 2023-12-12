@@ -64,6 +64,7 @@ namespace Monetizr.Campaigns
             public bool isAutoPlay = true;
             public string position = "preroll";
             public string videoUrl = "";
+            public string videoClickThroughUrl = "";
 
             public VideoSettings()
             {
@@ -89,7 +90,7 @@ namespace Monetizr.Campaigns
         }*/
 
         [System.Serializable]
-        internal class VastSettings 
+        internal class VastSettings
         {
             public string vendorName = "Themonetizr";
             public string sdkVersion = MonetizrManager.SDKVersion;
@@ -107,7 +108,7 @@ namespace Monetizr.Campaigns
 
             internal VastSettings()
             {
-                
+
             }
 
             internal void ReplaceVastTags(TagsReplacer replacer)
@@ -134,6 +135,8 @@ namespace Monetizr.Campaigns
                 {
                     vte.value = replacer.Replace(vte.value);
                 }
+
+                videoSettings.videoClickThroughUrl = replacer.Replace(videoSettings.videoClickThroughUrl);
             }
 
 
@@ -141,12 +144,12 @@ namespace Monetizr.Campaigns
             {
                 vendorName = settingsToCopy.vendorName;
                 sdkVersion = settingsToCopy.sdkVersion;
-                
-                videoSettings = new VideoSettings(settingsToCopy.videoSettings); 
-                
+
+                videoSettings = new VideoSettings(settingsToCopy.videoSettings);
+
                 adVerifications = new List<AdVerification>();
                 settingsToCopy.adVerifications.ForEach((v) => adVerifications.Add(new AdVerification(v)));
-                
+
                 videoTrackingEvents = new List<TrackingEvent>();
                 settingsToCopy.videoTrackingEvents.ForEach((e) => videoTrackingEvents.Add(new TrackingEvent(e)));
             }
@@ -171,15 +174,15 @@ namespace Monetizr.Campaigns
             {
                 verificationParameters = adVerificationToCopy.verificationParameters;
                 vendorField = adVerificationToCopy.vendorField;
-                
+
                 executableResource = new List<VerificationExecutableResource>();
-                adVerificationToCopy.executableResource.ForEach(item => executableResource.Add(new VerificationExecutableResource(item)));  
+                adVerificationToCopy.executableResource.ForEach(item => executableResource.Add(new VerificationExecutableResource(item)));
 
                 javaScriptResource = new List<VerificationJavaScriptResource>();
-                adVerificationToCopy.javaScriptResource.ForEach(item => javaScriptResource.Add(new VerificationJavaScriptResource(item))); 
+                adVerificationToCopy.javaScriptResource.ForEach(item => javaScriptResource.Add(new VerificationJavaScriptResource(item)));
 
                 tracking = new List<TrackingEvent>();
-                adVerificationToCopy.tracking.ForEach(item => tracking.Add(new TrackingEvent(item))); 
+                adVerificationToCopy.tracking.ForEach(item => tracking.Add(new TrackingEvent(item)));
             }
         }
 
@@ -440,7 +443,7 @@ namespace Monetizr.Campaigns
                 {
                     case Type.Inline:
                         LoadExtentions(_inline.Extensions);
-                        AddInlineCreativesIntoAssets();
+                        AddCreativesIntoAssets();
                         break;
                     case Type.Wrapper:
                         //AddVerificationSettingsFromExtentions();
@@ -496,7 +499,7 @@ namespace Monetizr.Campaigns
 
                 if (verificationNode == null) return;
                 if (verificationNode.Attributes == null) return;
-                
+
                 string vendor = verificationNode.Attributes["vendor"]?.Value;
 
                 XmlNode jsResourceNode = verificationNode.SelectSingleNode("JavaScriptResource");
@@ -516,7 +519,7 @@ namespace Monetizr.Campaigns
                 }
 
                 XmlNode verificationParamsNode = verificationNode.SelectSingleNode("VerificationParameters");
-                
+
                 var verificationParams = verificationParamsNode?.InnerText.Trim();
 
 
@@ -566,7 +569,7 @@ namespace Monetizr.Campaigns
                 //var adItem = _inline;
 
                 //if (adItem.Extensions.IsNullOrEmpty()) return;
-                if(extensions.IsNullOrEmpty()) return;
+                if (extensions.IsNullOrEmpty()) return;
 
                 foreach (var ad in extensions)
                 {
@@ -579,9 +582,9 @@ namespace Monetizr.Campaigns
                             string campaignSettings = av.InnerText.Trim();
 
                             var cs = Utils.ParseContentString(campaignSettings);
-                            
-                            if(cs.ContainsKey("content"))
-                                _serverCampaign.content = cs["content"];
+
+                            if (cs.TryGetValue("content", out var c))
+                                _serverCampaign.content = c;
                         }
                         else
                         {
@@ -590,144 +593,151 @@ namespace Monetizr.Campaigns
                     }
                 }
             }
-            
-            private void AddInlineCreativesIntoAssets()
+
+            private void AddNonLinearCreatives(Creative_Inline_typeNonLinearAds it)
+            {
+                foreach (var nl in it.NonLinear)
+                {
+                    AddCampaignAssetFromNonLinearCreative(nl, _serverCampaign);
+                }
+            }
+
+            private void AddLinearCreatives(Linear_Inline_type it, string cId, Verification_type[] adItemAdVerifications)
+            {
+                if (ServerCampaign.Asset.ValidateAssetJson(it.AdParameters?.Value))
+                {
+                    _serverCampaign.assets.Add(new ServerCampaign.Asset(it.AdParameters?.Value, true));
+                    return;
+                }
+
+                if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
+                {
+                    Log.PrintV($"MediaFile is null in Linear creative");
+                    return;
+                }
+
+                Linear_Inline_typeMediaFilesMediaFile mediaFile = it.MediaFiles.MediaFile[0];
+
+                float w = (float)_preferableVideoSize.width;
+                float h = (float)_preferableVideoSize.height;
+
+                Vector2 prefSize = new Vector2(w, h);
+
+                //choose media file close to preferable size and bitrate
+                Array.Sort(it.MediaFiles.MediaFile, (m1, m2) =>
+                {
+                    if (m1 == null || m2 == null ||
+                        string.IsNullOrEmpty(m1.width) || string.IsNullOrEmpty(m1.height) ||
+                        string.IsNullOrEmpty(m2.width) || string.IsNullOrEmpty(m2.height))
+                        return 0;
+
+                    Vector2 v1 = new Vector2(float.Parse(m1.width), float.Parse(m1.height));
+                    Vector2 v2 = new Vector2(float.Parse(m2.width), float.Parse(m2.height));
+
+                    int compareSize = Vector2.Distance(v1, prefSize).CompareTo(Vector2.Distance(v2, prefSize));
+
+                    //if the same size, take a look on bit rate
+                    if (compareSize == 0)
+                    {
+                        if (string.IsNullOrEmpty(m1.bitrate) ||
+                            string.IsNullOrEmpty(m2.bitrate))
+                            return 0;
+
+                        int br1 = Math.Abs(int.Parse(m1.bitrate) - _preferableVideoSize.bitrate);
+                        int br2 = Math.Abs(int.Parse(m2.bitrate) - _preferableVideoSize.bitrate);
+
+                        int result = br1.CompareTo(br2);
+                        return result;
+                    }
+
+                    return compareSize;
+                });
+
+                if (it.MediaFiles.MediaFile.Length > 1)
+                {
+                    mediaFile = Array.Find(it.MediaFiles.MediaFile,
+                        (Linear_Inline_typeMediaFilesMediaFile a) =>
+                        {
+                            return a.type.Equals("video/mp4");
+                        });
+                }
+
+                Log.PrintV($"Chosen video file - type:{mediaFile.type} br:{mediaFile.bitrate} w:{mediaFile.width} h:{mediaFile.height} ");
+
+                string value = mediaFile.Value;
+                string type = mediaFile.type;
+
+                _videoAsset = new ServerCampaign.Asset()
+                {
+                    id = cId,
+                    url = value,
+                    fpath = Utils.ConvertCreativeToFname(value),
+                    fname = "video",
+                    fext = Utils.ConvertCreativeToExt(type, value),
+                    type = "programmatic_video",
+                    mainAssetName = $"index.html",
+                    mediaType = type,
+                };
+
+                _serverCampaign.assets.Add(_videoAsset);
+
+                var videoUrl = value;
+                var skipOffset = it.skipoffset;
+
+                Utils.AddArrayToList(
+                    _serverCampaign.vastSettings.videoTrackingEvents,
+                    it.TrackingEvents,
+                    te =>
+                    {
+                        return te.Value.IndexOf(".", StringComparison.Ordinal) >= 0 ? new TrackingEvent(te) : null;
+                    },
+                    new TrackingEvent());
+
+                //Log.PrintV(asset.ToString());
+                var adParameters = it.AdParameters;
+
+                //LoadCampagnSettingsFromAdParams(it.AdParameters, _serverCampaign);
+
+                _serverCampaign.vastSettings.videoSettings = new VideoSettings() { skipOffset = skipOffset, videoUrl = videoUrl };
+
+                if (it.VideoClicks != null && _serverCampaign.serverSettings.GetBoolParam("openrtb.click_through", false))
+                {
+                    _serverCampaign.vastSettings.videoSettings.videoClickThroughUrl = it.VideoClicks.ClickThrough?.Value;
+                    
+                     Utils.AddArrayToList(
+                            _serverCampaign.vastSettings.videoTrackingEvents,
+                            it.VideoClicks.ClickTracking,  
+                           te => new TrackingEvent("click",te.Value),
+                           null);
+                    
+                }
+                
+                AddVastVerificationSettings(_serverCampaign.vastSettings, adItemAdVerifications);
+                
+            }
+
+            private void AddCreativesIntoAssets()
             {
                 var adItem = _inline;
-
-                //TODO:
-                //+Load MonetizrCampaignSettings from extentions
-                //Load AdVerifications from extentions
-                //Load at AdParameters from Linear and NonLinear params
-                //+adItem.Extensions
-                //NonLinear - creativeView event?
-
 
                 foreach (var c in adItem.Creatives)
                 {
                     //load non linear companions
                     if (c.NonLinearAds != null && !_loadVideoOnly)
                     {
-                        var it = c.NonLinearAds;
-
-                        foreach (var nl in it.NonLinear)
-                        {
-                            AddCampaignAssetFromNonLinearCreative(nl, c, _serverCampaign);
-                        }
-
+                        AddNonLinearCreatives(c.NonLinearAds);
                     }
-
                     //load videos
                     if (c.Linear != null)
                     {
-                        var it = c.Linear;
-
-                        if (ServerCampaign.Asset.ValidateAssetJson(it.AdParameters?.Value))
-                        {
-                            _serverCampaign.assets.Add(new ServerCampaign.Asset(it.AdParameters?.Value, true));
-                            continue;
-                        }
-
-                        if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
-                        {
-                            Log.PrintV($"MediaFile is null in Linear creative");
-                            break;
-                        }
-
-                        Linear_Inline_typeMediaFilesMediaFile mediaFile = it.MediaFiles.MediaFile[0];
-
-                        float w = (float)_preferableVideoSize.width;
-                        float h = (float)_preferableVideoSize.height;
-
-                        Vector2 prefSize = new Vector2(w, h);
-
-                        //choose media file close to preferable size and bitrate
-                        Array.Sort(it.MediaFiles.MediaFile, (m1, m2) =>
-                        {
-                            if (m1 == null || m2 == null ||
-                                string.IsNullOrEmpty(m1.width) || string.IsNullOrEmpty(m1.height) ||
-                                string.IsNullOrEmpty(m2.width) || string.IsNullOrEmpty(m2.height))
-                                return 0;
-
-                            Vector2 v1 = new Vector2(float.Parse(m1.width), float.Parse(m1.height));
-                            Vector2 v2 = new Vector2(float.Parse(m2.width), float.Parse(m2.height));
-
-                            int compareSize = Vector2.Distance(v1, prefSize).CompareTo(Vector2.Distance(v2, prefSize));
-
-                            //if the same size, take a look on bit rate
-                            if (compareSize == 0)
-                            {
-                                if (string.IsNullOrEmpty(m1.bitrate) ||
-                                    string.IsNullOrEmpty(m2.bitrate))
-                                    return 0;
-
-                                int br1 = Math.Abs(int.Parse(m1.bitrate) - _preferableVideoSize.bitrate);
-                                int br2 = Math.Abs(int.Parse(m2.bitrate) - _preferableVideoSize.bitrate);
-
-                                int result = br1.CompareTo(br2);
-                                return result;
-                            }
-
-                            return compareSize;
-                        });
-
-                        if (it.MediaFiles.MediaFile.Length > 1)
-                        {
-                            mediaFile = Array.Find(it.MediaFiles.MediaFile,
-                                (Linear_Inline_typeMediaFilesMediaFile a) =>
-                                {
-                                    return a.type.Equals("video/mp4");
-                                });
-                        }
-
-                        Log.PrintV($"Chosen video file - type:{mediaFile.type} br:{mediaFile.bitrate} w:{mediaFile.width} h:{mediaFile.height} ");
-
-                        string value = mediaFile.Value;
-                        string type = mediaFile.type;
-
-                        _videoAsset = new ServerCampaign.Asset()
-                        {
-                            id = c.id,
-                            url = value,
-                            fpath = Utils.ConvertCreativeToFname(value),
-                            fname = "video",
-                            fext = Utils.ConvertCreativeToExt(type, value),
-                            type = "programmatic_video",
-                            mainAssetName = $"index.html",
-                            mediaType = type,
-                        };
-
-                        _serverCampaign.assets.Add(_videoAsset);
-
-                        var videoUrl = value;
-                        var skipOffset = it.skipoffset;
-
-                        Utils.AddArrayToList(
-                            _serverCampaign.vastSettings.videoTrackingEvents,
-                            it.TrackingEvents,
-                            te =>
-                            {
-                                return te.Value.IndexOf(".", StringComparison.Ordinal) >= 0 ? new TrackingEvent(te) : null;
-                            },
-                            new TrackingEvent());
-
-                        //Log.PrintV(asset.ToString());
-                        var adParameters = it.AdParameters;
-
-                        //LoadCampagnSettingsFromAdParams(it.AdParameters, _serverCampaign);
-
-
-
-                        AddVastVerificationSettings(_serverCampaign.vastSettings, adItem.AdVerifications);
-
-                        _serverCampaign.vastSettings.videoSettings = new VideoSettings() { skipOffset = skipOffset, videoUrl = videoUrl };
-
+                        AddLinearCreatives(c.Linear,c.id,adItem.AdVerifications);
                     }
 
                 }
 
 
             }
+            
 
             private bool FindVideoInLinearCreativesAndGrabEvents(string videoName)
             {
@@ -785,7 +795,7 @@ namespace Monetizr.Campaigns
                     var adParameters = it.AdParameters;
 
                     //LoadCampagnSettingsFromAdParams(it.AdParameters, _serverCampaign);
-                    
+
                     AddAssetFromAdParameters(it?.AdParameters?.Value, _serverCampaign);
 
                     _serverCampaign.vastSettings.videoSettings = new VideoSettings() { skipOffset = skipOffset, videoUrl = videoUrl };
@@ -822,13 +832,13 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Vast settings: {vastJsonSettings}");
 
-            serverCampaign.vastAdParameters = vastJsonSettings; 
+            serverCampaign.vastAdParameters = vastJsonSettings;
             //serverCampaign.vastSettings = vastSettings;
 
             //await InitializeOMSDK(serverCampaign.vastAdParameters);
-            
+
             await PrepareVideoAsset(serverCampaign);
-            
+
             return serverCampaign;
         }
 
@@ -976,7 +986,7 @@ namespace Monetizr.Campaigns
         {
             Log.PrintV("Loading video player");
 
-            if (!serverCampaign.TryGetAssetInList(new List<string>(){"html","video"}, out var videoAsset))
+            if (!serverCampaign.TryGetAssetInList(new List<string>() { "html", "video" }, out var videoAsset))
             {
                 return;
             }
@@ -1070,44 +1080,14 @@ namespace Monetizr.Campaigns
         {
             if (!ServerCampaign.Asset.ValidateAssetJson(adParametersValue))
                 return false;
-            
+
             serverCampaign.assets.Add(new ServerCampaign.Asset(adParametersValue, false));
             return true;
         }
 
-        private static void AddCampaignAssetFromNonLinearCreative(NonLinearAd_Inline_type nl, Creative_Inline_type c,
-            ServerCampaign serverCampaign)
+        private static void AddCampaignAssetFromNonLinearCreative(NonLinearAd_Inline_type nl, ServerCampaign serverCampaign)
         {
-            if (nl?.AdParameters != null && AddAssetFromAdParameters(nl.AdParameters.Value, serverCampaign))
-                return;
-
-            /*string adParameters;
-
-            //No parameters
-            //TODO: define 
-            if (nl.AdParameters == null || string.IsNullOrEmpty(nl.AdParameters.Value))
-            {
-                adParameters = "tiny_teaser";
-            }
-            else
-            {
-                adParameters = nl.AdParameters.Value;
-            }
-
-            var staticRes = nl.StaticResource[0];
-
-            //Log.PrintV($"{staticRes.Value}");
-
-            ServerCampaign.Asset asset = new ServerCampaign.Asset()
-            {
-                id = $"{c.id} {nl.id}",
-                url = staticRes.Value,
-                type = adParameters,
-                fname = Utils.ConvertCreativeToFname(staticRes.Value),
-                fext = Utils.ConvertCreativeToExt(staticRes.creativeType, staticRes.Value),
-            };
-
-            serverCampaign.assets.Add(asset);*/
+            AddAssetFromAdParameters(nl?.AdParameters?.Value, serverCampaign);
         }
 
         internal async Task DownloadOMSDKServiceContent()
@@ -1124,7 +1104,7 @@ namespace Monetizr.Campaigns
 
             _omidJsServiceContent = Encoding.UTF8.GetString(data);
         }
-        
+
         internal void InitializeOMSDK(string vastAdVerificationParams)
         {
             Log.PrintV($"InitializeOMSDK with {vastAdVerificationParams}");

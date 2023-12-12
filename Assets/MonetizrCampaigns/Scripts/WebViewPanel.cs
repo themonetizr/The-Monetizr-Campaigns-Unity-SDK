@@ -49,6 +49,40 @@ namespace Monetizr.Campaigns
             return adType;
         }
 
+        internal void SetWebviewFrame(bool fullScreen, bool useSafeFrame)
+        {
+            var w = Screen.width;
+            var h = Screen.width * 1.5f;
+            var x = 0;
+            var y = (Screen.height - h) / 2;
+
+            float aspect = (float)Screen.height / (float)Screen.width;
+
+
+            if (aspect < 1.777)
+            {
+                h = Screen.height * 0.8f;
+                y = (Screen.height - h) / 2;
+            }
+
+#if UNITY_EDITOR
+            if (fullScreen)
+                _webView.Frame = new Rect(0, 0, 600, 1200);
+            else
+                _webView.Frame = new Rect(0, 0, 600, 800);
+#else
+            if (fullScreen)
+            {
+                //webView.Frame = useSafeFrame ? Screen.safeArea : new Rect(0, 0, Screen.width, Screen.height);
+                _webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
+            }
+            else
+            {
+                _webView.Frame = new Rect(x, y, w, h);
+            }
+#endif
+        }
+
         //private Action _onComplete;
 #if UNI_WEB_VIEW
         internal void PrepareWebViewComponent(bool fullScreen, bool useSafeFrame)
@@ -79,33 +113,7 @@ namespace Monetizr.Campaigns
 
             _webView = gameObject.AddComponent<UniWebView>();
 
-            var w = Screen.width;
-            var h = Screen.width * 1.5f;
-            var x = 0;
-            var y = (Screen.height - h) / 2;
-
-            float aspect = (float)Screen.height / (float)Screen.width;
-
-
-            if (aspect < 1.777)
-            {
-                h = Screen.height * 0.8f;
-                y = (Screen.height - h) / 2;
-            }
-
-#if UNITY_EDITOR
-            _webView.Frame = new Rect(0, 0, 600, 800);
-#else
-            if (fullScreen)
-            {
-                //webView.Frame = useSafeFrame ? Screen.safeArea : new Rect(0, 0, Screen.width, Screen.height);
-                _webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
-            }
-            else
-            {
-                _webView.Frame = new Rect(x, y, w, h);
-            }
-#endif
+            SetWebviewFrame(fullScreen, useSafeFrame);
 
             Log.Print($"frame: {fullScreen} {_webView.Frame}");
 
@@ -192,7 +200,7 @@ namespace Monetizr.Campaigns
 
         private async void PrepareHtml5Panel()
         {
-
+            bool fullScreen = true;
             var campaign = currentMission.campaign;
 
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
@@ -266,6 +274,12 @@ namespace Monetizr.Campaigns
 
                 campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
 
+                if (!string.IsNullOrEmpty(campaign.vastSettings.videoSettings.videoClickThroughUrl) ||
+                   !string.IsNullOrEmpty(campaign.serverSettings.GetParam("VideoReward.clickthrough_url")))
+                {
+                    fullScreen = false;
+                }
+
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
 
                 if (verifyWithOMSDK)
@@ -282,6 +296,11 @@ namespace Monetizr.Campaigns
 
 
 #endif
+            if (!fullScreen)
+            {
+                SetWebviewFrame(false, false);
+            }
+
             if (showWebview)
             {
                 programmaticStatus = "no_programmatic_or_success";

@@ -308,31 +308,44 @@ namespace Monetizr.Campaigns
             }
         }
 
-        public static List<ListType> CreateListFromArray<ArrayType, ListType>(ArrayType[] array, Func<ArrayType, ListType> convertToListType, ListType defaultElement)
+        public static List<TListType> CreateListFromArray<TArrayType, TListType>(TArrayType[] array, Func<TArrayType, TListType> convertToListType, TListType defaultElement)
         {
-            var list = new List<ListType>();
+            var list = new List<TListType>();
 
             AddArrayToList(list, array, convertToListType, defaultElement);
 
             return list;
         }
 
-        public static void AddArrayToList<ArrayType, ListType>(List<ListType> list, ArrayType[] array, Func<ArrayType, ListType> convertToListType, ListType defaultElement)
+        public static void AddArrayToList<TArrayType, TListType>(List<TListType> list, TArrayType[] array, Func<TArrayType, TListType> convertToListType, TListType defaultElement)
         {
-            if (array == null && defaultElement != null)
+            if (list == null)
             {
-                list.Add(defaultElement);
+                throw new ArgumentNullException(nameof(list));
+            }
+
+            if (convertToListType == null)
+            {
+                throw new ArgumentNullException(nameof(convertToListType));
+            }
+
+            if (array == null)
+            {
+                if (defaultElement != null)
+                    list.Add(defaultElement);
             }
             else
             {
-                Array.ForEach(array,
-                    (ArrayType elem) =>
-                    {
-                        var e = convertToListType(elem);
+                int initialCount = list.Count;
+                list.Capacity = initialCount + array.Length;
 
-                        if (e != null)
-                            list.Add(e);
-                    });
+                foreach (var t in array)
+                {
+                    var e = convertToListType(t);
+
+                    if (e != null)
+                        list.Add(e);
+                }
             }
         }
 
