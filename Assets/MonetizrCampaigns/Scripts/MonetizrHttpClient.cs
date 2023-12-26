@@ -502,7 +502,8 @@ namespace Monetizr.Campaigns
                     {"device-memory",SystemInfo.systemMemorySize.ToString()},
                     {"device-model",Utils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
                     {"device-name",Utils.EncodeStringIntoAscii(SystemInfo.deviceName)},
-                    {"internet-connection",MonetizrMobileAnalytics.GetInternetConnectionType()}
+                    {"internet-connection",MonetizrMobileAnalytics.GetInternetConnectionType()},
+                    {"local-time-stamp",((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString()}
                 }
             };
 
