@@ -293,5 +293,39 @@ namespace MonetizrCampaigns.Tests
 
         }
 
+        [Test]
+        public void ArrayToListTest()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                Utils.AddArrayToList<string, string>(null, Array.Empty<string>(), str => str, null));
+
+            Assert.Throws<ArgumentNullException>(() =>
+                Utils.AddArrayToList(new List<string>(), Array.Empty<string>(), null, null));
+
+            var list = new List<string>();
+            Utils.AddArrayToList<string,string>(list, null, str => str, "default");
+
+            Assert.AreEqual(1, list.Count);
+            Assert.AreEqual("default", list[0]);
+
+            var list2 = new List<string>();
+            Utils.AddArrayToList<string, string>(list2, null, str => str, null);
+            
+            Assert.AreEqual(0, list2.Count);
+            
+
+            var listInts = new List<int>();
+            var array = new[] { "1", "2", "3" };
+            Utils.AddArrayToList<string, int>(listInts, array, str => int.Parse(str), 0);
+            
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, listInts);
+
+            var array3 = new[] { "1", null, "3" };
+            var list3 = new List<string>();
+            Utils.AddArrayToList(list3, array3, str => str, null);
+
+            CollectionAssert.AreEqual(new[] { "1", "3" }, list3);
+        }
+
     }
 }
