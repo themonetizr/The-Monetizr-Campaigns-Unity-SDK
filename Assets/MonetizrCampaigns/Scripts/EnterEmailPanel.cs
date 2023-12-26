@@ -157,7 +157,7 @@ namespace Monetizr.Campaigns
             //MonetizrManager.analytics.EndShowAdAsset(adType, currentMission);
         }
 
-        static internal EnterEmailType GetPanelType(Mission m)
+        internal static EnterEmailType GetPanelType(Mission m)
         {
             var s = m.campaignServerSettings.GetParam("email_giveaway_type");
 
