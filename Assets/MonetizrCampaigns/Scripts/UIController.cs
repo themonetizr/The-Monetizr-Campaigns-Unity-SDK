@@ -30,6 +30,7 @@ namespace Monetizr.Campaigns
         SurveyCloseConfirmation,
         SurveyUnityView,
         ActionHtmlPanelView,
+        CodePanelView,
     }
 
     internal class UIController

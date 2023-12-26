@@ -310,7 +310,9 @@ namespace Monetizr.Campaigns
         AssetsLoading,
         ActionScreen,
         AssetsLoadingEnds,
-        AssetsLoadingStarts
+        AssetsLoadingStarts,
+
+        CodeEnterRewardScreen,
     }
 
     internal enum DeviceSizeGroup
