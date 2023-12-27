@@ -346,6 +346,54 @@ namespace Monetizr.Campaigns
             internal Action<ulong> _AddCurrencyAction;
             internal ulong maximumAmount;
 
+            public bool Validate()
+            {
+                bool isRewardValid = true;
+
+                if (icon == null)
+                {
+                    Log.PrintError("GameReward error: Icon is not set.");
+                    isRewardValid = false;
+                }
+                else
+                {
+                    float iconWidth = icon.rect.width;
+                    float iconHeight = icon.rect.height;
+
+                    if (iconWidth < 128 || iconHeight < 128 || Mathf.Abs(iconHeight - iconWidth) > 0.1f)
+                    {
+                        Log.PrintError("GameReward error: Icon size less than 256 pixels on one or more dimensions or it's not square.");
+                        isRewardValid = false;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(title))
+                {
+                    Log.PrintError("GameReward error: Title is empty.");
+                    isRewardValid = false;
+                }
+
+                if (_GetCurrencyFunc == null)
+                {
+                    Log.PrintError("GameReward error: GetCurrency function is not set.");
+                    isRewardValid = false;
+                }
+
+                if (_AddCurrencyAction == null)
+                {
+                    Log.PrintError("GameReward error: AddCurrency action is not set.");
+                    isRewardValid = false;
+                }
+
+                if (maximumAmount <= 0)
+                {
+                    Log.PrintError("GameReward error: Maximum amount is zero or less.");
+                    isRewardValid = false;
+                }
+
+                return isRewardValid;
+            }
+
             internal ulong GetCurrencyFunc()
             {
                 try
@@ -647,6 +695,7 @@ namespace Monetizr.Campaigns
 
             //RequestCampaigns();
 
+            ConnectionsClient.currentApiKey = apiKey;
             return true;
         }
 
@@ -1117,6 +1166,16 @@ namespace Monetizr.Campaigns
             MonetizrManager.Instance.missionsManager.ClaimAction(m, onComplete, null).Invoke();
         }
 
+        internal static void ShowCodeView(Action<bool> onComplete, Mission m = null)
+        {
+            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+
+            if (!Instance._isActive)
+                return;
+
+            Instance._uiController.ShowPanelFromPrefab("MonetizrEnterCodePanel2", PanelId.CodePanelView, onComplete, false, m);
+        }
+
         internal static void ShowMinigame(Action<bool> onComplete, Mission m)
         {
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
@@ -1172,7 +1231,7 @@ namespace Monetizr.Campaigns
         {
             _ShowWebView(onComplete, PanelId.ActionHtmlPanelView, m);
         }
-
+        
         internal static void ShowSurvey(Action<bool> onComplete, Mission m = null)
         {
             _ShowWebView(onComplete, PanelId.SurveyWebView, m);
@@ -1470,13 +1529,7 @@ namespace Monetizr.Campaigns
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
             await ConnectionsClient.GetGlobalSettings();
-
-            //TODO: api endpoint
-            //errors endpoint
-            //mixpanel errors
-            //disable double notifications
-
-
+            
             campaigns = new List<ServerCampaign>();
 
             try
@@ -1521,27 +1574,14 @@ namespace Monetizr.Campaigns
             await Task.Delay(10000);
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
-            //Color c;
-
-
-
+          
             foreach (var campaign in campaigns)
             {
-                //if (this._campaigns.ContainsKey(campaign.id))
-                //    continue;
-
-                string path = Application.persistentDataPath + "/" + campaign.id;
-
-                Log.Print($"Campaign path: {path}");
-
                 await campaign.LoadCampaignAssets();
 
                 if (campaign.isLoaded)
                 {
                     Log.Print($"Campaign {campaign.id} successfully loaded");
-
-                    //this._campaigns.Add(campaign.id, campaign);
-                    //_campaignIds.Add(campaign.id);
                 }
                 else
                 {
@@ -1608,6 +1648,15 @@ namespace Monetizr.Campaigns
                 return;
             }
 
+            foreach (var i in gameRewards)
+            {
+                if (!i.Value.Validate())
+                {
+                    return;
+                }
+            }
+
+
             Log.Print("MonetizrManager initialization okay!");
 
             _isActive = true;
@@ -1636,24 +1685,7 @@ namespace Monetizr.Campaigns
 
             _isMissionsIsOutdated = false;
         }
-
-        /// <summary>
-        /// Get Challenge by Id
-        /// </summary>
-        /// <returns></returns>
-        /*internal ServerCampaign GetCampaign(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-                return null;
-
-            if (_campaigns.TryGetValue(id, out var campaign))
-                return campaign;
-
-            Log.PrintWarning($"You're trying to get campaign {id} which is not exist!");
-
-            return null;
-        }*/
-
+        
         internal ServerCampaign GetActiveCampaign()
         {
             if (!IsActiveAndEnabled())
@@ -1686,12 +1718,7 @@ namespace Monetizr.Campaigns
 
             return null;
         }
-
-        /*internal List<string> GetAvailableCampaigns()
-        {
-            return _campaignIds;
-        }*/
-
+        
         internal bool HasCampaignsAndActive()
         {
             return _isActive && campaigns.Count > 0;
@@ -1701,12 +1728,7 @@ namespace Monetizr.Campaigns
         {
             return Instance != null && Instance.HasCampaignsAndActive();
         }
-
-        /* internal string GetActiveCampaignId()
-         {
-             return _activeCampaignId;
-         }*/
-
+        
         internal void SetActiveCampaign(ServerCampaign camp)
         {
             if (camp == _activeCampaignId)
@@ -1723,12 +1745,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Active campaign: {_activeCampaignId}");
         }
-
-        /*internal void SetActiveCampaign(ServerCampaign camp)
-        {
-            SetActiveCampaignId(camp?.id);
-        }*/
-
+        
         public bool HasActiveCampaign()
         {
             return _isActive && _activeCampaignId != null;
@@ -1738,12 +1755,7 @@ namespace Monetizr.Campaigns
         {
             return Instance != null;
         }
-
-        public static bool IsActive()
-        {
-            return Instance != null && Instance._isActive;
-        }
-
+        
         internal bool HasCampaign(string campaignId)
         {
             return campaigns.FindIndex(c => c.id == campaignId) >= 0;
