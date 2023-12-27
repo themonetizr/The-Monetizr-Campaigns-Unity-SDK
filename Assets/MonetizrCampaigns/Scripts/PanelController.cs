@@ -11,10 +11,10 @@ namespace Monetizr.Campaigns
     {
         enum State
         {
-           Unknown,
-           Hidden,
-           Animating,
-           Visible
+            Unknown,
+            Hidden,
+            Animating,
+            Visible
         };
 
         private Animator animator;
@@ -24,15 +24,15 @@ namespace Monetizr.Campaigns
         private State state;
         public UIController uiController;
         protected bool isSkipped = false;
-        public int uiVersion = 0;
+
         public Image backgroundImage;
         public Image backgroundBorderImage;
 
         [HideInInspector]
         internal Mission currentMission;
-        
+
         [HideInInspector]
-        public PanelId nextPanelId = PanelId.Unknown;
+        public int uiVersion = 0;
 
         internal bool triggersButtonEventsOnDeactivate = true;
         internal Dictionary<string, string> additionalEventValues = new Dictionary<string, string>();
@@ -71,8 +71,6 @@ namespace Monetizr.Campaigns
             if (canvasGroup != null)
             {
                 canvasGroup.blocksRaycasts = enable;
-
-
             }
         }
 
@@ -88,7 +86,7 @@ namespace Monetizr.Campaigns
 
         internal void SetActive(bool active, bool immediately = false)
         {
-            if(!active && !immediately && triggersButtonEventsOnDeactivate)
+            if (!active && !immediately && triggersButtonEventsOnDeactivate)
             {
                 MonetizrManager.Analytics.TrackEvent(currentMission,
                     this,
@@ -108,8 +106,8 @@ namespace Monetizr.Campaigns
                     state = State.Animating;
                 }
             }
-            else if(state != State.Hidden) //hiding
-            {                
+            else if (state != State.Hidden) //hiding
+            {
                 BlockRaycasts(false);
 
                 Intractable(false);
@@ -167,15 +165,15 @@ namespace Monetizr.Campaigns
 
             FinalizePanel(panelId);
 
-            if(!SendImpressionEventManually())
-                MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
+            if (!SendImpressionEventManually())
+                MonetizrManager.Analytics?.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
 
             gameObject.SetActive(false);
-            
+
             _onComplete?.Invoke(isSkipped);
         }
 
-       
+
     }
 
 }
