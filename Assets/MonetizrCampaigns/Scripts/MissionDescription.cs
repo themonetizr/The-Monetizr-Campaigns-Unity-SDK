@@ -219,6 +219,19 @@ namespace Monetizr.Campaigns
             return v.Count == 4 ? v : defaultParam;
         }
 
+        public int GetIntParam(List<TKey> pl, int defaultParam = 0)
+        {
+            foreach (var p in pl)
+            {
+                if (ContainsKey(p))
+                {
+                    return GetIntParam(p, defaultParam);
+                }
+            }
+            
+            return defaultParam;
+        }
+
         public int GetIntParam(TKey p, int defaultParam = 0)
         {
             if (p == null)
