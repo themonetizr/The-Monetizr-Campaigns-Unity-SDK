@@ -120,7 +120,7 @@ namespace Monetizr.Campaigns
             UnityWebRequest www = UnityWebRequest.Get(darTagUrl);
             UnityWebRequestAsyncOperation operation = www.SendWebRequest();
 
-            operation.completed += BundleOperation_CompletedHandler;
+            //operation.completed += BundleOperation_CompletedHandler;
 #endif
         }
 
