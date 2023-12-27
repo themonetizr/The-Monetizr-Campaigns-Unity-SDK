@@ -19,6 +19,7 @@ namespace Monetizr.Campaigns
         MinigameReward = 64,
         MemoryMinigameReward = 128,
         ActionReward = 256,
+        CodeReward = 512,
         All = uint.MaxValue,
     }
 
@@ -152,15 +153,9 @@ namespace Monetizr.Campaigns
 
     public class SettingsDictionary<TKey, TValue> : Dictionary<TKey, TValue>
     {
-        public SettingsDictionary()
-        {
+        public SettingsDictionary() { }
 
-        }
-
-        public SettingsDictionary(Dictionary<TKey, TValue> d) : base(d)
-        {
-
-        }
+        public SettingsDictionary(Dictionary<TKey, TValue> d) : base(d) { }
 
         public void MergeSettingsFrom(SettingsDictionary<TKey, TValue> addDictionary)
         {

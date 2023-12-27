@@ -54,6 +54,9 @@ namespace Monetizr.Campaigns
                 MonetizrManager.Instance.ConnectionsClient.GlobalSettings.GetBoolParam("app.sent_error_reports_to_mixpanel",
                     false);
 
+            if (condition.Contains("Mixpanel"))
+                sendReportToMixpanel = false;
+
             if (sendReportToMixpanel)
             {
                 MonetizrManager.Instance.ConnectionsClient.Analytics.SendErrorToMixpanel(condition,

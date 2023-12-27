@@ -9,13 +9,8 @@ namespace Monetizr.Campaigns
 
     internal class PanelTextItem : MonoBehaviour
     {
-        [SerializeField]
         public Text textElement;
-
-        [SerializeField]
         public string textContent;
-
-        [SerializeField]
         public Graphic buttonGrafic;
 
         public void InitializeByParent(PanelId parentId, Mission m)
@@ -23,41 +18,48 @@ namespace Monetizr.Campaigns
             if (m == null)
                 return;
 
-            var param = $"{parentId.ToString()}.{textContent}";
-            var paramWithType = $"{parentId.ToString()}.{m.type.ToString()}.{textContent}";
-            var paramWithTypeAndId = $"{parentId.ToString()}.{m.type.ToString()}.{m.serverId}.{textContent}";
+            if (buttonGrafic == null && textElement == null)
+                return;
+            
+            var param = $"{parentId}.{textContent}";
+            var param2 = $"{param}2";
+            var paramWithType = $"{parentId}.{m.type}.{textContent}";
+            var paramWithTypeAndId = $"{parentId}.{m.type}.{m.serverId}.{textContent}";
 
-            UIController.SetColorForElement(textElement, m.campaignServerSettings, "text_color");
+            //update graphics
+            string[] colorVars = { "button_bg_color", $"{param}_bg_color", $"{paramWithType}_bg_color", $"{paramWithTypeAndId}_bg_color" };
 
-            UIController.SetColorForElement(textElement, m.campaignServerSettings, $"{param}_color");
-            UIController.SetColorForElement(textElement, m.campaignServerSettings, $"{paramWithType}_color");
-            UIController.SetColorForElement(textElement, m.campaignServerSettings, $"{paramWithTypeAndId}_color");
-
-            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, "button_bg_color");
-
-            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, $"{param}_bg_color");
-            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, $"{paramWithType}_bg_color");
-            UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, $"{paramWithTypeAndId}_bg_color");
-
-            if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame)
+            foreach (var c in colorVars)
             {
-                var param2 = $"{parentId.ToString()}.{textContent}2";
-
-                if (m.campaignServerSettings.ContainsKey(param2))
-                {
-                    param = param2;
-                }
+                UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, c);
             }
 
-            string []prm = {param, paramWithType, paramWithTypeAndId};
+            //update text
+            if (textElement == null)
+                return;
 
-            System.Array.ForEach(prm, s =>
+            string[] textVars = { "text_color", $"{param}_color", $"{paramWithType}_color", $"{paramWithTypeAndId}_color" };
+
+            foreach (var t in textVars)
+            {
+                UIController.SetColorForElement(textElement, m.campaignServerSettings, t);
+            }
+            
+            if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame &&
+                m.campaignServerSettings.ContainsKey(param2))
+            {
+                param = param2;
+            }
+
+            string []paramStrings = {param, paramWithType, paramWithTypeAndId};
+
+            foreach (var s in paramStrings)
             {
                 if (m.campaignServerSettings.ContainsKey(s))
                 {
                     UpdateRewardText(m, s);
                 }
-            });
+            };
             
         }
 
@@ -77,14 +79,11 @@ namespace Monetizr.Campaigns
             return t;
         }
 
-        private void UpdateRewardText(Mission m, string param_with_type_and_id)
+        private void UpdateRewardText(Mission m, string param)
         {
-            string t = m.campaignServerSettings.GetParam(param_with_type_and_id);
+            string t = m.campaignServerSettings.GetParam(param);
 
-            t = PanelTextItem.ReplacePredefinedItemsInText(m, t);
-
-            if(textElement != null)
-                textElement.text = t;
+            textElement.text = PanelTextItem.ReplacePredefinedItemsInText(m, t);
         }
 
     }

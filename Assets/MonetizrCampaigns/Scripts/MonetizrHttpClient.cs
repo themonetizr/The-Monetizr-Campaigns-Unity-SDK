@@ -153,11 +153,6 @@ namespace Monetizr.Campaigns
                 _baseApiUrl = _baseTestApiUrl;
         }
 
-        /*internal override void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey)
-        {
-            Analytics.Initialize(testEnvironment, mixPanelApiKey,apiUri);
-        }*/
-
         internal override void Close()
         {
             Client.CancelPendingRequests();
@@ -250,7 +245,7 @@ namespace Monetizr.Campaigns
             
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
 
-            Log.PrintWarning($"Api endpoint: {_baseApiUrl}");
+            Log.PrintV($"Api endpoint: {_baseApiUrl}");
         }
 
         internal override async Task<List<ServerCampaign>> GetList()
@@ -502,7 +497,8 @@ namespace Monetizr.Campaigns
                     {"device-memory",SystemInfo.systemMemorySize.ToString()},
                     {"device-model",Utils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
                     {"device-name",Utils.EncodeStringIntoAscii(SystemInfo.deviceName)},
-                    {"internet-connection",MonetizrMobileAnalytics.GetInternetConnectionType()}
+                    {"internet-connection",MonetizrMobileAnalytics.GetInternetConnectionType()},
+                    {"local-time-stamp",((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString()}
                 }
             };
 

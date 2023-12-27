@@ -432,6 +432,7 @@ namespace Monetizr.Campaigns
                 case MissionType.MinigameReward:
                 case MissionType.MemoryMinigameReward:
                 case MissionType.ActionReward:
+                case MissionType.CodeReward:
                     AddMission(item, m, missionId); break;
             }
 

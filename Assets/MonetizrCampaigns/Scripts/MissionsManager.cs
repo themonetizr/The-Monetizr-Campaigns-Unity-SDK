@@ -244,6 +244,7 @@ namespace Monetizr.Campaigns
                 case MissionType.MinigameReward:
                 case MissionType.MemoryMinigameReward:
                 case MissionType.ActionReward:
+                case MissionType.CodeReward:
                     m = prepareMission(mt, campaign, false, true); break;
 
             }
@@ -315,6 +316,7 @@ namespace Monetizr.Campaigns
                 case MissionType.VideoReward: return VideoClaimAction(m, onComplete, updateUIDelegate);
                 case MissionType.MutiplyReward: return MutiplyRewardClaimAction(m, onComplete, updateUIDelegate);
                 case MissionType.ActionReward: return ActionRewardClaimAction(m, onComplete, updateUIDelegate);
+                case MissionType.CodeReward: return CodeRewardClaimAction(m, onComplete, updateUIDelegate);
             }
 
             return null;
@@ -375,14 +377,28 @@ namespace Monetizr.Campaigns
 
         internal Action ActionRewardClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
         {
-            Action<bool> onSurveyComplete = (bool isSkipped) =>
+            Action<bool> onActionComplete = (bool isSkipped) =>
             {
                 MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
             return () =>
             {
-                MonetizrManager.ShowActionView(onSurveyComplete, m);
+                MonetizrManager.ShowActionView(onActionComplete, m);
+            };
+            //#endif
+        }
+
+        internal Action CodeRewardClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
+        {
+            Action<bool> onCodeComplete = (bool isSkipped) =>
+            {
+                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
+            };
+
+            return () =>
+            {
+                MonetizrManager.ShowCodeView(onCodeComplete, m);
             };
             //#endif
         }
@@ -528,7 +544,6 @@ namespace Monetizr.Campaigns
                     m.reward = (ulong)(reward.maximumAmount * m.rewardPercent);
                 }
             }
-
         }
 
         internal static Sprite GetMissionRewardImage(Mission m)

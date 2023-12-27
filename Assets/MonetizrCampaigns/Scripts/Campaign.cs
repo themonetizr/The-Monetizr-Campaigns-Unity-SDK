@@ -504,6 +504,8 @@ namespace Monetizr.Campaigns
 
         internal async Task LoadCampaignAssets()
         {
+            Log.Print($"Campaign path: {Application.persistentDataPath}/{id}");
+
             foreach (var asset in assets)
             {
                 Log.PrintV($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
@@ -668,7 +670,10 @@ namespace Monetizr.Campaigns
                 Directory.CreateDirectory(zipFolder);
             }
 
-            byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+            string playerUrl = serverSettings.GetParam("openrtb.player_url",
+                "https://image.themonetizr.com/videoplayer/html.zip");
+
+            byte[] data = await DownloadHelper.DownloadAssetData(playerUrl);
 
             if (data == null)
             {
