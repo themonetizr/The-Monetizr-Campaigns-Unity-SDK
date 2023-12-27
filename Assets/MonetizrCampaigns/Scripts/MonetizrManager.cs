@@ -1548,24 +1548,21 @@ namespace Monetizr.Campaigns
                 Log.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
                 onRequestComplete?.Invoke(false);
             }
+            
+            var logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
 
-            //_campaignIds.Clear();
 
             if (campaigns.Count > 0)
             {
                 ConnectionsClient.SetTestMode(campaigns[0].testmode);
-
-                ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key);
+                
+                ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
 
                 ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
-
-
-                //httpClient.analytics.TrackEvent("Get List Started", campaigns[0]);
-                //httpClient.analytics.StartTimedEvent("Get List Finished");
             }
             else
             {
-                ConnectionsClient.Analytics.Initialize(false, null);
+                ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
             }
 
 

@@ -25,7 +25,7 @@ namespace MonetizrCampaigns.Tests
 
         }
 
-        internal override void Initialize(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
+        internal override void Initialize(bool testEnvironment, string mixPanelApiKey, bool logConnectionErrors)
         {
 
         }

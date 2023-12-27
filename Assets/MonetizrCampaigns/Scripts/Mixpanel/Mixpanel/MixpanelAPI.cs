@@ -293,6 +293,11 @@ namespace mixpanel
             MixpanelSettings.Instance.RuntimeToken = token;
         }
 
+        public static void SetLogConnectionErrors(bool isLog)
+        {
+            Config.LogConnectionErrors = isLog;
+        }
+
         /// <summary>
         /// Disables Mixpanel Component. Useful if you have "Manual Initialization" enabled under your Project Settings.
         /// </summary>

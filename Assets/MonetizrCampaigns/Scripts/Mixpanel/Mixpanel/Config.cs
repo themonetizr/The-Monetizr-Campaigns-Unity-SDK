@@ -8,6 +8,7 @@ namespace mixpanel
         internal static bool ShowDebug = false;
         internal static bool ManualInitialization = false;
         internal static float FlushInterval = 60f;
+        internal static bool LogConnectionErrors = true;
 
         internal static int BatchSize = 50;
 

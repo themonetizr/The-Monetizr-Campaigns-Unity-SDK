@@ -353,7 +353,7 @@ namespace Monetizr.Campaigns
         internal abstract void RandomizeUserId();
         internal abstract void SendErrorToMixpanel(string condition, string stackTrace, ServerCampaign getActiveCampaign);
         internal abstract void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign);
-        internal abstract void Initialize(bool testEnvironment, string mixPanelApiKey, string apiUri = null);
+        internal abstract void Initialize(bool testEnvironment, string mixPanelApiKey, bool logConnectionErrors);
         internal abstract void TrackEvent(Mission mission, 
             PanelController panel,
             MonetizrManager.EventType eventType, 
@@ -529,7 +529,7 @@ namespace Monetizr.Campaigns
 #endif
         }
 
-        internal override void Initialize(bool testEnvironment, string mixPanelApiKey, string apiUri = null)
+        internal override void Initialize(bool testEnvironment, string mixPanelApiKey, bool logConnectionErrors)
         {
             string key = "cda45517ed8266e804d4966a0e693d0d";
             
@@ -555,6 +555,7 @@ namespace Monetizr.Campaigns
             Mixpanel.Init();
             Mixpanel.SetToken(key);
             Mixpanel.Identify(deviceIdentifier);
+            Mixpanel.SetLogConnectionErrors(logConnectionErrors);
 
             Log.PrintV($"Mixpanel init called {key}");
         }
@@ -665,7 +666,7 @@ namespace Monetizr.Campaigns
             }
         }
 
-        private void MixpanelTrackAndMaybeFlush(ServerCampaign camp, string eventName, Value props, bool darTag = false)
+        private void MixpanelTrack(ServerCampaign camp, string eventName, Value props, bool darTag = false)
         {
             props["dar_tag_sent"] = darTag.ToString();
 
@@ -1071,7 +1072,7 @@ namespace Monetizr.Campaigns
                 props["$duration"] = duration;
             }
 
-            MixpanelTrackAndMaybeFlush(campaign, eventName, props);
+            MixpanelTrack(campaign, eventName, props);
         }
 
         internal override void OnApplicationQuit()

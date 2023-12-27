@@ -153,11 +153,6 @@ namespace Monetizr.Campaigns
                 _baseApiUrl = _baseTestApiUrl;
         }
 
-        /*internal override void InitializeMixpanel(bool testEnvironment, string mixPanelApiKey)
-        {
-            Analytics.Initialize(testEnvironment, mixPanelApiKey,apiUri);
-        }*/
-
         internal override void Close()
         {
             Client.CancelPendingRequests();
