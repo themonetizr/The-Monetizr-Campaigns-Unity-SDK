@@ -250,7 +250,7 @@ namespace Monetizr.Campaigns
             
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
 
-            Log.PrintWarning($"Api endpoint: {_baseApiUrl}");
+            Log.PrintV($"Api endpoint: {_baseApiUrl}");
         }
 
         internal override async Task<List<ServerCampaign>> GetList()
