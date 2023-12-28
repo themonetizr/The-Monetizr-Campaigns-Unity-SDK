@@ -133,7 +133,13 @@ namespace Monetizr.Campaigns
             var bundleId = DebugSettings.keyNames[DebugSettings.keys[apiKeysList.value]];
 
             if (bundleId.Contains("."))
+            {
                 MonetizrManager.bundleId = bundleId;
+            }
+            else
+            {
+                MonetizrManager.bundleId = "com.monetizr.landslice";
+            }
 
             var changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.keys[apiKeysList.value]);
 
