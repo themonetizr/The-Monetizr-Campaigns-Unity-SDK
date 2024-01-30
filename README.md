@@ -8,4 +8,4 @@ Campaigns are the main ad units created by advertisers inside the Monetizr platf
 Missions can be interconnected with game events. For example, mission can be locked until player reaches the specific game level or participates in a game quest. If a mission (game event) is completed, then players can be awarded with in-game or brand-sponsored rewards.
 
 ### Documentation
-Official documentation can be found on the [TheMonetizr website](https://docs.themonetizr.com/docs/unity-campaigns-sdk-integration).
+Integration documentation can be found at the [Wiki pages](https://github.com/themonetizr/The-Monetizr-Campaigns-Unity-SDK/wiki/Unity-Campaigns-SDK).
