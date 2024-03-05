@@ -362,7 +362,7 @@ namespace Monetizr.Campaigns
 
                     if (iconWidth < 128 || iconHeight < 128 || Mathf.Abs(iconHeight - iconWidth) > 0.1f)
                     {
-                        Log.PrintError("GameReward error: Icon size less than 256 pixels on one or more dimensions or it's not square.");
+                        Log.PrintError("GameReward error: Icon '" + icon.name + "' size less than 256 pixels on one or more dimensions or it's not square.");
                         isRewardValid = false;
                     }
                 }
@@ -469,12 +469,30 @@ namespace Monetizr.Campaigns
             }
         }
 
-        internal static GameReward GetGameReward(RewardType rt)
+        internal static GameReward GetGameReward (RewardType rt)
         {
+            LogGameRewards();
+
             if (gameRewards.ContainsKey(rt))
+            {
                 return gameRewards[rt];
+            }
 
             return null;
+        }
+
+        public static void LogGameRewards()
+        {
+            if (gameRewards == null || gameRewards.Count == 0)
+            {
+                Debug.Log("gameRewards dictionary is null or empty.");
+                return;
+            }
+
+            foreach (KeyValuePair<RewardType, GameReward> entry in gameRewards)
+            {
+                Debug.Log($"Key: {entry.Key}, Value: {entry.Value}");
+            }
         }
 
         public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
@@ -1778,8 +1796,6 @@ namespace Monetizr.Campaigns
                 onFailure.Invoke();
             }
         }
-
-
 
     }
 

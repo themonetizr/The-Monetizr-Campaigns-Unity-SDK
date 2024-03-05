@@ -607,7 +607,6 @@ namespace Monetizr.Campaigns
             {
                 List<MissionDescription> m = new List<MissionDescription>();
 
-                //Array.ForEach(missions, (ServerDefinedMissions _m) =>
                 foreach(var _m in missions)
                 {
 
@@ -619,15 +618,17 @@ namespace Monetizr.Campaigns
                     float rewardAmount = _m.GetRewardAmount() / 100.0f;
                     RewardType currency = _m.GetRewardType();
 
-                    MonetizrManager.GameReward gr = MonetizrManager.GetGameReward(currency);
+                    Debug.Log("MISSION: " + _m.GetMissionType() + " | REWARD: " + _m.GetRewardType() + " | AMOUNT: " + _m.GetRewardAmount());
+
+                    MonetizrManager.GameReward gameReward = MonetizrManager.GetGameReward(currency);
 
                     //no such reward
-                    if (gr == null)
+                    if (gameReward == null)
                     {
                         if (serverSettings.GetBoolParam("use_default_reward", true))
                         {
                             currency = RewardType.Coins;
-                            gr = MonetizrManager.GetGameReward(currency);
+                            gameReward = MonetizrManager.GetGameReward(currency);
                         }
                         else
                         {
@@ -636,17 +637,11 @@ namespace Monetizr.Campaigns
                     }
 
                     //award is too much
-                    if (rewardAmount > 100.0f)
-                        continue;
+                    if (rewardAmount > 100.0f) continue;
 
-                    ulong rewardAmount2 = (ulong)Math.Ceiling(gr.maximumAmount * rewardAmount);
-                    //}
+                    ulong rewardAmount2 = (ulong)Math.Ceiling(gameReward.maximumAmount * rewardAmount);
 
-                    //activateAfter = _m.GetActivateRange();
-
-                    //string surveyUrl = serverSettings.GetParam(_m.survey);
-
-                    Log.PrintV($"CreateMissionDescriptions:max:{gr.maximumAmount}:real:{rewardAmount2}:percent:{rewardAmount}");
+                    Log.PrintV($"CreateMissionDescriptions:max:{gameReward.maximumAmount}:real:{rewardAmount2}:percent:{rewardAmount}");
 
                     m.Add(new MissionDescription
                     {

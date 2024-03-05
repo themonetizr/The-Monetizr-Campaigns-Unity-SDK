@@ -13,8 +13,8 @@ public class SponsoredMissionsManager : MonoBehaviour
 
     private static void GetAdvertisingId(out string advertisingID, out bool limitAdvertising)
     {
-#if !UNITY_EDITOR
-    #if UNITY_ANDROID
+        #if !UNITY_EDITOR
+        #if UNITY_ANDROID
                    AndroidJavaClass up = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
                    AndroidJavaObject currentActivity = up.GetStatic<AndroidJavaObject> ("currentActivity");
                    AndroidJavaClass client = new AndroidJavaClass ("com.google.android.gms.ads.identifier.AdvertisingIdClient");
@@ -23,21 +23,21 @@ public class SponsoredMissionsManager : MonoBehaviour
                    advertisingID = adInfo.Call<string> ("getId").ToString();   
                    limitAdvertising = (adInfo.Call<bool> ("isLimitAdTrackingEnabled"));
 
-    #elif UNITY_IOS
+        #elif UNITY_IOS
                   limitAdvertising = !(ATTrackingStatusBinding.GetAuthorizationTrackingStatus() == ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED);
                   advertisingID = Device.advertisingIdentifier;
-    #endif
-#else
-        advertisingID = "";
-        limitAdvertising = false;
-
-#endif
+        #endif
+        #else
+            advertisingID = "";
+            limitAdvertising = false;
+        #endif
     }
 
     private void Start()
     {
         //temporary API key for testing
         const string key = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
+
 
         GetAdvertisingId(out var advertisingID, out var limitAdvertising);
 
@@ -70,7 +70,7 @@ public class SponsoredMissionsManager : MonoBehaviour
 
 
         //good default placement for teaser
-        MonetizrManager.SetTeaserPosition(Utils.isInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
+        MonetizrManager.SetTeaserPosition(Utils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
 
         //initialize SDK
         MonetizrManager.Initialize(key, null, () =>
@@ -90,9 +90,6 @@ public class SponsoredMissionsManager : MonoBehaviour
                 //SoundManager.I.SetSoundAllowed(soundOn);
             }, null);
 
-
     }
-
-
    
 }

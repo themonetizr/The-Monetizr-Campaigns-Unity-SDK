@@ -397,7 +397,7 @@ namespace Monetizr.Campaigns
             //Log.Print($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
         }
 
-        internal async Task PreloadAssetToCache(ServerCampaign.Asset asset, /*AssetsType urlString,*/ AssetsType fileString, bool required = true)
+        internal async Task PreloadAssetToCache(ServerCampaign.Asset asset, AssetsType fileString, bool required = true)
         {
             if (string.IsNullOrEmpty(asset.url))
             {
@@ -406,17 +406,16 @@ namespace Monetizr.Campaigns
             }
 
             string path = Application.persistentDataPath + "/" + this.id;
-
             string fname = string.IsNullOrEmpty(asset.fname) ? Path.GetFileName(asset.url) : $"{asset.fname}.{asset.fext}";
             path = string.IsNullOrEmpty(asset.fpath) ? $"{path}" : $"{path}/{asset.fpath}";
             string fpath = $"{path}/{fname}";
             string zipFolder = null;
             string fileToCheck = fpath;
-            
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
 
-            //Log.Print("PreloadAssetToCache: " + fname);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
 
             if (fname.Contains("zip"))
             {
@@ -427,7 +426,6 @@ namespace Monetizr.Campaigns
             }
 
             byte[] data = null;
-            
             Log.PrintV($"PreloadAssetToCache: {fname} {fileToCheck}");
 
             if (!File.Exists(fileToCheck))
@@ -450,25 +448,16 @@ namespace Monetizr.Campaigns
                 }
 
                 Log.PrintV($"WriteAllBytes to {fpath} size: {data.Length}");
-
                 File.WriteAllBytes(fpath, data);
 
                 if (zipFolder != null)
                 {
                     Log.PrintV("Extracting to: " + zipFolder);
-
-                    //if (Directory.Exists(zipFolder))
-                    //    DeleteDirectory(zipFolder);
-
-                    //if (!Directory.Exists(zipFolder))
-                    //Directory.CreateDirectory(zipFolder);
-
-                    //ZipFile.ExtractToDirectory(fpath, zipFolder);
                     var unzipResult = Utils.ExtractAllToDirectory(fpath, zipFolder);
-                                        
+
                     File.Delete(fpath);
 
-                    if(!unzipResult)
+                    if (!unzipResult)
                     {
                         if (required)
                         {
@@ -478,14 +467,15 @@ namespace Monetizr.Campaigns
 
                         return;
                     }
+
                 }
 
-
-                //Log.Print("saving: " + fpath);
             }
 
             if (zipFolder != null)
+            {
                 fpath = fileToCheck;
+            }
 
             if (!string.IsNullOrEmpty(asset.mainAssetName))
             {
@@ -493,12 +483,7 @@ namespace Monetizr.Campaigns
             }
 
             Log.PrintV($"Resource {fileString} {fpath}");
-
-            //Log.Print("zip path to: " + fpath);
-
             asset.localFullPath = fpath;
-
-            //ech.SetAsset<string>(urlString, asset.url);
             SetAsset<string>(fileString, fpath);
         }
 
@@ -895,7 +880,7 @@ namespace Monetizr.Campaigns
 
             Log.Print($"Loaded campaign: {id}");
         }
-
         
     }
+
 }

@@ -6,11 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
-using mixpanel;
 using UnityEngine;
-using static Monetizr.Campaigns.MonetizrUnitySurvey;
 
 namespace Monetizr.Campaigns
 {
