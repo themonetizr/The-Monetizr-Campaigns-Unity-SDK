@@ -8,12 +8,6 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
-    public static class DebugSettings
-    {
-        public static List<string> keys = null;
-        public static Dictionary<string, string> keyNames = null;
-    }
-
     internal class DebugPanel : PanelController
     {
         public Button closeButton;
@@ -146,7 +140,5 @@ namespace Monetizr.Campaigns
             //if (isIDChanged || changed)
             MonetizrManager.Instance.RestartClient();
         }
-        
     }
-
 }
