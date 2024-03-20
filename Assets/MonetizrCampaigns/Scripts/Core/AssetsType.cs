@@ -4,7 +4,7 @@
 //if we define this - video and survey campaigns will work
 //#define USING_WEBVIEW
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     /// <summary>
     /// Predefined asset types for easier access

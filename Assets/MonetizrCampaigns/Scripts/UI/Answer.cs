@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal partial class MonetizrUnitySurvey
     {

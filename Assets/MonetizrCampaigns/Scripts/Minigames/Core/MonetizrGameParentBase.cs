@@ -1,4 +1,6 @@
-﻿namespace Monetizr.SDK.Minigames
+﻿using Monetizr.SDK.UI;
+
+namespace Monetizr.SDK.Minigames
 {
     internal abstract class MonetizrGameParentBase : PanelController
     {

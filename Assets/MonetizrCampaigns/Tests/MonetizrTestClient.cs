@@ -1,16 +1,12 @@
-﻿using Monetizr.SDK;
-using MonetizrCampaigns.Tests;
+﻿using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Monetizr.Campaigns;
-using Monetizr.SDK.Campaigns;
 using static Monetizr.SDK.Campaigns.ServerCampaign;
 
-namespace MonetizrCampaigns.Tests
+namespace Monetizr.Tests
 {
     internal class MonetizrTestClient : MonetizrClient
     {

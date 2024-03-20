@@ -3,6 +3,7 @@ using System;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 
 #if UNITY_IOS
 using UnityEngine.iOS;

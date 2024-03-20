@@ -1,4 +1,5 @@
-﻿using Monetizr.SDK.Missions;
+﻿using Monetizr.SDK.Core;
+using Monetizr.SDK.Missions;
 using System.Collections.Generic;
 
 #if UNITY_IOS

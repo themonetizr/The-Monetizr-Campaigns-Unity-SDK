@@ -8,6 +8,7 @@ using Monetizr.Campaigns.Vast42;
 using Monetizr.SDK;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Utils;

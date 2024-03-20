@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal class MonetizrSurveyAnswer : MonoBehaviour
     {
@@ -15,11 +13,9 @@ namespace Monetizr.SDK
         public Image background;
         public Image image;
         public Image markImage;
-
         public Sprite grayBorder;
         public Sprite redBorder;
         public Sprite greenBorder;
-
         public Sprite greenRoundMark;
         public Sprite redSquareMark;
     }

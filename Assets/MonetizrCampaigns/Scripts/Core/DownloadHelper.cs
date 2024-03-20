@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Monetizr.SDK.Debug;
 
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     internal class DownloadHelper
     {

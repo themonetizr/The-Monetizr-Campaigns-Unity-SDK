@@ -1,4 +1,5 @@
 using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.GIF;
 using Monetizr.SDK.Missions;
@@ -7,9 +8,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
-
     internal class MonetizrMenuTeaser : PanelController
     {
         public GifImage gifImage;

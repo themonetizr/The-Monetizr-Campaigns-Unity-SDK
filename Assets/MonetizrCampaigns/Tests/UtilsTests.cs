@@ -15,7 +15,7 @@ using Toggle = UnityEngine.UI.Toggle;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Missions;
 
-namespace MonetizrCampaigns.Tests
+namespace Monetizr.Tests
 {
     public class UtilsTests
     {

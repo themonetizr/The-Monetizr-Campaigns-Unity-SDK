@@ -23,8 +23,9 @@ using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     public partial class MonetizrManager : MonoBehaviour
     {

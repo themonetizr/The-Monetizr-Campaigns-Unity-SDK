@@ -1,15 +1,15 @@
 using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal partial class MonetizrUnitySurvey : PanelController
     {

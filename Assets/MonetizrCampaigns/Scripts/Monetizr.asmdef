@@ -1,11 +1,10 @@
 {
-    "name": "Monetizr.Campaigns",
+    "name": "Monetizr.SDK",
     "rootNamespace": "",
-  "references": [
-    "Mixpanel",
-    "UniWebView-CSharp",
-    "System.IO.Compression.FileSystem"
-  ],
+    "references": [
+        "Mixpanel",
+        "UniWebView-CSharp"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

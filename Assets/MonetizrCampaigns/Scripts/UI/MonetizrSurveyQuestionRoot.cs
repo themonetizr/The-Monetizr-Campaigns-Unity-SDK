@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal class MonetizrSurveyQuestionRoot : MonoBehaviour
     {
@@ -16,5 +14,4 @@ namespace Monetizr.SDK
         public RectTransform gridLayoutRoot;
         public RectTransform imageGridLayoutRoot;
     }
-
 }

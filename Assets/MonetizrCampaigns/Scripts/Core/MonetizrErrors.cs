@@ -7,7 +7,7 @@
 using System.Collections.Generic;
 
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     internal static class MonetizrErrors
     {

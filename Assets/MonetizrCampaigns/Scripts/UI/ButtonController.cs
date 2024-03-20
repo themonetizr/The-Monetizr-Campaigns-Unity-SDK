@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal enum ButtonType
     {

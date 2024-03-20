@@ -5,7 +5,7 @@ using System;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     public class CanvasReferenceScaler : MonoBehaviour
     {

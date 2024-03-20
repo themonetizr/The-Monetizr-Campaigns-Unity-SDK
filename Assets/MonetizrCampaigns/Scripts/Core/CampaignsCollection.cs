@@ -10,7 +10,7 @@ using System;
 using Monetizr.SDK.Campaigns;
 
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     [Serializable]
     internal class CampaignsCollection : BaseCollection

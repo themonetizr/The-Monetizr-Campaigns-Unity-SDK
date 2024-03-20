@@ -3,20 +3,17 @@
 using Monetizr.Campaigns;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-//using UniWebView;
-
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal class WebViewPanel : PanelController
     {

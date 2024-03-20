@@ -1,5 +1,7 @@
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
 using System;
 using System.Collections.Generic;

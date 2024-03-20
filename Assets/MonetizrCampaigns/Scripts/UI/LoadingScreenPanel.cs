@@ -1,7 +1,7 @@
 ﻿using Monetizr.SDK.Missions;
 using System;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal class LoadingScreenPanel : PanelController
     {

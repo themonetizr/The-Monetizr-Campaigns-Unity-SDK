@@ -1,10 +1,12 @@
 ﻿using Monetizr.SDK;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.UI;
 using System.Collections.Generic;
 
-namespace MonetizrCampaigns.Tests
+namespace Monetizr.Tests
 {
     internal class MonetizrTestAnalytics : MonetizrAnalytics
     {

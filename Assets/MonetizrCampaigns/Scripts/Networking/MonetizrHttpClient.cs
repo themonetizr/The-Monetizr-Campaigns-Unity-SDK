@@ -16,6 +16,7 @@ using Monetizr.SDK.Debug;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 
 namespace Monetizr.SDK.Networking
 {

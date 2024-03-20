@@ -8,7 +8,7 @@ using UnityEngine;
 using System;
 using Monetizr.SDK.Debug;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     public partial class MonetizrManager
     {

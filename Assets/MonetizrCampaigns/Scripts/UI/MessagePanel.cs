@@ -2,9 +2,8 @@
 using System;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
-
     internal class MessagePanel : PanelController
     {
         public Text title;

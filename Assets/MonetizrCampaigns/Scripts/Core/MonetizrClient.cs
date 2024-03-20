@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     internal abstract class MonetizrClient
     {

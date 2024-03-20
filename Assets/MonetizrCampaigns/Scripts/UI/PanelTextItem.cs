@@ -1,12 +1,12 @@
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Utils;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
-
     internal class PanelTextItem : MonoBehaviour
     {
         public Text textElement;

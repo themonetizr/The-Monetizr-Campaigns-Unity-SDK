@@ -10,7 +10,7 @@ using Monetizr.SDK.Utils;
 using Monetizr.SDK.Missions;
 
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     [Serializable]
     internal class LocalCampaignSettings

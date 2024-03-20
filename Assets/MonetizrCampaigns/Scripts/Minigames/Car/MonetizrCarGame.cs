@@ -1,6 +1,8 @@
 using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;

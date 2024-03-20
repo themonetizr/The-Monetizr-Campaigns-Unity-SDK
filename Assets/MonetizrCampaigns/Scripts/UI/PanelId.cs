@@ -1,4 +1,4 @@
-﻿namespace Monetizr.SDK
+﻿namespace Monetizr.SDK.UI
 {
     internal enum PanelId
     {
@@ -22,8 +22,6 @@
         SurveyCloseConfirmation,
         SurveyUnityView,
         ActionHtmlPanelView,
-        CodePanelView,
+        CodePanelView
     }
-
-
 }

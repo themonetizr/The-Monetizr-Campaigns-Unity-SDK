@@ -14,8 +14,9 @@ using UnityEngine.UI;
 using Monetizr.Campaigns;
 using Button = UnityEngine.UI.Button;
 using Toggle = UnityEngine.UI.Toggle;
+using Monetizr.SDK.Core;
 
-namespace MonetizrCampaigns.Tests
+namespace Monetizr.Tests
 {
     public class Tests
     {

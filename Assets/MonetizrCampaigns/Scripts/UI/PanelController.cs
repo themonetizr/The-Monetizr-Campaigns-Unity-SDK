@@ -1,13 +1,13 @@
 ﻿using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal abstract class PanelController : MonoBehaviour
     {

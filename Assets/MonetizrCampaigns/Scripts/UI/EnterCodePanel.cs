@@ -1,4 +1,5 @@
 ﻿using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
 using System;
 using System.Collections;
@@ -8,7 +9,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.UI
 {
     internal class EnterCodePanel : PanelController
     {

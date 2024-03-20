@@ -1,4 +1,4 @@
-﻿namespace Monetizr.SDK
+﻿namespace Monetizr.SDK.UI
 {
     internal enum EnterEmailType
     {
@@ -6,5 +6,4 @@
         IngameReward,
         SelectionReward
     }
-
 }
