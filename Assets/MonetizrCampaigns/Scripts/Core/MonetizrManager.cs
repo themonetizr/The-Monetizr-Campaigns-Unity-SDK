@@ -8,9 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Monetizr.Campaigns;
-using UnityEngine.Networking;
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using System.IO;
@@ -21,232 +19,9 @@ using System.Threading;
 using System.Linq;
 using mixpanel;
 
-
 namespace Monetizr.Campaigns
 {
-    internal enum ErrorType
-    {
-        NotinitializedSDK,
-        SimultaneusAdAssets,
-        AdAssetStillShowing,
-        ConnectionError,
-    };
-
-    internal static class MonetizrErrors
-    {
-        public static readonly Dictionary<ErrorType, string> msg = new Dictionary<ErrorType, string>()
-        {
-            { ErrorType.NotinitializedSDK, "You're trying to use Monetizr SDK before it's been initialized. Call MonetizerManager.Initalize first." },
-            { ErrorType.SimultaneusAdAssets, "Simultaneous display of multiple ads is not supported!" },
-            { ErrorType.AdAssetStillShowing, "Some ad asset are still showing." },
-            { ErrorType.ConnectionError, "Connection error while getting list of campaigns!" }
-        };
-    }
-
-    /// <summary>
-    /// Predefined asset types for easier access
-    /// </summary>
-    public enum AssetsType
-    {
-        Unknown,
-        BrandLogoSprite, //icon
-        BrandBannerSprite, //banner
-        BrandRewardLogoSprite, //logo
-        BrandRewardBannerSprite, //reward_banner
-        SurveyURLString, //survey
-        //VideoURLString, //video url
-        VideoFilePathString, //video url
-        BrandTitleString, //text
-        TinyTeaserTexture, //text
-        TinyTeaserSprite,
-        //Html5ZipURLString,
-        Html5PathString,
-        TiledBackgroundSprite,
-        //CampaignHeaderTextColor,
-        //CampaignTextColor,
-        //HeaderTextColor,
-        //CampaignBackgroundColor,
-        CustomCoinSprite,
-        CustomCoinString,
-        LoadingScreenSprite,
-        TeaserGifPathString,
-        RewardSprite,
-        IngameRewardSprite,
-        UnknownRewardSprite,
-
-        MinigameSprite1,
-        MinigameSprite2,
-        MinigameSprite3,
-        LeaderboardBannerSprite,
-
-    }
-
-    internal static class ExtensionMethods
-    {
-        public static TaskAwaiter GetAwaiter(this AsyncOperation asyncOp)
-        {
-            var tcs = new TaskCompletionSource<object>();
-            asyncOp.completed += obj => { tcs.SetResult(null); };
-            return ((Task)tcs.Task).GetAwaiter();
-        }
-    }
-
-    internal class DownloadHelper
-    {
-        /// <summary>
-        /// Downloads any type of asset and returns its data as an array of bytes
-        /// </summary>
-        public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
-        {
-            UnityWebRequest uwr = UnityWebRequest.Get(url);
-
-            await uwr.SendWebRequest();
-
-            if (uwr.isNetworkError)
-            {
-                Log.PrintError($"Network error {uwr.error} with {url}");
-                onDownloadFailed?.Invoke();
-                return null;
-            }
-
-            return uwr.downloadHandler.data;
-        }
-    }
-
-    public enum RewardType
-    {
-        Undefined = 0,
-        Coins = 1,
-        Reward1 = 1,
-        AdditionalCoins = 2,
-        Reward2 = 2,
-        PremiumCurrency = 3,
-        Reward3 = 3,
-    }
-
-    [Serializable]
-    internal class LocalCampaignSettings
-    {
-        [SerializeField] internal string campId;
-        [SerializeField] internal string apiKey;
-        [SerializeField] internal string sdkVersion;
-        [SerializeField] internal UDateTime lastTimeShowNotification;
-        [SerializeField] internal int amountNotificationsShown;
-        [SerializeField] internal int amountTeasersShown;
-
-        [SerializeField] internal SerializableDictionary<string, string> settings = new SerializableDictionary<string, string>();
-    }
-
-    [Serializable]
-    internal class CampaignsCollection : BaseCollection
-    {
-        //campaign id and settings
-        [SerializeField]
-        internal List<LocalCampaignSettings> campaigns =
-           new List<LocalCampaignSettings>();
-
-        internal override void Clear()
-        {
-            campaigns.Clear();
-        }
-
-        internal LocalCampaignSettings GetCampaign(string id)
-        {
-            return campaigns.Find(c => c.campId == id);
-        }
-    };
-
-    internal class LocalSettingsManager : LocalSerializer<CampaignsCollection>
-    {
-        internal LocalSettingsManager()
-        {
-            data = new CampaignsCollection();
-        }
-
-        internal override string GetDataKey()
-        {
-            return "campaigns";
-        }
-
-        internal void Load()
-        {
-            //ResetData();
-
-            LoadData();
-
-            int deleted = data.campaigns.RemoveAll((LocalCampaignSettings m) =>
-                { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
-
-            deleted += data.campaigns.RemoveAll((LocalCampaignSettings m) =>
-                { return m.sdkVersion != MonetizrManager.SDKVersion; });
-
-            if (deleted > 0)
-            {
-                SaveData();
-            }
-        }
-
-        internal void AddCampaign(ServerCampaign campaign)
-        {
-            var camp = data.GetCampaign(campaign.id);
-
-            if (camp == null)
-            {
-                data.campaigns.Add(new LocalCampaignSettings()
-                {
-                    apiKey = MonetizrManager.Instance.GetCurrentAPIkey(),
-                    sdkVersion = MonetizrManager.SDKVersion,
-                    lastTimeShowNotification = DateTime.Now,
-                    campId = campaign.id
-                });
-            }
-        }
-
-        internal LocalCampaignSettings GetSetting(string campaign)
-        {
-            var camp = data.GetCampaign(campaign);
-
-            Debug.Assert(camp != null);
-
-            return camp;
-        }
-
-        /*internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaign> campaigns)
-        {
-            //load old settings
-            //сheck if apikey/sdkversion is old
-            Load();
-
-            //check if campaign is missing - remove it from data
-            data.campaigns.RemoveAll((LocalCampaignSettings c) => !campaigns.ContainsKey(c.campId));
-
-            //add empty campaign into settings
-            campaigns.Values.ToList().ForEach(c => AddCampaign(c));
-
-            SaveData();
-        }*/
-
-        internal void LoadOldAndUpdateNew(List<ServerCampaign> campaigns)
-        {
-            //load old settings
-            //сheck if apikey/sdkversion is old
-            Load();
-
-            //check if campaign is missing - remove it from data
-            data.campaigns.RemoveAll((LocalCampaignSettings localCampaigns) =>
-                campaigns.FindIndex(serverCampaigns => serverCampaigns.id == localCampaigns.campId) < 0);
-
-            //add empty campaign into settings
-            campaigns.ForEach(c => AddCampaign(c));
-
-            SaveData();
-        }
-    }
-
-    /// <summary>
-    /// Main manager for Monetizr
-    /// </summary>
-    public class MonetizrManager : MonoBehaviour
+    public partial class MonetizrManager : MonoBehaviour
     {
         public static float requestCampaignTime = 5 * 60;
         public static readonly string SDKVersion = "1.0.5";
@@ -290,17 +65,6 @@ namespace Monetizr.Campaigns
 
         internal LocalSettingsManager localSettings = null;
 
-        public enum EventType
-        {
-            Impression,
-            ImpressionEnds,
-            ButtonPressSkip,
-            ButtonPressOk,
-            Error,
-            ActionSuccess,
-            Notification,
-        }
-
         public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
 
         /// <summary>
@@ -338,95 +102,7 @@ namespace Monetizr.Campaigns
 
         public List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
 
-        internal class GameReward
-        {
-            internal Sprite icon;
-            internal string title;
-            internal Func<ulong> _GetCurrencyFunc;
-            internal Action<ulong> _AddCurrencyAction;
-            internal ulong maximumAmount;
-
-            public bool Validate()
-            {
-                bool isRewardValid = true;
-
-                if (icon == null)
-                {
-                    Log.PrintError("GameReward error: Icon is not set.");
-                    isRewardValid = false;
-                }
-                else
-                {
-                    float iconWidth = icon.rect.width;
-                    float iconHeight = icon.rect.height;
-
-                    if (iconWidth < 128 || iconHeight < 128 || Mathf.Abs(iconHeight - iconWidth) > 0.1f)
-                    {
-                        Log.PrintError("GameReward error: Icon '" + icon.name + "' size less than 256 pixels on one or more dimensions or it's not square.");
-                        isRewardValid = false;
-                    }
-                }
-
-                if (string.IsNullOrEmpty(title))
-                {
-                    Log.PrintError("GameReward error: Title is empty.");
-                    isRewardValid = false;
-                }
-
-                if (_GetCurrencyFunc == null)
-                {
-                    Log.PrintError("GameReward error: GetCurrency function is not set.");
-                    isRewardValid = false;
-                }
-
-                if (_AddCurrencyAction == null)
-                {
-                    Log.PrintError("GameReward error: AddCurrency action is not set.");
-                    isRewardValid = false;
-                }
-
-                if (maximumAmount <= 0)
-                {
-                    Log.PrintError("GameReward error: Maximum amount is zero or less.");
-                    isRewardValid = false;
-                }
-
-                return isRewardValid;
-            }
-
-            internal ulong GetCurrencyFunc()
-            {
-                try
-                {
-                    return _GetCurrencyFunc();
-                }
-                catch (Exception exception)
-                {
-                    Log.PrintError($"Exception in GetCurrencyFunc of {title}\n{exception.Message}");
-                    return 0;
-                }
-            }
-
-            internal void AddCurrencyAction(ulong amount)
-            {
-                try
-                {
-                    _AddCurrencyAction(amount);
-                }
-                catch (Exception exception)
-                {
-                    Log.PrintError($"Exception in AddCurrencyAction {amount} to {title}\n{exception}");
-                }
-            }
-        }
-
         public static string temporaryEmail = "";
-
-        internal enum RewardSelectionType
-        {
-            Product,
-            Ingame,
-        }
 
         internal static RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
 
@@ -909,13 +585,6 @@ namespace Monetizr.Campaigns
             Instance._uiController.ShowPanelFromPrefab("MonetizrDebugPanel", PanelId.DebugPanel);
         }
 
-        public enum NotificationPlacement
-        {
-            LevelStartNotification = 0,
-            MainMenuShowNotification = 1,
-            ManualNotification = 2
-        }
-
         public static void ShowStartupNotification(NotificationPlacement placement, Action<bool> onComplete)
         {
             if (Instance._uiController.HasActivePanel(PanelId.StartNotification))
@@ -1060,15 +729,6 @@ namespace Monetizr.Campaigns
         internal static void CleanUserDefinedMissions()
         {
             Instance.missionsManager.CleanUserDefinedMissions();
-        }
-
-        public enum OnCompleteStatus
-        {
-            //if player rejected the offer or haven't seen anything
-            Skipped,
-
-            //if player completed the offer
-            Completed
         }
 
         public delegate void OnComplete(OnCompleteStatus isSkipped);

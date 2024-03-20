@@ -670,11 +670,11 @@ namespace Monetizr.Campaigns
             {
                 var result = new ServerMissionsHelper();
 
-                if (!Utils.ValidateJson(json))
+                if (!MonetizrUtils.ValidateJson(json))
                     return result;
 
                 //JsonUtility doesn't work with escaped jsons
-                json = Utils.UnescapeJson(json);
+                json = MonetizrUtils.UnescapeJson(json);
 
                 if(json.Contains("\'"))
                     json = json.Replace('\'', '\"');
@@ -919,7 +919,7 @@ namespace Monetizr.Campaigns
 
                 if (!string.IsNullOrEmpty(missionDescription.activateConditions))
                 {
-                    m.conditions = Utils.ParseConditionsString(missionDescription.activateConditions);
+                    m.conditions = MonetizrUtils.ParseConditionsString(missionDescription.activateConditions);
 
                     if (!campaign.IsConditionsTrue(m.conditions))
                     {

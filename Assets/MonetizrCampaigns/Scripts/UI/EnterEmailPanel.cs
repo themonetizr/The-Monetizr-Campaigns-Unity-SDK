@@ -8,13 +8,6 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
-    internal enum EnterEmailType
-    {
-        ProductReward,
-        IngameReward,
-        SelectionReward
-    }
-
     internal class EnterEmailPanel : PanelController
     {
         public Image banner;

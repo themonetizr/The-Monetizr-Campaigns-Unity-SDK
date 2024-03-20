@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
-    internal class MonetizrUnitySurvey : PanelController
+    internal partial class MonetizrUnitySurvey : PanelController
     {
         public Button closeButton;
         public Image logo;
@@ -94,84 +94,6 @@ namespace Monetizr.Campaigns
 
         }
 
-        [Serializable]
-        internal class Question
-        {
-            public string id;
-            public string text;
-            public string type;
-            public string picture;
-            public bool randomOrder;
-            public Type enumType;
-            public bool oneTimeQuestion;
-
-            public List<Answer> answers = new List<Answer>();
-
-            [NonSerialized] internal MonetizrSurveyQuestionRoot questionRoot;
-            public Question previousQuestion;
-            public Question nextQuestion;
-            public int questionNumber;
-            public bool hasImages = false;
-            public bool isQuiz;
-
-            internal Type ParseType(string type)
-            {
-                if (type == null)
-                    return Type.One;
-
-                Dictionary<string, Type> types = new Dictionary<string, Type>()
-                {
-                    { "intro", Type.One },
-                    { "one", Type.One },
-                    { "multiple", Type.Multiple },
-                    { "editable", Type.Editable },
-                    { "sumbit", Type.One },
-                };
-
-                if (types.ContainsKey(type))
-                    return types[type];
-
-                return Type.One;
-            }
-
-            internal bool IsQuestionAlreadyAnswered(SerializableDictionary<string, string> campaignSettings)
-            {
-                if (!oneTimeQuestion)
-                    return false;
-
-                foreach (var a in answers)
-                {
-                    var savedResponse = campaignSettings.GetParam(a.GetVariableName());
-
-                    if (savedResponse != null)
-                        return true;
-                }
-
-                return false;
-            }
-
-        }
-
-        [Serializable]
-        internal class Answer
-        {
-            public string id;
-            public string text;
-            public bool disabled;
-            public bool requiredAnswer = false;
-            public string image;
-
-            [NonSerialized] internal MonetizrSurveyAnswer answerRoot;
-            [NonSerialized] internal Question question;
-            [NonSerialized] internal string response;
-            [NonSerialized] internal Survey survey;
-
-            public string GetVariableName()
-            {
-                return question.oneTimeQuestion ? $"{question.id}-{id}" : $"{survey.settings.id}-{question.id}-{id}";
-            }
-        }
-
         void SetProgress(float a)
         {
             //uvRect.y = 0.5f * (1.0f - Tween(a));
@@ -224,7 +146,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"{m.surveyId}");
 
-            if (!Utils.ValidateJson(surveysContent))
+            if (!MonetizrUtils.ValidateJson(surveysContent))
             {
                 Log.PrintError($"Json isn't properly formatted.");
                 Log.PrintWarning($"{surveysContent}");
@@ -297,7 +219,7 @@ namespace Monetizr.Campaigns
 
 
 
-               var qObj = GameObject.Instantiate<GameObject>(Utils.IsInLandscapeMode() ?
+               var qObj = GameObject.Instantiate<GameObject>(MonetizrUtils.IsInLandscapeMode() ?
                    monetizrQuestionRootLandscape.gameObject :
                    monetizrQuestionRoot.gameObject, contentRoot);
 
@@ -338,7 +260,7 @@ namespace Monetizr.Campaigns
                    questionRoot.imageGridLayoutRoot.gameObject.SetActive(true);
                }
 
-               if (Utils.IsInLandscapeMode())
+               if (MonetizrUtils.IsInLandscapeMode())
                {
                    q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
 
@@ -435,7 +357,7 @@ namespace Monetizr.Campaigns
                    }
                });
 
-               if (Utils.IsInLandscapeMode())
+               if (MonetizrUtils.IsInLandscapeMode())
                    height += 620;
                else
                    width += 1000;
@@ -629,11 +551,11 @@ namespace Monetizr.Campaigns
 
         internal float scrollNormalizedPosition
         {
-            get => Utils.IsInLandscapeMode() ? 1.0f - scroll.verticalNormalizedPosition : scroll.horizontalNormalizedPosition;
+            get => MonetizrUtils.IsInLandscapeMode() ? 1.0f - scroll.verticalNormalizedPosition : scroll.horizontalNormalizedPosition;
 
             set
             {
-                if (Utils.IsInLandscapeMode())
+                if (MonetizrUtils.IsInLandscapeMode())
                     scroll.verticalNormalizedPosition = 1.0f - value;
                 else
                     scroll.horizontalNormalizedPosition = value;

@@ -105,7 +105,7 @@ namespace Monetizr.Campaigns
 
             //actionButton.onClick.AddListener( ()=> { md.onClaimButtonPress.Invoke(); });
 
-            boosterNumber.text = $"+{Utils.ScoresToString(m.reward)}";
+            boosterNumber.text = $"+{MonetizrUtils.ScoresToString(m.reward)}";
             
             //boosterNumber.text = $"+{ScoreShow(m.reward)}";
 

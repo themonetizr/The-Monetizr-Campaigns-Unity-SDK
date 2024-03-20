@@ -98,7 +98,7 @@ namespace Monetizr.Campaigns
             }
 
 
-            if (Utils.IsInLandscapeMode())
+            if (MonetizrUtils.IsInLandscapeMode())
             {
                 //r = campaign.serverSettings.GetRectParam("RewardCenter.transform_landscape", new List<float> { 0, 0, 0, 0 });
             }
@@ -138,7 +138,7 @@ namespace Monetizr.Campaigns
             var hasBanner = camp.HasAsset(AssetsType.BrandBannerSprite);
 
 
-            if (Utils.IsInLandscapeMode())
+            if (MonetizrUtils.IsInLandscapeMode())
             {
                 if (hasBanner)
                 {
@@ -157,7 +157,7 @@ namespace Monetizr.Campaigns
                 }
             }
 
-            scrollListHasBanner = Utils.IsInLandscapeMode() ? false : hasBanner;
+            scrollListHasBanner = MonetizrUtils.IsInLandscapeMode() ? false : hasBanner;
 
             if (scrollListHasBanner)
             {
@@ -254,10 +254,10 @@ namespace Monetizr.Campaigns
             var playerMoney = MonetizrManager.gameRewards[RewardType.Coins].GetCurrencyFunc();
 
             money = new StringBuilder(money)
-                .Replace("%total_money%", $"{Utils.ScoresToString(playerMoney)}")
-                .Replace("%total_rewards_value%", $"{Utils.ScoresToString(totalRewardsValue)}")
-                .Replace("%claimed_reward_value%", $"{Utils.ScoresToString(claimedRewardsValue)}")
-                .Replace("%possible_reward_value%", $"{Utils.ScoresToString(possibleRewardsValue)}")
+                .Replace("%total_money%", $"{MonetizrUtils.ScoresToString(playerMoney)}")
+                .Replace("%total_rewards_value%", $"{MonetizrUtils.ScoresToString(totalRewardsValue)}")
+                .Replace("%claimed_reward_value%", $"{MonetizrUtils.ScoresToString(claimedRewardsValue)}")
+                .Replace("%possible_reward_value%", $"{MonetizrUtils.ScoresToString(possibleRewardsValue)}")
                 .ToString();
 
             headerText.text = statusText;
@@ -278,7 +278,7 @@ namespace Monetizr.Campaigns
 
             //m.brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(campaignId, AssetsType.BrandBannerSprite);
             m.missionTitle = $"{brandName} video";
-            m.missionDescription = $"Watch video by {brandName} and earn {Utils.ScoresToString(m.reward)} {rewardTitle}";
+            m.missionDescription = $"Watch video by {brandName} and earn {MonetizrUtils.ScoresToString(m.reward)} {rewardTitle}";
             m.progress = 1;
             m.brandName = brandName;
             m.claimButtonText = "Watch video";
@@ -303,7 +303,7 @@ namespace Monetizr.Campaigns
             Func<ulong> getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} multiply";
-            m.missionDescription = $"Earn {Utils.ScoresToString(m.reward)} {rewardTitle} and double it with {brandName}";
+            m.missionDescription = $"Earn {MonetizrUtils.ScoresToString(m.reward)} {rewardTitle} and double it with {brandName}";
             m.progress = ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Claim reward";
@@ -331,7 +331,7 @@ namespace Monetizr.Campaigns
 
             m.missionTitle = $"{brandName} survey";
             m.missionDescription =
-                $"Complete survey and earn {Utils.ScoresToString(m.reward)} {rewardTitle} with {brandName}";
+                $"Complete survey and earn {MonetizrUtils.ScoresToString(m.reward)} {rewardTitle} with {brandName}";
             m.progress = 1.0f; // ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Start survey";
@@ -366,7 +366,7 @@ namespace Monetizr.Campaigns
                 // m.missionDescription = $"Watch video and get {Utils.ScoresToString(m.reward)} {rewardTitle} from {brandName}";
                 m.missionDescription = $"Watch video and get $3 OFF Coupon from {brandName}";
             else
-                m.missionDescription = $"Get {Utils.ScoresToString(m.reward)} {rewardTitle} from {brandName}";
+                m.missionDescription = $"Get {MonetizrUtils.ScoresToString(m.reward)} {rewardTitle} from {brandName}";
 
             m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
@@ -403,7 +403,7 @@ namespace Monetizr.Campaigns
             Func<ulong> getCurrencyFunc = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc;
 
             m.missionTitle = $"{brandName} challenge";
-            m.missionDescription = $"Complete challenge and get {Utils.ScoresToString(m.reward)} {rewardTitle} from {brandName}";
+            m.missionDescription = $"Complete challenge and get {MonetizrUtils.ScoresToString(m.reward)} {rewardTitle} from {brandName}";
             m.progress = 1;// ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Play!";
@@ -543,7 +543,7 @@ namespace Monetizr.Campaigns
 
         void UpdateList()
         {
-            if (Utils.IsInLandscapeMode())
+            if (MonetizrUtils.IsInLandscapeMode())
                 bannerHeight = 0;
             else if (!scrollListHasBanner)
                 bannerHeight = 260;

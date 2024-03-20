@@ -6,12 +6,6 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
-    internal abstract class MonetizrGameParentBase : PanelController
-    {
-        internal abstract void OnOpenDone(int id);
-        internal abstract void OnCloseDone(int id);
-    }
-
     internal class MonetizrCarGame : MonetizrGameParentBase
     {
         internal class Item
@@ -270,13 +264,9 @@ namespace Monetizr.Campaigns
             Log.PrintV("OnCloseDone" + item);
         }
 
-
-
-
         internal override void FinalizePanel(PanelId id)
         {
 
         }
     }
-
 }

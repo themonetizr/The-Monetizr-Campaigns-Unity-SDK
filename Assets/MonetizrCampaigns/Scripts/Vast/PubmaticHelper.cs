@@ -65,7 +65,7 @@ namespace Monetizr.Campaigns
 
                 //string result = admNode.Value.Replace("\\\"", "\"");
 
-                return Utils.UnescapeString(admNode.Value);
+                return MonetizrUtils.UnescapeString(admNode.Value);
             }
 
             public string GetId()
@@ -410,7 +410,7 @@ namespace Monetizr.Campaigns
                 return false;
             }
 
-            openRtbRequest = Utils.UnescapeString(openRtbRequest);
+            openRtbRequest = MonetizrUtils.UnescapeString(openRtbRequest);
 
             openRtbRequest = NielsenDar.ReplaceMacros(openRtbRequest, currentCampaign, AdPlacement.Html5, userAgent);
 

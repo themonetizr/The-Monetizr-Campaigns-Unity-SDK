@@ -70,7 +70,7 @@ public class SponsoredMissionsManager : MonoBehaviour
 
 
         //good default placement for teaser
-        MonetizrManager.SetTeaserPosition(Utils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
+        MonetizrManager.SetTeaserPosition(MonetizrUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
 
         //initialize SDK
         MonetizrManager.Initialize(key, null, () =>

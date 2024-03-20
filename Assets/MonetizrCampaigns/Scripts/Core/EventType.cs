@@ -1,0 +1,24 @@
+﻿//undefine this to test slow internet
+//#define TEST_SLOW_LATENCY
+
+//if we define this - video and survey campaigns will work
+//#define USING_WEBVIEW
+
+namespace Monetizr.Campaigns
+{
+    public partial class MonetizrManager
+    {
+        public enum EventType
+        {
+            Impression,
+            ImpressionEnds,
+            ButtonPressSkip,
+            ButtonPressOk,
+            Error,
+            ActionSuccess,
+            Notification,
+        }
+
+    }
+
+}

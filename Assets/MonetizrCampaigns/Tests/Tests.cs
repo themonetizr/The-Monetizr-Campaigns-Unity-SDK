@@ -186,7 +186,7 @@ namespace MonetizrCampaigns.Tests
         public IEnumerator TestMemoryGame()
         {
             List<int> b = new List<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-            Utils.ShuffleList(b);
+            MonetizrUtils.ShuffleList(b);
 
             var tasks = new List<TestUITask>() {
 

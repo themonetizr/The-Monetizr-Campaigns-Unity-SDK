@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Monetizr.Campaigns
 {
     [System.Serializable]
-    internal class ServerCampaign
+    internal partial class ServerCampaign
     {
         private static readonly Dictionary<AssetsType, System.Type> AssetsSystemTypes = new Dictionary<AssetsType, System.Type>()
         {
@@ -88,112 +88,6 @@ namespace Monetizr.Campaigns
 
         [System.NonSerialized]
         public string openRtbRawResponse = "";
-
-        [System.Serializable]
-        public class Location
-        {
-            public string country;
-
-            public List<Region> regions = new List<Region>();
-        }
-
-        [System.Serializable]
-        public class Region
-        {
-            public string region;
-        }
-
-
-        [System.Serializable]
-        public class Reward
-        {
-            //reward id
-            public string id;
-
-            //title: informative information
-            public string title;
-
-            //if this is false, then product is definitely with a price and requires payment it is not a giveaway
-            public bool claimable;
-
-            //not all giveaways can be delivered digitally, this would be a real product - this might be removed if it will make problems
-            public bool requires_shipping_address;
-
-            //to deliver any kind of giveaways an email is required
-            public bool requires_email_address;
-
-            public bool in_game_only;
-        }
-
-        [System.Serializable]
-        public class Asset
-        {
-            public string id;
-            public string type;
-            public string title;
-            public string url;
-            public string survey_content;
-            public string fname;
-            public string fext;
-            public string fpath;
-            public string mainAssetName;
-            public string localFullPath;
-            
-            public Sprite spriteAsset;
-            public string mediaType;
-
-            internal Asset() { }
-
-            internal static bool ValidateAssetJson(string json)
-            {
-                if (string.IsNullOrEmpty(json))
-                    return false;
-
-                if (!Utils.ValidateJson(json))
-                    return false;
-
-                var d = Utils.ParseJson(json);
-
-                if (d.Count == 0)
-                    return false;
-
-                return d.ContainsKey("id") && d.ContainsKey("type") && d.ContainsKey("title") && d.ContainsKey("url");
-            }
-
-            internal Asset(string json, bool isVideo)
-            {
-                var d = Utils.ParseJson(json);
-
-                id = d["id"];
-                type = d["type"];
-                title = d["title"];
-                url = d["url"];
-                survey_content = d["survey_content"];
-
-                if(isVideo)
-                    InitializeVideoPaths();
-            }
-
-            internal void InitializeVideoPaths()
-            {
-                fpath = Utils.ConvertCreativeToFname(url);
-                fname = "video";
-                fext = Utils.ConvertCreativeToExt("", url);
-                mainAssetName = $"index.html";
-            }
-
-            public Asset Clone()
-            {
-                return (Asset)this.MemberwiseClone();
-            }
-
-            public override string ToString()
-            {
-                return $"Id: {id}, Type: {type}, Title: {title}, URL: {url}, Survey Content: {survey_content}";
-            }
-
-            
-        }
 
         internal bool HasAssetInList(string type)
         {
@@ -453,7 +347,7 @@ namespace Monetizr.Campaigns
                 if (zipFolder != null)
                 {
                     Log.PrintV("Extracting to: " + zipFolder);
-                    var unzipResult = Utils.ExtractAllToDirectory(fpath, zipFolder);
+                    var unzipResult = MonetizrUtils.ExtractAllToDirectory(fpath, zipFolder);
 
                     File.Delete(fpath);
 
@@ -584,9 +478,9 @@ namespace Monetizr.Campaigns
 
                         break;
                     case "video":
-                        asset.fpath = Utils.ConvertCreativeToFname(asset.url);
+                        asset.fpath = MonetizrUtils.ConvertCreativeToFname(asset.url);
                         asset.fname = "video";
-                        asset.fext = Utils.ConvertCreativeToExt("", asset.url);
+                        asset.fext = MonetizrUtils.ConvertCreativeToExt("", asset.url);
                         asset.mainAssetName = $"index.html";
 
                         await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
@@ -602,9 +496,9 @@ namespace Monetizr.Campaigns
 
                     case "html":
 
-                        asset.fpath = Utils.ConvertCreativeToFname(asset.url);
+                        asset.fpath = MonetizrUtils.ConvertCreativeToFname(asset.url);
                         asset.fname = "video";
-                        asset.fext = Utils.ConvertCreativeToExt("", asset.url);
+                        asset.fext = MonetizrUtils.ConvertCreativeToExt("", asset.url);
                         asset.mainAssetName = $"index.html";
                         
                         await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
@@ -668,7 +562,7 @@ namespace Monetizr.Campaigns
 
             File.WriteAllBytes(zipFolder + "/html.zip", data);
 
-            Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
+            MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
 
             File.Delete(zipFolder + "/html.zip");
 
@@ -707,7 +601,7 @@ namespace Monetizr.Campaigns
 
             File.WriteAllBytes(zipFolder + "/html.zip", data);
             
-            Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
+            MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
 
             File.Delete(zipFolder + "/html.zip");
 
@@ -874,7 +768,7 @@ namespace Monetizr.Campaigns
             
             //content = Utils.UnescapeString(content);
 
-            var cd = Utils.ParseContentString(content);
+            var cd = MonetizrUtils.ParseContentString(content);
 
             serverSettings = new SettingsDictionary<string, string>(cd);
 

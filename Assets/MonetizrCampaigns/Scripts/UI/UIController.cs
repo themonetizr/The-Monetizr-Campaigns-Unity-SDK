@@ -7,32 +7,6 @@ using UnityEngine.UI;
 
 namespace Monetizr.Campaigns
 {
-
-    internal enum PanelId
-    {
-        Unknown = -1,
-        StartNotification,
-        RewardCenter,
-        CongratsNotification,
-        SurveyWebView,
-        VideoWebView,
-        Html5WebView,
-        HtmlWebPageView,
-        TinyMenuTeaser,
-        SurveyNotification,
-        DebugPanel,
-        TwitterNotification,
-        GiveawayEmailEnterNotification,
-        BadEmailMessageNotification,
-        EmailEnterCloseConfirmation,
-        CarMemoryGame,
-        MemoryGame,
-        SurveyCloseConfirmation,
-        SurveyUnityView,
-        ActionHtmlPanelView,
-        CodePanelView,
-    }
-
     internal class UIController
     {
         private GameObject rootUIObject;
@@ -138,7 +112,7 @@ namespace Monetizr.Campaigns
                 string prefabLandscape = prefab + "_landscape";
                 GameObject asset = null;
                              
-                if (Utils.IsInLandscapeMode())
+                if (MonetizrUtils.IsInLandscapeMode())
                 {       
                     //Log.Print("Loading landscape");
                     asset = Resources.Load(prefabLandscape) as GameObject;

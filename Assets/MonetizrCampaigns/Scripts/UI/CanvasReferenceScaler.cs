@@ -47,7 +47,7 @@ namespace Monetizr.Campaigns
             _cs = gameObject.GetComponent<CanvasScaler>();
             _initialRefRes = _cs.referenceResolution;
 
-            if (Utils.IsInLandscapeMode())
+            if (MonetizrUtils.IsInLandscapeMode())
                 UpdateLandscape();
             else
                 UpdatePortrait();
@@ -67,7 +67,7 @@ namespace Monetizr.Campaigns
         {
             Log.PrintV("Orientation changed!");
             
-            if (Utils.IsInLandscapeMode())
+            if (MonetizrUtils.IsInLandscapeMode())
                 UpdateLandscape();
             else
                 UpdatePortrait();

@@ -1,66 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.Text.RegularExpressions;
 using System.Net;
-using System.Web;
 using Monetizr.Raygun4Unity;
 using UnityEngine.Networking;
 
 namespace Monetizr.Campaigns
 {
-    internal abstract class MonetizrClient
+    internal partial class MonetizrHttpClient : MonetizrClient
     {
-        internal string currentApiKey;
-        public string userAgent;
-
-        internal MonetizrAnalytics Analytics { get; set; } = null;
-        internal SettingsDictionary<string, string> GlobalSettings { get; set; } = new SettingsDictionary<string, string>();
-
-        //----
-
-        internal void SetUserAgent(string _userAgent) { this.userAgent = _userAgent; }
-
-        internal virtual void Close() { }
-
-        internal abstract Task GetGlobalSettings();
-
-        internal abstract Task<List<ServerCampaign>> GetList();
-
-        internal abstract Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null);
-
-        internal abstract Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null);
-
-        internal abstract void Initialize();
-
-        internal virtual void SetTestMode(bool testMode) {}
-
-        internal abstract Task<string> GetStringFromUrl(string generatorUri);
-    }
-
-    internal class MonetizrHttpClient : MonetizrClient
-    {
-        [Serializable]
-        internal class IpApiData
-        {
-            public string country_name;
-            public string country_code;
-            public string region_code;
-
-            public static IpApiData CreateFromJSON(string jsonString)
-            {
-                return JsonUtility.FromJson<IpApiData>(jsonString);
-            }
-        }
-        //public PlayerInfo playerInfo { get; set; }
-
         private string _baseApiUrl = "https://api.themonetizr.com";
 
         private string CampaignsApiUrl => _baseApiUrl + "/api/campaigns";
@@ -158,29 +112,6 @@ namespace Monetizr.Campaigns
             Client.CancelPendingRequests();
         }
 
-        [Serializable]
-        private class Campaigns
-        {
-            public List<ServerCampaign> campaigns;
-        }
-
-        internal class DownloadUrlAsStringException : Exception
-        {
-            public DownloadUrlAsStringException()
-            {
-            }
-
-            public DownloadUrlAsStringException(string message)
-                : base(message)
-            {
-            }
-
-            public DownloadUrlAsStringException(string message, Exception inner)
-                : base(message, inner)
-            {
-            }
-        }
-
         public static async Task<(bool isSuccess,string content)> DownloadUrlAsString(HttpRequestMessage requestMessage)
         {
             HttpResponseMessage response = null;
@@ -219,7 +150,7 @@ namespace Monetizr.Campaigns
 
             Log.PrintV($"Settings: {responseString}");
 
-            return new SettingsDictionary<string, string>(Utils.ParseContentString(responseString));
+            return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
         
 
@@ -366,7 +297,7 @@ namespace Monetizr.Campaigns
 
                 if (minSdkVersion != null)
                 {
-                    bool sdkVersionCheck = Utils.CompareVersions(MonetizrManager.SDKVersion, minSdkVersion) < 0;
+                    bool sdkVersionCheck = MonetizrUtils.CompareVersions(MonetizrManager.SDKVersion, minSdkVersion) < 0;
 
                     if (sdkVersionCheck)
                     {
@@ -495,8 +426,8 @@ namespace Monetizr.Campaigns
                     {"screen-dpi", Screen.dpi.ToString(CultureInfo.InvariantCulture)},
                     {"device-group",MonetizrMobileAnalytics.GetDeviceGroup().ToString().ToLower()},
                     {"device-memory",SystemInfo.systemMemorySize.ToString()},
-                    {"device-model",Utils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
-                    {"device-name",Utils.EncodeStringIntoAscii(SystemInfo.deviceName)},
+                    {"device-model",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
+                    {"device-name",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceName)},
                     {"internet-connection",MonetizrMobileAnalytics.GetInternetConnectionType()},
                     {"local-time-stamp",((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString()}
                 }

@@ -70,8 +70,8 @@ namespace Monetizr.Campaigns
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
             t = new StringBuilder(t)
-                .Replace("%ingame_reward%", $"{Utils.ScoresToString(m.reward)} {rewardTitle}")
-                .Replace("%reward_amount%", $"{Utils.ScoresToString(m.reward)}")
+                .Replace("%ingame_reward%", $"{MonetizrUtils.ScoresToString(m.reward)} {rewardTitle}")
+                .Replace("%reward_amount%", $"{MonetizrUtils.ScoresToString(m.reward)}")
                 .Replace("%reward_title%", $"{rewardTitle}")
                 .Replace("<br/>", "\n")
                 .ToString();

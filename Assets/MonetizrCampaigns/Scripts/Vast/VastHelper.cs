@@ -303,17 +303,17 @@ namespace Monetizr.Campaigns
             {
                 //Log.PrintV($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
 
-                var jsrList = Utils.CreateListFromArray<Verification_typeJavaScriptResource, VerificationJavaScriptResource>(
+                var jsrList = MonetizrUtils.CreateListFromArray<Verification_typeJavaScriptResource, VerificationJavaScriptResource>(
                     av.JavaScriptResource,
                     (Verification_typeJavaScriptResource jsr) => { return new VerificationJavaScriptResource(jsr); },
                     new VerificationJavaScriptResource());
 
-                var trackingList = Utils.CreateListFromArray<TrackingEvents_Verification_typeTracking, TrackingEvent>(
+                var trackingList = MonetizrUtils.CreateListFromArray<TrackingEvents_Verification_typeTracking, TrackingEvent>(
                     av.TrackingEvents,
                     (TrackingEvents_Verification_typeTracking te) => { return new TrackingEvent(te); },
                     new TrackingEvent());
 
-                var execList = Utils.CreateListFromArray<Verification_typeExecutableResource, VerificationExecutableResource>(
+                var execList = MonetizrUtils.CreateListFromArray<Verification_typeExecutableResource, VerificationExecutableResource>(
                     av.ExecutableResource,
                     (Verification_typeExecutableResource er) => { return new VerificationExecutableResource(er); },
                     new VerificationExecutableResource());
@@ -549,7 +549,7 @@ namespace Monetizr.Campaigns
 
                     var it = c.Linear;
 
-                    Utils.AddArrayToList(
+                    MonetizrUtils.AddArrayToList(
                         _serverCampaign.vastSettings.videoTrackingEvents,
                         it.TrackingEvents,
                         te =>
@@ -581,7 +581,7 @@ namespace Monetizr.Campaigns
                         {
                             string campaignSettings = av.InnerText.Trim();
 
-                            var cs = Utils.ParseContentString(campaignSettings);
+                            var cs = MonetizrUtils.ParseContentString(campaignSettings);
 
                             if (cs.TryGetValue("content", out var c))
                                 _serverCampaign.content = c;
@@ -671,9 +671,9 @@ namespace Monetizr.Campaigns
                 {
                     id = cId,
                     url = value,
-                    fpath = Utils.ConvertCreativeToFname(value),
+                    fpath = MonetizrUtils.ConvertCreativeToFname(value),
                     fname = "video",
-                    fext = Utils.ConvertCreativeToExt(type, value),
+                    fext = MonetizrUtils.ConvertCreativeToExt(type, value),
                     type = "programmatic_video",
                     mainAssetName = $"index.html",
                     mediaType = type,
@@ -684,7 +684,7 @@ namespace Monetizr.Campaigns
                 var videoUrl = value;
                 var skipOffset = it.skipoffset;
 
-                Utils.AddArrayToList(
+                MonetizrUtils.AddArrayToList(
                     _serverCampaign.vastSettings.videoTrackingEvents,
                     it.TrackingEvents,
                     te =>
@@ -704,7 +704,7 @@ namespace Monetizr.Campaigns
                 {
                     _serverCampaign.vastSettings.videoSettings.videoClickThroughUrl = it.VideoClicks.ClickThrough?.Value;
                     
-                     Utils.AddArrayToList(
+                     MonetizrUtils.AddArrayToList(
                             _serverCampaign.vastSettings.videoTrackingEvents,
                             it.VideoClicks.ClickTracking,  
                            te => new TrackingEvent("click",te.Value),
@@ -783,7 +783,7 @@ namespace Monetizr.Campaigns
                     var videoUrl = mediaFile.Value;
                     var skipOffset = it.skipoffset;
 
-                    Utils.AddArrayToList(
+                    MonetizrUtils.AddArrayToList(
                         _serverCampaign.vastSettings.videoTrackingEvents,
                         it.TrackingEvents,
                         te =>
@@ -1022,7 +1022,7 @@ namespace Monetizr.Campaigns
 
             //var dict = Utils.ParseJson(adp); //Json.Deserialize(adp) as Dictionary<string, object>);
 
-            var parsedDict = Utils.ParseContentString(adp);
+            var parsedDict = MonetizrUtils.ParseContentString(adp);
 
             foreach (var i in parsedDict)
             {
@@ -1054,7 +1054,7 @@ namespace Monetizr.Campaigns
 
             //ZipFile.ExtractToDirectory(zipFolder + "/html.zip", zipFolder);
 
-            Utils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
+            MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
 
             File.Delete(zipFolder + "/html.zip");
 
