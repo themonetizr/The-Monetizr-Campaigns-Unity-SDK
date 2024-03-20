@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Campaigns
 {
     internal partial class ServerCampaign
     {

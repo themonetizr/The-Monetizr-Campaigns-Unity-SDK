@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Networking
 {
     internal partial class MonetizrHttpClient
     {

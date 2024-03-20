@@ -1,4 +1,4 @@
-﻿namespace Monetizr.SDK
+﻿namespace Monetizr.SDK.Networking
 {
     internal class PlayerInfo
     {

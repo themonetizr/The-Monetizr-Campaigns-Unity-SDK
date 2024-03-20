@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Monetizr.SDK.Campaigns;
+using System;
 using System.Collections.Generic;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Networking
 {
     internal partial class MonetizrHttpClient
     {

@@ -1,4 +1,5 @@
-﻿using Monetizr.SDK.Debug;
+﻿using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Debug;
 using System;
 using System.Collections;
 using UnityEngine;

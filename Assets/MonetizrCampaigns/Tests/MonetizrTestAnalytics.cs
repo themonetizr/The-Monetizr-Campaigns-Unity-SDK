@@ -1,4 +1,7 @@
 ﻿using Monetizr.SDK;
+using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Missions;
 using System.Collections.Generic;
 
 namespace MonetizrCampaigns.Tests

@@ -1,7 +1,7 @@
 ﻿using Monetizr.SDK.Debug;
 using UnityEngine;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Campaigns
 {
     internal abstract class LocalSerializer<T> where T: BaseCollection
     {

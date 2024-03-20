@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Missions
 {
     [Flags]
     public enum MissionType : uint
@@ -18,6 +18,4 @@ namespace Monetizr.SDK
         CodeReward = 512,
         All = uint.MaxValue,
     }
-
-
 }

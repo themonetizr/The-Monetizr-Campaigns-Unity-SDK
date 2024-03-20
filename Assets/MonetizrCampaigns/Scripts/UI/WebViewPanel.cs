@@ -1,7 +1,11 @@
 ﻿#define UNI_WEB_VIEW
 
 using Monetizr.Campaigns;
+using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;

@@ -13,8 +13,11 @@ using UnityEngine.Networking;
 using Monetizr.SDK.Utils;
 using Monetizr.Campaigns;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.Campaigns;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Networking
 {
     internal partial class MonetizrHttpClient : MonetizrClient
     {

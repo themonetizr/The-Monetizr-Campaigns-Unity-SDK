@@ -5,6 +5,9 @@ using System;
 using System.Globalization;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.Networking;
+using Monetizr.SDK.Campaigns;
 
 #if UNITY_IOS
 using UnityEngine.iOS;
@@ -18,7 +21,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Analytics
 {
     internal class MonetizrMobileAnalytics : MonetizrAnalytics
     {

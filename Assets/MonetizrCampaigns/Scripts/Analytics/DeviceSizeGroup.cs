@@ -10,7 +10,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Analytics
 {
     internal enum DeviceSizeGroup
     {

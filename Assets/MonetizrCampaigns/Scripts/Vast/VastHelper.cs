@@ -18,6 +18,9 @@ using Vector2 = UnityEngine.Vector2;
 using Monetizr.SDK;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.Networking;
+using Monetizr.SDK.Campaigns;
 
 namespace Monetizr.Campaigns
 {

@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Monetizr.SDK.Missions;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Campaigns
 {
     [Serializable]
     internal class MissionsCollection : BaseCollection

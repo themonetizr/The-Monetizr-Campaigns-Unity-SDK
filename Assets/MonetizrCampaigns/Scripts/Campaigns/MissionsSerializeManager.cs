@@ -1,10 +1,8 @@
-using Monetizr.SDK;
 using Monetizr.SDK.Debug;
-using System.Collections;
+using Monetizr.SDK.Missions;
 using System.Collections.Generic;
-using UnityEngine.Assertions;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Campaigns
 {
     internal class MissionsSerializeManager : LocalSerializer<MissionsCollection>
     {

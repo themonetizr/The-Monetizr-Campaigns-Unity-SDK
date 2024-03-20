@@ -7,6 +7,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Monetizr.SDK.Campaigns;
 
 
 namespace Monetizr.SDK

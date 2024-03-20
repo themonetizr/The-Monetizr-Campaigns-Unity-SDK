@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Minigames
 {
     internal class MonetizrCar : MonoBehaviour
     {

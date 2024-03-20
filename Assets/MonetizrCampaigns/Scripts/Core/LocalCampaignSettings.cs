@@ -7,6 +7,7 @@
 using UnityEngine;
 using System;
 using Monetizr.SDK.Utils;
+using Monetizr.SDK.Missions;
 
 
 namespace Monetizr.SDK

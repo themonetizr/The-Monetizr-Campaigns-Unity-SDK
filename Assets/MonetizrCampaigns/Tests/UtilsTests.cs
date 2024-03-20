@@ -13,6 +13,7 @@ using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 using Toggle = UnityEngine.UI.Toggle;
 using Monetizr.SDK.Utils;
+using Monetizr.SDK.Missions;
 
 namespace MonetizrCampaigns.Tests
 {

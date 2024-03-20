@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monetizr.SDK.Campaigns;
+using System;
 
 #if UNITY_IOS
 using UnityEngine.iOS;
@@ -12,7 +13,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Analytics
 {
     internal class AdElement
     {

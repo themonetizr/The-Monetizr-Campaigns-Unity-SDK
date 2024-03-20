@@ -1,5 +1,7 @@
 ﻿using Monetizr.Campaigns;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.Networking;
 using Monetizr.SDK.Utils;
 using System;
 using System.Collections.Generic;
@@ -8,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Campaigns
 {
     [System.Serializable]
     internal partial class ServerCampaign

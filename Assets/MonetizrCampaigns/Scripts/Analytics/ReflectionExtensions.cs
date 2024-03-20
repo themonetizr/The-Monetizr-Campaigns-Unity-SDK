@@ -12,7 +12,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Analytics
 {
     public static class ReflectionExtensions
     {
@@ -23,9 +23,5 @@ namespace Monetizr.SDK
             var field = obj.GetType().GetField(name, bindingFlags);
             return (T)field?.GetValue(obj);
         }
-
     }
-
-
-
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Monetizr.Raygun4Unity;
+using Monetizr.SDK.Analytics;
 using UnityEngine;
 
 namespace Monetizr.SDK.Debug

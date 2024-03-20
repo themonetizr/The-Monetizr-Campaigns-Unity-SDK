@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Monetizr.SDK.Missions;
+using System.Collections.Generic;
 
 #if UNITY_IOS
 using UnityEngine.iOS;
@@ -12,7 +13,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Analytics
 {
     internal class TrackingEvent
     {
@@ -22,7 +23,4 @@ namespace Monetizr.SDK
         private Dictionary<string, string> additionalValues;
 
     }
-
-
-
 }

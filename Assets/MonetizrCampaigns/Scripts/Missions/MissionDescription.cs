@@ -1,7 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Missions
 {
     public class MissionDescription
     {

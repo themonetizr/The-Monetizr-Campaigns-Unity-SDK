@@ -1,9 +1,11 @@
-﻿using Monetizr.SDK.Utils;
+﻿using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Missions
 {
     [Serializable]
     public class Mission

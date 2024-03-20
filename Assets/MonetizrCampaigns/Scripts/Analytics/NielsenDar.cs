@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Campaigns;
 
 #if UNITY_IOS
 using UnityEngine.iOS;
@@ -18,7 +19,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Analytics
 {
     internal static class NielsenDar
     {
@@ -202,7 +203,4 @@ namespace Monetizr.SDK
             return Timestamp.ToString();
         }
     }
-
-
-
 }

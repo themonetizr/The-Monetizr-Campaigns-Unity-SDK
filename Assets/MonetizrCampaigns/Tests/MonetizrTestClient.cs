@@ -6,7 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Monetizr.SDK.ServerCampaign;
+using Monetizr.Campaigns;
+using Monetizr.SDK.Campaigns;
+using static Monetizr.SDK.Campaigns.ServerCampaign;
 
 namespace MonetizrCampaigns.Tests
 {

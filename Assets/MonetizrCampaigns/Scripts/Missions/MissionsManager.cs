@@ -1,12 +1,12 @@
+using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Missions
 {
     //TODO: This class must be improved
     internal class MissionsManager
