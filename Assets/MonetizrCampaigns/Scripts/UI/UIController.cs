@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Monetizr.SDK.Utils;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class UIController
     {

@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Monetizr.SDK.Utils;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     [Serializable]
     public class Mission

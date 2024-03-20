@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monetizr.SDK.Debug;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Utils
 {
     public static class MonetizrUtils
     {

@@ -1,4 +1,4 @@
-﻿namespace Monetizr.Campaigns
+﻿namespace Monetizr.SDK
 {
     internal abstract class MonetizrGameParentBase : PanelController
     {

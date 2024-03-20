@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using Monetizr.Raygun4Unity;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Debug
 {
-
     public class MonetizrErrorLogger : MonoBehaviour
     {
         private RaygunClient _raygunClient;

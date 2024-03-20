@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal static class ExtensionMethods
     {

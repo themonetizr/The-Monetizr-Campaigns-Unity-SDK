@@ -5,6 +5,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Monetizr.Campaigns.Vast42;
+using Monetizr.SDK;
+using Monetizr.SDK.Debug;
+using Monetizr.SDK.Utils;
 using SimpleJSON;
 using UnityEngine;
 

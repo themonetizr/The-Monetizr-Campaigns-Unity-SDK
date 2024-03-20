@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using Monetizr.SDK.Utils;
+using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal partial class ServerCampaign
     {

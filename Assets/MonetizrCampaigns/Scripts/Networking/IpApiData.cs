@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal partial class MonetizrHttpClient
     {

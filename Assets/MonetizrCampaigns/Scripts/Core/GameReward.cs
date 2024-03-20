@@ -6,8 +6,9 @@
 
 using UnityEngine;
 using System;
+using Monetizr.SDK.Debug;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     public partial class MonetizrManager
     {

@@ -1,4 +1,4 @@
-﻿using Monetizr.Campaigns;
+﻿using Monetizr.SDK;
 using MonetizrCampaigns.Tests;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Monetizr.Campaigns.ServerCampaign;
+using static Monetizr.SDK.ServerCampaign;
 
 namespace MonetizrCampaigns.Tests
 {

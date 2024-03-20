@@ -15,6 +15,9 @@ using System.Xml.Serialization;
 using UnityEngine;
 using Monetizr.Campaigns.Vast42;
 using Vector2 = UnityEngine.Vector2;
+using Monetizr.SDK;
+using Monetizr.SDK.Utils;
+using Monetizr.SDK.Debug;
 
 namespace Monetizr.Campaigns
 {

@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class EnterEmailPanel : PanelController
     {

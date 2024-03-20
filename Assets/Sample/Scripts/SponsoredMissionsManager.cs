@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Monetizr.Campaigns;
+using Monetizr.SDK;
 using UnityEngine.UI;
+using Monetizr.SDK.Utils;
 
 
 public class SponsoredMissionsManager : MonoBehaviour

@@ -1,10 +1,11 @@
+using Monetizr.SDK.Debug;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal partial class MonetizrMemoryGame : MonetizrGameParentBase
     {

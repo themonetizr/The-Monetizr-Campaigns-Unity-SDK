@@ -12,7 +12,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     public static class ReflectionExtensions
     {

@@ -9,7 +9,7 @@ using UnityEngine;
 using System;
 
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     [Serializable]
     internal class CampaignsCollection : BaseCollection

@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Monetizr.Campaigns;
+using Monetizr.SDK;
+using Monetizr.SDK.Utils;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
-using static Monetizr.Campaigns.ServerCampaign;
+using static Monetizr.SDK.ServerCampaign;
 using Button = UnityEngine.UI.Button;
 using Toggle = UnityEngine.UI.Toggle;
 

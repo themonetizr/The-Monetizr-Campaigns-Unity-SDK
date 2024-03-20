@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Debug
 {
     internal class DebugPanel : PanelController
     {
         public Button closeButton;
         public Dropdown apiKeysList;
-
         public Toggle keepLocalData;
         public Toggle serverClaims;
         public Toggle claimIfSkipped;
-
         public Text versionText;
-
-
 
         private bool isIDChanged;
 

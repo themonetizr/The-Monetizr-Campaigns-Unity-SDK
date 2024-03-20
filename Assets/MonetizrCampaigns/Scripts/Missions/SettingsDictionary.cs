@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     public class SettingsDictionary<TKey, TValue> : Dictionary<TKey, TValue>
     {

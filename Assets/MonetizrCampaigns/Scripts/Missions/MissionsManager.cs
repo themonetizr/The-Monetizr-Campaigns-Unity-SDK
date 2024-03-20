@@ -1,10 +1,12 @@
+using Monetizr.SDK.Debug;
+using Monetizr.SDK.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     //TODO: This class must be improved
     internal class MissionsManager
@@ -618,7 +620,7 @@ namespace Monetizr.Campaigns
                     float rewardAmount = _m.GetRewardAmount() / 100.0f;
                     RewardType currency = _m.GetRewardType();
 
-                    Debug.Log("MISSION: " + _m.GetMissionType() + " | REWARD: " + _m.GetRewardType() + " | AMOUNT: " + _m.GetRewardAmount());
+                    UnityEngine.Debug.Log("MISSION: " + _m.GetMissionType() + " | REWARD: " + _m.GetRewardType() + " | AMOUNT: " + _m.GetRewardAmount());
 
                     MonetizrManager.GameReward gameReward = MonetizrManager.GetGameReward(currency);
 

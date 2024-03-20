@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class MonetizrCar : MonoBehaviour
     {

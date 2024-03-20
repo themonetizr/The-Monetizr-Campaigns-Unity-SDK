@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal partial class MonetizrMemoryGame
     {

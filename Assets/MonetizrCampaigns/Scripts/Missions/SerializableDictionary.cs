@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     [Serializable]
     public class SerializableDictionary<TKey, TValue> : ISerializationCallbackReceiver

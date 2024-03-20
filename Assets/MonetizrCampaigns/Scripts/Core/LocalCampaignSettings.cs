@@ -6,9 +6,10 @@
 
 using UnityEngine;
 using System;
+using Monetizr.SDK.Utils;
 
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     [Serializable]
     internal class LocalCampaignSettings

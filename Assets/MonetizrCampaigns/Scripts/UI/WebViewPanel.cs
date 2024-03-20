@@ -1,5 +1,7 @@
 ﻿#define UNI_WEB_VIEW
 
+using Monetizr.Campaigns;
+using Monetizr.SDK.Debug;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ using UnityEngine.UI;
 
 //using UniWebView;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class WebViewPanel : PanelController
     {

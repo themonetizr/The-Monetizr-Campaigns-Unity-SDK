@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Monetizr.SDK.Debug;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal enum ButtonType
     {

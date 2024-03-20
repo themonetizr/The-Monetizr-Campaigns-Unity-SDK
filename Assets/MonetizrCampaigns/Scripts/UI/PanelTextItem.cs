@@ -1,10 +1,11 @@
+using Monetizr.SDK.Utils;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
 
     internal class PanelTextItem : MonoBehaviour

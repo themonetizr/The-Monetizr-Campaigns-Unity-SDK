@@ -1,4 +1,5 @@
 ﻿
+using Monetizr.SDK.Debug;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +7,7 @@ using ThreeDISevenZeroR.UnityGifDecoder;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.GIF
 {
     [RequireComponent(typeof(RawImage))]
     public class GifImage : MonoBehaviour

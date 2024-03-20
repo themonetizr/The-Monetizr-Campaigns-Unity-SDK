@@ -5,7 +5,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Utils
 {
     [System.Serializable]
     public class UDateTime : ISerializationCallbackReceiver

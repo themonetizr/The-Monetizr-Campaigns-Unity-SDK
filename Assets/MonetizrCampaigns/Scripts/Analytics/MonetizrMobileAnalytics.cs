@@ -3,6 +3,8 @@ using UnityEngine;
 using mixpanel;
 using System;
 using System.Globalization;
+using Monetizr.SDK.Utils;
+using Monetizr.SDK.Debug;
 
 #if UNITY_IOS
 using UnityEngine.iOS;
@@ -16,7 +18,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class MonetizrMobileAnalytics : MonetizrAnalytics
     {
@@ -401,7 +403,7 @@ namespace Monetizr.Campaigns
         {
             //Log.PrintV($"------Track event: {currentCampaign} {adPlacement} {eventType}");
 
-            Debug.Assert(currentCampaign != null);
+            UnityEngine.Debug.Assert(currentCampaign != null);
 
             string placementName = GetPlacementName(adPlacement);
 
@@ -666,7 +668,7 @@ namespace Monetizr.Campaigns
 
         internal override void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string, string> additionalValues = null, double duration = -1.0)
         {
-            Debug.Assert(isMixpanelInitialized);
+            UnityEngine.Debug.Assert(isMixpanelInitialized);
 
             string logString = $"--->SendEvent: {name}";
 

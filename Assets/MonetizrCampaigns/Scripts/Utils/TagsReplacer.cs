@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Utils
 {
     abstract class TagsReplacer
     {

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.UI
 {
 	[AddComponentMenu("UI/Effects/Gradient")]
 	public class Gradient : BaseMeshEffect

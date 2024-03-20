@@ -1,10 +1,11 @@
+using Monetizr.SDK.Debug;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Video
 {
 
     internal class MonetizrVideoPlayer : MonoBehaviour

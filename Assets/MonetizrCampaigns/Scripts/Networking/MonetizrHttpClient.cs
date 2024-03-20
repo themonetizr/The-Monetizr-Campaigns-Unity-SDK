@@ -10,8 +10,11 @@ using UnityEngine;
 using System.Net;
 using Monetizr.Raygun4Unity;
 using UnityEngine.Networking;
+using Monetizr.SDK.Utils;
+using Monetizr.Campaigns;
+using Monetizr.SDK.Debug;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal partial class MonetizrHttpClient : MonetizrClient
     {

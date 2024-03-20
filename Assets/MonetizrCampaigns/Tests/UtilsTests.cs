@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Monetizr.Campaigns;
+using Monetizr.SDK;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEngine.UI;
@@ -12,6 +12,7 @@ using System;
 using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 using Toggle = UnityEngine.UI.Toggle;
+using Monetizr.SDK.Utils;
 
 namespace MonetizrCampaigns.Tests
 {

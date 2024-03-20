@@ -4,6 +4,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using Monetizr.SDK.Debug;
 
 #if UNITY_IOS
 using UnityEngine.iOS;
@@ -17,7 +18,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal static class NielsenDar
     {

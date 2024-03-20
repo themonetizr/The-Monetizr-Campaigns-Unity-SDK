@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using Monetizr.SDK.Debug;
 using UnityEditor;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class MonetizrMenu : UnityEditor.Editor
     {

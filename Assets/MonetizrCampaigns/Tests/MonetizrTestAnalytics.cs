@@ -1,4 +1,4 @@
-﻿using Monetizr.Campaigns;
+﻿using Monetizr.SDK;
 using System.Collections.Generic;
 
 namespace MonetizrCampaigns.Tests

@@ -7,9 +7,10 @@
 using UnityEngine.Networking;
 using System;
 using System.Threading.Tasks;
+using Monetizr.SDK.Debug;
 
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class DownloadHelper
     {

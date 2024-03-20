@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Monetizr.SDK.Debug;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Utils
 {
-
     internal static class AssetsHelper
     {
         /// <summary>

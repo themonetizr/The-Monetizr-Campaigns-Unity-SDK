@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     [Serializable]
     internal abstract class BaseCollection

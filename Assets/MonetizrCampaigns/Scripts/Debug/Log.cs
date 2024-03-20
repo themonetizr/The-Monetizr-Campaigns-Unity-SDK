@@ -1,11 +1,8 @@
 #define MONETIZR_VERBOSE
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Debug
 {
     public static class Log
     {
@@ -22,7 +19,7 @@ namespace Monetizr.Campaigns
         public static void Print(object message)
         {
 #if UNITY_EDITOR
-            Debug.Log($"Monetizr SDK: {message}");
+            UnityEngine.Debug.Log($"Monetizr SDK: {message}");
 #else
             PrintLine($"Monetizr SDK: {message}");
 #endif
@@ -30,17 +27,17 @@ namespace Monetizr.Campaigns
 
         public static void PrintLine(object message)
         {
-            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message);
+            UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message);
         }
 
         public static void PrintError(object message)
         {
-            Debug.LogError($"Monetizr SDK: {message}");
+            UnityEngine.Debug.LogError($"Monetizr SDK: {message}");
         }
 
         public static void PrintWarning(object message)
         {
-            Debug.LogWarning($"Monetizr SDK: {message}");
+            UnityEngine.Debug.LogWarning($"Monetizr SDK: {message}");
         }
     }
 }

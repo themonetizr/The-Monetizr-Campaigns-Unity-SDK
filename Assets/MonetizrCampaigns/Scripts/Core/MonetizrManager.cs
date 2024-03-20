@@ -7,7 +7,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Monetizr.Campaigns;
+using Monetizr.SDK;
 using System;
 using System.Threading.Tasks;
 using UnityEngine.UI;
@@ -18,8 +18,9 @@ using System.Text;
 using System.Threading;
 using System.Linq;
 using mixpanel;
+using Monetizr.SDK.Debug;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     public partial class MonetizrManager : MonoBehaviour
     {
@@ -161,13 +162,13 @@ namespace Monetizr.Campaigns
         {
             if (gameRewards == null || gameRewards.Count == 0)
             {
-                Debug.Log("gameRewards dictionary is null or empty.");
+                UnityEngine.Debug.Log("gameRewards dictionary is null or empty.");
                 return;
             }
 
             foreach (KeyValuePair<RewardType, GameReward> entry in gameRewards)
             {
-                Debug.Log($"Key: {entry.Key}, Value: {entry.Value}");
+                UnityEngine.Debug.Log($"Key: {entry.Key}, Value: {entry.Value}");
             }
         }
 

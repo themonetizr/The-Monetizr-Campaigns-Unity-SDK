@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     [Flags]
     public enum MissionType : uint

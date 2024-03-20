@@ -4,7 +4,7 @@
 //if we define this - video and survey campaigns will work
 //#define USING_WEBVIEW
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     public partial class MonetizrManager
     {

@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Monetizr.Campaigns;
+using Monetizr.SDK;
 using UnityEngine;
 using UnityEngine.UI;
 

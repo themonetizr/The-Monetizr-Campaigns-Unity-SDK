@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
+using Monetizr.SDK.Utils;
+using Monetizr.SDK.Debug;
 
 #if UNITY_IOS
 using UnityEngine.iOS;
@@ -13,7 +15,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class VastTagsReplacer : TagsReplacer
     {

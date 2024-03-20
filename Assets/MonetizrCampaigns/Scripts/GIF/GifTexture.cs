@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.GIF
 {
     public class GifTexture
     {

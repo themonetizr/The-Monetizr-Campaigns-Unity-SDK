@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Monetizr.Campaigns;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Utils
 {
     public class TeaserHelper : MonoBehaviour
     {

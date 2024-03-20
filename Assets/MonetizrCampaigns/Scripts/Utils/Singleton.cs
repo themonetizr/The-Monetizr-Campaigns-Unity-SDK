@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.Utils
 {
-
     internal abstract class Singleton<T> : MonoBehaviour where T : Component
     {
 

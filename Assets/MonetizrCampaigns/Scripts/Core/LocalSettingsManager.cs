@@ -9,7 +9,7 @@ using UnityEngine;
 using System;
 
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal class LocalSettingsManager : LocalSerializer<CampaignsCollection>
     {
@@ -61,7 +61,7 @@ namespace Monetizr.Campaigns
         {
             var camp = data.GetCampaign(campaign);
 
-            Debug.Assert(camp != null);
+            UnityEngine.Debug.Assert(camp != null);
 
             return camp;
         }

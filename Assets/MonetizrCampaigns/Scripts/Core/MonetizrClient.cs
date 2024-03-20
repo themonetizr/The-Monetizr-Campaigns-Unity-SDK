@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal abstract class MonetizrClient
     {

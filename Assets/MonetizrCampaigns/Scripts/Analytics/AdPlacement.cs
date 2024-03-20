@@ -10,7 +10,7 @@ using UnityEngine.Android;
 using Facebook.Unity;   
 #endif
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK
 {
     internal enum AdPlacement
     {
