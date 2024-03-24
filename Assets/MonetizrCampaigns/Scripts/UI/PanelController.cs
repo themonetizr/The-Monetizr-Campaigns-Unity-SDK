@@ -96,7 +96,7 @@ namespace Monetizr.SDK.UI
                     additionalEventValues);
             }
 
-            if (active) //showing
+            if (active)
             {
                 if (state != State.Animating && state != State.Visible)
                 {
@@ -108,7 +108,7 @@ namespace Monetizr.SDK.UI
                     state = State.Animating;
                 }
             }
-            else if (state != State.Hidden) //hiding
+            else if (state != State.Hidden)
             {
                 BlockRaycasts(false);
 
@@ -174,7 +174,6 @@ namespace Monetizr.SDK.UI
 
             _onComplete?.Invoke(isSkipped);
         }
-
 
     }
 

@@ -1,14 +1,7 @@
-﻿//undefine this to test slow internet
-//#define TEST_SLOW_LATENCY
-
-//if we define this - video and survey campaigns will work
-//#define USING_WEBVIEW
-
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Missions;
-
 
 namespace Monetizr.SDK.Core
 {
@@ -21,7 +14,6 @@ namespace Monetizr.SDK.Core
         [SerializeField] internal UDateTime lastTimeShowNotification;
         [SerializeField] internal int amountNotificationsShown;
         [SerializeField] internal int amountTeasersShown;
-
         [SerializeField] internal SerializableDictionary<string, string> settings = new SerializableDictionary<string, string>();
     }
 

@@ -70,8 +70,7 @@ namespace Monetizr.SDK.Analytics
             Log.PrintError($"Unknown VAST tag {tag}");
             return "-1";
         }
+
     }
-
-
 
 }

@@ -21,18 +21,14 @@ namespace Monetizr.SDK.UI
         public Image rewardLine;
         public Text rewardPercent;
         public Text buttonText;
-        //public Image backgoundImage;
         public Image backgroundImage2;
         public Image borderImage;
-
         public Sprite defaultBoosterIcon;
-
         public Image backgroundImage;
         public Image giftIcon;
 
         RewardCenterPanel rewardCenterPanel;
         internal Mission mission;
-
         bool updateWithTimer = false;
         DateTime lastUpdateTime;
 
@@ -40,10 +36,9 @@ namespace Monetizr.SDK.UI
         public ulong currectProgress;
         public ulong maxProgress;
         public bool showGift = false;
-
         public RectTransform rect;
-
         public GameObject hideOverlay;
+
         private Sprite brandBanner;
         private Sprite missionIcon;
 
@@ -51,8 +46,6 @@ namespace Monetizr.SDK.UI
         {
             rewardCenterPanel = panel;
             mission = m;
-
-            //brandBanner = MonetizrManager.Instance.GetAsset<Sprite>(m.campaignId, AssetsType.BrandBannerSprite);
             missionIcon = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
 
             brandBanner = null;
@@ -76,40 +69,22 @@ namespace Monetizr.SDK.UI
                 buttonText.text = m.claimButtonText;
             }
 
-
             brandIcon.sprite = missionIcon;
             rewardTitle.text = m.missionTitle;
             rewardDescription.text = m.missionDescription;
-
           
             hideOverlay.SetActive(m.showHidden);
 
-            
-
-            //active-deactive
             if(m.activateTime != DateTime.MinValue && m.deactivateTime != DateTime.MaxValue)
-            //if (m.type == MissionType.SurveyReward)
             {
                 updateWithTimer = true;
                 lastUpdateTime = DateTime.Now.AddSeconds(1);
-
-                //if(!isButtonClickable())
-                //{
-                    
-                    updateButtonTimer();
-                //}
+                updateButtonTimer();
             }
 
             actionButton.clickReceiver = this;
-
-            //actionButton.onClick.AddListener( ()=> { md.onClaimButtonPress.Invoke(); });
-
             boosterNumber.text = $"+{MonetizrUtils.ScoresToString(m.reward)}";
-            
-            //boosterNumber.text = $"+{ScoreShow(m.reward)}";
-
             Sprite rewardIcon = MissionsManager.GetMissionRewardImage(m);;
-
 
             boosterIcon.sprite = rewardIcon;
             giftIcon.sprite = rewardIcon;
@@ -124,12 +99,9 @@ namespace Monetizr.SDK.UI
             giftIcon.gameObject.SetActive(showGift);
 
             rewardLine.fillAmount = m.progress;
-
-            //rewardPercent.text = $"{md.progress*100.0f:F1}%";
-
             rewardPercent.text = $"{currectProgress}/{maxProgress}";
 
-            if (m.progress < 1.0f) //reward isn't completed
+            if (m.progress < 1.0f)
             {
                 progressBar.SetActive(true);
                 actionButton.gameObject.SetActive(false);
@@ -141,11 +113,9 @@ namespace Monetizr.SDK.UI
             }
 
             actionButton.gameObject.name = $"RewardCenterButtonClaim{id}";
-            //----
 
             UIController.PrepareCustomColors(backgroundImage, borderImage, m.campaignServerSettings, PanelId.RewardCenter);
             UIController.PrepareCustomColors(null, backgroundImage2, m.campaignServerSettings, PanelId.RewardCenter);
-
 
             foreach (var t in gameObject.GetComponents<PanelTextItem>())
                 t.InitializeByParent(PanelId.RewardCenter, m);
@@ -190,13 +160,7 @@ namespace Monetizr.SDK.UI
                 actionButtonImage.color = Color.black;
             }
         }
-        // Start is called before the first frame update
-        //void Start()
-        //{
-
-        //}
-
-        //// Update is called once per frame
+        
         void Update()
         {
             if(updateWithTimer)
@@ -214,9 +178,9 @@ namespace Monetizr.SDK.UI
 
                     updateButtonTimer();
                 }
-
-
             }
         }
+
     }
+
 }

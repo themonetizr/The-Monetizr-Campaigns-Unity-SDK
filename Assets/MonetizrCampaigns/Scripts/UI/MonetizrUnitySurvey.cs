@@ -20,41 +20,27 @@ namespace Monetizr.SDK.UI
         public MonetizrSurveyQuestionRoot monetizrQuestionRoot;
         public MonetizrSurveyQuestionRoot monetizrQuestionRootLandscape;
         public MonetizrSurveyQuestionRoot monetizrImageQuestionRoot;
-
         public RectTransform contentRoot;
         public MonetizrSurveyAnswer answerRadioButtonPrefab;
         public MonetizrSurveyAnswer answerEditablePrefab;
         public MonetizrSurveyAnswer answerCheckButtonPrefab;
         public MonetizrSurveyAnswer answerImageButtonPrefab;
         public Image rewardImage;
-
         public Button backButton;
         public Button nextButton;
-
         public Text nextButtonText;
-
         public Text progressText;
-
         public Image progressImage;
-
         public Animator crossButtonAnimator;
-
-        //private int currentQuestion = -1;
-        //private int nextQuestion = -1;
 
         private Question currentQuestion = null;
         private Question startQuestion = null;
         private Question endQuestion = null;
         private Question nextQuestion = null;
-
-        //private AdPlacement adType;
-
         private Surveys surveys;
         private Survey currentSurvey;
-
         private string submitText;
         private string nextText;
-
 
         private enum State
         {
@@ -64,7 +50,6 @@ namespace Monetizr.SDK.UI
 
         private State state = State.Idle;
         private float progress = 0.0f;
-
 
         [Serializable]
         internal class Surveys
@@ -100,8 +85,7 @@ namespace Monetizr.SDK.UI
 
         void SetProgress(float a)
         {
-            //uvRect.y = 0.5f * (1.0f - Tween(a));
-            //teaserImage.uvRect = uvRect;
+            
         }
 
         float Tween(float k)
@@ -173,9 +157,6 @@ namespace Monetizr.SDK.UI
             float width = 0;
             float height = -620;
             int id = -1;
-            //int questionNumber = 0;
-            //bool isFirstQuestionEmpty = false;
-
             var campaignSettings = MonetizrManager.Instance.localSettings.GetSetting(m.campaign.id).settings;
 
             currentSurvey.activeQuestionsAmount = 0;
@@ -243,15 +224,9 @@ namespace Monetizr.SDK.UI
 
                q.questionRoot.verticalLayout.childAlignment = TextAnchor.MiddleCenter;
 
-               //no vertical truncate and upper left aligment
                if (id == 0 && q.answers.Count == 0)
                {
                    q.questionRoot.question.verticalOverflow = VerticalWrapMode.Overflow;
-
-                   //if (Utils.IsInLandscapeMode())
-                   //    q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
-                   //q.questionRoot.question.alignment = TextAnchor.UpperLeft;
-                   //isFirstQuestionEmpty = true;
                }
 
                questionRoot.imageGridLayoutRoot.gameObject.SetActive(false);
@@ -271,8 +246,6 @@ namespace Monetizr.SDK.UI
                    if (id == 0 && q.answers.Count == 0)
                        q.questionRoot.question.alignment = TextAnchor.UpperLeft;
                }
-
-
 
                int answerNum = 0;
 
@@ -314,8 +287,6 @@ namespace Monetizr.SDK.UI
                            aObj = GameObject.Instantiate<GameObject>(answerRadioButtonPrefab.gameObject,
                                questionRoot.gridLayoutRoot);
                    }
-
-
 
                    answerRoot = aObj.GetComponent<MonetizrSurveyAnswer>();
 
@@ -374,17 +345,11 @@ namespace Monetizr.SDK.UI
 
             contentRoot.sizeDelta = new Vector2(width, height);
 
-            //backButton.interactable = false;
-            //nextButton.interactable = isFirstQuestionEmpty;
-
             state = State.Idle;
 
             float step = 1.0f / (currentSurvey.activeQuestionsAmount);
 
             progressImage.fillAmount = step;
-
-
-            //-----
 
             rewardImage.enabled = !currentSurvey.settings.hideReward;
 
@@ -473,18 +438,13 @@ namespace Monetizr.SDK.UI
 
         public void OnNextButton()
         {
-            if (state == State.Moving)
-                return;
+            if (state == State.Moving) return;
 
-            //submit
-            //if (currentQuestion == currentSurvey.activeQuestionsAmount - 1)
             if (currentQuestion.nextQuestion == null)
             {
                 Complete();
                 return;
             }
-
-            //var question = currentSurvey.questions[currentQuestion];
 
             nextQuestion = currentQuestion.nextQuestion;//currentQuestion + 1;
 
@@ -521,7 +481,6 @@ namespace Monetizr.SDK.UI
                 }
             });
 
-            //check required answers
             question.answers.ForEach(a =>
             {
                 if (!question.isQuiz)
@@ -594,7 +553,6 @@ namespace Monetizr.SDK.UI
             }
         }
 
-
         public void _OnSkipButton()
         {
             isSkipped = true;
@@ -617,8 +575,6 @@ namespace Monetizr.SDK.UI
         private void HideSelf()
         {
             SetActive(false);
-
-            //MonetizrManager.ShowRewardCenter(null);
         }
 
         internal void Complete()
@@ -673,6 +629,7 @@ namespace Monetizr.SDK.UI
         {
 
         }
+
     }
 
 }

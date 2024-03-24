@@ -1,21 +1,13 @@
-﻿//undefine this to test slow internet
-//#define TEST_SLOW_LATENCY
-
-//if we define this - video and survey campaigns will work
-//#define USING_WEBVIEW
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Monetizr.SDK.Campaigns;
-
 
 namespace Monetizr.SDK.Core
 {
     [Serializable]
     internal class CampaignsCollection : BaseCollection
     {
-        //campaign id and settings
         [SerializeField]
         internal List<LocalCampaignSettings> campaigns =
            new List<LocalCampaignSettings>();
@@ -29,6 +21,7 @@ namespace Monetizr.SDK.Core
         {
             return campaigns.Find(c => c.campId == id);
         }
+
     };
 
 }

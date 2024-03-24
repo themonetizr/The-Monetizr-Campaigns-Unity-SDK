@@ -153,9 +153,6 @@ namespace Monetizr.SDK.Analytics
 
             isMixpanelInitialized = false;
 
-            //Mixpanel.SetToken("cda45517ed8266e804d4966a0e693d0d");
-
-
 #if USING_FACEBOOK
             if (FB.Is
             d)
@@ -185,7 +182,6 @@ namespace Monetizr.SDK.Analytics
 
             if (!string.IsNullOrEmpty(mixPanelApiKey))
             {
-                //checking corrupted mixpanel key
                 if (mixPanelApiKey.IndexOf("\n", StringComparison.Ordinal) >= 0)
                     mixPanelApiKey = null;
 
@@ -235,8 +231,6 @@ namespace Monetizr.SDK.Analytics
         {
             visibleAdAsset.RemoveWhere((AdElement a) =>
             {
-
-                //if campaign is null, we ignore it
                 ServerCampaign c = campaign == null ? null : a.campaign;
 
                 bool remove = a.placement == placement && c == campaign;
@@ -266,21 +260,14 @@ namespace Monetizr.SDK.Analytics
 
             props["bundle_id"] = MonetizrManager.bundleId;
             props["player_id"] = GetUserId();
-
             props["application_name"] = Application.productName;
             props["application_version"] = Application.version;
             props["impressions"] = "1";
-
-            //props["type"] = adTypeNames[adAsset.Key];
-            //props["type"] = adAsset.Key.ToString();
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
-
             props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
             props["sdk_version"] = MonetizrManager.SDKVersion;
-
             props["ad_id"] = MonetizrMobileAnalytics.advertisingID;
-
             props["screen_width"] = Screen.width.ToString();
             props["screen_height"] = Screen.height.ToString();
             props["screen_dpi"] = Screen.dpi.ToString(CultureInfo.InvariantCulture);
@@ -315,14 +302,10 @@ namespace Monetizr.SDK.Analytics
         {
             props["dar_tag_sent"] = darTag.ToString();
 
-            //Log.PrintV($"--->Mixpanel track {eventName}");
-
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track(eventName, props);
 
-            if (camp.serverSettings.GetBoolParam("mixpanel_fast_flush", false))
-                Mixpanel.Flush();
-
+            if (camp.serverSettings.GetBoolParam("mixpanel_fast_flush", false)) Mixpanel.Flush();
 
             if (MonetizrManager.ExternalAnalytics != null)
             {
@@ -333,14 +316,10 @@ namespace Monetizr.SDK.Analytics
                     var value = v.Value.GetFieldValue<string>("_string");
 
                     eventProps.Add(v.Key, value);
-
-                    //Log.Print($"params: {v.Key} {value}");
                 }
 
                 MonetizrManager.ExternalAnalytics(eventName, eventProps);
             }
-            //amplitude.logEvent(eventName, eventProps);
-
         }
 
         private void _EndShowAdAsset(AdElement adAsset)
@@ -406,24 +385,17 @@ namespace Monetizr.SDK.Analytics
 
         internal override void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
         {
-            //Log.PrintV($"------Track event: {currentCampaign} {adPlacement} {eventType}");
-
             UnityEngine.Debug.Assert(currentCampaign != null);
 
             string placementName = GetPlacementName(adPlacement);
 
             MonetizrManager._CallUserDefinedEvent(currentCampaign.id, placementName, eventType);
 
-            //-------
-
             if (additionalValues == null)
                 additionalValues = new Dictionary<string, string>();
 
             if (currentMission != null)
                 additionalValues["mission_id"] = currentMission.serverId.ToString();
-
-            //EmailErrorScreen,
-            //Video,
 
             var eventNames = new Dictionary<AdPlacement, string>()
             {
@@ -445,7 +417,6 @@ namespace Monetizr.SDK.Analytics
                 { AdPlacement.AssetsLoadingStarts, "Assets loading starts" },
                 { AdPlacement.AssetsLoadingEnds, "Assets loading ends" },
             };
-
 
             string completedOrPressed(AdPlacement p)
             {
@@ -489,7 +460,6 @@ namespace Monetizr.SDK.Analytics
                 BeginShowAdAsset($"{adPlacement}", adPlacement, currentCampaign);
             }
 
-            //No regular track event if we track end of impression
             if (eventType == MonetizrManager.EventType.ImpressionEnds)
             {
                 EndShowAdAsset(adPlacement, currentCampaign);
@@ -508,14 +478,8 @@ namespace Monetizr.SDK.Analytics
             MonetizrManager.EventType eventType,
             Dictionary<string, string> additionalValues)
         {
-
-            //string placementGroup = GetPlacementGroup(adPlacement);
-
             additionalValues.Add("placement", placementName);
             additionalValues.Add("placement_group", GetPlacementGroup(adPlacement));
-
-            //if(MonetizrManager.isVastActive)
-            //    TrackOMSDKEvents(eventType, adPlacement, placementGroup);
 
             var eventName = "";
             bool timed = false;
@@ -549,17 +513,12 @@ namespace Monetizr.SDK.Analytics
                 case MonetizrManager.EventType.ButtonPressSkip:
                     additionalValues.Add("action", "skip");
                     eventName = "Action";
-
                     break;
 
                 case MonetizrManager.EventType.Impression:
                     eventName = "ImpressionStarts";
-
                     NielsenDar.Track(campaign, adPlacement);
-
-                    //Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {ImpressionEnds}");
                     adNewElements.Add(new AdElement("ImpressionEnds", adPlacement, campaign));
-
                     break;
 
                 case MonetizrManager.EventType.ImpressionEnds:
@@ -570,8 +529,6 @@ namespace Monetizr.SDK.Analytics
                     {
                         if (adPlacement == a.placement && campaign == a.campaign)
                         {
-                            //additionalValues.Add("$duration", (DateTime.Now - a.activateTime).TotalSeconds.ToString());
-
                             duration = (DateTime.Now - a.activateTime).TotalSeconds;
 
                             return true;
@@ -597,16 +554,13 @@ namespace Monetizr.SDK.Analytics
             switch (adPlacement)
             {
                 case AdPlacement.TinyTeaser:
-
                 case AdPlacement.NotificationScreen:
                 case AdPlacement.SurveyNotificationScreen:
                 case AdPlacement.CongratsNotificationScreen:
                 case AdPlacement.EmailCongratsNotificationScreen:
-
                 case AdPlacement.Minigame:
                 case AdPlacement.Video:
                 case AdPlacement.Survey:
-
                 case AdPlacement.EmailEnterInGameRewardScreen:
                 case AdPlacement.EmailEnterCouponRewardScreen:
                 case AdPlacement.EmailEnterSelectionRewardScreen:
@@ -618,11 +572,8 @@ namespace Monetizr.SDK.Analytics
 
         private void TrackOMSDKEvents(MonetizrManager.EventType eventType, AdPlacement adPlacement, string placementGroup)
         {
-            //Videos has it's own OMSDK tracking
-            if (!CanTrackInOMSDK(adPlacement))
-                return;
+            if (!CanTrackInOMSDK(adPlacement)) return;
 
-            //TODO: change to real url
             string resourceUrl = $"https://image.themonetizr.com/{placementGroup.ToLower()}.png";
 
             if (eventType == MonetizrManager.EventType.Impression)
@@ -747,12 +698,12 @@ namespace Monetizr.SDK.Analytics
                         v = v.Trim('"');
 
                     props[name] = v;
-                    //Debug.LogError($"{name},{v}");
                 }
 
                 NestedDictIteration(name, key.Value, props);
             }
         }
+
         internal override void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign)
         {
             var props = new Value();
@@ -774,7 +725,6 @@ namespace Monetizr.SDK.Analytics
             props["request_pieces"] = MonetizrUtils.SplitStringIntoPieces(openRtbRequest, 255);
 
             Log.PrintV($"SendReport: {props}");
-            //Mixpanel.Identify("Programmatic-httpClient");
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track("Programmatic-request-httpClient", props);
         }
@@ -804,9 +754,10 @@ namespace Monetizr.SDK.Analytics
             props["callstack"] = callstack;
 
             Log.PrintV($"SendError: {props}");
-            //Mixpanel.Identify("Programmatic-client");
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track("[UNITY_SDK] Error", props);
         }
+
     }
+
 }

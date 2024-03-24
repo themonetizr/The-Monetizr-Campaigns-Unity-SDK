@@ -1,25 +1,31 @@
-using Monetizr.SDK.Analytics;
-using Monetizr.SDK.Core;
-using Monetizr.SDK.Debug;
-using Monetizr.SDK.Missions;
-using Monetizr.SDK.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Core;
+using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.UI;
 
 namespace Monetizr.SDK.Minigames
 {
-    internal partial class MonetizrMemoryGame : MonetizrGameParentBase
+    internal class MonetizrMemoryGame : MonetizrGameParentBase
     {
-        public Stats stats = new Stats();
-
+        public GameStats stats = new GameStats();
         public Sprite[] mapSprites;
-        private List<Item> _gameItems;
+        private List<GameItem> _gameItems;
         public GameObject[] items;
         public Image minigameBackground;
         public Image logo;
+
+        private int _amountOpened = 0;
+        private int _phase = 0;
+        private bool _disabledClick = false;
+        private int _totalUnknownOpened = 0;
+        private int _correctCreated = 0;
+        private int _numTapped = 0;
 
         internal override AdPlacement? GetAdPlacement()
         {
@@ -75,9 +81,7 @@ namespace Monetizr.SDK.Minigames
 
             UIController.SetColorForElement(minigameBackground, m.campaignServerSettings, "MemoryGame.bg_color2");
 
-            //---------------
-
-            _gameItems = new List<Item>(9);
+            _gameItems = new List<GameItem>(9);
 
             for (int i = 0; i < items.Length; i++)
             {
@@ -95,25 +99,14 @@ namespace Monetizr.SDK.Minigames
 
                 gi.image.sprite = mapSprites[0];
 
-                _gameItems.Add(new Item { b = b, go = items[i], value = 0, a = a, gi = gi, isOpened = false });
+                _gameItems.Add(new GameItem { b = b, go = items[i], value = 0, a = a, gi = gi, isOpened = false });
             }
         }
-
-        private int _amountOpened = 0;
-        private int _phase = 0;
-        private bool _disabledClick = false;
-        private int _totalUnknownOpened = 0;
-        private int _correctCreated = 0;
-        private int _numTapped = 0;
         
         internal void OnItemClick(int item)
         {
-
-
             stats.amountOfTotalTaps++;
-
             double tapTime = (DateTime.Now - stats.lastTapTime).TotalSeconds;
-
             stats.lastTapTime = DateTime.Now;
 
             if (stats.amountOfTotalTaps == 1)
@@ -157,7 +150,6 @@ namespace Monetizr.SDK.Minigames
 
             }
 
-            //if (gameItems[item].value == 1)
             _gameItems[item].a.Play("MonetizrMemoryGameTap");
             _gameItems[item].gi.middleAnimSprite = mapSprites[_gameItems[item].value];
             _gameItems[item].gi.hasEvents = true;
@@ -166,8 +158,7 @@ namespace Monetizr.SDK.Minigames
 
             _numTapped++;
 
-            if (_numTapped > 1)
-                _disabledClick = true;
+            if (_numTapped > 1) _disabledClick = true;
         }
 
         internal override void OnOpenDone(int item)
@@ -185,23 +176,17 @@ namespace Monetizr.SDK.Minigames
             _amountOpened = 0;
             
             int correct = 0;
-            _gameItems.ForEach((Item i) => { if (i.value == 2 && i.isFullyOpened) correct++; });
+            _gameItems.ForEach((GameItem i) => { if (i.value == 2 && i.isFullyOpened) correct++; });
 
-            //end game
             if (correct == 2)
             {
                 _disabledClick = true;
-
-                _gameItems.ForEach((Item i) => { if (i.value == 2 && i.isOpened) i.a.Play("MonetizrMemoryGameVictory"); });
-
+                _gameItems.ForEach((GameItem i) => { if (i.value == 2 && i.isOpened) i.a.Play("MonetizrMemoryGameVictory"); });
                 StartCoroutine(OnGameVictory());
-
                 return;
-
             }
 
             _numTapped = 0;
-            
             _disabledClick = true;
             bool hasEvents = false;
             
@@ -225,24 +210,19 @@ namespace Monetizr.SDK.Minigames
                     _disabledClick = false;
                 };
             }
-            
         }
 
         internal IEnumerator OnGameVictory()
         {
             yield return new WaitForSeconds(2);
-            
             isSkipped = false;
-
             SetActive(false);
-            
             SendStatsEvent();
         }
 
         internal override void OnCloseDone(int item)
         {
             _gameItems[item].isOpened = false;
-            
             Log.Print("OnCloseDone" + item);
         }
         
@@ -250,6 +230,7 @@ namespace Monetizr.SDK.Minigames
         {
      
         }
+
     }
 
 }

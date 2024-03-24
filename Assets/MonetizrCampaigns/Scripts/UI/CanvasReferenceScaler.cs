@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using System;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
 
@@ -10,7 +8,6 @@ namespace Monetizr.SDK.UI
     public class CanvasReferenceScaler : MonoBehaviour
     {
         private CanvasScaler _cs = null;
-        //private float aspect = 0;
         private Vector2 _initialRefRes;
         private ScreenOrientation _orientation;
         private Vector2Int _displaySize;
@@ -32,15 +29,7 @@ namespace Monetizr.SDK.UI
         private void UpdateLandscape()
         {
             float aspect = (float)Screen.width/ (float)Screen.height;
-
-            //if (aspect >= 1.777)
-            //{
-                _cs.referenceResolution = new Vector2(_initialRefRes.x*aspect, _initialRefRes.x);
-            //}
-            //else
-            //{
-            //    cs.matchWidthOrHeight = 1;
-            //}
+            _cs.referenceResolution = new Vector2(_initialRefRes.x*aspect, _initialRefRes.x);
         }
 
         private void Start()
@@ -81,4 +70,5 @@ namespace Monetizr.SDK.UI
         }
 
     }
+
 }

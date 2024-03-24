@@ -53,7 +53,6 @@ namespace Monetizr.SDK.Utils
 
             var trimmedChars = new[] { ' ', '\"' };
 
-            //regex to split only unquoted separators
             Regex regxComma = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
             Regex regxColon = new Regex(":(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
             string[] commaSplit = regxComma.Split(content);
@@ -102,7 +101,6 @@ namespace Monetizr.SDK.Utils
             if (string.IsNullOrEmpty(content))
                 return result;
 
-            //have to unescape json, as SimpleJSON doesn't work properly with macros such as ${} and ''
             content = UnescapeJson(content);
 
             var root = SimpleJSON.JSON.Parse(content);
@@ -120,9 +118,6 @@ namespace Monetizr.SDK.Utils
                         v = v.Trim('"');
 
                     result[name] = v;
-
-                    //Debug.LogWarning($"{name}={value}");
-                    //Debug.LogError($"{name},{v}");
                 }
 
             }
@@ -306,7 +301,6 @@ namespace Monetizr.SDK.Utils
         {
             if (Path.HasExtension(url))
             {
-                //remove starting dot
                 return Path.GetExtension(url).Substring(1);
             }
 
@@ -410,9 +404,6 @@ namespace Monetizr.SDK.Utils
 
         public static string UnescapeString(string content)
         {
-            //return Regex.Unescape(content);
-            //return Uri.UnescapeDataString(content);
-
             return content.Replace("\\\"", "\"").Replace("\\\\", "\\");
         }
     }

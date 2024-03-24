@@ -23,6 +23,7 @@ namespace Monetizr.SDK.Utils
 
             return instance;
         }
+
     }
 
 }

@@ -92,33 +92,22 @@ namespace Monetizr.SDK.Analytics
             return output;
         }
 
-        //{{PLACEMENT_ID=TinyTeaser:Monetizr_plc0001,NotificationScreen:Monetizr_plc0002,Html5VideoScreen:Monetizr_plc0003,EmailEnterScreen:Monetizr_plc0004,CongratsScreen:Monetizr_plc0005}}
         private static string ReplacePlacementTag(string s, AdPlacement t)
         {
             int startId = s.IndexOf("${{");
             int endId = s.IndexOf("}}");
 
-            //no braces
-            if (startId < 0 || endId < 0)
-                return s;
+            if (startId < 0 || endId < 0) return s;
 
-            //split string into pieces
             string s1 = s.Substring(0, startId);
             string s2 = s.Substring(startId + 3, endId - startId - 3);
             string s3 = s.Substring(s1.Length + s2.Length + 5, s.Length - (s1.Length + s2.Length + 5));
-
             string empty_res = s1 + s3;
 
-            //if DAR tag is null, create it
             if (DARPlacementTags == null)
             {
                 var arr = s2.Split('=');
-
-                //substring is wrong
-                if (arr.Length != 2 || arr[0] != "PLACEMENT_ID" || arr[1].IndexOf(':') == -1)
-                    return empty_res;
-
-                //creating dictionary
+                if (arr.Length != 2 || arr[0] != "PLACEMENT_ID" || arr[1].IndexOf(':') == -1) return empty_res;
                 DARPlacementTags = arr[1].Split(',').Select(v => v.Split(':')).ToDictionary(v => v.First(), v => v.Last());
             }
 
@@ -203,5 +192,7 @@ namespace Monetizr.SDK.Analytics
 
             return Timestamp.ToString();
         }
+
     }
+
 }

@@ -20,7 +20,6 @@ namespace Monetizr.SDK.Utils
             _isShown = false;
         }
 
-        // Update is called once per frame
         private void Update()
         {
             if (_isShown)
@@ -38,6 +37,7 @@ namespace Monetizr.SDK.Utils
 
             image.material.SetTextureOffset("_DetailTex", v);
         }
+
     }
 
 }

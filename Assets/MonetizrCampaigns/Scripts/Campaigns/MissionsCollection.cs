@@ -14,6 +14,7 @@ namespace Monetizr.SDK.Campaigns
         {
             missions.Clear();
         }
+
     };
 
 }

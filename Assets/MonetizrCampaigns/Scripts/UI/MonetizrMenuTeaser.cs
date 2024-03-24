@@ -13,7 +13,6 @@ namespace Monetizr.SDK.UI
     internal class MonetizrMenuTeaser : PanelController
     {
         public GifImage gifImage;
-
         public Button button;
         public RawImage teaserImage;
         public float delayTime = 5f;
@@ -23,22 +22,15 @@ namespace Monetizr.SDK.UI
         public Text earnText;
         public Image rewardImage;
         public Text rewardText;
-        
-        //private Mission currentMission;
-
         public Image singleBackgroundImage;
         public Image watchVideoIcon;
         public RectTransform buttonTextRect;
-
         public GameObject animatableBannerRoot;
         public Image rectangeBannerImage;
         public Image bannerRewardImage;
-
         public Text missionsNum;
-
         public GameObject buttonObject;
         public GameObject numberObject;
-
         public GameObject raysObject;
 
         internal override AdPlacement? GetAdPlacement()
@@ -54,22 +46,11 @@ namespace Monetizr.SDK.UI
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             this._onComplete = onComplete;
-
             currentMission = m;
-
             var noVideo = !m.hasVideo;
-
-            //if there's video and it's already shown
-            if (!noVideo && m.isVideoShown)
-                noVideo = true;
-
-            //more than one mission - no video sign
-            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(m.campaign) > 1)
-                noVideo = true;
-
-
+            if (!noVideo && m.isVideoShown) noVideo = true;
+            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(m.campaign) > 1) noVideo = true;
             var isSinglePicture = m.campaignServerSettings.GetBoolParam("teaser.single_picture", false);
-
             UpdateTransform(m);
 
             if (isSinglePicture)
@@ -77,12 +58,10 @@ namespace Monetizr.SDK.UI
                 Array.ForEach(gameObject.GetComponentsInChildren<RectTransform>(),
                     (RectTransform r) => { if (r.gameObject != gameObject) r.gameObject.SetActive(false); });
 
-
                 singleBackgroundImage.enabled = true;
 
                 if (m.campaign.HasAsset(AssetsType.TinyTeaserSprite))
                     singleBackgroundImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.TinyTeaserSprite);
-
 
                 return;
             }
@@ -96,7 +75,6 @@ namespace Monetizr.SDK.UI
                 watchVideoIcon.gameObject.SetActive(false);
                 buttonTextRect.anchoredPosition = new Vector2(0, 0);
             }
-
 
             var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(m.campaign,true);
 
@@ -114,11 +92,7 @@ namespace Monetizr.SDK.UI
 
             var showNumber = currentMission.campaignServerSettings.GetBoolParam("teaser.show_number", true);
 
-
-
             numberObject.SetActive(showNumber);
-
-            //hasGif = false;
 
             if (hasGif)
             {
@@ -141,18 +115,12 @@ namespace Monetizr.SDK.UI
                 rectangeBannerImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
 
             }
-            
 
             earnText.gameObject.SetActive(true);
             rewardImage.gameObject.SetActive(false);
             rewardText.gameObject.SetActive(true);
-
-            
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
-
             rewardText.text = rewardText.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
-            
-
             Log.PrintV($"PreparePanel teaser: {m.campaignId} {m}");
         }
 
@@ -164,9 +132,6 @@ namespace Monetizr.SDK.UI
                 return;
 
             RectTransform rt = GetComponent<RectTransform>();
-
-            //float[] values = null;
-
 
             string[] arr = teaser_transform.Split(',');
 
@@ -201,13 +166,10 @@ namespace Monetizr.SDK.UI
                 rt.localScale = Vector3.one * (values[4] / 100.0f);
         }
 
-
         internal override void FinalizePanel(PanelId id)
         {
-            //Moved to HideTinyMenuTeaser
-            //MonetizrManager.analytics.EndShowAdAsset(AdType.TinyTeaser);
+            
         }
-
 
     }
 

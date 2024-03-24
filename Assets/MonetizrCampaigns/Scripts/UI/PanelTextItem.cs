@@ -15,18 +15,15 @@ namespace Monetizr.SDK.UI
 
         public void InitializeByParent(PanelId parentId, Mission m)
         {
-            if (m == null)
-                return;
+            if (m == null) return;
 
-            if (buttonGrafic == null && textElement == null)
-                return;
+            if (buttonGrafic == null && textElement == null) return;
             
             var param = $"{parentId}.{textContent}";
             var param2 = $"{param}2";
             var paramWithType = $"{parentId}.{m.type}.{textContent}";
             var paramWithTypeAndId = $"{parentId}.{m.type}.{m.serverId}.{textContent}";
 
-            //update graphics
             string[] colorVars = { "button_bg_color", $"{param}_bg_color", $"{paramWithType}_bg_color", $"{paramWithTypeAndId}_bg_color" };
 
             foreach (var c in colorVars)
@@ -34,9 +31,7 @@ namespace Monetizr.SDK.UI
                 UIController.SetColorForElement(buttonGrafic, m.campaignServerSettings, c);
             }
 
-            //update text
-            if (textElement == null)
-                return;
+            if (textElement == null) return;
 
             string[] textVars = { "text_color", $"{param}_color", $"{paramWithType}_color", $"{paramWithTypeAndId}_color" };
 

@@ -40,7 +40,6 @@ namespace Monetizr.SDK.Campaigns
             { AssetsType.MinigameSprite2, typeof(Sprite) },
             { AssetsType.MinigameSprite3, typeof(Sprite) },
             { AssetsType.LeaderboardBannerSprite, typeof(Sprite) },
-
         };
 
         public string id;
@@ -141,16 +140,10 @@ namespace Monetizr.SDK.Campaigns
             if (assetsDict.ContainsKey(t))
             {
                 Log.PrintWarning($"An item {t} already exist in the campaign {id}");
-                //return;
             }
 
-            //Log.Print($"Adding asset {asset} into {t}");
-
             MonetizrManager.HoldResource(asset);
-
             assetsDict[t] = asset;
-
-            //assetsDict.Add(t, asset);
         }
 
         internal bool HasAsset(AssetsType t)
@@ -182,7 +175,6 @@ namespace Monetizr.SDK.Campaigns
                 throw new ArgumentException($"AssetsType {t} and {typeof(T)} do not match!");
 
             if (!assetsDict.ContainsKey(t))
-                //throw new ArgumentException($"Requested asset {t} doesn't exist in challenge!");
                 return default(T);
 
             return (T)Convert.ChangeType(assetsDict[t], typeof(T));
@@ -210,9 +202,6 @@ namespace Monetizr.SDK.Campaigns
             return $"{Application.persistentDataPath}/{this.id}/{fname}";
         }
 
-        /// <summary>
-        /// Helper function to download and assign graphics assets
-        /// </summary>
         internal async Task AssignAssetTextures(ServerCampaign.Asset asset, AssetsType texture, AssetsType sprite, bool isOptional = false)
         {
             if (asset.url == null || asset.url.Length == 0)
@@ -229,11 +218,7 @@ namespace Monetizr.SDK.Campaigns
 
             string fname = Path.GetFileName(asset.url);
             string fpath = path + "/" + fname;
-
             asset.localFullPath = fpath;
-
-            //Log.Print(fpath);
-
             byte[] data = null;
 
             if (!File.Exists(fpath))
@@ -258,14 +243,10 @@ namespace Monetizr.SDK.Campaigns
                 }
 
                 File.WriteAllBytes(fpath, data);
-
-                //Log.Print("saving: " + fpath);
             }
             else
             {
                 data = File.ReadAllBytes(fpath);
-
-                //Log.Print("reading: " + fpath);
             }
 
 #if TEST_SLOW_LATENCY
@@ -287,12 +268,6 @@ namespace Monetizr.SDK.Campaigns
                 SetAsset<Sprite>(sprite, s);
             }
 
-            //campaign.SetAssetUrl(sprite, asset.url);
-
-            //bool texStatus = tex != null;
-            //bool spriteStatus = s != null;
-
-            //Log.Print($"Adding texture:{texture}={texStatus} sprite:{sprite}={spriteStatus} into:{ech.campaign.id}");
         }
 
         internal async Task PreloadAssetToCache(ServerCampaign.Asset asset, AssetsType fileString, bool required = true)
@@ -471,8 +446,6 @@ namespace Monetizr.SDK.Campaigns
 
                         break;
 
-                    //------------------
-
                     case "survey":
 
                         if (!string.IsNullOrEmpty(asset.survey_content))
@@ -522,14 +495,11 @@ namespace Monetizr.SDK.Campaigns
 
                     case "custom_coin_title":
                         SetAsset<string>(AssetsType.CustomCoinString, asset.title);
-
                         break;
 
                     case "image":
                         
-                        //Log.PrintWarning($"Found image {asset.title} asset w!");
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.Unknown, true);
-                        
                         break;
 
                 }
@@ -540,13 +510,8 @@ namespace Monetizr.SDK.Campaigns
         internal async Task PreloadVideoPlayerForProgrammatic(Asset asset)
         {
             string zipFolder = GetCampaignPath($"{asset.fpath}");
-            
             string indexPath = $"{zipFolder}/index.html";
-
             Log.PrintV($"{zipFolder}");
-
-            //if (Directory.Exists(zipFolder))
-            //    Directory.Delete(zipFolder);
             
             if (!Directory.Exists(zipFolder))
             {
@@ -569,8 +534,6 @@ namespace Monetizr.SDK.Campaigns
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
 
             File.Delete(zipFolder + "/html.zip");
-
-            //--------------
 
             if (!File.Exists(indexPath))
             {
@@ -608,8 +571,6 @@ namespace Monetizr.SDK.Campaigns
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
 
             File.Delete(zipFolder + "/html.zip");
-
-            //--------------
             
             if (!File.Exists(indexPath))
             {
@@ -620,23 +581,9 @@ namespace Monetizr.SDK.Campaigns
 
         internal void EmbedVastParametersIntoVideoPlayer(Asset asset)
         {
-            //vastAdParameters = DumpsVastSettings();
-
             string fpath = GetCampaignPath(asset.fpath);
-
             string videoPath = $"{fpath}/video.mp4";
             string indexPath = $"{fpath}/{asset.mainAssetName}";
-            
-            /*var backPath = indexPath + ".back";
-
-            if (!File.Exists(backPath))
-            {
-                File.Copy(indexPath, backPath);
-            }
-            else
-            {
-                File.Delete(indexPath);
-            }*/
             
             var str = File.ReadAllText(indexPath);
 
@@ -658,7 +605,6 @@ namespace Monetizr.SDK.Campaigns
 
             foreach (string file in files)
             {
-                //File.SetAttributes(file, FileAttributes.Normal);
                 File.Delete(file);
             }
 
@@ -704,21 +650,17 @@ namespace Monetizr.SDK.Campaigns
         }
         internal bool IsCampaignInsideLocation(MonetizrHttpClient.IpApiData locData)
         {
-            //no location data
             if (locData == null)
                 return true;
 
-            //whole world
             if (locations.Count == 0)
                 return true;
 
             var country = locations.Find(l => l.country == locData.country_code);
 
-            //outside desired country
             if (country == null)
                 return false;
 
-            //no regions defined
             if (country.regions == null)
                 return true;
 
@@ -727,7 +669,6 @@ namespace Monetizr.SDK.Campaigns
 
             var region = country.regions.Find(r => r.region == locData.region_code);
 
-            //region found
             return region != null;
         }
 
@@ -767,11 +708,8 @@ namespace Monetizr.SDK.Campaigns
             Log.PrintV($"Content: {content}");
             Log.PrintV($"Adm: {adm}");
 
-            if (string.IsNullOrEmpty(content))
-                return;
+            if (string.IsNullOrEmpty(content)) return;
             
-            //content = Utils.UnescapeString(content);
-
             var cd = MonetizrUtils.ParseContentString(content);
 
             serverSettings = new SettingsDictionary<string, string>(cd);

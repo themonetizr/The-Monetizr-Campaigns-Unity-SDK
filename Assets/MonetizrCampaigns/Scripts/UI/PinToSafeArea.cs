@@ -1,14 +1,6 @@
 using UnityEngine;
 
 namespace Monetizr.SDK.UI {
-    /// <summary>
-    /// Resizes a UI element with a RectTransform to respect the safe areas of the current device.
-    /// This is particularly useful on an iPhone X, where we have to avoid the notch and the screen
-    /// corners.
-    /// 
-    /// The easiest way to use it is to create a root Canvas object, attach this script to a game object called "SafeAreaContainer"
-    /// that is the child of the root canvas, and then layout the UI elements within the SafeAreaContainer, which
-    /// will adjust size appropriately for the current device./// </summary>
     public class PinToSafeArea : MonoBehaviour
     {
         private Rect lastSafeArea;
@@ -44,5 +36,7 @@ namespace Monetizr.SDK.UI {
 
             lastSafeArea = Screen.safeArea;
         }
+
     }
+
 }

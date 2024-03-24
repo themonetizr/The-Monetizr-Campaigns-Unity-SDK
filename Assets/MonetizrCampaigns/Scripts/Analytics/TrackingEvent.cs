@@ -24,4 +24,5 @@ namespace Monetizr.SDK.Analytics
         private Dictionary<string, string> additionalValues;
 
     }
+
 }

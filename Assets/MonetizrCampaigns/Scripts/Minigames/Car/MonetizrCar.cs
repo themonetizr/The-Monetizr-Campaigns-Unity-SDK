@@ -13,5 +13,7 @@ namespace Monetizr.SDK.Minigames
                 parent.OnBonusTaken();
             }
         }
+
     }
+
 }

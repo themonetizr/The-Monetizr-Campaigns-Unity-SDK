@@ -7,6 +7,7 @@
         Visible,
         ToBeHidden,
         Hiding,
-        Hidden,
+        Hidden
     }
+
 }

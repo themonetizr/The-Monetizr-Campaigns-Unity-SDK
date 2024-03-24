@@ -19,5 +19,6 @@ namespace Monetizr.SDK.UI
         public Sprite greenRoundMark;
         public Sprite redSquareMark;
     }
+
 }
     

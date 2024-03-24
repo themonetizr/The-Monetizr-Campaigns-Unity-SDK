@@ -71,7 +71,6 @@ namespace Monetizr.SDK.Campaigns
             {
                 return $"Id: {id}, Type: {type}, Title: {title}, URL: {url}, Survey Content: {survey_content}";
             }
-
             
         }
         

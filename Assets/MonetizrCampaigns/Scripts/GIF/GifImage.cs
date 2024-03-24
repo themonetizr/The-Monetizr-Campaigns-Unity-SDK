@@ -1,32 +1,22 @@
-﻿
-using Monetizr.SDK.Debug;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using ThreeDISevenZeroR.UnityGifDecoder;
 using UnityEngine;
 using UnityEngine.UI;
+using Monetizr.SDK.Debug;
+using ThreeDISevenZeroR.UnityGifDecoder;
 
 namespace Monetizr.SDK.GIF
 {
     [RequireComponent(typeof(RawImage))]
     public class GifImage : MonoBehaviour
     {
-        public enum State
-        {
-            None,
-            Loading,
-            Ready,
-            Playing,
-            Pause,
-        }
-
         public RawImage m_rawImage;
         private List<GifTexture> m_gifTextureList;
         private float m_delayTime;
         private int m_gifTextureIndex;
         private int m_nowLoopCount;
-        private State state;
+        private GifState state;
         private int loopCount;
                 
         private void OnDestroy()
@@ -38,16 +28,16 @@ namespace Monetizr.SDK.GIF
         {
             switch (state)
             {
-                case State.None:
+                case GifState.None:
                     break;
 
-                case State.Loading:
+                case GifState.Loading:
                     break;
 
-                case State.Ready:
+                case GifState.Ready:
                     break;
 
-                case State.Playing:
+                case GifState.Playing:
                     if (m_rawImage == null || m_gifTextureList == null || m_gifTextureList.Count <= 0)
                     {
                         return;
@@ -56,7 +46,7 @@ namespace Monetizr.SDK.GIF
                     {
                         return;
                     }
-                    // Change texture
+
                     m_gifTextureIndex++;
                     if (m_gifTextureIndex >= m_gifTextureList.Count)
                     {
@@ -72,11 +62,12 @@ namespace Monetizr.SDK.GIF
                             }
                         }
                     }
+
                     m_rawImage.texture = m_gifTextureList[m_gifTextureIndex].m_texture2d;
                     m_delayTime = Time.time + m_gifTextureList[m_gifTextureIndex].m_delaySec;
                     break;
 
-                case State.Pause:
+                case GifState.Pause:
                     break;
 
                 default:
@@ -100,14 +91,14 @@ namespace Monetizr.SDK.GIF
                 yield break;
             }
 
-            if (state == State.Playing)
+            if (state == GifState.Playing)
             {
-                state = State.Ready;
+                state = GifState.Ready;
                 Play();
                 yield break;
             }
 
-            if (state == State.Loading)
+            if (state == GifState.Loading)
             {
                 Log.PrintWarning("Already loading.");
                 yield break;
@@ -118,12 +109,12 @@ namespace Monetizr.SDK.GIF
             if (bytes == null)
             {
                 Log.PrintError("File load error.\n");
-                state = State.None;
+                state = GifState.None;
                 yield break;
             }
 
             Clear();
-            state = State.Loading;
+            state = GifState.Loading;
 
             m_gifTextureList = new List<GifTexture>();
 
@@ -135,7 +126,6 @@ namespace Monetizr.SDK.GIF
                     {
                         case GifStream.Token.Image:
                             var image = gifStream.ReadImage();
-                            // do something with image
 
                             var frame = new Texture2D(
                                 gifStream.Header.width,
@@ -151,19 +141,17 @@ namespace Monetizr.SDK.GIF
 
                         case GifStream.Token.Comment:
                             var comment = gifStream.ReadComment();
-                            // log this comment
                             break;
 
                         default:
                             gifStream.SkipToken();
-                            // this token has no use for you, skip it
                             break;
                     }
                 }
             }
 
             loopCount = -1;
-            state = State.Ready;
+            state = GifState.Ready;
 
             if (autoPlay)
             {
@@ -174,11 +162,6 @@ namespace Monetizr.SDK.GIF
 
         private void Clear()
         {
-            if (m_rawImage != null)
-            {
-                //m_rawImage.texture = null;
-            }
-
             if (m_gifTextureList != null)
             {
                 for (int i = 0; i < m_gifTextureList.Count; i++)
@@ -197,12 +180,12 @@ namespace Monetizr.SDK.GIF
                 m_gifTextureList = null;
             }
 
-            state = State.None;
+            state = GifState.None;
         }
 
         internal void Play()
         {
-            if (state != State.Ready)
+            if (state != GifState.Ready)
             {
                 Log.PrintWarning("State is not READY.");
                 return;
@@ -212,7 +195,7 @@ namespace Monetizr.SDK.GIF
                 Log.PrintError($"Raw Image {m_rawImage} or GIF Texture list {m_gifTextureList} is null or empty {m_gifTextureList.Count}.");
                 return;
             }
-            state = State.Playing;
+            state = GifState.Playing;
             m_rawImage.texture = m_gifTextureList[0].m_texture2d;
             m_delayTime = Time.time + m_gifTextureList[0].m_delaySec;
             m_gifTextureIndex = 0;
@@ -221,32 +204,34 @@ namespace Monetizr.SDK.GIF
 
         internal void Stop()
         {
-            if (state != State.Playing && state != State.Pause)
+            if (state != GifState.Playing && state != GifState.Pause)
             {
                 Log.PrintWarning("State is not Playing and Pause.");
                 return;
             }
-            state = State.Ready;
+            state = GifState.Ready;
         }
 
         internal void Pause()
         {
-            if (state != State.Playing)
+            if (state != GifState.Playing)
             {
                 Log.PrintWarning("State is not Playing.");
                 return;
             }
-            state = State.Pause;
+            state = GifState.Pause;
         }
 
         internal void Resume()
         {
-            if (state != State.Pause)
+            if (state != GifState.Pause)
             {
                 Log.PrintWarning("State is not Pause.");
                 return;
             }
-            state = State.Playing;
+            state = GifState.Playing;
         }
+
     }
+
 }

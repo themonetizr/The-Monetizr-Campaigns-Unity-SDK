@@ -1,14 +1,6 @@
-﻿//undefine this to test slow internet
-//#define TEST_SLOW_LATENCY
-
-//if we define this - video and survey campaigns will work
-//#define USING_WEBVIEW
-
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using System;
 using Monetizr.SDK.Campaigns;
-
 
 namespace Monetizr.SDK.Core
 {
@@ -26,8 +18,6 @@ namespace Monetizr.SDK.Core
 
         internal void Load()
         {
-            //ResetData();
-
             LoadData();
 
             int deleted = data.campaigns.RemoveAll((LocalCampaignSettings m) =>
@@ -67,34 +57,11 @@ namespace Monetizr.SDK.Core
             return camp;
         }
 
-        /*internal void LoadOldAndUpdateNew(Dictionary<String, ServerCampaign> campaigns)
-        {
-            //load old settings
-            //сheck if apikey/sdkversion is old
-            Load();
-
-            //check if campaign is missing - remove it from data
-            data.campaigns.RemoveAll((LocalCampaignSettings c) => !campaigns.ContainsKey(c.campId));
-
-            //add empty campaign into settings
-            campaigns.Values.ToList().ForEach(c => AddCampaign(c));
-
-            SaveData();
-        }*/
-
         internal void LoadOldAndUpdateNew(List<ServerCampaign> campaigns)
         {
-            //load old settings
-            //сheck if apikey/sdkversion is old
             Load();
-
-            //check if campaign is missing - remove it from data
-            data.campaigns.RemoveAll((LocalCampaignSettings localCampaigns) =>
-                campaigns.FindIndex(serverCampaigns => serverCampaigns.id == localCampaigns.campId) < 0);
-
-            //add empty campaign into settings
+            data.campaigns.RemoveAll((LocalCampaignSettings localCampaigns) => campaigns.FindIndex(serverCampaigns => serverCampaigns.id == localCampaigns.campId) < 0);
             campaigns.ForEach(c => AddCampaign(c));
-
             SaveData();
         }
     }

@@ -1,13 +1,13 @@
-using Monetizr.SDK.Analytics;
-using Monetizr.SDK.Core;
-using Monetizr.SDK.Debug;
-using Monetizr.SDK.Missions;
-using Monetizr.SDK.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Core;
+using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.UI;
 
 namespace Monetizr.SDK.Minigames
 {
@@ -19,8 +19,6 @@ namespace Monetizr.SDK.Minigames
             public Button b;
             public Animator a;
             public MemoryGameItem gi;
-
-            //0 - undefined, 1 - empty, 2 - item
             public int value;
             internal bool isOpened;
         }
@@ -198,7 +196,6 @@ namespace Monetizr.SDK.Minigames
                 return;
             }
             
-            //open something
             if (item < _openFields.Length)
             {
                 _openFields[item].ForEach((int i) => {
@@ -217,22 +214,15 @@ namespace Monetizr.SDK.Minigames
         {
             Log.PrintV("RestartGame");
 
-
             yield return new WaitForSeconds(0.5f);
 
             _gameItems.ForEach((Item i) => {
                 if (i.b.interactable)
                 {
-
                     i.a.Play("MonetizrMemoryGameTap2");
                     i.gi.middleAnimSprite = backSpriteDisabled;
-
                     i.gi.isOpening = false;
-
-                    //i.gi.image.sprite = backSpriteDisabled;
                     i.gi.hasEvents = false;
-
-
                 }
 
                 i.isOpened = false;
@@ -273,5 +263,7 @@ namespace Monetizr.SDK.Minigames
         {
 
         }
+
     }
+
 }

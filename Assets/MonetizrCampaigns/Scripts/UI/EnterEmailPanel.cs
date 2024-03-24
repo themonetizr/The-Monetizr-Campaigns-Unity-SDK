@@ -4,7 +4,6 @@ using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -25,28 +24,19 @@ namespace Monetizr.SDK.UI
         public Text buttonText;
         public Button noThanksButton;
         public InputField inputField;
-
         public GameObject singleRewardRoot;
         public GameObject selectRewardRoot;
-
         public Image selection1Icon;
         public Image selection2Icon;
-
         public Animator crossButtonAnimator;
 
-        //[HideInInspector]
-        //public Mission currentMission;
         private Regex validateEmailRegex;
         private string result;
-
         private EnterEmailType enterEmailType;
-
         private MonetizrManager.RewardSelectionType selection;
         private AdPlacement adType;
-
         public Toggle termsToggle;
         private bool termsTogglePressed;
-        //private Action _onComplete;
 
         internal override AdPlacement? GetAdPlacement()
         {
@@ -106,12 +96,9 @@ namespace Monetizr.SDK.UI
             if (s != null && s.Length > 0)
             {
                 lowerCaseMail = s.ToLower();
-
-                //check email with regex
                 isValid = validateEmailRegex.IsMatch(lowerCaseMail);
             }
 
-            //double check with MailAddress
             if (isValid)
             {
                 try
@@ -121,17 +108,12 @@ namespace Monetizr.SDK.UI
                 }
                 catch (FormatException)
                 {
-                    // address is invalid
                     isValid = false;
                 }
             }
 
-            //email valid, but country code is too short
-            if (isValid && lowerCaseMail.Length - lowerCaseMail.LastIndexOf('.') <= 2)
-                isValid = false;
-
+            if (isValid && lowerCaseMail.Length - lowerCaseMail.LastIndexOf('.') <= 2) isValid = false;
             UpdateEnterFieldVisibility(isValid);
-
             result = s;
         }
 
@@ -144,14 +126,10 @@ namespace Monetizr.SDK.UI
 
         internal override void FinalizePanel(PanelId id)
         {
-            //fail test
-            if (result == "aa@aa.aa")
-                result = "asdfqe qe qefqwe";
+            if (result == "aa@aa.aa") result = "asdfqe qe qefqwe";
 
             MonetizrManager.temporaryEmail = result;
             MonetizrManager.temporaryRewardTypeSelection = selection;
-
-            //MonetizrManager.analytics.EndShowAdAsset(adType, currentMission);
         }
 
         internal static EnterEmailType GetPanelType(Mission m)
@@ -161,10 +139,8 @@ namespace Monetizr.SDK.UI
             switch(s)
             {
                 case "product_reward":
-                    //selection = MonetizrManager.RewardSelectionType.Product;
                     return EnterEmailType.ProductReward;
                 case "ingame_reward":
-                    //selection = MonetizrManager.RewardSelectionType.Ingame;
                     return EnterEmailType.IngameReward;
 
                 case "selection_reward": return EnterEmailType.SelectionReward;
@@ -209,7 +185,7 @@ namespace Monetizr.SDK.UI
 
             m.adPlacement = adType;
 
-            var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = m.campaignId;
 
             banner.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandBannerSprite);
             banner.color = Color.white;
@@ -291,22 +267,15 @@ namespace Monetizr.SDK.UI
                 selection2Icon.sprite = m.campaign.GetAsset<Sprite>(AssetsType.RewardSprite);
             }
 
-            //TODO: needs to be checked carefully!!!
             rewardImage.sprite = MissionsManager.GetMissionRewardImage(m);
-            
-            
-            //rewardImage.gameObject.SetActive(false);
             rewardAmount.gameObject.SetActive(false);
             rewardImageBackgroud.gameObject.SetActive(false);
             noThanksButton?.gameObject.SetActive(true);
-
         }
 
         private new void Awake()
         {
             base.Awake();
-
-
         }
 
         public void _OnNoThanksPress()
@@ -326,7 +295,6 @@ namespace Monetizr.SDK.UI
                 },
                 this.currentMission,
                 PanelId.EmailEnterCloseConfirmation);
-           
         }
 
         public void OnButtonPress()

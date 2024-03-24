@@ -3,7 +3,6 @@ using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -17,7 +16,6 @@ namespace Monetizr.SDK.UI
         private Canvas mainCanvas;
         private PanelId previousPanel;
         private Dictionary<PanelId, PanelController> panels = null;
-        //public bool isVideoPlaying;
 
         internal UIController()
         {
@@ -48,25 +46,6 @@ namespace Monetizr.SDK.UI
             return panels.ContainsKey(panel);
         }
 
-    /*public void PlayVideo(String path, Action<bool> _onComplete)
-    {
-        isVideoPlaying = true;
-
-        MonetizrManager.HideRewardCenter();
-
-        var prefab = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrVideoPlayer") as GameObject, rootUIObject.transform);
-
-        var player = prefab.GetComponent<MonetizrVideoPlayer>();
-
-        player.Play(path, (bool isSkip) => {
-            
-                _onComplete?.Invoke(isSkip);
-
-                GameObject.Destroy(prefab);
-                isVideoPlaying = false;
-        } );
-    }*/
-
         internal PanelController ShowLoadingScreen()
         {
             var go = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrLoadingScreen") as GameObject, rootUIObject.transform);
@@ -86,21 +65,15 @@ namespace Monetizr.SDK.UI
             Action<bool> complete = (bool isSkipped) =>
             {                                
                 panels.Remove(id);
-
                 onComplete?.Invoke(isSkipped);
-
-                //TODO: track end of placement!!!!
-
                 GameObject.Destroy(panel.gameObject);
 
-                //nothing, but teaser
                 if (panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser))
                 {
                     MonetizrManager.Instance?.onUIVisible?.Invoke(false);
                 }
             };
 
-            //nothing or only teaser
             if ((panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser)) || panels.Count == 0)
                 MonetizrManager.Instance?.onUIVisible?.Invoke(true);
 
@@ -116,13 +89,11 @@ namespace Monetizr.SDK.UI
                              
                 if (MonetizrUtils.IsInLandscapeMode())
                 {       
-                    //Log.Print("Loading landscape");
                     asset = Resources.Load(prefabLandscape) as GameObject;
                 }
 
                 if (asset == null)
                 {
-                    //Log.Print("Loading regular prefab");
                     asset = Resources.Load(prefab) as GameObject;
                 }
 
@@ -151,13 +122,9 @@ namespace Monetizr.SDK.UI
             }
 
             ctrlPanel.transform.SetAsLastSibling();
-
             ctrlPanel.SetActive(true);
 
-            if (rememberPrevious)
-               previousPanel = id;
-
-            
+            if (rememberPrevious) previousPanel = id;
         }
 
         internal static void SetColorForElement(Graphic i, Dictionary<string, string> additionalParams, string param)
@@ -177,24 +144,17 @@ namespace Monetizr.SDK.UI
             Dictionary<string,string> additionalParams,
             PanelId id)
         {
-            //Log.Print($"--------{id.ToString()}");
-
             SetColorForElement(background, additionalParams, "bg_color");
             SetColorForElement(border, additionalParams, "bg_border_color");
-
             SetColorForElement(background, additionalParams, $"{id.ToString()}.bg_color");
             SetColorForElement(border, additionalParams, $"{id.ToString()}.bg_border_color");
         }
 
         internal void DestroyTinyMenuTeaser()
         {
-            if (!panels.ContainsKey(PanelId.TinyMenuTeaser))
-                return;
-
+            if (!panels.ContainsKey(PanelId.TinyMenuTeaser)) return;
             MonetizrMenuTeaser teaser = panels[PanelId.TinyMenuTeaser] as MonetizrMenuTeaser;
-
             GameObject.Destroy(teaser.gameObject);
-
             panels.Remove(PanelId.TinyMenuTeaser);
         }
 
@@ -205,20 +165,11 @@ namespace Monetizr.SDK.UI
             if (!panels.ContainsKey(PanelId.TinyMenuTeaser))
             {
                 string teaserPrefab = "MonetizrMenuTeaser2";
-
-                /*if (designVersion == 2)
-                {
-                    teaserPrefab = "MonetizrMenuTeaser2";
-                    //screenPos = Vector2.zero;
-                }*/
-
                 if (designVersion >= 3)
                 {
                     teaserPrefab = $"MonetizrMenuTeaser{designVersion}";
-                    //screenPos = Vector2.zero;
                 }
-
-                               
+                
                 var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject,
                     root != null ? root : rootUIObject.transform);
 
@@ -237,13 +188,8 @@ namespace Monetizr.SDK.UI
                 teaser = panels[PanelId.TinyMenuTeaser] as MonetizrMenuTeaser;
             }
 
-            if (teaser.IsVisible())
-                return;
-
+            if (teaser.IsVisible()) return;
             
-            //var campaign = MonetizrManager.Instance.GetActiveCampaign();
-
-            //Mission m = MonetizrManager.Instance.missionsManager.GetMission(challengeId);
             var missionsList = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(campaign,false);
 
             var m = missionsList[0];
@@ -257,32 +203,20 @@ namespace Monetizr.SDK.UI
 
             MonetizrManager.Analytics.TrackEvent(m, teaser, MonetizrManager.EventType.Impression);
 
-            //if teaser attached is not attached to user defined root
-            if(root == null)
-                teaser.rectTransform.SetAsFirstSibling();
+            if(root == null) teaser.rectTransform.SetAsFirstSibling();
 
             if (screenPos != null)
             {
                 teaser.rectTransform.anchoredPosition = screenPos.Value;
             }
-
-            //previousPanel = PanelId.TinyMenuTeaser;
-
-
         }
 
         internal void HidePanel(PanelId id = PanelId.Unknown)
         {
-            if (id == PanelId.Unknown && previousPanel != PanelId.Unknown)
-                id = previousPanel;
-
-            if(panels.ContainsKey(id))
-                panels[id].SetActive(false);
-
+            if (id == PanelId.Unknown && previousPanel != PanelId.Unknown) id = previousPanel;
+            if(panels.ContainsKey(id)) panels[id].SetActive(false);
         }
-
       
     }
-
 
 }

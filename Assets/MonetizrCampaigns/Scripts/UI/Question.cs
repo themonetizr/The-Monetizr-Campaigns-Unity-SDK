@@ -63,6 +63,7 @@ namespace Monetizr.SDK.UI
             }
 
         }
+
     }
 
 }

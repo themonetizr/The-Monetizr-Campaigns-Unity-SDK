@@ -24,24 +24,18 @@ namespace Monetizr.SDK.UI
 #endif
         private string _webUrl;
         private string _rewardWebUrl;
-        //private Mission currentMission;
         private string eventsPrefix;
         private AdPlacement adType;
         public Image background;
-
         public GameObject claimButton;
-
         public Animator crossButtonAnimator;
-
         private int _pagesSwitchesAmount = -1;
-
         public string successReason;
         public bool claimPageReached = false;
         public string programmaticStatus;
         private int _claimButtonDelay;
         private bool impressionStarts = false;
         private int _closeButtonDelay;
-
 
         internal override bool SendImpressionEventManually()
         {
@@ -86,7 +80,6 @@ namespace Monetizr.SDK.UI
 #endif
         }
 
-        //private Action _onComplete;
 #if UNI_WEB_VIEW
         internal void PrepareWebViewComponent(bool fullScreen, bool useSafeFrame)
         {
@@ -94,7 +87,6 @@ namespace Monetizr.SDK.UI
 
 #if UNITY_EDITOR
             fullScreen = false;
-            //UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
 #endif
 
             if (Log.isVerbose)
@@ -124,7 +116,6 @@ namespace Monetizr.SDK.UI
             _webView.OnPageStarted += OnPageStarted;
             _webView.OnPageFinished += OnPageFinished;
             _webView.OnPageErrorReceived += OnPageErrorReceived;
-
             _webView.Alpha = 0;
         }
 #endif
@@ -216,8 +207,6 @@ namespace Monetizr.SDK.UI
             if (hasVideo)
             {
                 _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
-
-                //if (campaign.serverSettings.GetBoolParam("omsdk.verify_internal_videos", false))
                 campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
@@ -231,10 +220,7 @@ namespace Monetizr.SDK.UI
             }
 
             var showWebview = true;
-            //var isSkipped = false;
-
             var oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
-
             string userAgent = _webView.GetUserAgent();
             var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, userAgent);
 
@@ -304,11 +290,6 @@ namespace Monetizr.SDK.UI
 
 
 #endif
-            /*if (!fullScreen)
-            {
-                closeButton.gameObject.SetActive(true);
-                SetWebviewFrame(false, false);
-            }*/
 
             if (showWebview)
             {
@@ -323,8 +304,6 @@ namespace Monetizr.SDK.UI
             else
             {
                 programmaticStatus = "failed";
-                //OnCompleteEvent();
-
                 if (campaign.serverSettings.GetBoolParam("openrtb.give_reward_on_programmatic_fail", true))
                 {
                     OnCompleteEvent();
@@ -334,9 +313,7 @@ namespace Monetizr.SDK.UI
                     _OnSkipPress();
                 }
             }
-
         }
-
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
@@ -407,15 +384,11 @@ namespace Monetizr.SDK.UI
 
             if (!string.IsNullOrEmpty(_webUrl))
             {
-                // Load a URL.
                 Log.PrintV($"Url to show {_webUrl}");
                 _webView.Show();
             }
 
-            //Show it separately because it async method
-            if (id == PanelId.Html5WebView)
-                PrepareHtml5Panel();
-
+            if (id == PanelId.Html5WebView) PrepareHtml5Panel();
 #endif
         }
 
@@ -454,24 +427,17 @@ namespace Monetizr.SDK.UI
             if (message.RawMessage.Contains("close"))
             {
                 OnCompleteEvent();
-
-                //ClosePanel();
             }
 
             if (message.RawMessage.Contains("skip"))
             {
                 _OnSkipPress();
-
-                //ClosePanel();
             }
-
-            
         }
 
         void OnPageStarted(UniWebView webView, string url)
         {
             Log.PrintV($"OnPageStarted: { url} ");
-            
         }
 
         void OnPageFinished(UniWebView webView, int statusCode, string url)
@@ -556,7 +522,6 @@ namespace Monetizr.SDK.UI
             return;
         }
 
-
         private void OnCompleteEvent()
         {
             isSkipped = false;
@@ -566,10 +531,7 @@ namespace Monetizr.SDK.UI
         private void ClosePanel()
         {
             HideClaimButton();
-            closeButton.gameObject.SetActive(false);
-            
-            //---
-            
+            closeButton.gameObject.SetActive(false);            
             additionalEventValues.Clear();
 
             if (panelId == PanelId.ActionHtmlPanelView)
@@ -611,31 +573,21 @@ namespace Monetizr.SDK.UI
         private void DestroyWebView()
         {
             Log.PrintV($"Destroying webview isSkipped: {isSkipped} current time: {Time.time}");
-
             Destroy(_webView);
             _webView = null;
-
             SetActive(false);
         }
-
 
         private new void Awake()
         {
             base.Awake();
-
-
         }
-
 
         public void OnClaimRewardPress()
         {
             Log.PrintV("OnClaimRewardPress");
-
-            
-            
             OnCompleteEvent();
         }
-
 
         public void OnSkipPress()
         {
@@ -644,7 +596,6 @@ namespace Monetizr.SDK.UI
                 _OnSkipPress();
                 return;
             }
-
 
             _webView.Hide(true, UniWebViewTransitionEdge.Top, 0.4f, () =>
             {
@@ -672,7 +623,6 @@ namespace Monetizr.SDK.UI
             ClosePanel();
         }
 
-
 #endif
         private void TrackErrorEvent(string eventName, int statusCode = 0)
         {
@@ -688,7 +638,6 @@ namespace Monetizr.SDK.UI
 
             MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Error, p);
         }
-
 
         internal override void FinalizePanel(PanelId id)
         {

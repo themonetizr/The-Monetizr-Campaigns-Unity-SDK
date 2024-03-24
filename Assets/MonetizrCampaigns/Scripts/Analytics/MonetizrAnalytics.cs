@@ -50,4 +50,5 @@ namespace Monetizr.SDK.Analytics
         internal abstract void OnApplicationQuit();
        
     }
+
 }

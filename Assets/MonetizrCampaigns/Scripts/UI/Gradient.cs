@@ -78,5 +78,7 @@ namespace Monetizr.SDK.UI
 			float sin = Mathf.Sin(angleRad);
 			return new Vector2(cos, sin);
 		}
+
 	}
+
 }

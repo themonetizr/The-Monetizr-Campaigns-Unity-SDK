@@ -105,5 +105,7 @@ namespace Monetizr.SDK.Missions
 
             return float.TryParse(value.ToString(), out var result) ? result : defaultParam;
         }
+
     }
+
 }

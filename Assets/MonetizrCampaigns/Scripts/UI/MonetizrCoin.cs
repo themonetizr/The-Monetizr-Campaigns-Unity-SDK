@@ -33,14 +33,12 @@ namespace Monetizr.SDK.UI
             }
         }
 
-        // Start is called before the first frame update
         private void Awake()
         {
-
             _uiCoin = GetComponent<Image>();
             _defaultSprite = _uiCoin.sprite;
-
-            //Log.Print($"------COIN-------- {uiCoin}");
         }
+
     }
+
 }

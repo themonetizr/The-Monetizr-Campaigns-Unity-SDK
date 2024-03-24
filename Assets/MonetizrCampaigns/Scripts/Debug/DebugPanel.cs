@@ -118,9 +118,6 @@ namespace Monetizr.SDK.Debug
         {
             PlayerPrefs.SetString("api_key", DebugSettings.keys[apiKeysList.value]);
             PlayerPrefs.Save();
-
-            //MonetizrManager.Instance.CleanRewardsClaims();
-
             var bundleId = DebugSettings.keyNames[DebugSettings.keys[apiKeysList.value]];
 
             if (bundleId.Contains("."))
@@ -134,8 +131,9 @@ namespace Monetizr.SDK.Debug
 
             var changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.keys[apiKeysList.value]);
 
-            //if (isIDChanged || changed)
             MonetizrManager.Instance.RestartClient();
         }
+
     }
+
 }

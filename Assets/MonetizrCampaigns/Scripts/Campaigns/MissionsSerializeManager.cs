@@ -7,8 +7,6 @@ namespace Monetizr.SDK.Campaigns
 {
     internal class MissionsSerializeManager : LocalSerializer<MissionsCollection>
     {
-        //private readonly string dateTimeOffsetFormatString = "yyyy-MM-ddTHH:mm:sszzz";
-
         private MissionsCollection missionsCollection = null;
 
         internal MissionsSerializeManager()
@@ -57,7 +55,6 @@ namespace Monetizr.SDK.Campaigns
         {
             ResetData();
         }
-        
 
     }
 

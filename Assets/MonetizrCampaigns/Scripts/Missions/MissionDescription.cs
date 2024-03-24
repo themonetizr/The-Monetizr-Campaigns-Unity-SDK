@@ -20,4 +20,5 @@ namespace Monetizr.SDK.Missions
         internal string activateConditions;
         internal string openRtbRequestForProgrammatic;
     }
+
 }

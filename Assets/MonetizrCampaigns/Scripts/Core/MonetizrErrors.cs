@@ -1,11 +1,4 @@
-﻿//undefine this to test slow internet
-//#define TEST_SLOW_LATENCY
-
-//if we define this - video and survey campaigns will work
-//#define USING_WEBVIEW
-
-using System.Collections.Generic;
-
+﻿using System.Collections.Generic;
 
 namespace Monetizr.SDK.Core
 {
@@ -18,6 +11,7 @@ namespace Monetizr.SDK.Core
             { ErrorType.AdAssetStillShowing, "Some ad asset are still showing." },
             { ErrorType.ConnectionError, "Connection error while getting list of campaigns!" }
         };
+
     }
 
 }

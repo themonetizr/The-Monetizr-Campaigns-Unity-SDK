@@ -39,5 +39,7 @@ namespace Monetizr.SDK.Debug
         {
             UnityEngine.Debug.LogWarning($"Monetizr SDK: {message}");
         }
+
     }
+
 }

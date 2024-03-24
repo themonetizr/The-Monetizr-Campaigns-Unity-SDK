@@ -28,8 +28,8 @@ namespace Monetizr.SDK.UI
             Log.PrintV($"Clicked: {buttonType} id: {id}");
 
             clickReceiver.ButtonPressed(this);
-            //GameState.GetInstance().ButtonPress(buttonType,id);       
         }
+
     }
 
 }

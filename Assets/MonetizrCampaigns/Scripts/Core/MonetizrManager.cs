@@ -1,10 +1,4 @@
-﻿//undefine this to test slow internet
-//#define TEST_SLOW_LATENCY
-
-//if we define this - video and survey campaigns will work
-//#define USING_WEBVIEW
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Monetizr.SDK;
@@ -42,8 +36,6 @@ namespace Monetizr.SDK.Core
 
         internal static bool isVastActive = false;
 
-
-        //position relative to center with 1080x1920 screen resolution
         private static Vector2? tinyTeaserPosition = null;
 
         private static Transform teaserRoot;
@@ -73,9 +65,6 @@ namespace Monetizr.SDK.Core
 
         public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
 
-        /// <summary>
-        /// This delegate is using for tracking user defines events from SDK side
-        /// </summary>
         public UserDefinedEvent userDefinedEvent = null;
 
         internal static void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
@@ -91,10 +80,8 @@ namespace Monetizr.SDK.Core
         }
 
 
-        //Hold resources to prevent automatic unload
         public static void HoldResource(object o)
         {
-            //if(o.GetType().IsSubclassOf(typeof(UnityEngine.Object)))
             if (o is UnityEngine.Object)
             {
                 UnityEngine.Object uo = (UnityEngine.Object)o;
@@ -274,9 +261,6 @@ namespace Monetizr.SDK.Core
             Analytics?.OnApplicationQuit();
         }
 
-        /// <summary>
-        /// Initialize
-        /// </summary>
         private void Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
         {
 #if USING_WEBVIEW
@@ -285,13 +269,10 @@ namespace Monetizr.SDK.Core
                 Log.Print("WebView isn't supported on current platform!");
             }
 #endif
-            //ExternalAnalytics = null;
 
             localSettings = new LocalSettingsManager();
 
             missionsManager = new MissionsManager();
-
-            //missionsManager.CleanUp();
 
             this._soundSwitch = soundSwitch;
 
@@ -305,16 +286,11 @@ namespace Monetizr.SDK.Core
 
             _onRequestComplete = (bool isOk) =>
             {
-                //moved together with showing teaser, because here in-game logic may not be ready
-                //                createEmbedMissions();
-
                 gameOnInitSuccess?.Invoke();
                 gameOnInitSuccess = null;
 
                 if (tinyTeaserCanBeVisible)
                 {
-                    //isMissionsIsOudated = true;
-                    //ShowTinyMenuTeaser(null);
                     OnMainMenuShow(false);
                 }
 
@@ -342,14 +318,9 @@ namespace Monetizr.SDK.Core
 
         internal void InitializeBuiltinMissions(ServerCampaign campaign)
         {
-            //if (_isMissionsIsOutdated)
             missionsManager.CreateMissionsFromCampaign(campaign);
-
-            //_isMissionsIsOutdated = false;
         }
 
-
-        //check if all mission with current campain claimed
         internal bool CheckFullCampaignClaim(Mission m)
         {
             return missionsManager.CheckFullCampaignClaim(m);
@@ -357,8 +328,6 @@ namespace Monetizr.SDK.Core
 
         internal void SaveClaimedReward(Mission m)
         {
-            //missionsManager.SaveClaimedReward(m);
-
             missionsManager.SaveAll();
         }
 
@@ -390,11 +359,6 @@ namespace Monetizr.SDK.Core
                 return false;
 
             Log.Print($"Changing api key to {apiKey}");
-
-            //RestartClient();
-
-            //RequestCampaigns();
-
             ConnectionsClient.currentApiKey = apiKey;
             return true;
         }
@@ -410,8 +374,6 @@ namespace Monetizr.SDK.Core
             missionsManager.CleanUp();
 
             campaigns.Clear();
-            //_campaigns.Clear();
-            //_campaignIds.Clear();
 
             _activeCampaignId = null;
 
@@ -473,7 +435,6 @@ namespace Monetizr.SDK.Core
 
             string campaignId = m.campaignId;
 
-            //show screen to block
             var lscreen = Instance._uiController.ShowLoadingScreen();
 
             lscreen._onComplete = (bool _) => { GameObject.Destroy(lscreen); };
@@ -489,8 +450,6 @@ namespace Monetizr.SDK.Core
             catch (OperationCanceledException)
             {
                 Log.Print("\nTasks cancelled: timed out.\n");
-
-                //onFail.Invoke();
             }
             finally
             {
@@ -504,7 +463,6 @@ namespace Monetizr.SDK.Core
         internal static async void WaitForEndRequestAndNotify(Action<bool> onComplete, Mission m,
             Action updateUIDelegate)
         {
-            //show screen to block
             var lscreen = Instance._uiController.ShowLoadingScreen();
 
             lscreen._onComplete = (bool _) => { GameObject.Destroy(lscreen); };
@@ -513,8 +471,6 @@ namespace Monetizr.SDK.Core
             {
                 Log.Print("SUCCESS!");
 
-                //MonetizrManager.analytics.TrackEvent("Enter email succeeded", m);
-
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressOk);
 
                 MonetizrManager.Instance.OnClaimRewardComplete(m, false, onComplete, updateUIDelegate);
@@ -522,26 +478,16 @@ namespace Monetizr.SDK.Core
 
             Action onFail = () =>
             {
-                Log.Print("FAIL!");
-
-                //MonetizrManager.analytics.TrackEvent("Email enter failed", m);
-
-                //MonetizrManager.analytics.TrackEvent(m, AdPlacement.EmailEnterInGameRewardScreen, MonetizrManager.EventType.Error);
-
+                Log.Print("FAIL!");;
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.Error);
-
 
                 ShowMessage((bool _) => { onComplete?.Invoke(false); },
                     m,
                     PanelId.BadEmailMessageNotification);
-
-
             };
-
 
             if (serverClaimForCampaigns)
             {
-
                 CancellationTokenSource s_cts = new CancellationTokenSource();
 
                 try
@@ -553,8 +499,6 @@ namespace Monetizr.SDK.Core
                 catch (OperationCanceledException)
                 {
                     Log.Print("\nTasks cancelled: timed out.\n");
-
-                    //onFail.Invoke();
                 }
                 finally
                 {
@@ -566,13 +510,8 @@ namespace Monetizr.SDK.Core
                 onSuccess.Invoke();
             }
 
-            //GameObject.Destroy(lscreen);
-
             temporaryEmail = null;
             lscreen.SetActive(false);
-
-
-
         }
 
         public static void ShowDebug()
@@ -601,19 +540,12 @@ namespace Monetizr.SDK.Core
 
             bool forceSkip = false;
 
-            //Log.Print($"------ShowStartupNotification 1 {placement}");
-
             if (Instance == null || !Instance.HasActiveCampaign())
             {
                 onComplete?.Invoke(true);
                 return;
             }
 
-            //Log.Print($"------ShowStartupNotification 2 {placement}");
-
-            //Log.PrintWarning("ShowStartupNotification");
-
-            //Mission sponsoredMsns = instance.missionsManager.missions.Find((Mission item) => { return item.isSponsored; });
             var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance.GetActiveCampaign());
 
             if (missions == null || missions?.Count == 0)
@@ -624,13 +556,11 @@ namespace Monetizr.SDK.Core
 
             Mission mission = missions[0];
 
-            //manual notification calls, no limits
             if (placement == NotificationPlacement.ManualNotification)
             {
                 ShowNotification(onComplete, mission, PanelId.StartNotification);
                 return;
             }
-
 
             if (placement == NotificationPlacement.LevelStartNotification)
             {
@@ -647,17 +577,11 @@ namespace Monetizr.SDK.Core
                     Log.Print($"No notifications in main menu defined on server-side");
             }
 
-            // Log.Print($"------ShowStartupNotification 3 {placement}");
-
-            //var campaign = MonetizrManager.Instance.GetCampaign(mission.campaignId);
-
             if (mission.campaignServerSettings.GetParam("no_campaigns_notification") == "true")
             {
                 Log.Print($"No notifications defined on serverside");
                 forceSkip = true;
             }
-
-            //Log.Print($"Notifications sk {mission.amountOfNotificationsSkipped} shown {mission.amountOfNotificationsShown}");
 
             mission.amountOfNotificationsSkipped++;
 
@@ -668,7 +592,6 @@ namespace Monetizr.SDK.Core
                 forceSkip = true;
             }
 
-            //check if need to limit notifications amount
             var serverMaxAmount = mission.campaignServerSettings.GetIntParam("amount_of_notifications");
             var currentAmount = Instance.localSettings.GetSetting(mission.campaignId).amountNotificationsShown;
             if (currentAmount > serverMaxAmount)
@@ -677,7 +600,6 @@ namespace Monetizr.SDK.Core
                 forceSkip = true;
             }
 
-            //check last time
             var lastTimeShow = Instance.localSettings.GetSetting(mission.campaignId).lastTimeShowNotification;
             var serverDelay = mission.campaignServerSettings.GetIntParam("notifications_delay_time_sec");
             var lastTime = (DateTime.Now - lastTimeShow).TotalSeconds;
@@ -688,8 +610,6 @@ namespace Monetizr.SDK.Core
                 forceSkip = true;
             }
 
-
-
             if (forceSkip)
             {
                 onComplete?.Invoke(true);
@@ -697,17 +617,10 @@ namespace Monetizr.SDK.Core
             }
 
             mission.amountOfNotificationsSkipped = 0;
-
-            //mission.amountOfNotificationsShown--;
-
             Instance.localSettings.GetSetting(mission.campaignId).lastTimeShowNotification = DateTime.Now;
             Instance.localSettings.GetSetting(mission.campaignId).amountNotificationsShown++;
-
             Instance.localSettings.SaveData();
-
-
             Log.Print($"Notification shown {currentAmount}/{serverMaxAmount} last time: {lastTime}/{serverDelay}");
-
             ShowNotification(onComplete, mission, PanelId.StartNotification);
         }
 
@@ -715,7 +628,6 @@ namespace Monetizr.SDK.Core
         {
             ShowNotification(onComplete, m, PanelId.CongratsNotification);
         }
-
 
         internal void ClaimMissionData(Mission m)
         {
@@ -739,14 +651,6 @@ namespace Monetizr.SDK.Core
 
         public delegate void OnComplete(OnCompleteStatus isSkipped);
 
-        /// <summary>
-        /// This method helps to show Monetizr offer instead of RV ads
-        /// If player skipped Monetizr offer or haven't seen anything 
-        /// OnComplete callback will be called with the parameter OnCompleteStatus.Skipped
-        /// </summary>
-        /// <param name="onComplete">Depending on whether the player completed the task this method calls with the corresponding parameter
-        /// </param>
-        /// 
         public static void EngagedUserAction(OnComplete onComplete)
         {
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
@@ -759,7 +663,6 @@ namespace Monetizr.SDK.Core
                 return;
             }
 
-            //no more offers, skipping
             if (missions[0].amountOfRVOffersShown == 0)
             {
                 onComplete(OnCompleteStatus.Skipped);
@@ -786,7 +689,6 @@ namespace Monetizr.SDK.Core
 
             var campaign = Instance?.FindBestCampaignToActivate();
 
-            //has some challanges
             if (campaign == null)
             {
                 onComplete?.Invoke(true);
@@ -795,17 +697,6 @@ namespace Monetizr.SDK.Core
             }
 
             Instance?.SetActiveCampaign(campaign);
-
-            //var challengeId = Instance.GetActiveCampaignId();
-
-            /*var m = Instance.missionsManager.GetMission(challengeId);
-
-            //no missions, consider as a skipped
-            if (m == null)
-            {
-                onComplete?.Invoke(true);
-                return;
-            }*/
 
             var missions = Instance.missionsManager.GetMissionsForRewardCenter(campaign);
 
@@ -842,11 +733,7 @@ namespace Monetizr.SDK.Core
 
         internal void _PressSingleMission(Action<bool> onComplete, Mission m)
         {
-            if (m.isClaimed == ClaimState.Claimed)
-                return;
-
-            //MonetizrManager.Instance.missionsManager.GetEmailGiveawayClaimAction(m, _onComplete, null).Invoke();
-
+            if (m.isClaimed == ClaimState.Claimed) return;
             MonetizrManager.Instance.missionsManager.ClaimAction(m, onComplete, null).Invoke();
         }
 
@@ -948,22 +835,13 @@ namespace Monetizr.SDK.Core
 
         public static Action<string, Dictionary<string, string>> ExternalAnalytics { internal get; set; } = null;
 
-
-        /// <summary>
-        /// Call this method to show Notification and if player close it teaser will be shown
-        /// </summary>
-        /// <param name="showNotifications"></param>
         public static void OnMainMenuShow(bool showNotifications = true)
         {
             tinyTeaserCanBeVisible = true;
 
-            if (Instance == null)
-                return;
+            if (Instance == null) return;
 
-
-            if (!Instance.HasCampaignsAndActive())
-                return;
-
+            if (!Instance.HasCampaignsAndActive()) return;
 
             Instance.InitializeBuiltinMissionsForAllCampaigns();
 
@@ -971,11 +849,7 @@ namespace Monetizr.SDK.Core
 
             Instance.SetActiveCampaign(campaign);
 
-            if (campaign == null)
-                return;
-
-
-            //Instance.InitializeBuiltinMissions(campaign);
+            if (campaign == null) return;
 
             if (showNotifications)
             {
@@ -996,15 +870,6 @@ namespace Monetizr.SDK.Core
 
         }
 
-        /// <summary>
-        /// Shows campaign notification and if player press Ok button - he sees an offer
-        /// </summary>
-        /// <param name="onComplete">
-        /// IF there's no campaigns, if player closed notification or if player do not complete task 
-        /// - OnComplete called with parameter OnCompleteStatus.Skipped
-        /// IF campaign task is completed
-        /// - OnComplete called with parameter OnCompleteStatus.Completed
-        /// </param>
         public static void ShowCampaignNotificationAndEngage(OnComplete onComplete = null)
         {
             if (Instance == null || !Instance.HasCampaignsAndActive())
@@ -1013,9 +878,7 @@ namespace Monetizr.SDK.Core
                 return;
             }
 
-            //tinyTeaserCanBeVisible = true;
             Instance.InitializeBuiltinMissionsForAllCampaigns();
-
 
             var campaign = MonetizrManager.Instance?.GetActiveCampaign();
 
@@ -1025,57 +888,34 @@ namespace Monetizr.SDK.Core
                 return;
             }
 
-
-            //Instance.InitializeBuiltinMissions(campaign);
-
-            //Notification is shown
             ShowStartupNotification(NotificationPlacement.ManualNotification, (bool isSkipped) =>
             {
-                //If notification is closed
                 if (isSkipped)
                 {
                     onComplete?.Invoke(OnCompleteStatus.Skipped);
                 }
-                //If notification isn't closed
                 else
                 {
                     ShowRewardCenter(null, (bool isRCSkipped) =>
                     {
-                        //Does player complete the task?
                         onComplete?.Invoke(isRCSkipped ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
                     });
                 }
             });
-
-
-
         }
 
         public static void OnMainMenuHide()
         {
             tinyTeaserCanBeVisible = false;
-
             HideTinyMenuTeaser();
-
-            //ShowStartupNotification((bool _) => {  });
         }
 
         public static void ShowTinyMenuTeaser(Action UpdateGameUI = null)
         {
-            //Log.Print("ShowTinyMenuTeaser");
-            if (!MonetizrManager.tinyTeaserCanBeVisible)
-                return;
-
-            //Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
-            //
-            if (Instance == null)
-                return;
-
-            //tinyTeaserCanBeVisible = true;
-
+            if (!MonetizrManager.tinyTeaserCanBeVisible) return;
+            if (Instance == null) return;
             var campaign = Instance?.FindBestCampaignToActivate();
 
-            //has some challanges
             if (campaign == null)
             {
                 Log.Print($"No active campaigns for teaser");
@@ -1084,15 +924,11 @@ namespace Monetizr.SDK.Core
 
             Instance?.SetActiveCampaign(campaign);
 
-            //has some active missions
             if (Instance.missionsManager.GetActiveMissionsNum(campaign) == 0)
             {
                 Log.Print($"No active missions for teaser");
                 return;
             }
-
-            //var challengeId = MonetizrManager.Instance.GetActiveCampaignId();
-            //var campaign = MonetizrManager.Instance.GetCampaign(challengeId);
 
             if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) &&
                 !campaign.HasAsset(AssetsType.TeaserGifPathString) &&
@@ -1118,30 +954,18 @@ namespace Monetizr.SDK.Core
             Instance.localSettings.GetSetting(campaign.id).amountTeasersShown++;
             Instance.localSettings.SaveData();
 
-            int uiVersion = 4; //campaign.serverSettings.GetIntParam("teaser_design_version", 2);
+            int uiVersion = 4;
 
-            Instance._uiController.ShowTinyMenuTeaser(teaserRoot, tinyTeaserPosition, UpdateGameUI, uiVersion,
-                campaign);
-
+            Instance._uiController.ShowTinyMenuTeaser(teaserRoot, tinyTeaserPosition, UpdateGameUI, uiVersion, campaign);
         }
 
         public static void HideTinyMenuTeaser(bool checkIfSomeMissionsAvailable = false)
         {
-            //Assert.IsNotNull(instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
-            if (Instance == null)
-                return;
+            if (Instance == null) return;
 
-            if (checkIfSomeMissionsAvailable && Instance.missionsManager.GetActiveMissionsNum() > 0)
-                return;
+            if (checkIfSomeMissionsAvailable && Instance.missionsManager.GetActiveMissionsNum() > 0) return;
 
-            //tinyTeaserCanBeVisible = false;
-
-            if (!Instance._isActive)
-                return;
-
-            // MonetizrManager.analytics.EndShowAdAsset(AdPlacement.TinyTeaser);
-
-            //MonetizrManager.analytics.TrackEvent(null, null, EventType.ImpressionEnds);
+            if (!Instance._isActive) return;
 
             Instance._uiController.HidePanel(PanelId.TinyMenuTeaser);
         }
@@ -1180,19 +1004,11 @@ namespace Monetizr.SDK.Core
                     updateUI = true;
                 }
 
-                /*if (missionsManager.TryToActivateSurvey(mission))
-                {
-                    //UpdateUI();
-                    updateUI = true;
-                }*/
-
-
                 if (mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false))
                 {
                     if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
                     {
                         ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); });
-
                     }
                 }
 
@@ -1200,11 +1016,9 @@ namespace Monetizr.SDK.Core
 
                 onComplete?.Invoke(isSkipped);
 
-                if (!updateUI)
-                    return;
+                if (!updateUI) return;
 
                 updateUIDelegate?.Invoke();
-
 
             }, mission);
 
@@ -1275,9 +1089,6 @@ namespace Monetizr.SDK.Core
 
                     if (ConnectionsClient.GlobalSettings.GetBoolParam("openrtb.sent_error_report_to_slack", true))
                     {
-                        //ConnectionsClient.SendErrorToRemoteServer("Campaign loading assets error",
-                        //    "Campaign loading assets error",
-                        //    $"Campaign {campaign.id} loading error:\nApp: {bundleId}\nApp version: {Application.version}\nSystem language: {Application.systemLanguage}\n\n{campaign.loadingError}");
 
                     }
                 }
@@ -1285,42 +1096,14 @@ namespace Monetizr.SDK.Core
 
             campaigns.RemoveAll(c => c.isLoaded == false);
 
-            // _activeCampaignId = _campaignIds.Count > 0 ? _campaignIds[0] : null;
-
-            //_isMissionsIsOutdated = true;
-
 #if TEST_SLOW_LATENCY
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
             localSettings.LoadOldAndUpdateNew(campaigns);
 
-
             Log.Print($"RequestCampaigns completed with {campaigns.Count} campaigns.");
 
-            /*if (_activeCampaignId != null)
-            {
-                //httpClient.analytics.TrackEvent("Get List Finished", activeChallengeId, true);
-
-                ConnectionsClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.ImpressionEnds);
-            }
-            else
-            {
-                if (campaigns.Count > 0)
-                {
-                    //httpClient.analytics.TrackEvent("Get List Load Failed", campaigns[0]);
-
-                    ConnectionsClient.analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoading, EventType.Error);
-                }
-            }*/
-
-            if (campaigns.Count > 0)
-                ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
-
-            /* if (!isOk)
-             {
-                 Log.Print("Request complete is not okay!");
-                 return;
-             }*/
+            if (campaigns.Count > 0) ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
 
             if (gameRewards.Count == 0)
             {
@@ -1337,26 +1120,19 @@ namespace Monetizr.SDK.Core
                 }
             }
 
-
             Log.Print("MonetizrManager initialization okay!");
-
             _isActive = true;
-
-
-            //Ok, even if response empty
-            onRequestComplete?.Invoke( /*challengesId.Count > 0*/true);
+            onRequestComplete?.Invoke(true);
         }
 
         internal void InitializeBuiltinMissionsForAllCampaigns()
         {
-            if (!_isMissionsIsOutdated)
-                return;
+            if (!_isMissionsIsOutdated) return;
 
             missionsManager.LoadSerializedMissions();
 
             campaigns.ForEach((c) =>
             {
-                //_isMissionsIsOutdated = true;
                 Instance.InitializeBuiltinMissions(c);
             });
 
@@ -1442,17 +1218,10 @@ namespace Monetizr.SDK.Core
             return campaigns.FindIndex(c => c.id == campaignId) >= 0;
         }
 
-        /// <summary>
-        /// Single update for reward and claim
-        /// </summary>
         internal async Task ClaimReward(ServerCampaign campaign, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            //var challenge = _campaigns[challengeId];
-
             try
             {
-                //await Task.Delay(15000,ct);
-
                 await ConnectionsClient.Claim(campaign, ct, onSuccess, onFailure);
             }
             catch (Exception e)

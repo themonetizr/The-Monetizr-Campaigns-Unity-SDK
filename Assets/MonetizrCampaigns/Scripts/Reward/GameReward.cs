@@ -1,11 +1,5 @@
-﻿//undefine this to test slow internet
-//#define TEST_SLOW_LATENCY
-
-//if we define this - video and survey campaigns will work
-//#define USING_WEBVIEW
-
+﻿using System;
 using UnityEngine;
-using System;
 using Monetizr.SDK.Debug;
 
 namespace Monetizr.SDK.Core

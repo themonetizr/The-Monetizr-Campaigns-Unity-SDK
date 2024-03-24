@@ -37,6 +37,7 @@ namespace Monetizr.SDK.Campaigns
 
             PlayerPrefs.SetString(GetDataKey(), "");
         }
+
     }
 
 }

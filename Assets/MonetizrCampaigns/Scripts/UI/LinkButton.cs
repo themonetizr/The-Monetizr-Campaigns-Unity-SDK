@@ -30,5 +30,7 @@ namespace Monetizr.SDK.UI {
             Application.OpenURL(url);    
 #endif
         }
+
     }
+
 }

@@ -14,4 +14,5 @@ namespace Monetizr.SDK.UI
         public RectTransform gridLayoutRoot;
         public RectTransform imageGridLayoutRoot;
     }
+
 }

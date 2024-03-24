@@ -16,8 +16,6 @@ namespace Monetizr.SDK.Core
         internal MonetizrAnalytics Analytics { get; set; } = null;
         internal SettingsDictionary<string, string> GlobalSettings { get; set; } = new SettingsDictionary<string, string>();
 
-        //----
-
         internal void SetUserAgent(string _userAgent) { this.userAgent = _userAgent; }
 
         internal virtual void Close() { }
@@ -36,4 +34,5 @@ namespace Monetizr.SDK.Core
 
         internal abstract Task<string> GetStringFromUrl(string generatorUri);
     }
+
 }

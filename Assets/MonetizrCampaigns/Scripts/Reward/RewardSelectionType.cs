@@ -2,10 +2,10 @@
 {
     public partial class MonetizrManager
     {
-        public enum OnCompleteStatus
+        internal enum RewardSelectionType
         {
-            Skipped,
-            Completed
+            Product,
+            Ingame
         }
 
     }

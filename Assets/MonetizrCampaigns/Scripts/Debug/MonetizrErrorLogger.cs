@@ -29,8 +29,6 @@ namespace Monetizr.SDK.Debug
             if (!condition.StartsWith("Monetizr SDK"))
                 return;
             
-            //Debug.LogError(condition + " " + stackTrace);
-
             _raygunClient.ApplicationVersion = MonetizrManager.SDKVersion;
 
             var tags = new List<string>();
@@ -65,6 +63,7 @@ namespace Monetizr.SDK.Debug
                     MonetizrManager.Instance.GetActiveCampaign());
             }
         }
+
     }
 
 }

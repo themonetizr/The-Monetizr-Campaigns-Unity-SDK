@@ -3,9 +3,6 @@ using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Net.Mail;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -118,7 +115,6 @@ namespace Monetizr.SDK.UI
                 },
                 this.currentMission,
                 PanelId.EmailEnterCloseConfirmation);
-
         }
 
         public void OnOkPress()

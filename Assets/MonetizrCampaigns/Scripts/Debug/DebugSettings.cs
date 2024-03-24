@@ -7,4 +7,5 @@ namespace Monetizr.SDK.Debug
         public static List<string> keys = null;
         public static Dictionary<string, string> keyNames = null;
     }
+
 }

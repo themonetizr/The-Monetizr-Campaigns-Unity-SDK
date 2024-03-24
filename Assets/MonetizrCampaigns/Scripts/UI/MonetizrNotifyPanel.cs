@@ -38,7 +38,6 @@ namespace Monetizr.SDK.UI
             this._onComplete = onComplete;
             this.panelId = id;
             this.currentMission = m;
-            //this.eventPrefix = null;
            
             closeButton.onClick.AddListener(OnButtonPress);
             noThanksButton?.onClick.AddListener(OnNoThanksPress);
@@ -51,7 +50,7 @@ namespace Monetizr.SDK.UI
             switch (id)
             {
                 case PanelId.CongratsNotification:
-                    if (/*m.type == MissionType.GiveawayWithMail ||*/ m.type == MissionType.VideoWithEmailGiveaway)
+                    if (m.type == MissionType.VideoWithEmailGiveaway)
                     {
                         if(MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product)
                             PrepareGiveawayCongratsPanel(m);
@@ -65,9 +64,7 @@ namespace Monetizr.SDK.UI
                     break;
 
                 case PanelId.StartNotification: PrepareNotificationPanel(m); break;
-                case PanelId.SurveyNotification: PrepareSurveyNotificationPanel(m); break;
-                //case PanelId.TwitterNotification: PrepareTwitterNotificationPanel(m); break;
-                
+                case PanelId.SurveyNotification: PrepareSurveyNotificationPanel(m); break;                
             }
         }
 
@@ -78,7 +75,7 @@ namespace Monetizr.SDK.UI
                
         private void PrepareNotificationPanel(Mission m)
         {
-            var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = m.campaignId;
 
             banner.sprite = _brandBanner;
             logo.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite); ;
@@ -87,7 +84,6 @@ namespace Monetizr.SDK.UI
             rewardAmount.text = m.reward.ToString();
 
             string brandTitle = m.brandName;
-
             
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
@@ -124,7 +120,7 @@ namespace Monetizr.SDK.UI
                 rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
             
-            var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = m.campaignId;
 
             banner.sprite = _brandRewardBanner != null ? _brandRewardBanner : _brandBanner;
 
@@ -170,7 +166,7 @@ namespace Monetizr.SDK.UI
 
         private void PrepareSurveyNotificationPanel(Mission m)
         {
-            var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = m.campaignId;
 
             banner.sprite = _brandRewardBanner;
             logo.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite); ;
@@ -183,7 +179,6 @@ namespace Monetizr.SDK.UI
             {
                 rewardTitle = m.campaign.GetAsset<string>(AssetsType.CustomCoinString);
             }
-            
 
             rewardImage.gameObject.SetActive(true);
             rewardImageBackgroud.gameObject.SetActive(false);
@@ -199,7 +194,7 @@ namespace Monetizr.SDK.UI
 
         private void PrepareGiveawayCongratsPanel(Mission m)
         {
-            var challengeId = m.campaignId;//MonetizrManager.Instance.GetActiveChallenge();
+            var challengeId = m.campaignId;
 
             if (_brandRewardBanner != null)
                 banner.sprite = _brandRewardBanner;
@@ -218,7 +213,6 @@ namespace Monetizr.SDK.UI
 
             rewardImage.sprite = _rewardIcon;
 
-            //v2 updates
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
 
             text.text = text.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
@@ -235,9 +229,7 @@ namespace Monetizr.SDK.UI
 
             gift?.gameObject.SetActive(false);
 
-
-            _adType = AdPlacement.EmailCongratsNotificationScreen;
-                      
+            _adType = AdPlacement.EmailCongratsNotificationScreen;       
         }
 
         private new void Awake()

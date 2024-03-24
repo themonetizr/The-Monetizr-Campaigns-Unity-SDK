@@ -42,7 +42,6 @@ namespace Monetizr.SDK.Networking
             {
                 if (token.IsCancellationRequested)
                 {
-                    //Log.Print("Task {0} cancelled");
                     token.ThrowIfCancellationRequested();
                 }
 
@@ -99,8 +98,6 @@ namespace Monetizr.SDK.Networking
             currentApiKey = apiKey;
             
             Client.Timeout = TimeSpan.FromSeconds(timeout);
-            //ConnectionsClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            //ConnectionsClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         internal override void Initialize()
@@ -164,8 +161,6 @@ namespace Monetizr.SDK.Networking
         internal async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
         {
             MonetizrManager.isVastActive = false;
-
-            //await DownloadGlobalSettings();
             
             var loadResult = await GetServerCampaignsFromMonetizr();
             
@@ -195,46 +190,12 @@ namespace Monetizr.SDK.Networking
             RemoveCampaignsWithWrongSDKVersion(result);
 
             CheckAllowedDevices(result);
-            
-            //disabled due to API changes
-            //await FilterCampaignsByLocation(result);
 
             foreach (var ch in result)
                 Log.Print($"Campaign passed filters: {ch.id}");
 
             return result;
         }
-
-        /*private async Task FilterCampaignsByLocation(List<ServerCampaign> result)
-        {
-            if (result.Count > 0)
-            {
-                bool needFilter = result[0].serverSettings.GetBoolParam("filter_campaigns_by_location", false);
-
-                if (needFilter)
-                {
-                    Analytics.locationData = await GetIpApiData();
-
-                    if (Analytics.locationData != null)
-                    {
-                        result.RemoveAll(e => { return !e.IsCampaignInsideLocation(Analytics.locationData); });
-
-                        if (result.Count > 0)
-                        {
-                            Log.Print($"{result.Count} campaigns passed location filter");
-                        }
-                    }
-                    else
-                    {
-                        Log.Print($"No location data");
-                    }
-                }
-                else
-                {
-                    Log.Print($"Geo-filtering disabled");
-                }
-            }
-        }*/
 
         private static void CheckAllowedDevices(List<ServerCampaign> result)
         {
@@ -297,7 +258,6 @@ namespace Monetizr.SDK.Networking
 
         private static void RemoveCampaignsWithWrongSDKVersion(List<ServerCampaign> result)
         {
-            //remove all campaign with SDK version lower than current
             result.RemoveAll(e =>
             {
                 string minSdkVersion = e.serverSettings.GetParam("min_sdk_version");
@@ -321,7 +281,6 @@ namespace Monetizr.SDK.Networking
 
         private static void RemoveCampaignsWithNoAssets(List<ServerCampaign> result)
         {
-            //remove all campaigns without assets
             result.RemoveAll(e =>
             {
                 bool noAssets = e.assets.Count == 0;
@@ -358,7 +317,6 @@ namespace Monetizr.SDK.Networking
 
             if (responseString.Length == 0)
             {
-                //Log.PrintError($"GetStringFromUrl has empty response {response.StatusCode} for {url}");
                 return "";
             }
 
@@ -442,13 +400,10 @@ namespace Monetizr.SDK.Networking
 
             output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", MonetizrManager.Instance.ConnectionsClient.currentApiKey);
             output.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            //ConnectionsClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            //ConnectionsClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             if (string.IsNullOrEmpty(userAgent)) 
                 return output;
             
-            //Log.PrintError(userAgent);
             output.Headers.Add("User-Agent", userAgent);
 
             return output;
@@ -463,9 +418,6 @@ namespace Monetizr.SDK.Networking
             return httpRequest;
         }
 
-        /// <summary>
-        /// Reset the challenge as claimed by the player.
-        /// </summary>
         internal override async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null,
             Action onFailure = null)
         {
@@ -488,9 +440,6 @@ namespace Monetizr.SDK.Networking
             }
         }
 
-        /// <summary>
-        /// Marks the challenge as claimed by the player.
-        /// </summary>
         internal override async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null,
             Action onFailure = null)
         {
@@ -545,21 +494,11 @@ namespace Monetizr.SDK.Networking
             }
         }
 
-        /*public void SendErrorToRemoteServer(string type, string shortDescription, string fullDescription)
-        {
-            if (!string.IsNullOrEmpty(fullDescription) && fullDescription.Length > 1024)
-                fullDescription = fullDescription.Substring(0, 1024);
-
-            string url = $"https://unity-notification-channel-to-slack-stineosy7q-uc.a.run.app/?message=\"{fullDescription}\"";
-
-            var requestMessage = MonetizrHttpClient.GetHttpRequestMessage(url);
-
-            _ = ConnectionsClient.SendAsync(requestMessage);
-        }*/
-
         public void SendReportToMixpanel(string openRtbRequest, string res)
         {
             
         }
+
     }
+
 }

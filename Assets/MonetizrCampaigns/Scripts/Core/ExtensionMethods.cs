@@ -1,13 +1,6 @@
-﻿//undefine this to test slow internet
-//#define TEST_SLOW_LATENCY
-
-//if we define this - video and survey campaigns will work
-//#define USING_WEBVIEW
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
 
 namespace Monetizr.SDK.Core
 {
@@ -19,6 +12,7 @@ namespace Monetizr.SDK.Core
             asyncOp.completed += obj => { tcs.SetResult(null); };
             return ((Task)tcs.Task).GetAwaiter();
         }
+
     }
 
 }

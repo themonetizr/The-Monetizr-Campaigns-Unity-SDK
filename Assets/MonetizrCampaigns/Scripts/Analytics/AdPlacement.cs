@@ -33,6 +33,7 @@ namespace Monetizr.SDK.Analytics
         ActionScreen,
         AssetsLoadingEnds,
         AssetsLoadingStarts,
-        CodeEnterRewardScreen,
+        CodeEnterRewardScreen
     }
+
 }
