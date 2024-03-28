@@ -194,15 +194,11 @@ namespace Monetizr.SDK.UI
                
                q.questionNumber = ++currentSurvey.activeQuestionsAmount;
 
-               if (startQuestion == null)
-                   startQuestion = q;
+               if (startQuestion == null) startQuestion = q;
 
                q.previousQuestion = lastQuestion;
 
-               if (lastQuestion != null)
-                   lastQuestion.nextQuestion = q;
-
-
+               if (lastQuestion != null) lastQuestion.nextQuestion = q;
 
                var qObj = GameObject.Instantiate<GameObject>(MonetizrUtils.IsInLandscapeMode() ?
                    monetizrQuestionRootLandscape.gameObject :
@@ -213,7 +209,6 @@ namespace Monetizr.SDK.UI
                questionRoot.question.text = $"{PanelTextItem.ReplacePredefinedItemsInText(m, q.text)}";
                questionRoot.id = q.id;
                q.questionRoot = questionRoot;
-               //width += questionRoot.rectTransform.sizeDelta.x;
 
                q.enumType = q.ParseType(q.type);
 
@@ -446,7 +441,7 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            nextQuestion = currentQuestion.nextQuestion;//currentQuestion + 1;
+            nextQuestion = currentQuestion.nextQuestion;
 
             state = State.Moving;
 

@@ -1,17 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Monetizr.SDK;
-using System;
-using System.Threading.Tasks;
-using UnityEngine.UI;
-using System.IO;
 using UnityEngine.Assertions;
-using System.IO.Compression;
-using System.Text;
-using System.Threading;
-using System.Linq;
-using mixpanel;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Missions;
@@ -78,7 +71,6 @@ namespace Monetizr.SDK.Core
                 Log.PrintError($"Exception in _CallUserDefinedEvent\n{ex}");
             }
         }
-
 
         public static void HoldResource(object o)
         {

@@ -7,18 +7,7 @@ using System.Text;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
-
-#if UNITY_IOS
-using UnityEngine.iOS;
-#endif
-
-#if UNITY_ANDROID
-using UnityEngine.Android;
-#endif
-
-#if USING_FACEBOOK
-using Facebook.Unity;   
-#endif
+using UnityEngine.Networking;
 
 namespace Monetizr.SDK.Analytics
 {
@@ -43,8 +32,6 @@ namespace Monetizr.SDK.Analytics
 #if !UNITY_EDITOR
             UnityWebRequest www = UnityWebRequest.Get(darTagUrl);
             UnityWebRequestAsyncOperation operation = www.SendWebRequest();
-
-            //operation.completed += BundleOperation_CompletedHandler;
 #endif
         }
 

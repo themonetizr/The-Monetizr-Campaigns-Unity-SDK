@@ -70,7 +70,6 @@ namespace Monetizr.SDK.UI
 #else
             if (fullScreen)
             {
-                //webView.Frame = useSafeFrame ? Screen.safeArea : new Rect(0, 0, Screen.width, Screen.height);
                 _webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
             }
             else
@@ -119,7 +118,6 @@ namespace Monetizr.SDK.UI
             _webView.Alpha = 0;
         }
 #endif
-
 
         internal void PrepareSurveyPanel(Mission m)
         {
@@ -194,8 +192,6 @@ namespace Monetizr.SDK.UI
         {
             claimButton.SetActive(false);
         }
-
-
 
         private async void PrepareHtml5Panel()
         {
@@ -287,8 +283,6 @@ namespace Monetizr.SDK.UI
 
 #if UNITY_EDITOR_WIN
             showWebview = false;
-
-
 #endif
 
             if (showWebview)

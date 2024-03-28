@@ -200,7 +200,6 @@ namespace Monetizr.SDK.Networking
         private static void CheckAllowedDevices(List<ServerCampaign> result)
         {
 #if !UNITY_EDITOR
-            //keep campaigns only for allowed devices
 
             var hasAdId = !string.IsNullOrEmpty(MonetizrMobileAnalytics.advertisingID);
 
@@ -208,12 +207,6 @@ namespace Monetizr.SDK.Networking
             {
                 result.RemoveAll(e =>
                 {
-                    /*if (e.testmode)
-                    {
-                        Log.PrintV($"Campaign {e.id} in test mode, no device filtering");
-                        return false;
-                    }*/
-
                     string allowed_device_id = e.serverSettings.GetParam("allowed_ad_id", "");
 
                     if (allowed_device_id.Length == 0)
@@ -233,7 +226,6 @@ namespace Monetizr.SDK.Networking
                                 isKeyFound = true;
                         });
 
-                        //if (!allowed_device_id.Contains(MonetizrMobileAnalytics.advertisingID))
                         if (!isKeyFound)
                         {
                             Log.Print($"Device {MonetizrMobileAnalytics.advertisingID} isn't allowed for campaign {e.id}");
@@ -244,8 +236,6 @@ namespace Monetizr.SDK.Networking
                             Log.Print($"Device {MonetizrMobileAnalytics.advertisingID} is OK for campaign {e.id}");
                             return false;
                         }
-
-                        //return !allowed_device_id.Contains(MonetizrMobileAnalytics.advertisingID);
                     }
                 });
             }

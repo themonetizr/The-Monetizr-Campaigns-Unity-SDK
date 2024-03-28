@@ -5,18 +5,6 @@ using Monetizr.SDK.Debug;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 
-#if UNITY_IOS
-using UnityEngine.iOS;
-#endif
-
-#if UNITY_ANDROID
-using UnityEngine.Android;
-#endif
-
-#if USING_FACEBOOK
-using Facebook.Unity;   
-#endif
-
 namespace Monetizr.SDK.Analytics
 {
     internal class VastTagsReplacer : TagsReplacer

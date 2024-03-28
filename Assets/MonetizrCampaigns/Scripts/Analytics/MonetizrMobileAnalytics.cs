@@ -154,8 +154,7 @@ namespace Monetizr.SDK.Analytics
             isMixpanelInitialized = false;
 
 #if USING_FACEBOOK
-            if (FB.Is
-            d)
+            if (FB.Isd)
             {
                 FB.ActivateApp();
             }
