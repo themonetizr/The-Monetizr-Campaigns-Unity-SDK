@@ -439,10 +439,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e20071554d605dc4aa9f5294603f042b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiVersion: 0
   backgroundImage: {fileID: 4899393877724029829}
   backgroundBorderImage: {fileID: 8036533285515009095}
-  nextPanelId: -1
+  uiVersion: 0
   gifImage: {fileID: 7709642674296097535}
   button: {fileID: 336197565933457743}
   teaserImage: {fileID: 336197566610468165}
@@ -509,6 +508,7 @@ MonoBehaviour:
   textElement: {fileID: 336197565902944286}
   textContent: button_text
   buttonGrafic: {fileID: 336197565390321919}
+  shouldChangeColor: 0
 --- !u!114 &1200273175110356505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -524,6 +524,7 @@ MonoBehaviour:
   textElement: {fileID: 1101338383327312448}
   textContent: header_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &497403101516821853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -539,6 +540,7 @@ MonoBehaviour:
   textElement: {fileID: 4043938307231625026}
   textContent: content_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &5729651403457851465
 MonoBehaviour:
   m_ObjectHideFlags: 0

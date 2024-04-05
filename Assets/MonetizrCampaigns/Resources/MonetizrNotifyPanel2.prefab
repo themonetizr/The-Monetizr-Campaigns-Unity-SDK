@@ -470,10 +470,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0cabfa2e43024b189fff65a62ad83eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiVersion: 0
   backgroundImage: {fileID: 1601973313011850879}
   backgroundBorderImage: {fileID: 7226164532691812479}
-  nextPanelId: -1
+  uiVersion: 0
   banner: {fileID: 67837266811523669}
   rewardImageBackgroud: {fileID: 5460336906616306820}
   rewardImage: {fileID: 283572453481621835}
@@ -485,7 +484,6 @@ MonoBehaviour:
   buttonText: {fileID: 7234977449560703399}
   noThanksButton: {fileID: 3046868277876281524}
   gift: {fileID: 3611454950221394275}
-  leaderboardImage: {fileID: 5788864503576455431}
 --- !u!114 &6572120955561666976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -501,6 +499,7 @@ MonoBehaviour:
   textElement: {fileID: 3816175783834833260}
   textContent: header_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &2331839769963241637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -516,6 +515,7 @@ MonoBehaviour:
   textElement: {fileID: 4387190133157259847}
   textContent: content_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &6117922490522058262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -531,6 +531,7 @@ MonoBehaviour:
   textElement: {fileID: 7234977449560703399}
   textContent: button_text
   buttonGrafic: {fileID: 5344945013802130261}
+  shouldChangeColor: 0
 --- !u!1 &3876935952929317554
 GameObject:
   m_ObjectHideFlags: 0

@@ -297,7 +297,7 @@ CanvasGroup:
   m_IgnoreParentGroups: 0
 --- !u!95 &5087530922797124350
 Animator:
-  serializedVersion: 5
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -310,12 +310,10 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &1215985927064123361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,6 +353,7 @@ MonoBehaviour:
   textElement: {fileID: 3816175783834833260}
   textContent: header_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &5172000109784537317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -370,6 +369,7 @@ MonoBehaviour:
   textElement: {fileID: 4387190133157259847}
   textContent: content_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &7016635983246889318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -385,6 +385,7 @@ MonoBehaviour:
   textElement: {fileID: 7234977449560703399}
   textContent: button_text
   buttonGrafic: {fileID: 5344945013802130261}
+  shouldChangeColor: 0
 --- !u!114 &825438785428921310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -400,6 +401,7 @@ MonoBehaviour:
   textElement: {fileID: 0}
   textContent: terms_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &7197426363524158102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -415,6 +417,7 @@ MonoBehaviour:
   textElement: {fileID: 4954255537914366396}
   textContent: placeholder_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &2290178704630150567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -430,6 +433,7 @@ MonoBehaviour:
   textElement: {fileID: 0}
   textContent: ingame_reward_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &3571951984119422569
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -445,6 +449,7 @@ MonoBehaviour:
   textElement: {fileID: 0}
   textContent: product_reward_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &900666879047097632
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -460,6 +465,7 @@ MonoBehaviour:
   textElement: {fileID: 0}
   textContent: terms_checkbox_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &5593929599378290330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -475,6 +481,7 @@ MonoBehaviour:
   textElement: {fileID: 0}
   textContent: terms_link_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!1 &3006630695858517114
 GameObject:
   m_ObjectHideFlags: 0
@@ -599,7 +606,7 @@ MonoBehaviour:
   m_PixelsPerUnitMultiplier: 1
 --- !u!95 &1743476649870523909
 Animator:
-  serializedVersion: 5
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -612,12 +619,10 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &4596498856462182920
 GameObject:
   m_ObjectHideFlags: 0
@@ -741,7 +746,7 @@ MonoBehaviour:
       m_Calls: []
 --- !u!95 &7432772928640070619
 Animator:
-  serializedVersion: 5
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -754,12 +759,10 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &5352783214683142118
 GameObject:
   m_ObjectHideFlags: 0
@@ -992,7 +995,7 @@ MonoBehaviour:
   m_PixelsPerUnitMultiplier: 1
 --- !u!95 &5825414493570760177
 Animator:
-  serializedVersion: 5
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1005,12 +1008,10 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &6222281424124019900
 GameObject:
   m_ObjectHideFlags: 0

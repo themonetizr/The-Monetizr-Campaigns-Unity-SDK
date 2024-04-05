@@ -366,7 +366,7 @@ CanvasGroup:
   m_IgnoreParentGroups: 0
 --- !u!95 &5087530922797124350
 Animator:
-  serializedVersion: 5
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -379,12 +379,10 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &8970457607965500597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -397,10 +395,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2aaeb7d6bbb16148be9e041093fefc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiVersion: 0
   backgroundImage: {fileID: 1601973313011850879}
   backgroundBorderImage: {fileID: 7226164532691812479}
-  nextPanelId: -1
+  uiVersion: 0
   title: {fileID: 8558785635724576829}
   text: {fileID: 4387190133157259847}
   closeButton: {fileID: 4344017537882115212}
@@ -421,6 +418,7 @@ MonoBehaviour:
   textElement: {fileID: 8558785635724576829}
   textContent: header_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &2331839769963241637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -436,6 +434,7 @@ MonoBehaviour:
   textElement: {fileID: 4387190133157259847}
   textContent: content_text
   buttonGrafic: {fileID: 0}
+  shouldChangeColor: 1
 --- !u!114 &6117922490522058262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -451,6 +450,7 @@ MonoBehaviour:
   textElement: {fileID: 7234977449560703399}
   textContent: button_text
   buttonGrafic: {fileID: 5344945013802130261}
+  shouldChangeColor: 0
 --- !u!1 &5049633877948271756
 GameObject:
   m_ObjectHideFlags: 0

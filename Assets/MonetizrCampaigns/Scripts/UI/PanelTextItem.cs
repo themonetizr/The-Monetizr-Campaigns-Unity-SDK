@@ -13,6 +13,8 @@ namespace Monetizr.SDK.UI
         public string textContent;
         public Graphic buttonGrafic;
 
+        [SerializeField] private bool shouldChangeColor = true;
+
         public void InitializeByParent(PanelId parentId, Mission m)
         {
             if (m == null) return;
@@ -35,9 +37,12 @@ namespace Monetizr.SDK.UI
 
             string[] textVars = { "text_color", $"{param}_color", $"{paramWithType}_color", $"{paramWithTypeAndId}_color" };
 
-            foreach (var t in textVars)
+            if (shouldChangeColor)
             {
-                UIController.SetColorForElement(textElement, m.campaignServerSettings, t);
+                foreach (var t in textVars)
+                {
+                    UIController.SetColorForElement(textElement, m.campaignServerSettings, t);
+                }
             }
             
             if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame &&
