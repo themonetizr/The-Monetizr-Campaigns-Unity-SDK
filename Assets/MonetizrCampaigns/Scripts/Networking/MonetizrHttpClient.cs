@@ -11,12 +11,12 @@ using System.Net;
 using Monetizr.Raygun4Unity;
 using UnityEngine.Networking;
 using Monetizr.SDK.Utils;
-using Monetizr.Campaigns;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
+using Monetizr.SDK.VAST;
 
 namespace Monetizr.SDK.Networking
 {

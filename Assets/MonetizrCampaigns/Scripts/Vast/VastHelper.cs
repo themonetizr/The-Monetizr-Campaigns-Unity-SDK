@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-//using UnityEditor.Android;
 using UnityEngine;
-using Monetizr.Campaigns.Vast42;
 using Vector2 = UnityEngine.Vector2;
-using Monetizr.SDK;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
@@ -23,16 +17,13 @@ using Monetizr.SDK.Networking;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.VAST
 {
     internal class VastHelper
     {
         internal static MonetizrClient httpClient;
-
         internal static string userAgent;
-
         private string _omidJsServiceContent;
-        //internal VastSettings vastSettings;
 
         internal class VastParams
         {
@@ -88,14 +79,6 @@ namespace Monetizr.Campaigns
             }
         }
 
-
-        /*[System.Serializable]
-        internal class VastSettings
-        {
-            public OtherSettings otherSettings;
-            public VastSettings adVerifications;
-        }*/
-
         [System.Serializable]
         internal class VastSettings
         {
@@ -146,7 +129,6 @@ namespace Monetizr.Campaigns
                 videoSettings.videoClickThroughUrl = replacer.Replace(videoSettings.videoClickThroughUrl);
             }
 
-
             internal VastSettings(VastSettings settingsToCopy)
             {
                 vendorName = settingsToCopy.vendorName;
@@ -160,7 +142,6 @@ namespace Monetizr.Campaigns
                 videoTrackingEvents = new List<TrackingEvent>();
                 settingsToCopy.videoTrackingEvents.ForEach((e) => videoTrackingEvents.Add(new TrackingEvent(e)));
             }
-
         }
 
         [System.Serializable]
@@ -298,8 +279,6 @@ namespace Monetizr.Campaigns
 
         internal static void AddVastVerificationSettings(VastSettings _vastSettings, Verification_type[] adVerifications)
         {
-            //adVerifications = null;
-
             if (adVerifications.IsNullOrEmpty())
             {
                 Log.PrintWarning("AdVerifications is not defined in the VAST xml!");
@@ -308,8 +287,6 @@ namespace Monetizr.Campaigns
 
             foreach (var av in adVerifications)
             {
-                //Log.PrintV($"Vendor: [{av.vendor}] VerificationParameters: [{av.VerificationParameters}]");
-
                 var jsrList = MonetizrUtils.CreateListFromArray<Verification_typeJavaScriptResource, VerificationJavaScriptResource>(
                     av.JavaScriptResource,
                     (Verification_typeJavaScriptResource jsr) => { return new VerificationJavaScriptResource(jsr); },
@@ -334,13 +311,8 @@ namespace Monetizr.Campaigns
                     verificationParameters = av.VerificationParameters
                 });
             }
-
-            //string s = Json.Serialize(adv.adVerifications);
-
-            //_vastSettings.videoSettings = new VideoSettings() { skipOffset = _skipOffset, videoUrl = _videoUrl };
-
-
         }
+
         internal SettingsDictionary<string, string> GetDefaultSettingsForProgrammatic()
         {
             var settings = new Dictionary<string, string>()
@@ -394,9 +366,7 @@ namespace Monetizr.Campaigns
             private readonly Wrapper_type _wrapper;
             private readonly Inline_type _inline;
             private readonly Type _type;
-            //private readonly VastSettings _vastSettings;
             private readonly bool _loadVideoOnly;
-            //private List<TrackingEvent> _videoTrackingEvents;
             private readonly AdDefinitionBase_type _baseType;
             private ServerCampaign.Asset _videoAsset;
             private PreferableVideoSize _preferableVideoSize;
@@ -417,15 +387,8 @@ namespace Monetizr.Campaigns
             {
                 return _videoAsset;
             }
-            internal VastAdItem(AdDefinitionBase_type adDefinition,
-                ServerCampaign serverCampaign,
-                //VastSettings vastSettings,
-                //List<TrackingEvent> videoTrackingEvents,
-                PreferableVideoSize preferableVideoSize,
-                bool loadVideoOnly)
+            internal VastAdItem (AdDefinitionBase_type adDefinition, ServerCampaign serverCampaign, PreferableVideoSize preferableVideoSize, bool loadVideoOnly)
             {
-                //_videoTrackingEvents = videoTrackingEvents;
-                //_vastSettings = vastSettings;
                 _serverCampaign = serverCampaign;
                 _baseType = adDefinition;
                 _wrapper = adDefinition as Wrapper_type;
@@ -443,7 +406,6 @@ namespace Monetizr.Campaigns
 
             }
 
-
             public void AssignCreativesIntoAssets()
             {
                 switch (_type)
@@ -453,7 +415,6 @@ namespace Monetizr.Campaigns
                         AddCreativesIntoAssets();
                         break;
                     case Type.Wrapper:
-                        //AddVerificationSettingsFromExtentions();
                         LoadExtentions(_wrapper.Extensions);
                         AddWrapperCreativesIntoTrackingEvents();
                         break;
@@ -532,12 +493,10 @@ namespace Monetizr.Campaigns
 
                 _serverCampaign.vastSettings.adVerifications.Add(new AdVerification()
                 {
-                    //executableResource = execList,
                     javaScriptResource = new List<VerificationJavaScriptResource>()
                             {
                                 new VerificationJavaScriptResource(apiFramework,browserOptional,false,jsResource)
                             },
-                    //tracking = trackingList,
                     vendorField = vendor,
                     verificationParameters = verificationParams
                 });
@@ -565,23 +524,16 @@ namespace Monetizr.Campaigns
                         },
                         new TrackingEvent());
                 }
-
-
             }
 
             internal string WrapperAdTagUri => _type == Type.Wrapper ? _wrapper.VASTAdTagURI : null;
 
             private void LoadExtentions(AdDefinitionBase_typeExtension[] extensions)
             {
-                //var adItem = _inline;
-
-                //if (adItem.Extensions.IsNullOrEmpty()) return;
                 if (extensions.IsNullOrEmpty()) return;
 
                 foreach (var ad in extensions)
                 {
-                    //if (ad.type != "MonetizrCampaign") continue;
-
                     foreach (var av in ad.Any)
                     {
                         if (av.Name == "MonetizrCampaignSettings")
@@ -630,7 +582,6 @@ namespace Monetizr.Campaigns
 
                 Vector2 prefSize = new Vector2(w, h);
 
-                //choose media file close to preferable size and bitrate
                 Array.Sort(it.MediaFiles.MediaFile, (m1, m2) =>
                 {
                     if (m1 == null || m2 == null ||
@@ -643,7 +594,6 @@ namespace Monetizr.Campaigns
 
                     int compareSize = Vector2.Distance(v1, prefSize).CompareTo(Vector2.Distance(v2, prefSize));
 
-                    //if the same size, take a look on bit rate
                     if (compareSize == 0)
                     {
                         if (string.IsNullOrEmpty(m1.bitrate) ||
@@ -700,11 +650,7 @@ namespace Monetizr.Campaigns
                     },
                     new TrackingEvent());
 
-                //Log.PrintV(asset.ToString());
                 var adParameters = it.AdParameters;
-
-                //LoadCampagnSettingsFromAdParams(it.AdParameters, _serverCampaign);
-
                 _serverCampaign.vastSettings.videoSettings = new VideoSettings() { skipOffset = skipOffset, videoUrl = videoUrl };
 
                 if (it.VideoClicks != null && _serverCampaign.serverSettings.GetBoolParam("openrtb.click_through", false))
@@ -720,7 +666,6 @@ namespace Monetizr.Campaigns
                 }
                 
                 AddVastVerificationSettings(_serverCampaign.vastSettings, adItemAdVerifications);
-                
             }
 
             private void AddCreativesIntoAssets()
@@ -729,22 +674,16 @@ namespace Monetizr.Campaigns
 
                 foreach (var c in adItem.Creatives)
                 {
-                    //load non linear companions
                     if (c.NonLinearAds != null && !_loadVideoOnly)
                     {
                         AddNonLinearCreatives(c.NonLinearAds);
                     }
-                    //load videos
                     if (c.Linear != null)
                     {
                         AddLinearCreatives(c.Linear,c.id,adItem.AdVerifications);
                     }
-
                 }
-
-
             }
-            
 
             private bool FindVideoInLinearCreativesAndGrabEvents(string videoName)
             {
@@ -752,7 +691,6 @@ namespace Monetizr.Campaigns
 
                 foreach (var c in adItem.Creatives)
                 {
-                    //load videos
                     if (c.Linear == null) continue;
 
                     var it = c.Linear;
@@ -774,8 +712,6 @@ namespace Monetizr.Campaigns
                             (Linear_Inline_typeMediaFilesMediaFile a) => a.Value.Contains(videoName));
                     }
 
-                    //mediaFile = null;
-
                     if (mediaFile == null)
                     {
                         string filesList = string.Join("\n", it.MediaFiles.MediaFile.Select(x => $"{x.Value}#{x.bitrate}").ToArray());
@@ -784,7 +720,6 @@ namespace Monetizr.Campaigns
                             httpClient.Analytics.SendOpenRtbReportToMixpanel(filesList, "media error", "media", null);
 
                         mediaFile = it.MediaFiles.MediaFile[0];
-                        //return false;
                     }
 
                     var videoUrl = mediaFile.Value;
@@ -800,16 +735,9 @@ namespace Monetizr.Campaigns
                         new TrackingEvent());
 
                     var adParameters = it.AdParameters;
-
-                    //LoadCampagnSettingsFromAdParams(it.AdParameters, _serverCampaign);
-
                     AddAssetFromAdParameters(it?.AdParameters?.Value, _serverCampaign);
-
                     _serverCampaign.vastSettings.videoSettings = new VideoSettings() { skipOffset = skipOffset, videoUrl = videoUrl };
-
-
                     AddVastVerificationSettings(_serverCampaign.vastSettings, adItem.AdVerifications);
-
                 }
 
                 return true;
@@ -817,59 +745,26 @@ namespace Monetizr.Campaigns
         }
         internal async Task<ServerCampaign> PrepareServerCampaign(string campaignId, string vastContent, bool videoOnly = false)
         {
-            //ServerCampaign serverCampaign = new ServerCampaign() { id = $"{v.Ad[0].id}-{UnityEngine.Random.Range(1000,2000)}", dar_tag = "" };
-            ServerCampaign serverCampaign = new ServerCampaign(
-                campaignId,
-                "",
-                GetDefaultSettingsForProgrammatic()
-            );
-
-            //var videoTrackingEvents = new List<TrackingEvent>();
-            //var vastSettings = new VastSettings();
-
-            //---
-
-            if (!await LoadVastContent(vastContent, videoOnly, serverCampaign))
-                return null;
-
-            //-----
-
+            ServerCampaign serverCampaign = new ServerCampaign(campaignId, "", GetDefaultSettingsForProgrammatic());
+            if (!await LoadVastContent(vastContent, videoOnly, serverCampaign)) return null;
             string vastJsonSettings = serverCampaign.DumpsVastSettings(null);
-
-
             Log.PrintV($"Vast settings: {vastJsonSettings}");
-
             serverCampaign.vastAdParameters = vastJsonSettings;
-            //serverCampaign.vastSettings = vastSettings;
-
-            //await InitializeOMSDK(serverCampaign.vastAdParameters);
-
             await PrepareVideoAsset(serverCampaign);
-
             return serverCampaign;
         }
 
         internal async Task<bool> InitializeServerCampaignForProgrammatic(ServerCampaign campaign, string vastContent)
         {
             campaign.RemoveAssetsByTypeFromList("programmatic_video");
-            //campaign.vastSettings = new VastSettings();
-
             await LoadVastAndFindVideoAsset(vastContent, campaign);
 
             if (!campaign.TryGetAssetInList("programmatic_video", out var video))
             {
                 return false;
             }
-
-            //if (string.IsNullOrEmpty(vastJsonSettings))
-            //    return false;
-
-            //Log.PrintV($"Vast settings: {vastJsonSettings}");
-
-            //campaign.vastAdParameters = vastJsonSettings;
-
+            
             await campaign.PreloadVideoPlayerForProgrammatic(video);
-
             return true;
         }
 
@@ -886,7 +781,6 @@ namespace Monetizr.Campaigns
             if (vastData.Items == null || vastData.Items.Length == 0)
                 return;
 
-            //load only first ad item
             if (!(vastData.Items[0] is VASTAD vad))
                 return;
 
@@ -901,13 +795,6 @@ namespace Monetizr.Campaigns
 
             if (adItem.InUnknownAdType())
                 return;
-
-            //adItem.AssignCreativesIntoAssets();
-
-            //string videoFileName = videoAsset.fpath;
-
-            //if (!adItem.FindExactAssetAndCollectTrackingEvents(videoFileName))
-            //    return null;
 
             adItem.AssignCreativesIntoAssets();
 
@@ -929,6 +816,7 @@ namespace Monetizr.Campaigns
         private async Task<bool> LoadVastContent(string vastContent, bool videoOnly, ServerCampaign serverCampaign)
         {
             VAST vastData = CreateVastFromXml(vastContent);
+            serverCampaign.openRtbRawResponse = vastContent;
 
             if (vastData == null)
             {
@@ -939,7 +827,6 @@ namespace Monetizr.Campaigns
             if (vastData.Items == null || vastData.Items.Length == 0)
                 return false;
 
-            //load only first ad item
             if (!(vastData.Items[0] is VASTAD vad))
                 return false;
 
@@ -957,16 +844,11 @@ namespace Monetizr.Campaigns
 
             adItem.AssignCreativesIntoAssets();
 
-            //AddVastVerificationSettings(vastSettings, adItem.AdVerifications);
-
             if (!string.IsNullOrEmpty(adItem.WrapperAdTagUri))
             {
                 string url = adItem.WrapperAdTagUri;
 
                 Log.PrintV($"Wrapper url {url}");
-
-                //url = "http://localhost:8080/";
-
                 Log.PrintV($"Loading wrapper with the url {url}");
 
                 HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
@@ -983,7 +865,6 @@ namespace Monetizr.Campaigns
                 if (!await LoadVastContent(result.content, videoOnly, serverCampaign))
                     return false;
 
-                //var _vastData = CreateVastFromXml(result.content);
             }
 
             return true;
@@ -998,22 +879,7 @@ namespace Monetizr.Campaigns
                 return;
             }
 
-            //serverCampaign.serverSettings.Add("custom_missions",
-            //        "{'missions': [{'type':'VideoReward','percent_amount':'100','id':'5'}]}");
-
             await DownloadAndPrepareHtmlVideoPlayer(serverCampaign, videoAsset);
-
-            //---------------
-
-            /*if (!serverCampaign.HasAssetInList("tiny_teaser"))
-            {
-                serverCampaign.assets.Add(new ServerCampaign.Asset()
-                {
-                    url = "https://image.themonetizr.com/default_assets/monetizr_teaser.gif",
-                    type = "tiny_teaser_gif",
-                });
-            }*/
-
         }
 
         private static void LoadCampagnSettingsFromAdParams(AdParameters_type adParameters, ServerCampaign serverCampaign)
@@ -1022,51 +888,27 @@ namespace Monetizr.Campaigns
                 return;
 
             Log.PrintV(adParameters.Value);
-
             string adp = adParameters.Value;
-
             adp = adp.Replace("\n", "");
-
-            //var dict = Utils.ParseJson(adp); //Json.Deserialize(adp) as Dictionary<string, object>);
-
             var parsedDict = MonetizrUtils.ParseContentString(adp);
 
             foreach (var i in parsedDict)
             {
                 serverCampaign.serverSettings.Add(i.Key, i.Value);
-
                 Log.PrintV($"Additional settings from AdParameters [{i.Key}:{i.Value}]");
             }
-
-            //serverCampaign.serverSettings = new SettingsDictionary<string, string>(Utils.ParseContentString(adp, dict));
         }
 
         private static async Task DownloadAndPrepareHtmlVideoPlayer(ServerCampaign serverCampaign, ServerCampaign.Asset videoAsset)
         {
             string campPath = Application.persistentDataPath + "/" + serverCampaign.id;
-
             string zipFolder = campPath + "/" + videoAsset.fpath;
-
             Log.PrintV($"{campPath} {zipFolder}");
-
-            //if (Directory.Exists(zipFolder))
-            //    ServerCampaign.DeleteDirectory(zipFolder);
-
-            if (!Directory.Exists(zipFolder))
-                Directory.CreateDirectory(zipFolder);
-
+            if (!Directory.Exists(zipFolder)) Directory.CreateDirectory(zipFolder);
             byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
-
             File.WriteAllBytes(zipFolder + "/html.zip", data);
-
-            //ZipFile.ExtractToDirectory(zipFolder + "/html.zip", zipFolder);
-
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-
             File.Delete(zipFolder + "/html.zip");
-
-            //--------------
-
             string indexPath = $"{zipFolder}/index.html";
 
             if (!File.Exists(indexPath))
@@ -1076,9 +918,7 @@ namespace Monetizr.Campaigns
             else
             {
                 var str = File.ReadAllText(indexPath);
-
                 str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{serverCampaign.vastAdParameters}");
-
                 File.WriteAllText(indexPath, str);
             }
         }
@@ -1150,64 +990,5 @@ namespace Monetizr.Campaigns
 
             return vastData;
         }
-
-        /*internal async Task GetCampaign(List<ServerCampaign> campList, ConnectionsClient httpClient)
-        {
-            VastParams vp = GetVastParams();
-
-            if (vp == null)
-                return;
-
-            //string uri = $"https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154";
-            //https://servedbyadbutler.com/vast.spark?setID=31328&ID=184952&pid=165154
-
-            //string uri = $"https://servedbyadbutler.com/vast.spark?setID={vp.setID}&ID={vp.id}&pid={vp.pid}";
-
-            //Pubmatic VAST
-            //string uri = "https://programmatic-serve-stineosy7q-uc.a.run.app/?test&native"; 
-
-
-            //OMSDK certification site
-            string uri = "https://vast-serve-stineosy7q-uc.a.run.app";
-
-            Log.PrintV($"Requesting VAST campaign with url {uri}");
-
-            var requestMessage = MonetizrHttpClient.GetHttpRequestMessage(uri);
-
-            HttpResponseMessage response = await httpClient.SendAsync(requestMessage);
-
-            var res = await response.Content.ReadAsStringAsync();
-
-            Log.PrintV($"Proxy response is: {res} {response.StatusCode}");
-            Log.PrintV(res);
-
-            if (!response.IsSuccessStatusCode)
-                return;
-
-            if (res.Length == 0)
-                return;
-
-            VAST vastData = CreateVastFromXml(res);
-
-
-            //Log.PrintV(v.Ad[0].Item.GetType());
-
-            if (vastData != null)
-            {
-                Log.PrintV("VAST data successfully loaded!");
-            }
-
-            ServerCampaign serverCampaign = await PrepareServerCampaign(null,res);
-
-            if (serverCampaign == null)
-            {
-                Log.PrintV("PrepareServerCampaign failed!");
-                return;
-            }
-
-            if (serverCampaign != null)
-                campList.Add(serverCampaign);
-
-        }*/
     }
 }

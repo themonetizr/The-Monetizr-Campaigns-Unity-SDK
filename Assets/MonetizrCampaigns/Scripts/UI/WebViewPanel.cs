@@ -1,12 +1,12 @@
 ﻿#define UNI_WEB_VIEW
 
-using Monetizr.Campaigns;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
+using Monetizr.SDK.VAST;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -191,6 +191,16 @@ namespace Monetizr.SDK.UI
         internal void HideClaimButton()
         {
             claimButton.SetActive(false);
+        }
+
+        public void PrintServerSettings()
+        {
+            string logMessage = "Server Settings:\n";
+            foreach (KeyValuePair<string, string> pair in currentMission.campaign.serverSettings)
+            {
+                logMessage += pair.Key + ": " + pair.Value + "\n";
+            }
+            UnityEngine.Debug.Log(logMessage);
         }
 
         private async void PrepareHtml5Panel()

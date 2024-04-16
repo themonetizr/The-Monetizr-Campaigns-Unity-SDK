@@ -1,9 +1,9 @@
-﻿using Monetizr.Campaigns;
-using Monetizr.SDK.Core;
+﻿using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Utils;
+using Monetizr.SDK.VAST;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -589,10 +589,14 @@ namespace Monetizr.SDK.Campaigns
 
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
-            if(!string.IsNullOrEmpty(openRtbRawResponse))
+            Log.PrintV($"OpenRTBResponse: {openRtbRawResponse}");
+
+            if (!string.IsNullOrEmpty(openRtbRawResponse))
                 str = str.Replace("\"${VAST_RESPONSE}\"",openRtbRawResponse);
 
-            if(!File.Exists(videoPath))
+            Log.PrintV($"Full String: {str}");
+
+            if (!File.Exists(videoPath))
                 str = str.Replace("video.mp4", asset.url);
 
             File.WriteAllText(indexPath, str);
