@@ -586,15 +586,18 @@ namespace Monetizr.SDK.Campaigns
             string indexPath = $"{fpath}/{asset.mainAssetName}";
             
             var str = File.ReadAllText(indexPath);
-
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
+
+            Log.PrintV($"Full String BEFORE: {str}");
 
             Log.PrintV($"OpenRTBResponse: {openRtbRawResponse}");
 
-            if (!string.IsNullOrEmpty(openRtbRawResponse))
-                str = str.Replace("\"${VAST_RESPONSE}\"",openRtbRawResponse);
+            openRtbRawResponse = "`" + openRtbRawResponse + "`";
 
-            Log.PrintV($"Full String: {str}");
+            if (!string.IsNullOrEmpty(openRtbRawResponse))
+                str = str.Replace("\"${VAST_RESPONSE}\"", openRtbRawResponse);
+
+            Log.PrintV($"Full String AFTER: {str}");
 
             if (!File.Exists(videoPath))
                 str = str.Replace("video.mp4", asset.url);
