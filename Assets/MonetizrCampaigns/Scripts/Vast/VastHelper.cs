@@ -463,43 +463,47 @@ namespace Monetizr.SDK.VAST
 
             private void AddVerificationSettingsFromXmlElement(XmlElement element)
             {
-                XmlNode verificationNode = element.SelectSingleNode(".//Verification");
+                XmlNodeList verificationNodes = element.SelectNodes(".//Verification");
 
-                if (verificationNode == null) return;
-                if (verificationNode.Attributes == null) return;
-
-                string vendor = verificationNode.Attributes["vendor"]?.Value;
-
-                XmlNode jsResourceNode = verificationNode.SelectSingleNode("JavaScriptResource");
-                string apiFramework = "";
-                bool browserOptional = false;
-                string jsResource = "";
-
-                if (jsResourceNode != null)
+                for (int i = 0; i < verificationNodes.Count; i++)
                 {
-                    if (jsResourceNode.Attributes != null)
+                    XmlNode verificationNode = verificationNodes.Item(i);
+                    if (verificationNode == null) continue;
+                    if (verificationNode.Attributes == null) continue;
+
+                    string vendor = verificationNode.Attributes["vendor"]?.Value;
+
+                    XmlNode jsResourceNode = verificationNode.SelectSingleNode("JavaScriptResource");
+                    string apiFramework = "";
+                    bool browserOptional = false;
+                    string jsResource = "";
+
+                    if (jsResourceNode != null)
                     {
-                        apiFramework = jsResourceNode.Attributes["apiFramework"]?.Value;
-                        bool.TryParse(jsResourceNode.Attributes["browserOptional"]?.Value, out browserOptional);
+                        if (jsResourceNode.Attributes != null)
+                        {
+                            apiFramework = jsResourceNode.Attributes["apiFramework"]?.Value;
+                            bool.TryParse(jsResourceNode.Attributes["browserOptional"]?.Value, out browserOptional);
+                        }
+
+                        jsResource = jsResourceNode.InnerText.Trim();
                     }
 
-                    jsResource = jsResourceNode.InnerText.Trim();
-                }
+                    XmlNode verificationParamsNode = verificationNode.SelectSingleNode("VerificationParameters");
 
-                XmlNode verificationParamsNode = verificationNode.SelectSingleNode("VerificationParameters");
-
-                var verificationParams = verificationParamsNode?.InnerText.Trim();
+                    var verificationParams = verificationParamsNode?.InnerText.Trim();
 
 
-                _serverCampaign.vastSettings.adVerifications.Add(new AdVerification()
-                {
-                    javaScriptResource = new List<VerificationJavaScriptResource>()
+                    _serverCampaign.vastSettings.adVerifications.Add(new AdVerification()
+                    {
+                        javaScriptResource = new List<VerificationJavaScriptResource>()
                             {
                                 new VerificationJavaScriptResource(apiFramework,browserOptional,false,jsResource)
                             },
-                    vendorField = vendor,
-                    verificationParameters = verificationParams
-                });
+                        vendorField = vendor,
+                        verificationParameters = verificationParams
+                    });
+                }
             }
 
             private void AddWrapperCreativesIntoTrackingEvents()
@@ -746,9 +750,8 @@ namespace Monetizr.SDK.VAST
         internal async Task<ServerCampaign> PrepareServerCampaign(string campaignId, string vastContent, bool videoOnly = false)
         {
             ServerCampaign serverCampaign = new ServerCampaign(campaignId, "", GetDefaultSettingsForProgrammatic());
-            if (!await LoadVastContent(vastContent, videoOnly, serverCampaign)) return null;
+            if (!await LoadVastContent(vastContent, videoOnly, serverCampaign, true)) return null;
             string vastJsonSettings = serverCampaign.DumpsVastSettings(null);
-            Log.PrintV($"Vast settings: {vastJsonSettings}");
             serverCampaign.vastAdParameters = vastJsonSettings;
             await PrepareVideoAsset(serverCampaign);
             return serverCampaign;
@@ -793,6 +796,8 @@ namespace Monetizr.SDK.VAST
                 new VastAdItem.PreferableVideoSize(prefBitRate, prefWidth, prefHeight),
                 true);
 
+            
+
             if (adItem.InUnknownAdType())
                 return;
 
@@ -813,7 +818,7 @@ namespace Monetizr.SDK.VAST
             return;
         }
 
-        private async Task<bool> LoadVastContent(string vastContent, bool videoOnly, ServerCampaign serverCampaign)
+        private async Task<bool> LoadVastContent(string vastContent, bool videoOnly, ServerCampaign serverCampaign, bool isFirstCall)
         {
             VAST vastData = CreateVastFromXml(vastContent);
             serverCampaign.openRtbRawResponse = vastContent;
@@ -824,36 +829,25 @@ namespace Monetizr.SDK.VAST
                 return false;
             }
 
-            if (vastData.Items == null || vastData.Items.Length == 0)
-                return false;
-
-            if (!(vastData.Items[0] is VASTAD vad))
-                return false;
+            if (vastData.Items == null || vastData.Items.Length == 0) return false;
+            if (!(vastData.Items[0] is VASTAD vad)) return false;
 
             int prefBitRate = httpClient.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
             int prefWidth = httpClient.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
             int prefHeight = httpClient.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
+            var adItem = new VastAdItem(vad.Item, serverCampaign, new VastAdItem.PreferableVideoSize(prefBitRate, prefWidth, prefHeight), videoOnly);
 
-            var adItem = new VastAdItem(vad.Item,
-                serverCampaign,
-                new VastAdItem.PreferableVideoSize(prefBitRate, prefWidth, prefHeight),
-                videoOnly);
-
-            if (adItem.InUnknownAdType())
-                return false;
+            if (adItem.InUnknownAdType()) return false;
 
             adItem.AssignCreativesIntoAssets();
 
             if (!string.IsNullOrEmpty(adItem.WrapperAdTagUri))
             {
                 string url = adItem.WrapperAdTagUri;
-
-                Log.PrintV($"Wrapper url {url}");
                 Log.PrintV($"Loading wrapper with the url {url}");
-
                 HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
                 httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-
+                
                 var result = await MonetizrHttpClient.DownloadUrlAsString(httpRequest);
 
                 if (!result.isSuccess)
@@ -862,9 +856,7 @@ namespace Monetizr.SDK.VAST
                     return false;
                 }
 
-                if (!await LoadVastContent(result.content, videoOnly, serverCampaign))
-                    return false;
-
+                if (!await LoadVastContent(result.content, videoOnly, serverCampaign, false)) return false;
             }
 
             return true;

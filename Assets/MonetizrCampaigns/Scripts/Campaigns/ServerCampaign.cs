@@ -584,20 +584,16 @@ namespace Monetizr.SDK.Campaigns
             string fpath = GetCampaignPath(asset.fpath);
             string videoPath = $"{fpath}/video.mp4";
             string indexPath = $"{fpath}/{asset.mainAssetName}";
-            
+
+            UnityEngine.Debug.Log("*********************************");
+            UnityEngine.Debug.Log("Injected Parameters: " + vastAdParameters);
+
             var str = File.ReadAllText(indexPath);
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
-            Log.PrintV($"Full String BEFORE: {str}");
-
-            Log.PrintV($"OpenRTBResponse: {openRtbRawResponse}");
-
             openRtbRawResponse = "`" + openRtbRawResponse + "`";
-
             if (!string.IsNullOrEmpty(openRtbRawResponse))
                 str = str.Replace("\"${VAST_RESPONSE}\"", openRtbRawResponse);
-
-            Log.PrintV($"Full String AFTER: {str}");
 
             if (!File.Exists(videoPath))
                 str = str.Replace("video.mp4", asset.url);
@@ -651,7 +647,7 @@ namespace Monetizr.SDK.Campaigns
             
             res = res.Insert(res.Length - 1, campaignSettingsJson);
                         
-            Log.PrintV($"settings: {res}");
+            Log.PrintV($"VAST Settings: {res}");
 
             return res;
         }
