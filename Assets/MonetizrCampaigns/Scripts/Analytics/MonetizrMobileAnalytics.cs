@@ -725,7 +725,7 @@ namespace Monetizr.SDK.Analytics
 
             Log.PrintV($"SendReport: {props}");
             Mixpanel.Identify(deviceIdentifier);
-            Mixpanel.Track("Programmatic-request-httpClient", props);
+            Mixpanel.Track("Programmatic-request-client", props);
         }
 
         public static string GetInternetConnectionType()

@@ -591,9 +591,9 @@ namespace Monetizr.SDK.Campaigns
             var str = File.ReadAllText(indexPath);
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
-            openRtbRawResponse = "`" + openRtbRawResponse + "`";
-            if (!string.IsNullOrEmpty(openRtbRawResponse))
-                str = str.Replace("\"${VAST_RESPONSE}\"", openRtbRawResponse);
+            string vastResponse = "`" + openRtbRawResponse + "`";
+            if (!string.IsNullOrEmpty(vastResponse))
+                str = str.Replace("\"${VAST_RESPONSE}\"", vastResponse);
 
             if (!File.Exists(videoPath))
                 str = str.Replace("video.mp4", asset.url);
