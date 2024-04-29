@@ -207,7 +207,8 @@ namespace Monetizr.SDK.VAST
             {
                 var delay = (DateTime.Now - lastTime).TotalSeconds;
 
-                var targetDelay = currentCampaign.serverSettings.GetIntParam("openrtb.delay", 300);
+                //var targetDelay = currentCampaign.serverSettings.GetIntParam("openrtb.delay", 300);
+                var targetDelay = 10;
                 if (delay < targetDelay)
                 {
                     Log.PrintV($"Last programmatic request was earlier than {targetDelay} {delay}");
@@ -218,13 +219,11 @@ namespace Monetizr.SDK.VAST
 
             MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings[timeParameterName] = DateTime.Now.ToString();
             MonetizrManager.Instance.localSettings.SaveData();
-            
             var openRtbRequest = settings.GetParam(requestParameterName);
             
             if (string.IsNullOrEmpty(openRtbRequest) && settings.ContainsKey("openrtb.generator_url"))
             {
                 string generatorUri = settings.GetParam("openrtb.generator_url");
-
                 openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrMobileAnalytics.advertisingID}");
             }
 
@@ -235,17 +234,13 @@ namespace Monetizr.SDK.VAST
             }
 
             openRtbRequest = MonetizrUtils.UnescapeString(openRtbRequest);
-
             openRtbRequest = NielsenDar.ReplaceMacros(openRtbRequest, currentCampaign, AdPlacement.Html5, userAgent);
 
             Log.PrintV($"OpenRTB request: {openRtbRequest}");
             Log.PrintV($"Requesting OpenRTB campaign with url: {openRtbUri}");
-            
 
             var requestMessage = MonetizrHttpClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
             var response = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
-
-
             string res = response.content;
 
             if (!response.isSuccess || res.Contains("Request failed!") || res.Length <= 0)
@@ -258,14 +253,12 @@ namespace Monetizr.SDK.VAST
             }
 
             currentCampaign.openRtbRawResponse = res;
+            UnityEngine.Debug.Log("================================");
             UnityEngine.Debug.Log($"Open RTB Raw Response: {res}");
-
             var openRtbResponse = OpenRTBResponse.Load(res);
-
             var adm = openRtbResponse.GetAdm();
 
-            if (string.IsNullOrEmpty(adm))
-                return false;
+            if (string.IsNullOrEmpty(adm)) return false;
 
             Log.PrintV($"Open RTB response loaded with adm: {adm}");
 
