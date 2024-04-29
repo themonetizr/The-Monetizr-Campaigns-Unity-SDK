@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Monetizr.Campaigns.Vast42;
+using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
+using Monetizr.SDK.Debug;
+using Monetizr.SDK.Networking;
+using Monetizr.SDK.Utils;
 using SimpleJSON;
 using UnityEngine;
 
-namespace Monetizr.Campaigns
+namespace Monetizr.SDK.VAST
 {
     internal class PubmaticHelper : VastHelper
     {
@@ -63,9 +66,7 @@ namespace Monetizr.Campaigns
                 if (admNode == null)
                     return "";
 
-                //string result = admNode.Value.Replace("\\\"", "\"");
-
-                return Utils.UnescapeString(admNode.Value);
+                return MonetizrUtils.UnescapeString(admNode.Value);
             }
 
             public string GetId()
@@ -165,7 +166,7 @@ namespace Monetizr.Campaigns
             public string vasttag;
         }
 
-        internal PubmaticHelper(MonetizrClient client, string userAgent) : base(client, userAgent)
+        internal PubmaticHelper(MonetizrClient httpClient, string userAgent) : base(httpClient, userAgent)
         {
         }
 
@@ -173,238 +174,19 @@ namespace Monetizr.Campaigns
         {
             if (string.IsNullOrEmpty(generatorUri))
                 return null;
+            
+            httpClient.SetUserAgent(userAgent);
 
-            var requestMessage = client.GetHttpRequestMessage(generatorUri, userAgent);
+            string res = await httpClient.GetStringFromUrl(generatorUri);
 
-            Log.PrintV($"Generator message: {requestMessage}");
+            httpClient.SetUserAgent(null);
 
-            HttpResponseMessage response = await client.GetHttpClient().SendAsync(requestMessage);
-
-            Log.PrintV($"Generator response: {response}");
-
-            var result = await response.Content.ReadAsStringAsync();
-
-            Log.PrintV($"Generator result: {result}");
-
-            if (response.IsSuccessStatusCode && result.Length > 0)
-                return result;
-
-            return null;
-        }
-
-        internal async Task<(bool isSuccess, List<ServerCampaign> result)> GetProgrammaticCampaign(MonetizrClient monetizrClient)
-        {
-            //if (GetVastParams() == null)
-            //    return false;
-
-            var resultCampaignList = new List<ServerCampaign>();
-
-            var globalSettings = client.GlobalSettings;
-            //
-            var testmode = globalSettings.GetBoolParam("mixpanel.testmode", false);
-            var mixpanelKey = globalSettings.GetParam("mixpanel.apikey", "");
-            var apiUrl = globalSettings.GetParam("api_url");
-            var videoOnly = globalSettings.GetBoolParam("openrtb.video_only", true);
-
-            monetizrClient.InitializeMixpanel(testmode, mixpanelKey, apiUrl);
-
-            //getting openrtb campaign from monetizr proxy or with ssp endpoind
-            //Log.PrintV(globalSettings.dictionary.ToString());
-
-            if (!globalSettings.ContainsKey("openrtb.endpoint"))
-            {
-                Log.PrintV($"No programmatic endpoint defined! Programmatic disabled!");
-                return (false, new List<ServerCampaign>());
-            }
-
-            string uri = globalSettings.GetParam("openrtb.endpoint");
-
-            var requestMessage = client.GetHttpRequestMessage(uri);
-
-            string openRtbRequest = "";
-
-            if (globalSettings.GetBoolParam("openrtb.send_by_client", false) &&
-                globalSettings.ContainsKey("openrtb.endpoint") &&
-                globalSettings.ContainsKey("openrtb.generator_url"))
-            {
-                string generatorUri = globalSettings.GetParam("openrtb.generator_url");
-
-                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri);
-
-                if (!string.IsNullOrEmpty(openRtbRequest))
-                {
-                    Log.PrintWarning($"request: {openRtbRequest}");
-                }
-            }
-
-            Log.PrintV($"Requesting OpenRTB campaign with url: {uri}");
-
-            requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, openRtbRequest, HttpMethod.Post);
-
-            var response = await MonetizrClient.DownloadUrlAsString(requestMessage);
-
-            /*#if UNITY_EDITOR
-                        uri = "http://127.0.0.1:8000/?test=3";
-                        requestMessage = MonetizrClient.GetOpenRtbRequestMessage(uri, "", HttpMethod.Post);
-                        response = await MonetizrClient.DownloadUrlAsString(requestMessage);
-            #endif*/
-
-            if (!response.isSuccess)
-            {
-                //#if !UNITY_EDITOR
-                if (globalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
-                    monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", null);
-                //#endif                
-
-                return (false, new List<ServerCampaign>());
-            }
-
-
-            string res = response.content;
-
-            if (res.Contains("Request failed!"))
-                return (false, new List<ServerCampaign>());
-
-
-            var openRtbResponse = OpenRTBResponse.Load(res);
-
-
-            var adm = openRtbResponse.GetAdm();
-
-            if (string.IsNullOrEmpty(adm))
-                return (false, new List<ServerCampaign>());
-
-            Log.PrintV($"Open RTB response loaded with adm: {adm}");
-
-            string vastString = null;
-            //string nativeString = null;
-
-            /*if (adm.Contains("vasttag"))
-            {
-                
-                //extracting vast tag out of json, because parse is not working with xml inside
-                string input = adm;
-                string startTag = "vasttag\":\"";
-                string endTag = "\"}";
-
-                int start = input.LastIndexOf(startTag, StringComparison.Ordinal) + startTag.Length;
-                int end = input.IndexOf(endTag, start, StringComparison.Ordinal);
-
-                vastString = input.Substring(start, end - start);
-                nativeString = input.Remove(start, end - start);
-            }
-            else */
-            if (adm.StartsWith("<VAST"))
-            {
-                vastString = adm;
-            }
-            else
-            {
-                Log.PrintV($"Open RTB response is not a VAST");
-                return (false, new List<ServerCampaign>());
-            }
-
-            //*/
-
-            ServerCampaign serverCampaign = await PrepareServerCampaign(openRtbResponse.GetId(), vastString, videoOnly);
-
-            if (serverCampaign == null)
-            {
-                Log.PrintV($"PrepareServerCampaign failed.");
-                return (false, new List<ServerCampaign>());
-            }
-
-            serverCampaign.serverSettings.MergeSettingsFrom(globalSettings);
-
-            //Log.PrintV($"vast {vastString}\n\n{nativeString}");
-
-            /*if (nativeString != null)
-            {
-                LoadAdditionalNativeAssets(nativeString, serverCampaign);
-            }*/
-
-            //#if !UNITY_EDITOR            
-            if (globalSettings.ContainsKey("openrtb.sent_report_to_mixpanel"))
-            {
-                monetizrClient.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, null);
-            }
-
-            /* if (globalSettings.GetBoolParam("openrtb.sent_report_to_slack", false))
-             {
-                 monetizrClient.SendErrorToRemoteServer("Notify",
-                     "Openrtb request successfully received",
-                                 $"Notify: Openrtb request successfully received (test mode: {testmode}) ");
-             }*/
-            //#endif
-
-            resultCampaignList.Add(serverCampaign);
-
-
-            //Log.PrintV($"Culture: {System.Globalization.CultureInfo.CurrentCulture.Name}");
-
-            return (true, resultCampaignList);
+            return res;
         }
         
-        private void LoadAdditionalNativeAssets(string result, ServerCampaign serverCampaign)
+        internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign, string currentMissionOpenRtbRequest)
         {
-            var nativeData = NativeData.Load(result);
-
-            //sc.id = openRtbResponse.id;
-
-            foreach (var a in nativeData.native.assets)
-            {
-                Log.PrintV($"asset: {a.id} {a.GetAssetType().ToString()}");
-
-                //if (a.img == null || string.IsNullOrEmpty(a.img.url))
-                //    continue;
-
-                string url = a.img.url;
-
-                Log.PrintV($"url: {url}");
-                Log.PrintV($"title: {a.title.text}");
-                Log.PrintV($"data: {a.data.value}");
-
-                switch (a.GetAssetType())
-                {
-                    case AssetType.Unknown:
-                        break;
-
-                    case AssetType.Data:
-                        if (a.data.value.Length > 15)
-                            serverCampaign.serverSettings["RewardCenter.VideoReward.content_text"] = a.data.value;
-
-                        break;
-
-                    case AssetType.Image:
-                        var asset = new ServerCampaign.Asset()
-                        {
-                            id = $"{a.id}",
-                            url = url,
-                            type = "banner",
-                            fname = Utils.ConvertCreativeToFname(url),
-                            fext = Utils.ConvertCreativeToExt("", url),
-                        };
-                        serverCampaign.assets.Add(asset);
-
-                        break;
-                    case AssetType.Title:
-                        serverCampaign.serverSettings["TinyMenuTeaser.button_text"] = a.title.text;
-                        break;
-                    case AssetType.Video:
-                        break;
-                }
-
-
-                //Log.PrintV(asset.ToString());
-            }
-        }
-        
-        internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign,
-            string currentMissionOpenRtbRequest)
-        {
-            var settings = currentCampaign.serverSettings; //client.GlobalSettings;
-
-           //var apiUrl = globalSettings.GetParam("api_url");
+            var settings = currentCampaign.serverSettings;
             var openRtbUri = settings.GetParam("openrtb.endpoint");
 
             if (string.IsNullOrEmpty(openRtbUri))
@@ -425,7 +207,8 @@ namespace Monetizr.Campaigns
             {
                 var delay = (DateTime.Now - lastTime).TotalSeconds;
 
-                var targetDelay = currentCampaign.serverSettings.GetIntParam("openrtb.delay", 300);
+                //var targetDelay = currentCampaign.serverSettings.GetIntParam("openrtb.delay", 300);
+                var targetDelay = 10;
                 if (delay < targetDelay)
                 {
                     Log.PrintV($"Last programmatic request was earlier than {targetDelay} {delay}");
@@ -434,20 +217,14 @@ namespace Monetizr.Campaigns
             }
 #endif
 
-            MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings[timeParameterName] =
-                DateTime.Now.ToString();
+            MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings[timeParameterName] = DateTime.Now.ToString();
             MonetizrManager.Instance.localSettings.SaveData();
-
-            //var requestMessage = MonetizrClient.GetHttpRequestMessage(openRtbUri, userAgent);
-
-            
             var openRtbRequest = settings.GetParam(requestParameterName);
             
             if (string.IsNullOrEmpty(openRtbRequest) && settings.ContainsKey("openrtb.generator_url"))
             {
                 string generatorUri = settings.GetParam("openrtb.generator_url");
-
-                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrAnalytics.advertisingID}");
+                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrMobileAnalytics.advertisingID}");
             }
 
             if (string.IsNullOrEmpty(openRtbRequest))
@@ -456,38 +233,34 @@ namespace Monetizr.Campaigns
                 return false;
             }
 
-            openRtbRequest = Utils.UnescapeString(openRtbRequest);
-
+            openRtbRequest = MonetizrUtils.UnescapeString(openRtbRequest);
             openRtbRequest = NielsenDar.ReplaceMacros(openRtbRequest, currentCampaign, AdPlacement.Html5, userAgent);
 
             Log.PrintV($"OpenRTB request: {openRtbRequest}");
             Log.PrintV($"Requesting OpenRTB campaign with url: {openRtbUri}");
 
-            var requestMessage = MonetizrClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
-            var response = await MonetizrClient.DownloadUrlAsString(requestMessage);
-
-
+            var requestMessage = MonetizrHttpClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
+            var response = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
             string res = response.content;
 
             if (!response.isSuccess || res.Contains("Request failed!") || res.Length <= 0)
             {
                 if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
-                    client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
+                    httpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
 
                 Log.PrintV($"Response unsuccessful with content: {res}");
                 return false;
             }
 
+            currentCampaign.openRtbRawResponse = res;
+            UnityEngine.Debug.Log("================================");
+            UnityEngine.Debug.Log($"Open RTB Raw Response: {res}");
             var openRtbResponse = OpenRTBResponse.Load(res);
-
             var adm = openRtbResponse.GetAdm();
 
-            if (string.IsNullOrEmpty(adm))
-                return false;
+            if (string.IsNullOrEmpty(adm)) return false;
 
             Log.PrintV($"Open RTB response loaded with adm: {adm}");
-
-            //string vastString;
 
             if (!adm.Contains("<VAST"))
             {
@@ -507,7 +280,7 @@ namespace Monetizr.Campaigns
 
             if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
             {
-                client.analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
+                httpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
             }
 
             return true;

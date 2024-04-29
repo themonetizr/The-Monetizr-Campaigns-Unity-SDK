@@ -1,20 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Monetizr.Campaigns;
 using UnityEngine.UI;
+using Monetizr.SDK.Core;
+using Monetizr.SDK.Utils;
 
-
-public class SponsoredMissionsManager : MonoBehaviour
+namespace Monetizr.Sample
 {
-    public Sprite defaultRewardIcon;
-    public Sprite gemsRewardIcon;
-    public GameObject dummyUI;
-
-    private static void GetAdvertisingId(out string advertisingID, out bool limitAdvertising)
+    public class SponsoredMissionsManager : MonoBehaviour
     {
+        public Sprite defaultRewardIcon;
+        public Sprite gemsRewardIcon;
+        public GameObject dummyUI;
+
+        private static void GetAdvertisingId(out string advertisingID, out bool limitAdvertising)
+        {
 #if !UNITY_EDITOR
-    #if UNITY_ANDROID
+#if UNITY_ANDROID
                    AndroidJavaClass up = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
                    AndroidJavaObject currentActivity = up.GetStatic<AndroidJavaObject> ("currentActivity");
                    AndroidJavaClass client = new AndroidJavaClass ("com.google.android.gms.ads.identifier.AdvertisingIdClient");
@@ -23,59 +25,59 @@ public class SponsoredMissionsManager : MonoBehaviour
                    advertisingID = adInfo.Call<string> ("getId").ToString();   
                    limitAdvertising = (adInfo.Call<bool> ("isLimitAdTrackingEnabled"));
 
-    #elif UNITY_IOS
+#elif UNITY_IOS
                   limitAdvertising = !(ATTrackingStatusBinding.GetAuthorizationTrackingStatus() == ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED);
                   advertisingID = Device.advertisingIdentifier;
-    #endif
-#else
-        advertisingID = "";
-        limitAdvertising = false;
-
 #endif
-    }
+#else
+            advertisingID = "";
+            limitAdvertising = false;
+#endif
+        }
 
-    private void Start()
-    {
-        //temporary API key for testing
-        const string key = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
+        private void Start()
+        {
+            //temporary API key for testing
+            const string key = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
 
-        GetAdvertisingId(out var advertisingID, out var limitAdvertising);
 
-        //Log.isVerbose = true;
+            GetAdvertisingId(out var advertisingID, out var limitAdvertising);
 
-        MonetizrManager.SetAdvertisingIds(advertisingID, limitAdvertising);
+            //Log.isVerbose = true;
 
-        //define reward type, name, getter and adder for reward
-        MonetizrManager.SetGameCoinAsset(RewardType.Reward1, defaultRewardIcon, "Coins", () =>
-                {
-                    //return current amount of coins
-                    return 0;// GameController.I.GetCoinsTotal();
-                },
-                (ulong reward) =>
-                {
-                    //add coins
-                    //GameController.I.AddCoinsTotal(reward);
-                }, 10000);
+            MonetizrManager.SetAdvertisingIds(advertisingID, limitAdvertising);
 
-        MonetizrManager.SetGameCoinAsset(RewardType.Reward2, gemsRewardIcon, "Gems", () =>
+            //define reward type, name, getter and adder for reward
+            MonetizrManager.SetGameCoinAsset(RewardType.Reward1, defaultRewardIcon, "Coins", () =>
             {
                 //return current amount of coins
                 return 0;// GameController.I.GetCoinsTotal();
             },
-            (ulong reward) =>
+                    (ulong reward) =>
+                    {
+                        //add coins
+                        //GameController.I.AddCoinsTotal(reward);
+                    }, 10000);
+
+            MonetizrManager.SetGameCoinAsset(RewardType.Reward2, gemsRewardIcon, "Gems", () =>
             {
-                //add coins
-                //GameController.I.AddCoinsTotal(reward);
-            }, 100);
+                //return current amount of coins
+                return 0;// GameController.I.GetCoinsTotal();
+            },
+                (ulong reward) =>
+                {
+                    //add coins
+                    //GameController.I.AddCoinsTotal(reward);
+                }, 100);
 
 
-        //good default placement for teaser
-        MonetizrManager.SetTeaserPosition(Utils.isInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
+            //good default placement for teaser
+            MonetizrManager.SetTeaserPosition(MonetizrUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
 
-        //initialize SDK
-        MonetizrManager.Initialize(key, null, () =>
+            //initialize SDK
+            MonetizrManager.Initialize(key, null, () =>
             {
-                if(MonetizrManager.IsActiveAndEnabled())
+                if (MonetizrManager.IsActiveAndEnabled())
                 {
                     //we can show teaser manually, but better to use TeaserHelper script
                     //see DummyMainUI object in SampleScene
@@ -85,14 +87,13 @@ public class SponsoredMissionsManager : MonoBehaviour
                     //Do something
                 }
             },
-            (bool soundOn) =>
-            {
-                //SoundManager.I.SetSoundAllowed(soundOn);
-            }, null);
+                (bool soundOn) =>
+                {
+                    //SoundManager.I.SetSoundAllowed(soundOn);
+                }, null);
 
+        }
 
     }
 
-
-   
 }

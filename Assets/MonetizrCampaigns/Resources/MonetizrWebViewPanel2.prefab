@@ -612,12 +612,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d46e2af2ee39149e0bea6c6fccfb32e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiVersion: 0
   backgroundImage: {fileID: 0}
   backgroundBorderImage: {fileID: 0}
-  nextPanelId: -1
-  closeButtonImageAsset: {fileID: 4900000, guid: d470db49358db4e43966772c1ecc75e2,
-    type: 3}
+  uiVersion: 0
+  closeButtonImageAsset: {fileID: 4900000, guid: d470db49358db4e43966772c1ecc75e2, type: 3}
   closeButton: {fileID: 8476186599486507920}
   background: {fileID: 8476186598977400446}
   claimButton: {fileID: 1533164976123071377}
@@ -640,6 +638,7 @@ MonoBehaviour:
   textElement: {fileID: 959929017956217512}
   textContent: button_text
   buttonGrafic: {fileID: 6597715709867690598}
+  shouldChangeColor: 0
 --- !u!114 &1029560109718835000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -655,6 +654,7 @@ MonoBehaviour:
   textElement: {fileID: 8476186599874992485}
   textContent: loading_text
   buttonGrafic: {fileID: 8476186598977400446}
+  shouldChangeColor: 1
 --- !u!1 &8476186599874992487
 GameObject:
   m_ObjectHideFlags: 0

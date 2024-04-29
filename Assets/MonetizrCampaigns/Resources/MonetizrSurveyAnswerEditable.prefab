@@ -602,7 +602,14 @@ MonoBehaviour:
   toggle: {fileID: 0}
   enteredAnswer: {fileID: 1750994570307058277}
   inputField: {fileID: 5985255971184301839}
-  greenBackground: {fileID: 0}
+  background: {fileID: 0}
+  image: {fileID: 0}
+  markImage: {fileID: 0}
+  grayBorder: {fileID: 0}
+  redBorder: {fileID: 0}
+  greenBorder: {fileID: 0}
+  greenRoundMark: {fileID: 0}
+  redSquareMark: {fileID: 0}
 --- !u!1 &8485631635543316545
 GameObject:
   m_ObjectHideFlags: 0

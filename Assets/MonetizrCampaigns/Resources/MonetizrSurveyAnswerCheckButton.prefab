@@ -93,7 +93,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &767052308667159871
 RectTransform:
   m_ObjectHideFlags: 0
@@ -416,7 +416,14 @@ MonoBehaviour:
   toggle: {fileID: 2955452655643482131}
   enteredAnswer: {fileID: 0}
   inputField: {fileID: 0}
-  greenBackground: {fileID: 5491389720374971800}
+  background: {fileID: 1310065862095693723}
+  image: {fileID: 0}
+  markImage: {fileID: 927352045440695915}
+  grayBorder: {fileID: 21300000, guid: 42e038cb0732d4ee0a95fa36bea53eb3, type: 3}
+  redBorder: {fileID: 21300000, guid: f1e56af51162d6c489d5a859785a2e4d, type: 3}
+  greenBorder: {fileID: 21300000, guid: 391748d804acbc44bba803613aeb1caf, type: 3}
+  greenRoundMark: {fileID: 21300000, guid: 727d3ceda70624df4bcd6c4a75b6bb95, type: 3}
+  redSquareMark: {fileID: 21300000, guid: cd110008e373b0c49a4672fa3c1b763f, type: 3}
 --- !u!1 &8485631635543316545
 GameObject:
   m_ObjectHideFlags: 0
