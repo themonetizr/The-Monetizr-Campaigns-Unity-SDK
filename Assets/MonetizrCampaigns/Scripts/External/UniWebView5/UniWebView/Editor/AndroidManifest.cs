@@ -76,6 +76,7 @@ internal class UniWebViewAndroidManifest : UniWebViewAndroidXmlDocument {
         return changed;
     }
 
+    /*
     internal bool AddCameraPermission() {
         bool changed = false;
         if (SelectNodes("/manifest/uses-permission[@android:name='android.permission.CAMERA']", nameSpaceManager).Count == 0) {
@@ -109,6 +110,7 @@ internal class UniWebViewAndroidManifest : UniWebViewAndroidXmlDocument {
         }
         return changed;
     }
+    */
 
     internal bool AddReadExternalStoragePermission() {
         bool changed = false;
@@ -132,6 +134,7 @@ internal class UniWebViewAndroidManifest : UniWebViewAndroidXmlDocument {
         return changed;
     }
 
+    /*
     internal bool AddAccessFineLocationPermission() {
         bool changed = false;
         if (SelectNodes("/manifest/uses-permission[@android:name='android.permission.ACCESS_FINE_LOCATION']", nameSpaceManager).Count == 0) {
@@ -142,6 +145,7 @@ internal class UniWebViewAndroidManifest : UniWebViewAndroidXmlDocument {
         }
         return changed;
     }
+    */
 
     internal bool AddAuthCallbacksIntentFilter(string[] authCallbackUrls) {
         bool changed = false;

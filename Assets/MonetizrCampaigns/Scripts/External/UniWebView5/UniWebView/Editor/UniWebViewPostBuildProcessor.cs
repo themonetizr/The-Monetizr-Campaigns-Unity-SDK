@@ -31,9 +31,11 @@ class UniWebViewPostBuildProcessor : IPostGenerateGradleAndroidProject
         if (settings.writeExternalStorage) {
             changed = manifest.AddWriteExternalStoragePermission() || changed;
         }
+        /*
         if (settings.accessFineLocation) {
             changed = manifest.AddAccessFineLocationPermission() || changed;
         }
+        */
         if (settings.authCallbackUrls.Length > 0) {
             changed = manifest.AddAuthCallbacksIntentFilter(settings.authCallbackUrls) || changed;
         }

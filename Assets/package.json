@@ -1,20 +1,20 @@
 {
-    "name": "com.monetizr.unityplugin",
-    "version": "1.0.5",
-    "displayName": "Monetizr Unity SDK",
-    "description": "A plugin to simplify the Unity integration of Monetizr Unity SDK.",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/themonetizr/The-Monetizr-Campaigns-Unity-SDK.git?path=/Assets"
-    },
-    "documentationUrl": "https://docs.themonetizr.com/docs/unity-campaigns-sdk-integration",
-    "keywords": [
-        "monetizr"
-    ],
-    "category": "Monetizr",
-    "author": {
-        "name": "Monetizr",
-        "email": "dev@themonetizr.com",
-        "url": "https://github.com/themonetizr/The-Monetizr-Campaigns-Unity-SDK"
-    }
+  "name": "com.monetizr.unityplugin",
+  "version": "1.0.6",
+  "displayName": "Monetizr Unity SDK",
+  "description": "A plugin to simplify the Unity integration of Monetizr Unity SDK.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/themonetizr/The-Monetizr-Campaigns-Unity-SDK.git?path=/Assets"
+  },
+  "documentationUrl": "https://docs.themonetizr.com/docs/unity-campaigns-sdk-integration",
+  "keywords": [
+    "monetizr"
+  ],
+  "category": "Monetizr",
+  "author": {
+    "name": "Monetizr",
+    "email": "dev@themonetizr.com",
+    "url": "https://github.com/themonetizr/The-Monetizr-Campaigns-Unity-SDK"
+  }
 }

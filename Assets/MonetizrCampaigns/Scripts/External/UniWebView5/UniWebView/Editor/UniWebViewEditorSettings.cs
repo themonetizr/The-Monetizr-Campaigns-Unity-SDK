@@ -14,8 +14,8 @@ class UniWebViewEditorSettings: ScriptableObject
     [SerializeField]
     internal bool writeExternalStorage = false;
 
-    [SerializeField]
-    internal bool accessFineLocation = false;
+    //[SerializeField]
+    //internal bool accessFineLocation = false;
 
     [SerializeField]
     internal bool addsKotlin = true;
@@ -88,8 +88,8 @@ static class UniWebViewSettingsProvider {
         EditorGUILayout.PropertyField(settings.FindProperty("writeExternalStorage"));
         DrawDetailLabel("If you need to download an image from web page.");
 
-        EditorGUILayout.PropertyField(settings.FindProperty("accessFineLocation"));
-        DrawDetailLabel("If you need to enable location support in web view.");
+        //EditorGUILayout.PropertyField(settings.FindProperty("accessFineLocation"));
+        //DrawDetailLabel("If you need to enable location support in web view.");
         EditorGUI.indentLevel--;
         EditorGUILayout.EndVertical();
 
