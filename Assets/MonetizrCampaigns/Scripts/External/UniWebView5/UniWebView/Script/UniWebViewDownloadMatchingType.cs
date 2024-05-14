@@ -15,18 +15,20 @@
 //  arising from, out of or in connection with the software or the use of other dealing in the software.
 //
 
-/// <summary>
-/// The matching type used when UniWebView determines whether to download from a URL or MIME type.
-/// </summary>
-public enum UniWebViewDownloadMatchingType
+namespace CustomUniWebView 
 {
     /// <summary>
-    /// Matches exact the whole value.
+    /// The matching type used when UniWebView determines whether to download from a URL or MIME type.
     /// </summary>
-    ExactValue = 1,
-    /// <summary>
-    /// Uses the value as a regular expression.
-    /// </summary>
-    RegularExpression = 2
+    public enum UniWebViewDownloadMatchingType
+    {
+        /// <summary>
+        /// Matches exact the whole value.
+        /// </summary>
+        ExactValue = 1,
+        /// <summary>
+        /// Uses the value as a regular expression.
+        /// </summary>
+        RegularExpression = 2
+    }
 }
-

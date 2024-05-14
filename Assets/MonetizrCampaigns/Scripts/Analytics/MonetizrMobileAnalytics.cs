@@ -10,6 +10,8 @@ using Monetizr.SDK.Networking;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.UI;
+using CustomUniWebView;
+
 
 #if UNITY_IOS
 using UnityEngine.iOS;
