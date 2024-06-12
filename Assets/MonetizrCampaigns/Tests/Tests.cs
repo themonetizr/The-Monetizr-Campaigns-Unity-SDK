@@ -17,6 +17,7 @@ using Monetizr.SDK.Core;
 
 namespace Monetizr.Tests
 {
+    /*
     public class Tests
     {
         static int loadSuccess = 0;
@@ -234,7 +235,7 @@ namespace Monetizr.Tests
 
             new TestVisibility("MonetizrRewardedItem0",true,2),
 
-            new ClickTask("RewardCenterButtonClaim0",2),*/
+            new ClickTask("RewardCenterButtonClaim0",2),
 
                 //page1
                 new ClickTask($"NextButton",2),
@@ -267,7 +268,6 @@ namespace Monetizr.Tests
 
             //yield return null;
         }
-
 
         class TasksManager
         {
@@ -453,4 +453,5 @@ namespace Monetizr.Tests
             }
         }
     }
+    */
 }

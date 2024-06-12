@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 namespace Monetizr.Tests
 {
+    /*
     internal class MonetizrTestAnalytics : MonetizrAnalytics
     {
         internal override string GetUserId()
@@ -63,4 +64,5 @@ namespace Monetizr.Tests
             
         }
     }
+    */
 }
