@@ -9,8 +9,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projectPath:
-          - The-Monetizr-Campaigns-Unity-SDK
         testMode:
           - playmode
           - editmode
@@ -23,6 +21,5 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          projectPath: ${{ matrix.projectPath }}
           testMode: ${{ matrix.testMode }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
