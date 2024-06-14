@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - ./
+          - ./The-Monetizr-Campaigns-Unity-SDK
         testMode:
           - playmode
           - editmode
