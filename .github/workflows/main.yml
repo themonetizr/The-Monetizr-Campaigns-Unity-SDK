@@ -9,8 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projectPath:
-          - the-monetizr-campaigns-unity-sdk
+        unityVersion: '2020.3.34f1'
         testMode:
           - playmode
           - editmode
