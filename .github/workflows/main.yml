@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   testAllModes:
-    name: Tests
+    name: Unity - Test runner
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -12,11 +12,9 @@ jobs:
         unityVersion: 
           - '2020.3.34f1'
         testMode:
-          - playmode
-          - editmode
-          - standalone
+          - all
     steps:
-      - uses: game-ci/unity-test-runner@v4
+      - uses: game-ci/unity-test-runner@v4.3.0
         id: testRunner
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
