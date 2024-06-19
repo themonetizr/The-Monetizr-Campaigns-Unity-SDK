@@ -226,7 +226,7 @@ namespace Monetizr.SDK.Missions
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign.id;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
-            m.sdkVersion = MonetizrManager.SDKVersion;
+            m.sdkVersion = MonetizrSDKConfiguration.SDKVersion;
             if (!md.hasUnitySurvey) m.surveyUrl = md.surveyUrl;
             m.surveyId = md.surveyId;
             m.serverId = md.id;
@@ -534,7 +534,7 @@ namespace Monetizr.SDK.Missions
                     continue;
 
                 m.campaign = campaign;
-                m.sdkVersion = MonetizrManager.SDKVersion;
+                m.sdkVersion = MonetizrSDKConfiguration.SDKVersion;
                 m.rewardAssetName = missionDescription.rewardImage;
 
                 if (!missionDescription.hasUnitySurvey)

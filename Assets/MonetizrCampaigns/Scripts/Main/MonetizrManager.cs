@@ -16,9 +16,6 @@ namespace Monetizr.SDK.Core
 {
     public partial class MonetizrManager : MonoBehaviour
     {
-        public static float requestCampaignTime = 5 * 60;
-        public static readonly string SDKVersion = "1.0.5";
-
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
         public static bool claimForSkippedCampaigns;
@@ -216,7 +213,7 @@ namespace Monetizr.SDK.Core
                 };
             }
 
-            Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {SDKVersion}");
+            Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {MonetizrSDKConfiguration.SDKVersion}");
 
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
@@ -290,8 +287,10 @@ namespace Monetizr.SDK.Core
 
             RequestCampaigns(_onRequestComplete);
 
-            if (requestCampaignTime > 0)
-                StartCoroutine(TryRequestCampaignsLater(requestCampaignTime));
+            if (MonetizrSDKConfiguration.requestCampaignTime > 0)
+            {
+                StartCoroutine(TryRequestCampaignsLater(MonetizrSDKConfiguration.requestCampaignTime));
+            }
         }
 
         private IEnumerator TryRequestCampaignsLater(float time)
