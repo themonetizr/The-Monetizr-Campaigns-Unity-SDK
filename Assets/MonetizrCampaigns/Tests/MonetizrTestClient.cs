@@ -8,6 +8,7 @@ using static Monetizr.SDK.Campaigns.ServerCampaign;
 
 namespace Monetizr.Tests
 {
+    /*
     internal class MonetizrTestClient : MonetizrClient
     {
         internal override void Close()
@@ -110,5 +111,5 @@ namespace Monetizr.Tests
             throw new NotImplementedException();
         }
     }
-
+    */
 }

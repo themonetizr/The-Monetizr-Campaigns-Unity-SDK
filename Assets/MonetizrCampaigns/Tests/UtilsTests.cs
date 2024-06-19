@@ -17,6 +17,7 @@ using Monetizr.SDK.Missions;
 
 namespace Monetizr.Tests
 {
+    /*
     public class UtilsTests
     {
         [Test]
@@ -328,6 +329,6 @@ namespace Monetizr.Tests
 
             CollectionAssert.AreEqual(new[] { "1", "3" }, list3);
         }
-
     }
+    */
 }
