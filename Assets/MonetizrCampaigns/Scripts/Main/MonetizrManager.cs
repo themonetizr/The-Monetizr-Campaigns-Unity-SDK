@@ -16,46 +16,44 @@ namespace Monetizr.SDK.Core
 {
     public partial class MonetizrManager : MonoBehaviour
     {
+        internal static MonetizrManager Instance { get; private set; } = null;
+
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
         public static bool claimForSkippedCampaigns;
-
         public static bool closeRewardCenterAfterEveryMission = false;
-
         internal static int maximumCampaignAmount = 1;
-
         internal static bool isVastActive = false;
-
         private static Vector2? tinyTeaserPosition = null;
-
         private static Transform teaserRoot;
-
         internal MonetizrClient ConnectionsClient { get; private set; }
-
         public List<MissionDescription> sponsoredMissions { get; private set; }
-
         private UIController _uiController = null;
-
         private ServerCampaign _activeCampaignId = null;
-
         private Action<bool> _soundSwitch = null;
         private Action<bool> _onRequestComplete = null;
         internal Action<bool> onUIVisible = null;
-
         private bool _isActive = false;
         private bool _isMissionsIsOutdated = true;
-
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
-
         internal static bool tinyTeaserCanBeVisible;
-
         internal MissionsManager missionsManager = null;
-
         internal LocalSettingsManager localSettings = null;
-
         public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
-
         public UserDefinedEvent userDefinedEvent = null;
+        public List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
+        public static string temporaryEmail = "";
+        internal static RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
+        public static int defaultRewardAmount = 1000;
+        public static string defaultTwitterLink = "";
+        internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
+        private static int debugAttempt = 0;
+        public static int abTestSegment = 0;
+        public static string bundleId = null;
+        private Action _gameOnInitSuccess;
+        internal static MonetizrAnalytics Analytics => Instance.ConnectionsClient.Analytics;
+        public delegate void OnComplete(OnCompleteStatus isSkipped);
+        public static Action<string, Dictionary<string, string>> ExternalAnalytics { internal get; set; } = null;
 
         internal static void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
         {
@@ -81,22 +79,6 @@ namespace Monetizr.SDK.Core
                 }
             }
         }
-
-        public List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
-
-        public static string temporaryEmail = "";
-
-        internal static RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
-
-        public static int defaultRewardAmount = 1000;
-        public static string defaultTwitterLink = "";
-
-        internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
-        private static int debugAttempt = 0;
-        public static int abTestSegment = 0;
-
-        public static string bundleId = null;
-        private Action _gameOnInitSuccess;
 
         public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title,
             Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
@@ -241,9 +223,7 @@ namespace Monetizr.SDK.Core
             return Instance;
         }
 
-        internal static MonetizrManager Instance { get; private set; } = null;
 
-        internal static MonetizrAnalytics Analytics => Instance.ConnectionsClient.Analytics;
 
         void OnApplicationQuit()
         {
@@ -640,8 +620,6 @@ namespace Monetizr.SDK.Core
             Instance.missionsManager.CleanUserDefinedMissions();
         }
 
-        public delegate void OnComplete(OnCompleteStatus isSkipped);
-
         public static void EngagedUserAction(OnComplete onComplete)
         {
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
@@ -670,7 +648,6 @@ namespace Monetizr.SDK.Core
                     onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
                 });
         }
-
 
         public static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
         {
@@ -772,7 +749,6 @@ namespace Monetizr.SDK.Core
                 false, m);
         }
 
-
         internal static void _ShowWebView(Action<bool> onComplete, PanelId id, Mission m = null)
         {
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
@@ -823,8 +799,6 @@ namespace Monetizr.SDK.Core
         {
             teaserRoot = root;
         }
-
-        public static Action<string, Dictionary<string, string>> ExternalAnalytics { internal get; set; } = null;
 
         public static void OnMainMenuShow(bool showNotifications = true)
         {
