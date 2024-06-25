@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Utils;
+using Monetizr.SDK.New;
 
 namespace Monetizr.Sample
 {
@@ -37,14 +38,8 @@ namespace Monetizr.Sample
 
         private void Start()
         {
-            //temporary API key for testing
             const string key = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
-
-
             GetAdvertisingId(out var advertisingID, out var limitAdvertising);
-
-            //Log.isVerbose = true;
-
             MonetizrManager.SetAdvertisingIds(advertisingID, limitAdvertising);
 
             //define reward type, name, getter and adder for reward
@@ -86,11 +81,7 @@ namespace Monetizr.Sample
                     //MonetizrManager.ShowTinyMenuTeaser();
                     //Do something
                 }
-            },
-                (bool soundOn) =>
-                {
-                    //SoundManager.I.SetSoundAllowed(soundOn);
-                }, null);
+            }, (bool soundOn) => { }, null);
 
         }
 

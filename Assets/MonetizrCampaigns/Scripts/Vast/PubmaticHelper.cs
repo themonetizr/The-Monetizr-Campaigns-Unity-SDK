@@ -177,7 +177,7 @@ namespace Monetizr.SDK.VAST
             
             httpClient.SetUserAgent(userAgent);
 
-            string res = await httpClient.GetStringFromUrl(generatorUri);
+            string res = await httpClient.GetResponseStringFromUrl(generatorUri);
 
             httpClient.SetUserAgent(null);
 
