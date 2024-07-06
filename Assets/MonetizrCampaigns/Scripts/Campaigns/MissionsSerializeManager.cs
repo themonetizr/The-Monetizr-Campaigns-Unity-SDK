@@ -32,7 +32,7 @@ namespace Monetizr.SDK.Campaigns
 
             int deleted = data.missions.RemoveAll((Mission m) => { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
           
-            deleted += data.missions.RemoveAll((Mission m) => { return m.sdkVersion != MonetizrSDKConfiguration.SDKVersion; });
+            deleted += data.missions.RemoveAll((Mission m) => { return m.sdkVersion != MonetizrConfiguration.SDKVersion; });
 
             if(deleted > 0)
             {

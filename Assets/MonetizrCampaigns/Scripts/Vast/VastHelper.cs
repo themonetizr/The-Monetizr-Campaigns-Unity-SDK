@@ -84,7 +84,7 @@ namespace Monetizr.SDK.VAST
         internal class VastSettings
         {
             public string vendorName = "Themonetizr";
-            public string sdkVersion = MonetizrSDKConfiguration.SDKVersion;
+            public string sdkVersion = MonetizrConfiguration.SDKVersion;
 
             public VideoSettings videoSettings = new VideoSettings();
 
