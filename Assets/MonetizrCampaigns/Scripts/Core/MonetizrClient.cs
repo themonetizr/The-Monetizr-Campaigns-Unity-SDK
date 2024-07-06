@@ -32,7 +32,7 @@ namespace Monetizr.SDK.Core
 
         internal virtual void SetTestMode(bool testMode) {}
 
-        internal abstract Task<string> GetStringFromUrl(string generatorUri);
+        internal abstract Task<string> GetResponseStringFromUrl(string generatorUri);
     }
 
 }

@@ -23,13 +23,10 @@ namespace Monetizr.SDK.Networking
     internal partial class MonetizrHttpClient : MonetizrClient
     {
         private string _baseApiUrl = "https://api.themonetizr.com";
-
         private string CampaignsApiUrl => _baseApiUrl + "/api/campaigns";
         private string SettingsApiUrl => _baseApiUrl + "/settings";
-
         private readonly string _baseTestApiUrl = "https://api-test.themonetizr.com";
         private static readonly HttpClient Client = new HttpClient();
-        
         private CancellationTokenSource downloadCancellationTokenSource;
         
         private static async Task RequestEnd(UnityWebRequest request, CancellationToken token)
@@ -92,11 +89,8 @@ namespace Monetizr.SDK.Networking
 
         public MonetizrHttpClient(string apiKey, int timeout = 30)
         {
-            System.Net.ServicePointManager.SecurityProtocol |=
-                SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             currentApiKey = apiKey;
-            
             Client.Timeout = TimeSpan.FromSeconds(timeout);
         }
 
@@ -130,21 +124,15 @@ namespace Monetizr.SDK.Networking
             }
 
             string result = await response.Content.ReadAsStringAsync();
-
             Log.PrintV($"Download response is: {result} {response.StatusCode}");
-            
-            if (!response.IsSuccessStatusCode)
-                return (false,"");
-
-            if (result.Length == 0)
-                return (false,"");
-            
-            return (true,result);
+            if (!response.IsSuccessStatusCode) return (false,"");
+            if (result.Length == 0) return (false,"");
+            return (true, result);
         }
 
         private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
         {
-            var responseString = await GetStringFromUrl(SettingsApiUrl);
+            var responseString = await GetResponseStringFromUrl(SettingsApiUrl);
 
             if (string.IsNullOrEmpty(responseString))
             {
@@ -153,47 +141,35 @@ namespace Monetizr.SDK.Networking
             }
 
             Log.PrintV($"Settings: {responseString}");
-
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
-        
 
         internal async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
         {
             MonetizrManager.isVastActive = false;
-            
             var loadResult = await GetServerCampaignsFromMonetizr();
-            
             Log.PrintV($"GetServerCampaignsFromMonetizr result {loadResult.Count}");
-            
             return loadResult;
         }
 
         internal override async Task GetGlobalSettings()
         {
             GlobalSettings = await DownloadGlobalSettings();
-
-            RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint",
-                "");
-            
+            RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint", "");
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
-
             Log.PrintV($"Api endpoint: {_baseApiUrl}");
         }
 
         internal override async Task<List<ServerCampaign>> GetList()
         {
             var result = await LoadCampaignsListFromServer();
-            
             RemoveCampaignsWithNoAssets(result);
-
             RemoveCampaignsWithWrongSDKVersion(result);
-
             CheckAllowedDevices(result);
-
             foreach (var ch in result)
+            {
                 Log.Print($"Campaign passed filters: {ch.id}");
-
+            }
             return result;
         }
 
@@ -254,12 +230,11 @@ namespace Monetizr.SDK.Networking
 
                 if (minSdkVersion != null)
                 {
-                    bool sdkVersionCheck = MonetizrUtils.CompareVersions(MonetizrManager.SDKVersion, minSdkVersion) < 0;
+                    bool sdkVersionCheck = MonetizrUtils.CompareVersions(MonetizrSDKConfiguration.SDKVersion, minSdkVersion) < 0;
 
                     if (sdkVersionCheck)
                     {
-                        Log.Print(
-                            $"Removing campaign {e.id} because SDK version {MonetizrManager.SDKVersion} less then required SDK version {minSdkVersion}");
+                        Log.Print($"Removing campaign {e.id} because SDK version {MonetizrSDKConfiguration.SDKVersion} less then required SDK version {minSdkVersion}");
                     }
 
                     return sdkVersionCheck;
@@ -284,18 +259,12 @@ namespace Monetizr.SDK.Networking
             });
         }
 
-        internal override async Task<string> GetStringFromUrl(string url)
+        internal override async Task<string> GetResponseStringFromUrl(string url)
         {
             var requestMessage = GetHttpRequestMessage(url);
-
             Log.PrintV($"Sent request: {requestMessage}");
-
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
-
             var responseString = await response.Content.ReadAsStringAsync();
-
-            string responseOk = response.IsSuccessStatusCode == true ? "OK" : "Not OK";
-
             Log.Print($"Response is: {response.StatusCode}");
             Log.PrintV(responseString);
 
@@ -313,50 +282,38 @@ namespace Monetizr.SDK.Networking
             return responseString;
         }
 
-
         private async Task<List<ServerCampaign>> GetServerCampaignsFromMonetizr()
         {
-            var responseString = await GetStringFromUrl(CampaignsApiUrl);
-            
+            var responseString = await GetResponseStringFromUrl(CampaignsApiUrl);
             if (string.IsNullOrEmpty(responseString))
             {
                 return new List<ServerCampaign>();
             }
             
             var campaigns = JsonUtility.FromJson<Campaigns>("{\"campaigns\":" + responseString + "}");
-
             if (campaigns == null)
             {
                 return new List<ServerCampaign>();
             }
 
-            if(GlobalSettings.GetBoolParam("campaign.use_adm",true))
-                campaigns.campaigns = await TryRecreateCampaignsFromAdm(campaigns.campaigns);
-
+            if(GlobalSettings.GetBoolParam("campaign.use_adm",true)) campaigns.campaigns = await TryRecreateCampaignsFromAdm(campaigns.campaigns);
             campaigns.campaigns.ForEach(c => c.PostCampaignLoad());
-            
             return campaigns.campaigns;
         }
 
         internal async Task<List<ServerCampaign>> TryRecreateCampaignsFromAdm(List<ServerCampaign> campaigns)
         {
             var admCampaigns = new List<ServerCampaign>();
-
             var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
 
             foreach (var c in campaigns)
             {
                 if (string.IsNullOrEmpty(c.adm)) continue;
-
                 var admCampaign = await ph.PrepareServerCampaign(c.id, c.adm, false);
-
-                if(admCampaign != null)
-                    admCampaigns.Add(admCampaign);
+                if (admCampaign != null) admCampaigns.Add(admCampaign);
             }
 
-            if (admCampaigns.Count <= 0) 
-                return campaigns;
-            
+            if (admCampaigns.Count <= 0)  return campaigns;
             campaigns.Clear();
             return admCampaigns;
         }
@@ -373,7 +330,7 @@ namespace Monetizr.SDK.Networking
                 {
                     {"player-id", MonetizrMobileAnalytics.deviceIdentifier},
                     {"app-bundle-id", MonetizrManager.bundleId},
-                    {"sdk-version", MonetizrManager.SDKVersion},
+                    {"sdk-version", MonetizrSDKConfiguration.SDKVersion},
                     {"os-group", MonetizrMobileAnalytics.GetOsGroup()},
                     {"ad-id", MonetizrMobileAnalytics.advertisingID},
                     {"screen-width", Screen.width.ToString()},
@@ -390,12 +347,8 @@ namespace Monetizr.SDK.Networking
 
             output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", MonetizrManager.Instance.ConnectionsClient.currentApiKey);
             output.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            if (string.IsNullOrEmpty(userAgent)) 
-                return output;
-            
+            if (string.IsNullOrEmpty(userAgent))  return output;
             output.Headers.Add("User-Agent", userAgent);
-
             return output;
         }
         
@@ -408,16 +361,11 @@ namespace Monetizr.SDK.Networking
             return httpRequest;
         }
 
-        internal override async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null,
-            Action onFailure = null)
+        internal override async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            HttpRequestMessage requestMessage =
-                GetHttpRequestMessage($"{CampaignsApiUrl}/{campaignId}/reset");
-
+            HttpRequestMessage requestMessage = GetHttpRequestMessage($"{CampaignsApiUrl}/{campaignId}/reset");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
-
             string s = await response.Content.ReadAsStringAsync();
-
             Log.PrintV($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
@@ -430,48 +378,32 @@ namespace Monetizr.SDK.Networking
             }
         }
 
-        internal override async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null,
-            Action onFailure = null)
+        internal override async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            HttpRequestMessage requestMessage =
-                GetHttpRequestMessage($"{CampaignsApiUrl}/{challenge.id}/claim",true);
-
+            HttpRequestMessage requestMessage = GetHttpRequestMessage($"{CampaignsApiUrl}/{challenge.id}/claim",true);
             string content = string.Empty;
 
             if (MonetizrManager.temporaryEmail != null && MonetizrManager.temporaryEmail.Length > 0)
             {
-                bool ingame =
-                    MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product
-                        ? false
-                        : true;
-
-                ServerCampaign.Reward reward = challenge.rewards.Find(
-                    (ServerCampaign.Reward r) => { return r.in_game_only == ingame; });
+                bool ingame = MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Product ? false : true;
+                ServerCampaign.Reward reward = challenge.rewards.Find((ServerCampaign.Reward r) => { return r.in_game_only == ingame; });
 
                 if (reward == null)
                 {
                     Log.PrintError($"Product reward doesn't found for campaign {ingame}");
-
                     onFailure?.Invoke();
                     return;
                 }
 
                 Log.PrintV($"Reward {reward.id} found in_game_only {reward.in_game_only}");
-
                 content = $"{{\"email\":\"{MonetizrManager.temporaryEmail}\",\"reward_id\":\"{reward.id}\"}}";
-
                 MonetizrManager.temporaryEmail = "";
             }
 
             requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
-
-
             Log.PrintV($"Request:\n[{requestMessage}] content:\n[{content}]");
-
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
-
             string s = await response.Content.ReadAsStringAsync();
-
             Log.PrintV($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
@@ -482,11 +414,6 @@ namespace Monetizr.SDK.Networking
             {
                 onFailure?.Invoke();
             }
-        }
-
-        public void SendReportToMixpanel(string openRtbRequest, string res)
-        {
-            
         }
 
     }

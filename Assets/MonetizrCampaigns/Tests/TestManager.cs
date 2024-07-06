@@ -1,23 +1,31 @@
+using Monetizr.SDK.Core;
+using Monetizr.SDK.Utils;
 using UnityEngine;
-using UnityEngine.TestTools;
-using NUnit.Framework;
-using System.Collections;
+using UnityEngine.SceneManagement;
 
-namespace Monetizr.Tests
+namespace Monetizr.Tests 
 {
-    public class TestManager
+    public static class TestManager
     {
-        [Test]
-        public void SimpleCommonTest ()
-        {
-            throw new System.Exception();
-        }
+        public static float sdkInitializationDelay = 2f;
 
-        [UnityTest]
-        public IEnumerator SimpleUnityTest ()
-        {
-            yield return null;
-        }
+        private static string apiKey = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
+        private static string bundleID = "com.monetizr.sample";
 
+        public static void Setup ()
+        {
+            GameObject camera = new GameObject("Default Camera", typeof(Camera));
+            SceneManager.MoveGameObjectToScene(camera, SceneManager.GetActiveScene());
+            camera.transform.SetAsFirstSibling();
+            PlayerPrefs.SetString("campaigns", "");
+            PlayerPrefs.SetString("missions", "");
+            Sprite mockImage = TestUtils.CreateMockSprite();
+            Time.timeScale = 5;
+            MonetizrManager.bundleId = bundleID;
+            MonetizrManager.SetAdvertisingIds("", false);
+            MonetizrManager.SetGameCoinAsset(RewardType.Coins, mockImage, "Coins", () => { return 0; }, (ulong reward) => { }, 100);
+            MonetizrManager.SetTeaserPosition(MonetizrUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
+            MonetizrManager.InitializeForTests(apiKey, null, () => { }, null, null);
+        }
     }
 }
