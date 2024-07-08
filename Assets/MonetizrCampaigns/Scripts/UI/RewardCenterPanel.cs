@@ -197,13 +197,14 @@ namespace Monetizr.SDK.UI
 
             int claimed = 0;
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(camp, true);
+            // Get all missions, including both claimed and unclaimed
+            var allMissions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(camp, false);
 
             double totalRewardsValue = 0;
             double claimedRewardsValue = 0;
             double possibleRewardsValue = 0;
 
-            foreach (var m in missions)
+            foreach (var m in allMissions)
             {
                 totalRewardsValue += m.reward;
                 if (m.isClaimed == ClaimState.Claimed)
@@ -219,7 +220,7 @@ namespace Monetizr.SDK.UI
 
             statusText = new StringBuilder(statusText)
                 .Replace("%claimed_missions%", claimed.ToString())
-                .Replace("%total_missions%", missions.Count.ToString())
+                .Replace("%total_missions%", allMissions.Count.ToString())
                 .ToString();
 
             var money = camp.serverSettings.GetParam("RewardCenter.money_num_text", "%claimed_reward_value%/%possible_reward_value%");
