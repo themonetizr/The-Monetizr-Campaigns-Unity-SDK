@@ -190,21 +190,17 @@ namespace Monetizr.SDK.UI
         {
             var camp = MonetizrManager.Instance.GetActiveCampaign();
 
-            if (camp == null)
-                return;
+            if (camp == null) return;
 
             var statusText = camp.serverSettings.GetParam("RewardCenter.missions_num_text", "%claimed_missions%/%total_missions%");
-
             int claimed = 0;
-
-            // Get all missions, including both claimed and unclaimed
-            var allMissions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(camp, false);
+            var missions = MonetizrManager.Instance.missionsManager.GetAllMissions(camp);
 
             double totalRewardsValue = 0;
             double claimedRewardsValue = 0;
             double possibleRewardsValue = 0;
 
-            foreach (var m in allMissions)
+            foreach (var m in missions)
             {
                 totalRewardsValue += m.reward;
                 if (m.isClaimed == ClaimState.Claimed)
@@ -220,11 +216,10 @@ namespace Monetizr.SDK.UI
 
             statusText = new StringBuilder(statusText)
                 .Replace("%claimed_missions%", claimed.ToString())
-                .Replace("%total_missions%", allMissions.Count.ToString())
+                .Replace("%total_missions%", missions.Count.ToString())
                 .ToString();
 
             var money = camp.serverSettings.GetParam("RewardCenter.money_num_text", "%claimed_reward_value%/%possible_reward_value%");
-
             var playerMoney = MonetizrManager.gameRewards[RewardType.Coins].GetCurrencyFunc();
 
             money = new StringBuilder(money)
@@ -390,8 +385,7 @@ namespace Monetizr.SDK.UI
                 case MissionType.MinigameReward:
                 case MissionType.MemoryMinigameReward:
                 case MissionType.ActionReward:
-                case MissionType.CodeReward:
-                    AddMission(item, m, missionId); break;
+                case MissionType.CodeReward: AddMission(item, m, missionId); break;
             }
 
             Log.PrintV(m.missionTitle);
