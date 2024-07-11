@@ -88,12 +88,7 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-
-            if (MonetizrUtils.IsInLandscapeMode())
-            {
-
-            }
-            else
+            if (!MonetizrUtils.IsInLandscapeMode())
             {
                 var r = campaign.serverSettings.GetRectParam("RewardCenter.transform", new List<float> { 30, 0, 0, 0 });
                 scrollViewRect.offsetMin = new Vector2(r[0], r[3]);
@@ -101,9 +96,7 @@ namespace Monetizr.SDK.UI
             }
 
             showNotClaimedDisabled = campaign.serverSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
-
             var activeCampaign = MonetizrManager.Instance.GetActiveCampaign();
-
             missionsForRewardCenter = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign, true);
 
             if (missionsForRewardCenter.Count == 0)
@@ -155,9 +148,6 @@ namespace Monetizr.SDK.UI
                     images[1].sprite = camp.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
 
                 bannerHeight = 1250;
-            }
-            else
-            {
             }
 
             foreach (var m in missionsForRewardCenter)
@@ -222,12 +212,18 @@ namespace Monetizr.SDK.UI
             var money = camp.serverSettings.GetParam("RewardCenter.money_num_text", "%claimed_reward_value%/%possible_reward_value%");
             var playerMoney = MonetizrManager.gameRewards[RewardType.Coins].GetCurrencyFunc();
 
+            //Log.Print("\n| PlayerMoney: " + playerMoney + " \n| TotalRewards: " + totalRewardsValue + " \n| ClaimedRewards: " + claimedRewardsValue + " \n| PossibleRewards: " + possibleRewardsValue);
+
             money = new StringBuilder(money)
                 .Replace("%total_money%", $"{MonetizrUtils.ScoresToString(playerMoney)}")
                 .Replace("%total_rewards_value%", $"{MonetizrUtils.ScoresToString(totalRewardsValue)}")
                 .Replace("%claimed_reward_value%", $"{MonetizrUtils.ScoresToString(claimedRewardsValue)}")
                 .Replace("%possible_reward_value%", $"{MonetizrUtils.ScoresToString(possibleRewardsValue)}")
                 .ToString();
+
+            money = MonetizrUtils.ScoresToString(claimedRewardsValue) + "/" + MonetizrUtils.ScoresToString(totalRewardsValue);
+
+            //Log.Print(money);
 
             headerText.text = statusText;
             moneyText.text = money;

@@ -5,6 +5,7 @@ using Monetizr.SDK.GIF;
 using Monetizr.SDK.Missions;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -69,20 +70,19 @@ namespace Monetizr.SDK.UI
             noVideo = false;
 
             var noVideoSign = m.campaignServerSettings.GetBoolParam("teaser.no_video_sign", true);
-            
+
             if (noVideo || noVideoSign)
             {
                 watchVideoIcon.gameObject.SetActive(false);
                 buttonTextRect.anchoredPosition = new Vector2(0, 0);
             }
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(m.campaign,true);
+            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(m.campaign, true);
 
             var numText = currentMission.campaignServerSettings.GetParam("teaser.num_text", "%total_missions%");
 
             numText = numText.Replace("%total_missions%", $"{missions.Count}");
-
-            missionsNum.text = numText;
+            UpdateMissionAmountText();
 
             var hasGif = m.campaign.HasAsset(AssetsType.TeaserGifPathString);
 
@@ -122,6 +122,23 @@ namespace Monetizr.SDK.UI
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
             rewardText.text = rewardText.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
             Log.PrintV($"PreparePanel teaser: {m.campaignId} {m}");
+        }
+
+        private void UpdateMissionAmountText()
+        {
+            var missions = MonetizrManager.Instance.missionsManager.GetAllMissions();
+            int totalMissionCount = missions.Count;
+            int claimed = 0;
+
+            foreach (var m in missions)
+            {
+                if (m.isClaimed == ClaimState.Claimed)
+                {
+                    claimed++;
+                }
+            }
+
+            missionsNum.text = (totalMissionCount - claimed).ToString();
         }
 
         internal void UpdateTransform(Mission m)
