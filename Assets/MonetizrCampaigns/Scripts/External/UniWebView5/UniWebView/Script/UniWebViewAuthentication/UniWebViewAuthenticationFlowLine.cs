@@ -20,181 +20,207 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-/// <summary>
-/// A predefined authentication flow LINE Login.
-///
-/// This implementation follows the flow described here:
-/// https://developers.line.biz/en/reference/line-login/
-///
-/// Google authentication flow is a bit different from the other standard authentication flows. Please read the link
-/// above carefully to understand it.
-///
-/// See https://docs.uniwebview.com/guide/oauth2.html for a more detailed guide of authentication in UniWebView.
-/// </summary>
-public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFlow, IUniWebViewAuthenticationFlow<UniWebViewAuthenticationLineToken> {
+namespace CustomUniWebView
+{
     /// <summary>
-    /// The client ID (Channel ID) of your LINE Login application.
+    /// A predefined authentication flow LINE Login.
+    ///
+    /// This implementation follows the flow described here:
+    /// https://developers.line.biz/en/reference/line-login/
+    ///
+    /// Google authentication flow is a bit different from the other standard authentication flows. Please read the link
+    /// above carefully to understand it.
+    ///
+    /// See https://docs.uniwebview.com/guide/oauth2.html for a more detailed guide of authentication in UniWebView.
     /// </summary>
-    public string clientId = "";
-    
-    /// <summary>
-    /// The iOS bundle Id you set in LINE developer console.
-    /// </summary>
-    public string iOSBundleId = "";
-    
-    /// <summary>
-    /// The Android package name you set in LINE developer console.
-    /// </summary>
-    public string androidPackageName = "";
-    
-    /// <summary>
-    /// The scope of your LINE application.
-    /// </summary>
-    public string scope = "";
-    
-    /// <summary>
-    /// Optional to control this flow's behaviour.
-    /// </summary>
-    public UniWebViewAuthenticationFlowLineOptional optional;
-    
-    private string responseType = "code";
-    private string grantType = "authorization_code";
+    public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFlow, IUniWebViewAuthenticationFlow<UniWebViewAuthenticationLineToken>
+    {
+        /// <summary>
+        /// The client ID (Channel ID) of your LINE Login application.
+        /// </summary>
+        public string clientId = "";
 
-    private string RedirectUri {
-        get {
-            if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.OSXEditor) {
-                return $"line3rdp.{iOSBundleId}://auth";
-            }
+        /// <summary>
+        /// The iOS bundle Id you set in LINE developer console.
+        /// </summary>
+        public string iOSBundleId = "";
 
-            if (Application.platform == RuntimePlatform.Android) {
-                return "intent://auth#Intent;package=" + androidPackageName + ";scheme=lineauth;end";
+        /// <summary>
+        /// The Android package name you set in LINE developer console.
+        /// </summary>
+        public string androidPackageName = "";
+
+        /// <summary>
+        /// The scope of your LINE application.
+        /// </summary>
+        public string scope = "";
+
+        /// <summary>
+        /// Optional to control this flow's behaviour.
+        /// </summary>
+        public UniWebViewAuthenticationFlowLineOptional optional;
+
+        private string responseType = "code";
+        private string grantType = "authorization_code";
+
+        private string RedirectUri
+        {
+            get
+            {
+                if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.OSXEditor)
+                {
+                    return $"line3rdp.{iOSBundleId}://auth";
+                }
+
+                if (Application.platform == RuntimePlatform.Android)
+                {
+                    return "intent://auth#Intent;package=" + androidPackageName + ";scheme=lineauth;end";
+                }
+                UniWebViewLogger.Instance.Critical("Not supported platform for LINE Login.");
+                return "";
             }
-            UniWebViewLogger.Instance.Critical("Not supported platform for LINE Login.");
-            return "";
         }
-    }
 
-    private readonly UniWebViewAuthenticationConfiguration config = 
-        new UniWebViewAuthenticationConfiguration(
-            "https://access.line.me/oauth2/v2.1/login", 
-            "https://api.line.me/oauth2/v2.1/token"
-        );
+        private readonly UniWebViewAuthenticationConfiguration config =
+            new UniWebViewAuthenticationConfiguration(
+                "https://access.line.me/oauth2/v2.1/login",
+                "https://api.line.me/oauth2/v2.1/token"
+            );
 
-    /// <summary>
-    /// Starts the authentication flow with the standard OAuth 2.0.
-    /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
-    /// </summary>
-    public override void StartAuthenticationFlow() {
-        var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationLineToken>(this);
-        flow.StartAuth();
-    }
-    
-    /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
-    /// </summary>
-    public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration() {
-        return config;
-    }
-    
-    /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
-    /// </summary>
-    public string GetCallbackUrl() {
-        return RedirectUri;
-    }
+        /// <summary>
+        /// Starts the authentication flow with the standard OAuth 2.0.
+        /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
+        /// </summary>
+        public override void StartAuthenticationFlow()
+        {
+            var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationLineToken>(this);
+            flow.StartAuth();
+        }
 
-    /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
-    /// </summary>
-    public Dictionary<string, string> GetAuthenticationUriArguments() {
-        var authorizeArgs = new Dictionary<string, string> {
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration()
+        {
+            return config;
+        }
+
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public string GetCallbackUrl()
+        {
+            return RedirectUri;
+        }
+
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public Dictionary<string, string> GetAuthenticationUriArguments()
+        {
+            var authorizeArgs = new Dictionary<string, string> {
             { "loginChannelId", clientId },
             { "returnUri", GenerateReturnUri() },
         };
-        
-        return authorizeArgs;
-    }
 
-    private string GenerateReturnUri() {
-        var query = System.Web.HttpUtility.ParseQueryString("");
-        query.Add("response_type", responseType);
-        query.Add("client_id", clientId);
-        query.Add("redirect_uri", RedirectUri);
-        
-        // State is a must in LINE Login.
-        var state = GenerateAndStoreState();
-        query.Add("state", state);
-        
-        if (!String.IsNullOrEmpty(scope)) {
-            query.Add("scope", scope);
-        } else {
-            query.Add("scope", "profile");
+            return authorizeArgs;
         }
-        if (optional != null) {
-            if (optional.PKCESupport != UniWebViewAuthenticationPKCE.None) {
-                var codeChallenge = GenerateCodeChallengeAndStoreCodeVerify(optional.PKCESupport);
-                query.Add("code_challenge", codeChallenge);
-        
-                var method = UniWebViewAuthenticationUtils.ConvertPKCEToString(optional.PKCESupport);
-                query.Add("code_challenge_method", method);
+
+        private string GenerateReturnUri()
+        {
+            var query = System.Web.HttpUtility.ParseQueryString("");
+            query.Add("response_type", responseType);
+            query.Add("client_id", clientId);
+            query.Add("redirect_uri", RedirectUri);
+
+            // State is a must in LINE Login.
+            var state = GenerateAndStoreState();
+            query.Add("state", state);
+
+            if (!String.IsNullOrEmpty(scope))
+            {
+                query.Add("scope", scope);
             }
-        }
-        return "/oauth2/v2.1/authorize/consent?" + query;
-    }
+            else
+            {
+                query.Add("scope", "profile");
+            }
+            if (optional != null)
+            {
+                if (optional.PKCESupport != UniWebViewAuthenticationPKCE.None)
+                {
+                    var codeChallenge = GenerateCodeChallengeAndStoreCodeVerify(optional.PKCESupport);
+                    query.Add("code_challenge", codeChallenge);
 
-    /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
-    /// </summary>
-    public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse) {
-        var normalizedRedirectUri = UniWebViewAuthenticationUtils.ConvertIntentUri(RedirectUri);
-        if (!authResponse.StartsWith(normalizedRedirectUri)) {
-            throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
+                    var method = UniWebViewAuthenticationUtils.ConvertPKCEToString(optional.PKCESupport);
+                    query.Add("code_challenge_method", method);
+                }
+            }
+            return "/oauth2/v2.1/authorize/consent?" + query;
         }
-        
-        var uri = new Uri(authResponse);
-        var response = UniWebViewAuthenticationUtils.ParseFormUrlEncodedString(uri.Query);
-        VerifyState(response);
-        if (!response.TryGetValue("code", out var code)) {
-            throw AuthenticationResponseException.InvalidResponse(authResponse);
-        }
-        var parameters = new Dictionary<string, string> {
+
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse)
+        {
+            var normalizedRedirectUri = UniWebViewAuthenticationUtils.ConvertIntentUri(RedirectUri);
+            if (!authResponse.StartsWith(normalizedRedirectUri))
+            {
+                throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
+            }
+
+            var uri = new Uri(authResponse);
+            var response = UniWebViewAuthenticationUtils.ParseFormUrlEncodedString(uri.Query);
+            VerifyState(response);
+            if (!response.TryGetValue("code", out var code))
+            {
+                throw AuthenticationResponseException.InvalidResponse(authResponse);
+            }
+            var parameters = new Dictionary<string, string> {
             { "client_id", clientId },
             { "code", code },
             { "redirect_uri", RedirectUri },
             { "grant_type", grantType },
         };
-        if (CodeVerify != null) {
-            parameters.Add("code_verifier", CodeVerify);
+            if (CodeVerify != null)
+            {
+                parameters.Add("code_verifier", CodeVerify);
+            }
+
+            return parameters;
         }
 
-        return parameters;
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public UniWebViewAuthenticationLineToken GenerateTokenFromExchangeResponse(string exchangeResponse)
+        {
+            return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationLineToken>.Parse(exchangeResponse);
+        }
+
+        [field: SerializeField]
+        public UnityEvent<UniWebViewAuthenticationLineToken> OnAuthenticationFinished { get; set; }
+        [field: SerializeField]
+        public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
     }
 
     /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// The authentication flow's optional settings for LINE.
     /// </summary>
-    public UniWebViewAuthenticationLineToken GenerateTokenFromExchangeResponse(string exchangeResponse) {
-        return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationLineToken>.Parse(exchangeResponse);
+    [Serializable]
+    public class UniWebViewAuthenticationFlowLineOptional
+    {
+        /// <summary>
+        /// Whether to enable PKCE when performing authentication. Default is `S256`.
+        /// </summary>
+        public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.S256;
     }
 
-    [field: SerializeField]
-    public UnityEvent<UniWebViewAuthenticationLineToken> OnAuthenticationFinished { get; set; }
-    [field: SerializeField]
-    public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
-}
-
-/// <summary>
-/// The authentication flow's optional settings for LINE.
-/// </summary>
-[Serializable]
-public class UniWebViewAuthenticationFlowLineOptional {
     /// <summary>
-    /// Whether to enable PKCE when performing authentication. Default is `S256`.
+    /// The token object from LINE. Check `UniWebViewAuthenticationStandardToken` for more.
     /// </summary>
-    public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.S256;
+    public class UniWebViewAuthenticationLineToken : UniWebViewAuthenticationStandardToken { }
+
 }
 
-/// <summary>
-/// The token object from LINE. Check `UniWebViewAuthenticationStandardToken` for more.
-/// </summary>
-public class UniWebViewAuthenticationLineToken : UniWebViewAuthenticationStandardToken { }

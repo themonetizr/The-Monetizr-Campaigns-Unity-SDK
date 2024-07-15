@@ -10,10 +10,11 @@ namespace Monetizr.SDK.Core
         public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
         {
             UnityWebRequest uwr = UnityWebRequest.Get(url);
+            uwr.timeout = 10; 
 
             await uwr.SendWebRequest();
 
-            if (uwr.isNetworkError)
+            if (uwr.isNetworkError || uwr.isHttpError)
             {
                 Log.PrintError($"Network error {uwr.error} with {url}");
                 onDownloadFailed?.Invoke();

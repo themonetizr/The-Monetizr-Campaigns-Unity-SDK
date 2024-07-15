@@ -16,6 +16,7 @@ using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
+using CustomUniWebView;
 
 namespace Monetizr.SDK.VAST
 {
@@ -83,7 +84,7 @@ namespace Monetizr.SDK.VAST
         internal class VastSettings
         {
             public string vendorName = "Themonetizr";
-            public string sdkVersion = MonetizrManager.SDKVersion;
+            public string sdkVersion = MonetizrSDKConfiguration.SDKVersion;
 
             public VideoSettings videoSettings = new VideoSettings();
 
@@ -929,7 +930,7 @@ namespace Monetizr.SDK.VAST
             AddAssetFromAdParameters(nl?.AdParameters?.Value, serverCampaign);
         }
 
-        internal async Task DownloadOMSDKServiceContent()
+        internal async Task<bool> DownloadOMSDKServiceContent()
         {
             var url = "https://image.themonetizr.com/omsdk/omsdk-v1.js";
 
@@ -938,10 +939,11 @@ namespace Monetizr.SDK.VAST
             if (data == null)
             {
                 Log.PrintWarning($"InitializeOMSDK failed! Download of {url} failed!");
-                return;
+                return false;
             }
 
             _omidJsServiceContent = Encoding.UTF8.GetString(data);
+            return true;
         }
 
         internal void InitializeOMSDK(string vastAdVerificationParams)

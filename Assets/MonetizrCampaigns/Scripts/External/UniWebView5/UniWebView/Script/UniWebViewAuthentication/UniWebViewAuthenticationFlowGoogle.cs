@@ -20,172 +20,193 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-/// <summary>
-/// A predefined authentication flow for Google Identity.
-///
-/// This implementation follows the flow described here:
-/// https://developers.google.com/identity/protocols/oauth2/native-app
-///
-/// Google authentication flow is a bit different from the other standard authentication flows. Please read the link
-/// above carefully to understand it.
-///
-/// See https://docs.uniwebview.com/guide/oauth2.html for a more detailed guide of authentication in UniWebView.
-/// </summary>
-public class UniWebViewAuthenticationFlowGoogle : UniWebViewAuthenticationCommonFlow, IUniWebViewAuthenticationFlow<UniWebViewAuthenticationGoogleToken> {
+namespace CustomUniWebView
+{
     /// <summary>
-    /// The client ID of your Google application.
-    /// </summary>
-    public string clientId = "";
-    
-    /// <summary>
-    /// The redirect URI of your Google application.
+    /// A predefined authentication flow for Google Identity.
     ///
-    /// It might be something like "com.googleusercontent.apps.${clientId}:${redirect_uri_path}". Be caution that the URI does not
-    /// contain regular double slashes `//`, but should be only one.
-    /// </summary>
-    public string redirectUri = "";
-    
-    /// <summary>
-    /// The scope of your Google application.
+    /// This implementation follows the flow described here:
+    /// https://developers.google.com/identity/protocols/oauth2/native-app
     ///
-    /// It might be some full URL in recent Google services, such as "https://www.googleapis.com/auth/userinfo.profile" 
+    /// Google authentication flow is a bit different from the other standard authentication flows. Please read the link
+    /// above carefully to understand it.
+    ///
+    /// See https://docs.uniwebview.com/guide/oauth2.html for a more detailed guide of authentication in UniWebView.
     /// </summary>
-    public string scope = "";
-    
-    /// <summary>
-    /// Optional to control this flow's behaviour.
-    /// </summary>
-    public UniWebViewAuthenticationFlowGoogleOptional optional;
-    
-    private string responseType = "code";
-    private string grantType = "authorization_code";
+    public class UniWebViewAuthenticationFlowGoogle : UniWebViewAuthenticationCommonFlow, IUniWebViewAuthenticationFlow<UniWebViewAuthenticationGoogleToken>
+    {
+        /// <summary>
+        /// The client ID of your Google application.
+        /// </summary>
+        public string clientId = "";
 
-    private readonly UniWebViewAuthenticationConfiguration config = 
-        new UniWebViewAuthenticationConfiguration(
-            "https://accounts.google.com/o/oauth2/v2/auth", 
-            "https://oauth2.googleapis.com/token"
-        );
+        /// <summary>
+        /// The redirect URI of your Google application.
+        ///
+        /// It might be something like "com.googleusercontent.apps.${clientId}:${redirect_uri_path}". Be caution that the URI does not
+        /// contain regular double slashes `//`, but should be only one.
+        /// </summary>
+        public string redirectUri = "";
 
-    /// <summary>
-    /// Starts the authentication flow with the standard OAuth 2.0.
-    /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
-    /// </summary>
-    public override void StartAuthenticationFlow() {
-        var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationGoogleToken>(this);
-        flow.StartAuth();
-    }
-    
-    /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
-    /// </summary>
-    public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration() {
-        return config;
-    }
-    
-    /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
-    /// </summary>
-    public string GetCallbackUrl() {
-        return redirectUri;
-    }
+        /// <summary>
+        /// The scope of your Google application.
+        ///
+        /// It might be some full URL in recent Google services, such as "https://www.googleapis.com/auth/userinfo.profile" 
+        /// </summary>
+        public string scope = "";
 
-    /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
-    /// </summary>
-    public Dictionary<string, string> GetAuthenticationUriArguments() {
-        var authorizeArgs = new Dictionary<string, string> {
+        /// <summary>
+        /// Optional to control this flow's behaviour.
+        /// </summary>
+        public UniWebViewAuthenticationFlowGoogleOptional optional;
+
+        private string responseType = "code";
+        private string grantType = "authorization_code";
+
+        private readonly UniWebViewAuthenticationConfiguration config =
+            new UniWebViewAuthenticationConfiguration(
+                "https://accounts.google.com/o/oauth2/v2/auth",
+                "https://oauth2.googleapis.com/token"
+            );
+
+        /// <summary>
+        /// Starts the authentication flow with the standard OAuth 2.0.
+        /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
+        /// </summary>
+        public override void StartAuthenticationFlow()
+        {
+            var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationGoogleToken>(this);
+            flow.StartAuth();
+        }
+
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration()
+        {
+            return config;
+        }
+
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public string GetCallbackUrl()
+        {
+            return redirectUri;
+        }
+
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public Dictionary<string, string> GetAuthenticationUriArguments()
+        {
+            var authorizeArgs = new Dictionary<string, string> {
             { "client_id", clientId },
             { "redirect_uri", redirectUri },
             { "scope", scope },
             { "response_type", responseType }
         };
-        if (optional != null) {
-            if (optional.enableState) {
-                var state = GenerateAndStoreState();
-                authorizeArgs.Add("state", state);
+            if (optional != null)
+            {
+                if (optional.enableState)
+                {
+                    var state = GenerateAndStoreState();
+                    authorizeArgs.Add("state", state);
+                }
+
+                if (optional.PKCESupport != UniWebViewAuthenticationPKCE.None)
+                {
+                    var codeChallenge = GenerateCodeChallengeAndStoreCodeVerify(optional.PKCESupport);
+                    authorizeArgs.Add("code_challenge", codeChallenge);
+
+                    var method = UniWebViewAuthenticationUtils.ConvertPKCEToString(optional.PKCESupport);
+                    authorizeArgs.Add("code_challenge_method", method);
+                }
+
+                if (!String.IsNullOrEmpty(optional.loginHint))
+                {
+                    authorizeArgs.Add("login_hint", optional.loginHint);
+                }
             }
 
-            if (optional.PKCESupport != UniWebViewAuthenticationPKCE.None) {
-                var codeChallenge = GenerateCodeChallengeAndStoreCodeVerify(optional.PKCESupport);
-                authorizeArgs.Add("code_challenge", codeChallenge);
+            return authorizeArgs;
+        }
 
-                var method = UniWebViewAuthenticationUtils.ConvertPKCEToString(optional.PKCESupport);
-                authorizeArgs.Add("code_challenge_method", method);
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse)
+        {
+            if (!authResponse.StartsWith(redirectUri))
+            {
+                throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
             }
 
-            if (!String.IsNullOrEmpty(optional.loginHint)) {
-                authorizeArgs.Add("login_hint", optional.loginHint);
+            var uri = new Uri(authResponse);
+            var response = UniWebViewAuthenticationUtils.ParseFormUrlEncodedString(uri.Query);
+            if (!response.TryGetValue("code", out var code))
+            {
+                throw AuthenticationResponseException.InvalidResponse(authResponse);
             }
-        }
-
-        return authorizeArgs;
-    }
-
-    /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
-    /// </summary>
-    public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse) {
-        if (!authResponse.StartsWith(redirectUri)) {
-            throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
-        }
-        
-        var uri = new Uri(authResponse);
-        var response = UniWebViewAuthenticationUtils.ParseFormUrlEncodedString(uri.Query);
-        if (!response.TryGetValue("code", out var code)) {
-            throw AuthenticationResponseException.InvalidResponse(authResponse);
-        }
-        if (optional.enableState) {
-            VerifyState(response);
-        }
-        var parameters = new Dictionary<string, string> {
+            if (optional.enableState)
+            {
+                VerifyState(response);
+            }
+            var parameters = new Dictionary<string, string> {
             { "client_id", clientId },
             { "code", code },
             { "redirect_uri", redirectUri },
             { "grant_type", grantType },
         };
-        if (CodeVerify != null) {
-            parameters.Add("code_verifier", CodeVerify);
+            if (CodeVerify != null)
+            {
+                parameters.Add("code_verifier", CodeVerify);
+            }
+
+            return parameters;
         }
 
-        return parameters;
+        /// <summary>
+        /// Implements required method in `IUniWebViewAuthenticationFlow`.
+        /// </summary>
+        public UniWebViewAuthenticationGoogleToken GenerateTokenFromExchangeResponse(string exchangeResponse)
+        {
+            return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationGoogleToken>.Parse(exchangeResponse);
+        }
+
+        [field: SerializeField]
+        public UnityEvent<UniWebViewAuthenticationGoogleToken> OnAuthenticationFinished { get; set; }
+        [field: SerializeField]
+        public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
     }
-    
+
     /// <summary>
-    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// The authentication flow's optional settings for Google.
     /// </summary>
-    public UniWebViewAuthenticationGoogleToken GenerateTokenFromExchangeResponse(string exchangeResponse) {
-        return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationGoogleToken>.Parse(exchangeResponse);
+    [Serializable]
+    public class UniWebViewAuthenticationFlowGoogleOptional
+    {
+        /// <summary>
+        /// Whether to enable PKCE when performing authentication. Default is `S256`.
+        /// </summary>
+        public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.S256;
+        /// <summary>
+        /// Whether to enable the state verification. If enabled, the state will be generated and verified in the
+        /// authentication callback. Default is `true`.
+        /// </summary>
+        public bool enableState = true;
+        /// <summary>
+        /// If your application knows which user is trying to authenticate, it can use this parameter to provide a hint to
+        /// the Google Authentication Server. 
+        /// </summary>
+        public string loginHint = "";
     }
 
-    [field: SerializeField]
-    public UnityEvent<UniWebViewAuthenticationGoogleToken> OnAuthenticationFinished { get; set; }
-    [field: SerializeField]
-    public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
-}
+    /// <summary>
+    /// The token object from Google. Check `UniWebViewAuthenticationStandardToken` for more.
+    /// </summary>
+    public class UniWebViewAuthenticationGoogleToken : UniWebViewAuthenticationStandardToken { }
 
-/// <summary>
-/// The authentication flow's optional settings for Google.
-/// </summary>
-[Serializable]
-public class UniWebViewAuthenticationFlowGoogleOptional {
-    /// <summary>
-    /// Whether to enable PKCE when performing authentication. Default is `S256`.
-    /// </summary>
-    public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.S256;
-    /// <summary>
-    /// Whether to enable the state verification. If enabled, the state will be generated and verified in the
-    /// authentication callback. Default is `true`.
-    /// </summary>
-    public bool enableState = true;
-    /// <summary>
-    /// If your application knows which user is trying to authenticate, it can use this parameter to provide a hint to
-    /// the Google Authentication Server. 
-    /// </summary>
-    public string loginHint = "";
-}
 
-/// <summary>
-/// The token object from Google. Check `UniWebViewAuthenticationStandardToken` for more.
-/// </summary>
-public class UniWebViewAuthenticationGoogleToken : UniWebViewAuthenticationStandardToken { }
+}
 

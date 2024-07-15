@@ -10,6 +10,8 @@ using Monetizr.SDK.Networking;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.UI;
+using CustomUniWebView;
+
 
 #if UNITY_IOS
 using UnityEngine.iOS;
@@ -265,7 +267,7 @@ namespace Monetizr.SDK.Analytics
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
             props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
-            props["sdk_version"] = MonetizrManager.SDKVersion;
+            props["sdk_version"] = MonetizrSDKConfiguration.SDKVersion;
             props["ad_id"] = MonetizrMobileAnalytics.advertisingID;
             props["screen_width"] = Screen.width.ToString();
             props["screen_height"] = Screen.height.ToString();
