@@ -20,16 +20,12 @@ namespace Monetizr.SDK.Missions
 
                 foreach(var _m in missions)
                 {
-
                     MissionType serverMissionType = _m.GetMissionType();
 
-                    if (serverMissionType == MissionType.Undefined)
-                        continue;
+                    if (serverMissionType == MissionType.Undefined) continue;
 
                     float rewardAmount = _m.GetRewardAmount() / 100.0f;
                     RewardType currency = _m.GetRewardType();
-
-                    UnityEngine.Debug.Log("MISSION: " + _m.GetMissionType() + " | REWARD: " + _m.GetRewardType() + " | AMOUNT: " + _m.GetRewardAmount());
 
                     MonetizrManager.GameReward gameReward = MonetizrManager.GetGameReward(currency);
 

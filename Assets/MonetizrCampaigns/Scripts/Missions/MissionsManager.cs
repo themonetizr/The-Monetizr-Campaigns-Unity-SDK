@@ -613,29 +613,40 @@ namespace Monetizr.SDK.Missions
         {
             return missions.FindAll((Mission m) =>
             {
-
                 bool disabled = m.isDisabled;
-
-                if (includeDisabled)
-                    disabled = false;
-
+                if (includeDisabled) disabled = false;
                 return m.isSponsored &&
                         m.isClaimed != ClaimState.Claimed &&
                         !disabled &&
                         IsActiveByTime(m) &&
                         m.isServerCampaignActive &&
                         m.autoStartAfter == -1;
+            });
+        }
 
+        internal List<Mission> GetAllMissions ()
+        {
+            return missions.FindAll((Mission m) =>
+            {
+                return m.isSponsored &&
+                        m.type != MissionType.ActionReward &&
+                        IsActiveByTime(m) &&
+                        m.isServerCampaignActive &&
+                        m.autoStartAfter == -1;
             });
         }
 
         internal List<Mission> GetMissionsForRewardCenter(ServerCampaign campaign, bool includeDisabled = false)
         {
-            if (campaign == null)
-                return null;
-            
+            if (campaign == null) return null;
             var res = GetMissionsForRewardCenter(includeDisabled);
+            return res?.FindAll((Mission m) => m.campaignId == campaign.id);
+        }
 
+        internal List<Mission> GetAllMissions (ServerCampaign campaign)
+        {
+            if (campaign == null) return null;
+            var res = GetAllMissions();
             return res?.FindAll((Mission m) => m.campaignId == campaign.id);
         }
 

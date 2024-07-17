@@ -266,6 +266,7 @@ namespace Monetizr.SDK.UI
             }
 
             bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
+            bool hasDownloaded = false;
 
             if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
@@ -285,12 +286,13 @@ namespace Monetizr.SDK.UI
 
                 if (verifyWithOMSDK)
                 {
-                    await ph.DownloadOMSDKServiceContent();
-                    ph.InitializeOMSDK(campaign.vastAdParameters);
+                    hasDownloaded = await ph.DownloadOMSDKServiceContent();
+                    if (hasDownloaded) ph.InitializeOMSDK(campaign.vastAdParameters);
                 }
             }
 
             campaign.vastSettings = oldVastSettings;
+            if (!hasDownloaded) showWebview = false;
 
 #if UNITY_EDITOR_WIN
             showWebview = false;
