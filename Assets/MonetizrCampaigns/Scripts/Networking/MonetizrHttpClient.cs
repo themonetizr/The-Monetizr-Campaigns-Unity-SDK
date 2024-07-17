@@ -230,11 +230,11 @@ namespace Monetizr.SDK.Networking
 
                 if (minSdkVersion != null)
                 {
-                    bool sdkVersionCheck = MonetizrUtils.CompareVersions(MonetizrSDKConfiguration.SDKVersion, minSdkVersion) < 0;
+                    bool sdkVersionCheck = MonetizrUtils.CompareVersions(MonetizrConfiguration.SDKVersion, minSdkVersion) < 0;
 
                     if (sdkVersionCheck)
                     {
-                        Log.Print($"Removing campaign {e.id} because SDK version {MonetizrSDKConfiguration.SDKVersion} less then required SDK version {minSdkVersion}");
+                        Log.Print($"Removing campaign {e.id} because SDK version {MonetizrConfiguration.SDKVersion} less then required SDK version {minSdkVersion}");
                     }
 
                     return sdkVersionCheck;
@@ -330,7 +330,7 @@ namespace Monetizr.SDK.Networking
                 {
                     {"player-id", MonetizrMobileAnalytics.deviceIdentifier},
                     {"app-bundle-id", MonetizrManager.bundleId},
-                    {"sdk-version", MonetizrSDKConfiguration.SDKVersion},
+                    {"sdk-version", MonetizrConfiguration.SDKVersion},
                     {"os-group", MonetizrMobileAnalytics.GetOsGroup()},
                     {"ad-id", MonetizrMobileAnalytics.advertisingID},
                     {"screen-width", Screen.width.ToString()},

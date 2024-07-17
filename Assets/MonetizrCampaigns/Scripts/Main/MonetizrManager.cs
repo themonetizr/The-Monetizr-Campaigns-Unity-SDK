@@ -110,7 +110,7 @@ namespace Monetizr.SDK.Core
                 };
             }
 
-            Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {MonetizrSDKConfiguration.SDKVersion}");
+            Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {MonetizrConfiguration.SDKVersion}");
 
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
@@ -166,9 +166,9 @@ namespace Monetizr.SDK.Core
 
             RequestCampaigns(_onRequestComplete);
 
-            if (MonetizrSDKConfiguration.requestCampaignTime > 0)
+            if (MonetizrConfiguration.requestCampaignTime > 0)
             {
-                StartCoroutine(TryRequestCampaignsLater(MonetizrSDKConfiguration.requestCampaignTime));
+                StartCoroutine(TryRequestCampaignsLater(MonetizrConfiguration.requestCampaignTime));
             }
         }
 

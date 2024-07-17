@@ -29,7 +29,7 @@ namespace Monetizr.SDK.Debug
             if (!condition.StartsWith("Monetizr SDK"))
                 return;
             
-            _raygunClient.ApplicationVersion = MonetizrSDKConfiguration.SDKVersion;
+            _raygunClient.ApplicationVersion = MonetizrConfiguration.SDKVersion;
 
             var tags = new List<string>();
 
