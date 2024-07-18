@@ -1,6 +1,7 @@
 ﻿using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.New;
 using Monetizr.SDK.Utils;
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,7 @@ namespace Monetizr.SDK.UI
                 string prefabLandscape = prefab + "_landscape";
                 GameObject asset = null;
                              
-                if (MonetizrUtils.IsInLandscapeMode())
+                if (New_MobileUtils.IsInLandscapeMode())
                 {       
                     asset = Resources.Load(prefabLandscape) as GameObject;
                 }

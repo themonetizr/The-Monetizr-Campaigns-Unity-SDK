@@ -17,6 +17,7 @@ using Monetizr.SDK.Missions;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.VAST;
+using Monetizr.SDK.New;
 
 namespace Monetizr.SDK.Networking
 {
@@ -340,7 +341,7 @@ namespace Monetizr.SDK.Networking
                     {"device-memory",SystemInfo.systemMemorySize.ToString()},
                     {"device-model",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
                     {"device-name",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceName)},
-                    {"internet-connection",MonetizrMobileAnalytics.GetInternetConnectionType()},
+                    {"internet-connection",New_NetworkingUtils.GetInternetConnectionType()},
                     {"local-time-stamp",((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString()}
                 }
             };

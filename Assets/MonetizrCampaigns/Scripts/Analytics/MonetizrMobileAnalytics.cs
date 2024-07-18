@@ -11,6 +11,7 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.UI;
 using CustomUniWebView;
+using Monetizr.SDK.New;
 
 
 #if UNITY_IOS
@@ -78,14 +79,7 @@ namespace Monetizr.SDK.Analytics
 
         internal static string deviceIdentifier = "";
 
-        private static float DeviceDiagonalSizeInInches()
-        {
-            float screenWidth = Screen.width / Screen.dpi;
-            float screenHeight = Screen.height / Screen.dpi;
-            float diagonalInches = Mathf.Sqrt(Mathf.Pow(screenWidth, 2) + Mathf.Pow(screenHeight, 2));
-
-            return diagonalInches;
-        }
+        
 
         internal static DeviceSizeGroup GetDeviceGroup()
         {
@@ -104,7 +98,7 @@ namespace Monetizr.SDK.Analytics
 #elif UNITY_ANDROID
 
             float aspectRatio = Mathf.Max(Screen.width, Screen.height) / Mathf.Min(Screen.width, Screen.height);
-            bool isTablet = (DeviceDiagonalSizeInInches() > 6.5f && aspectRatio < 2f);
+            bool isTablet = (New_MobileUtils.DeviceDiagonalSizeInInches() > 6.5f && aspectRatio < 2f);
 
             if (isTablet)
             {
@@ -276,7 +270,7 @@ namespace Monetizr.SDK.Analytics
             props["device_memory"] = SystemInfo.systemMemorySize.ToString();
             props["device_model"] = SystemInfo.deviceModel;
             props["device_name"] = SystemInfo.deviceName;
-            props["internet_connection"] = MonetizrMobileAnalytics.GetInternetConnectionType();
+            props["internet_connection"] = New_NetworkingUtils.GetInternetConnectionType();
 
             if (locationData != null)
             {
@@ -728,21 +722,6 @@ namespace Monetizr.SDK.Analytics
             Log.PrintV($"SendReport: {props}");
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track("Programmatic-request-client", props);
-        }
-
-        public static string GetInternetConnectionType()
-        {
-            switch (Application.internetReachability)
-            {
-                case NetworkReachability.NotReachable:
-                    return "no_connection";
-                case NetworkReachability.ReachableViaCarrierDataNetwork:
-                    return "mobile";
-                case NetworkReachability.ReachableViaLocalAreaNetwork:
-                    return "lan";
-                default:
-                    return "unknown";
-            }
         }
 
         internal override void SendErrorToMixpanel(string condition, string callstack, ServerCampaign campaign)

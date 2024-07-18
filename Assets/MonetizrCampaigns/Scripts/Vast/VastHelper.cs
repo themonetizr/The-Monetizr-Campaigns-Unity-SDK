@@ -898,7 +898,7 @@ namespace Monetizr.SDK.VAST
             string zipFolder = campPath + "/" + videoAsset.fpath;
             Log.PrintV($"{campPath} {zipFolder}");
             if (!Directory.Exists(zipFolder)) Directory.CreateDirectory(zipFolder);
-            byte[] data = await DownloadHelper.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+            byte[] data = await DownloadManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
             File.WriteAllBytes(zipFolder + "/html.zip", data);
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
             File.Delete(zipFolder + "/html.zip");
@@ -934,7 +934,7 @@ namespace Monetizr.SDK.VAST
         {
             var url = "https://image.themonetizr.com/omsdk/omsdk-v1.js";
 
-            byte[] data = await DownloadHelper.DownloadAssetData(url);
+            byte[] data = await DownloadManager.DownloadAssetData(url);
 
             if (data == null)
             {

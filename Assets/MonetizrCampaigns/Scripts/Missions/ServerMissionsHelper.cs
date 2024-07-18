@@ -27,7 +27,7 @@ namespace Monetizr.SDK.Missions
                     float rewardAmount = _m.GetRewardAmount() / 100.0f;
                     RewardType currency = _m.GetRewardType();
 
-                    MonetizrManager.GameReward gameReward = MonetizrManager.GetGameReward(currency);
+                    GameReward gameReward = MonetizrManager.GetGameReward(currency);
 
                     if (gameReward == null)
                     {

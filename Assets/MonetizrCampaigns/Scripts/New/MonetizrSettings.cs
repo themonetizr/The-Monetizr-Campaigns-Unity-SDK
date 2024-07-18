@@ -5,7 +5,6 @@ using UnityEngine;
 using Monetizr.SDK.Core;
 using System.Collections.Generic;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -50,7 +49,7 @@ public class MonetizrSettings : ScriptableObject
         instance = instance ? null : Resources.Load<MonetizrSettings>("MonetizrSettings");
         instance = instance ? instance : Resources.LoadAll<MonetizrSettings>(string.Empty).FirstOrDefault();
         instance = instance ? instance : CreateAndSave<MonetizrSettings>();
-        if (instance == null) throw new Exception("Could not find or create settings for Monetizr");
+        if (instance == null) throw new Exception("Could not find or create settings for Monetizr.");
         return instance;
     }
 

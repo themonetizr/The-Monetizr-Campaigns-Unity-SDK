@@ -414,7 +414,7 @@ namespace Monetizr.SDK.Missions
             MonetizrManager.ShowHTML5((bool isSkipped) => { onComplete(isSkipped); }, m);
         }
 
-        internal void UpdateMissionsRewards(RewardType rt, MonetizrManager.GameReward reward)
+        internal void UpdateMissionsRewards(RewardType rt, GameReward reward)
         {
             foreach (var m in missions)
             {

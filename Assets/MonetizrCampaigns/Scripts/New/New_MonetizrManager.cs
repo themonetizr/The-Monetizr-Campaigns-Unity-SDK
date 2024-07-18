@@ -1,11 +1,9 @@
 using Monetizr.SDK.Core;
-using System.Collections;
 using System.Collections.Generic;
-using static Monetizr.SDK.Core.MonetizrManager;
 
 namespace Monetizr.SDK.New
 {
-    public static class NewMonetizrManager
+    public static class New_MonetizrManager
     {
         private static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
 

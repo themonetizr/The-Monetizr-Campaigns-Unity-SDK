@@ -244,7 +244,7 @@ namespace Monetizr.SDK.Core
 
             foreach (var i in gameRewards)
             {
-                if (!i.Value.Validate()) return;
+                if (!i.Value.IsSetupValid()) return;
             }
 
             Log.Print("MonetizrManager initialization okay!");

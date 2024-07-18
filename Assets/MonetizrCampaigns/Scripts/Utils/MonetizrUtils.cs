@@ -332,11 +332,6 @@ namespace Monetizr.SDK.Utils
             return pieces;
         }
 
-        public static bool IsInLandscapeMode()
-        {
-            return (Screen.width > Screen.height);
-        }
-
         public static Dictionary<string, string> ParseConditionsString(string conditionsString)
         {
             var output = new Dictionary<string, string>();

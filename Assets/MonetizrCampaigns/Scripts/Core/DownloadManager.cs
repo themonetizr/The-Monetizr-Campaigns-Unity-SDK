@@ -5,7 +5,7 @@ using Monetizr.SDK.Debug;
 
 namespace Monetizr.SDK.Core
 {
-    internal class DownloadHelper
+    internal class DownloadManager
     {
         public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
         {
