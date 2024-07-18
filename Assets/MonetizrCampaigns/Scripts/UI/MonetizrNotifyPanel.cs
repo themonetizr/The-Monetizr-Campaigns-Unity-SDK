@@ -209,7 +209,7 @@ namespace Monetizr.SDK.UI
                 logo.gameObject.SetActive(false);
 
            
-            var r = m.campaign.rewards.Find((ServerCampaign.Reward obj) => obj.claimable == true);
+            var r = m.campaign.rewards.Find((Reward obj) => obj.claimable == true);
 
             rewardImage.sprite = _rewardIcon;
 

@@ -34,7 +34,7 @@ namespace Monetizr.Tests
 
             request.SetRequestHeader("player-id", MonetizrMobileAnalytics.deviceIdentifier);
             request.SetRequestHeader("app-bundle-id", MonetizrManager.bundleId);
-            request.SetRequestHeader("sdk-version", MonetizrConfiguration.SDKVersion);
+            request.SetRequestHeader("sdk-version", MonetizrSettings.SDKVersion);
             request.SetRequestHeader("os-group", MonetizrMobileAnalytics.GetOsGroup());
             request.SetRequestHeader("ad-id", MonetizrMobileAnalytics.advertisingID);
             request.SetRequestHeader("screen-width", Screen.width.ToString());

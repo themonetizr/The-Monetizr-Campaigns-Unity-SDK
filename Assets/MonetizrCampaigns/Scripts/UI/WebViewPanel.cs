@@ -255,7 +255,7 @@ namespace Monetizr.SDK.UI
                     programmaticOk = false;
                 }
 
-                ServerCampaign.Asset programmaticVideoAsset = null;
+                Asset programmaticVideoAsset = null;
 
                 if (programmaticOk && campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
                 {

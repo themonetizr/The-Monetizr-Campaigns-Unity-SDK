@@ -54,7 +54,7 @@ namespace Monetizr.SDK.Debug
         {
             versionText.text = $"App version: {Application.version} " +
              $"OS: {MonetizrMobileAnalytics.osVersion} " +
-             $"SDK: {MonetizrConfiguration.SDKVersion}\n" +
+             $"SDK: {MonetizrSettings.SDKVersion}\n" +
              $"ADID: {MonetizrMobileAnalytics.advertisingID}\n" +
              $"UserId: {MonetizrManager.Instance.ConnectionsClient.Analytics.GetUserId()}\n" +
              $"Limit ad tracking: {MonetizrMobileAnalytics.limitAdvertising}\n" +

@@ -30,8 +30,6 @@ namespace Monetizr.SDK.Analytics
 {
     internal class MonetizrMobileAnalytics : MonetizrAnalytics
     {
-        internal MonetizrHttpClient.IpApiData locationData = null;
-
         public static string osVersion;
         public static string advertisingID = "";
         public static bool limitAdvertising = false;
@@ -261,7 +259,7 @@ namespace Monetizr.SDK.Analytics
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
             props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
-            props["sdk_version"] = MonetizrConfiguration.SDKVersion;
+            props["sdk_version"] = MonetizrSettings.SDKVersion;
             props["ad_id"] = MonetizrMobileAnalytics.advertisingID;
             props["screen_width"] = Screen.width.ToString();
             props["screen_height"] = Screen.height.ToString();
@@ -272,12 +270,22 @@ namespace Monetizr.SDK.Analytics
             props["device_name"] = SystemInfo.deviceName;
             props["internet_connection"] = New_NetworkingUtils.GetInternetConnectionType();
 
-            if (locationData != null)
+            /*
+            if (String.IsNullOrEmpty(props["country_code"]))
             {
-                props["country_code"] = locationData.country_code;
-                props["region_code"] = locationData.region_code;
-                props["country_name"] = locationData.country_name;
+                props["country_code"] = "";
             }
+
+            if (String.IsNullOrEmpty(props["region_code"]))
+            {
+                props["region_code"] = "";
+            }
+
+            if (String.IsNullOrEmpty(props["country_name"]))
+            {
+                props["country_name"] = "";
+            }
+            */
 
             if (campaign != null)
             {

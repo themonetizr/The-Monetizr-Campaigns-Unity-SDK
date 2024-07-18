@@ -203,7 +203,7 @@ namespace Monetizr.SDK.UI
 
             string brandTitle = m.brandName;
 
-            var r = m.campaign.rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true;  });
+            var r = m.campaign.rewards.Find((Reward obj) => { return obj.claimable == true;  });
 
             string giveawayTitle = "";
 

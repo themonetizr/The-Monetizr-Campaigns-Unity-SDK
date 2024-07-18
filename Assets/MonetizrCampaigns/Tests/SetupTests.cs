@@ -18,7 +18,7 @@ namespace Monetizr.Tests
         [Test, Order(1)]
         public void AccessSDKVersion ()
         {
-            Assert.IsNotNull(MonetizrConfiguration.SDKVersion);
+            Assert.IsNotNull(MonetizrSettings.SDKVersion);
         }
 
         [UnityTest, Order(2)]

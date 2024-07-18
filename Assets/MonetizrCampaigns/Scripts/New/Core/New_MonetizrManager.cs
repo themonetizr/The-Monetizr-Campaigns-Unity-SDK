@@ -18,13 +18,13 @@ namespace Monetizr.SDK.New
 
         private static bool IsInitializationSetupComplete ()
         {
-            if (string.IsNullOrEmpty(MonetizrConfiguration.apiKey))
+            if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
             {
                 UnityEngine.Debug.Log("Missing API Key.");
                 return false;
             }
 
-            if (string.IsNullOrEmpty(MonetizrConfiguration.bundleID))
+            if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
             {
                 UnityEngine.Debug.Log("Missing Bundle ID.");
                 return false;

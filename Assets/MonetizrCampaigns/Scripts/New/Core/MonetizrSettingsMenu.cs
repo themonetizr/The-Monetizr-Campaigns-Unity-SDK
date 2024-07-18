@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using UnityEditor;
 #endif
 
-public class MonetizrSettings : ScriptableObject
+public class MonetizrSettingsMenu : ScriptableObject
 {
     [Header("Android Settings")]
     public string androidBundleID;
@@ -22,19 +22,19 @@ public class MonetizrSettings : ScriptableObject
     [Header("Game Reward Settings")]
     public List<TestGameReward> gameRewards;
 
-    private static MonetizrSettings _instance;
+    private static MonetizrSettingsMenu _instance;
 
     public static void LoadSettings()
     {
         if (!_instance)
         {
             _instance = FindOrCreateInstance();
-            MonetizrConfiguration.bundleID = _instance.androidBundleID;
-            MonetizrConfiguration.apiKey = _instance.androidAPIKey;
+            MonetizrSettings.bundleID = _instance.androidBundleID;
+            MonetizrSettings.apiKey = _instance.androidAPIKey;
         }
     }
 
-    public static MonetizrSettings Instance
+    public static MonetizrSettingsMenu Instance
     {
         get
         {
@@ -43,12 +43,12 @@ public class MonetizrSettings : ScriptableObject
         }
     }
 
-    private static MonetizrSettings FindOrCreateInstance()
+    private static MonetizrSettingsMenu FindOrCreateInstance()
     {
-        MonetizrSettings instance = null;
-        instance = instance ? null : Resources.Load<MonetizrSettings>("MonetizrSettings");
-        instance = instance ? instance : Resources.LoadAll<MonetizrSettings>(string.Empty).FirstOrDefault();
-        instance = instance ? instance : CreateAndSave<MonetizrSettings>();
+        MonetizrSettingsMenu instance = null;
+        instance = instance ? null : Resources.Load<MonetizrSettingsMenu>("MonetizrSettings");
+        instance = instance ? instance : Resources.LoadAll<MonetizrSettingsMenu>(string.Empty).FirstOrDefault();
+        instance = instance ? instance : CreateAndSave<MonetizrSettingsMenu>();
         if (instance == null) throw new Exception("Could not find or create settings for Monetizr.");
         return instance;
     }

@@ -137,7 +137,7 @@ namespace Monetizr.SDK.Missions
 
         Mission PrepareGiveawayMission(MissionType mt, ServerCampaign campaign)
         {
-            var claimableReward = campaign.rewards.Find((ServerCampaign.Reward obj) => { return obj.claimable == true; });
+            var claimableReward = campaign.rewards.Find((Reward obj) => { return obj.claimable == true; });
 
             if (claimableReward == null)
                 return null;
@@ -226,7 +226,7 @@ namespace Monetizr.SDK.Missions
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign.id;
             m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
-            m.sdkVersion = MonetizrConfiguration.SDKVersion;
+            m.sdkVersion = MonetizrSettings.SDKVersion;
             if (!md.hasUnitySurvey) m.surveyUrl = md.surveyUrl;
             m.surveyId = md.surveyId;
             m.serverId = md.id;
@@ -534,7 +534,7 @@ namespace Monetizr.SDK.Missions
                     continue;
 
                 m.campaign = campaign;
-                m.sdkVersion = MonetizrConfiguration.SDKVersion;
+                m.sdkVersion = MonetizrSettings.SDKVersion;
                 m.rewardAssetName = missionDescription.rewardImage;
 
                 if (!missionDescription.hasUnitySurvey)

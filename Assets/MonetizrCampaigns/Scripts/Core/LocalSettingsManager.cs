@@ -24,7 +24,7 @@ namespace Monetizr.SDK.Core
                 { return m.apiKey != MonetizrManager.Instance.GetCurrentAPIkey(); });
 
             deleted += data.campaigns.RemoveAll((LocalCampaignSettings m) =>
-                { return m.sdkVersion != MonetizrConfiguration.SDKVersion; });
+                { return m.sdkVersion != MonetizrSettings.SDKVersion; });
 
             if (deleted > 0)
             {
@@ -41,7 +41,7 @@ namespace Monetizr.SDK.Core
                 data.campaigns.Add(new LocalCampaignSettings()
                 {
                     apiKey = MonetizrManager.Instance.GetCurrentAPIkey(),
-                    sdkVersion = MonetizrConfiguration.SDKVersion,
+                    sdkVersion = MonetizrSettings.SDKVersion,
                     lastTimeShowNotification = DateTime.Now,
                     campId = campaign.id
                 });

@@ -17,6 +17,7 @@ using Monetizr.SDK.Networking;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using CustomUniWebView;
+using Monetizr.SDK.New;
 
 namespace Monetizr.SDK.VAST
 {
@@ -84,7 +85,7 @@ namespace Monetizr.SDK.VAST
         internal class VastSettings
         {
             public string vendorName = "Themonetizr";
-            public string sdkVersion = MonetizrConfiguration.SDKVersion;
+            public string sdkVersion = MonetizrSettings.SDKVersion;
 
             public VideoSettings videoSettings = new VideoSettings();
 
@@ -369,7 +370,7 @@ namespace Monetizr.SDK.VAST
             private readonly Type _type;
             private readonly bool _loadVideoOnly;
             private readonly AdDefinitionBase_type _baseType;
-            private ServerCampaign.Asset _videoAsset;
+            private Asset _videoAsset;
             private PreferableVideoSize _preferableVideoSize;
 
             enum Type
@@ -384,10 +385,11 @@ namespace Monetizr.SDK.VAST
                 return _type == Type.Unknown;
             }
 
-            internal ServerCampaign.Asset GetVideoAsset()
+            internal Asset GetVideoAsset()
             {
                 return _videoAsset;
             }
+
             internal VastAdItem (AdDefinitionBase_type adDefinition, ServerCampaign serverCampaign, PreferableVideoSize preferableVideoSize, bool loadVideoOnly)
             {
                 _serverCampaign = serverCampaign;
@@ -568,9 +570,9 @@ namespace Monetizr.SDK.VAST
 
             private void AddLinearCreatives(Linear_Inline_type it, string cId, Verification_type[] adItemAdVerifications)
             {
-                if (ServerCampaign.Asset.ValidateAssetJson(it.AdParameters?.Value))
+                if (Asset.ValidateAssetJson(it.AdParameters?.Value))
                 {
-                    _serverCampaign.assets.Add(new ServerCampaign.Asset(it.AdParameters?.Value, true));
+                    _serverCampaign.assets.Add(new Asset(it.AdParameters?.Value, true));
                     return;
                 }
 
@@ -629,7 +631,7 @@ namespace Monetizr.SDK.VAST
                 string value = mediaFile.Value;
                 string type = mediaFile.type;
 
-                _videoAsset = new ServerCampaign.Asset()
+                _videoAsset = new Asset()
                 {
                     id = cId,
                     url = value,
@@ -892,13 +894,13 @@ namespace Monetizr.SDK.VAST
             }
         }
 
-        private static async Task DownloadAndPrepareHtmlVideoPlayer(ServerCampaign serverCampaign, ServerCampaign.Asset videoAsset)
+        private static async Task DownloadAndPrepareHtmlVideoPlayer(ServerCampaign serverCampaign, Asset videoAsset)
         {
             string campPath = Application.persistentDataPath + "/" + serverCampaign.id;
             string zipFolder = campPath + "/" + videoAsset.fpath;
             Log.PrintV($"{campPath} {zipFolder}");
             if (!Directory.Exists(zipFolder)) Directory.CreateDirectory(zipFolder);
-            byte[] data = await DownloadManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+            byte[] data = await New_NetworkingManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
             File.WriteAllBytes(zipFolder + "/html.zip", data);
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
             File.Delete(zipFolder + "/html.zip");
@@ -918,10 +920,10 @@ namespace Monetizr.SDK.VAST
 
         private static bool AddAssetFromAdParameters(string adParametersValue, ServerCampaign serverCampaign)
         {
-            if (!ServerCampaign.Asset.ValidateAssetJson(adParametersValue))
+            if (!Asset.ValidateAssetJson(adParametersValue))
                 return false;
 
-            serverCampaign.assets.Add(new ServerCampaign.Asset(adParametersValue, false));
+            serverCampaign.assets.Add(new Asset(adParametersValue, false));
             return true;
         }
 
@@ -934,7 +936,7 @@ namespace Monetizr.SDK.VAST
         {
             var url = "https://image.themonetizr.com/omsdk/omsdk-v1.js";
 
-            byte[] data = await DownloadManager.DownloadAssetData(url);
+            byte[] data = await New_NetworkingManager.DownloadAssetData(url);
 
             if (data == null)
             {

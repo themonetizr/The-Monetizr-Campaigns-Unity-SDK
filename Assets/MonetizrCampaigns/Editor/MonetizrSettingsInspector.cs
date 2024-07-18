@@ -2,7 +2,7 @@ using Monetizr.SDK.Core;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(MonetizrSettings))]
+[CustomEditor(typeof(MonetizrSettingsMenu))]
 public class MonetizrSettingsInspector : Editor
 {
     public override void OnInspectorGUI()
@@ -10,7 +10,7 @@ public class MonetizrSettingsInspector : Editor
         base.OnInspectorGUI();
         EditorGUILayout.Space();
         EditorGUI.DrawRect(EditorGUILayout.BeginVertical(), new Color(0.4f, 0.4f, 0.4f));
-        EditorGUILayout.LabelField(new GUIContent("SDK Version", "The current version of the SDK."), new GUIContent(MonetizrConfiguration.SDKVersion));
+        EditorGUILayout.LabelField(new GUIContent("SDK Version", "The current version of the SDK."), new GUIContent(MonetizrSettings.SDKVersion));
         EditorGUILayout.EndVertical();
     }
 }

@@ -11,7 +11,7 @@ namespace Monetizr.SDK.Analytics
     {
         private readonly ServerCampaign _serverCampaign;
 
-        internal VastTagsReplacer(ServerCampaign serverCampaign, ServerCampaign.Asset asset, string clientUA)
+        internal VastTagsReplacer(ServerCampaign serverCampaign, Asset asset, string clientUA)
         {
             _serverCampaign = serverCampaign;
             var clientUa = clientUA;

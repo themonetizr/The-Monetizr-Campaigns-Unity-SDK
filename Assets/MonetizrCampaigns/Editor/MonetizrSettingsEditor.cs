@@ -11,10 +11,10 @@ namespace Monetizr
             {
                 guiHandler = (searchContext) =>
                 {
-                    Editor.CreateEditor(MonetizrSettings.Instance).OnInspectorGUI();
+                    Editor.CreateEditor(MonetizrSettingsMenu.Instance).OnInspectorGUI();
                 },
 
-                keywords = SettingsProvider.GetSearchKeywordsFromSerializedObject(new SerializedObject(MonetizrSettings.Instance))
+                keywords = SettingsProvider.GetSearchKeywordsFromSerializedObject(new SerializedObject(MonetizrSettingsMenu.Instance))
             };
 
             return provider;

@@ -2,6 +2,7 @@
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
+using Monetizr.SDK.New;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
 using System;
@@ -14,7 +15,7 @@ using UnityEngine;
 namespace Monetizr.SDK.Campaigns
 {
     [System.Serializable]
-    internal partial class ServerCampaign
+    public class ServerCampaign
     {
         private static readonly Dictionary<AssetsType, System.Type> AssetsSystemTypes = new Dictionary<AssetsType, System.Type>()
         {
@@ -55,7 +56,6 @@ namespace Monetizr.SDK.Campaigns
         public bool testmode;
         public List<Reward> rewards = new List<Reward>();
         public List<Asset> assets = new List<Asset>();
-        public List<Location> locations = new List<Location>();
         public string end_date;
         public string adm;
 
@@ -202,7 +202,7 @@ namespace Monetizr.SDK.Campaigns
             return $"{Application.persistentDataPath}/{this.id}/{fname}";
         }
 
-        internal async Task AssignAssetTextures(ServerCampaign.Asset asset, AssetsType texture, AssetsType sprite, bool isOptional = false)
+        internal async Task AssignAssetTextures(Asset asset, AssetsType texture, AssetsType sprite, bool isOptional = false)
         {
             if (asset.url == null || asset.url.Length == 0)
             {
@@ -223,7 +223,7 @@ namespace Monetizr.SDK.Campaigns
 
             if (!File.Exists(fpath))
             {
-                data = await DownloadManager.DownloadAssetData(asset.url);
+                data = await New_NetworkingManager.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
@@ -270,7 +270,7 @@ namespace Monetizr.SDK.Campaigns
 
         }
 
-        internal async Task PreloadAssetToCache(ServerCampaign.Asset asset, AssetsType fileString, bool required = true)
+        internal async Task PreloadAssetToCache(Asset asset, AssetsType fileString, bool required = true)
         {
             if (string.IsNullOrEmpty(asset.url))
             {
@@ -305,7 +305,7 @@ namespace Monetizr.SDK.Campaigns
             {
                 Log.PrintV($"Downloading archive {asset.url}");
 
-                data = await DownloadManager.DownloadAssetData(asset.url);
+                data = await New_NetworkingManager.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
@@ -521,7 +521,7 @@ namespace Monetizr.SDK.Campaigns
             string playerUrl = serverSettings.GetParam("openrtb.player_url",
                 "https://image.themonetizr.com/videoplayer/html.zip");
 
-            byte[] data = await DownloadManager.DownloadAssetData(playerUrl);
+            byte[] data = await New_NetworkingManager.DownloadAssetData(playerUrl);
 
             if (data == null)
             {
@@ -557,7 +557,7 @@ namespace Monetizr.SDK.Campaigns
                 this.loadingError = $"Folder for video player {zipFolder} doesn't exist";
             }
 
-            byte[] data = await DownloadManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+            byte[] data = await New_NetworkingManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
 
             if (data == null)
             {
@@ -650,29 +650,6 @@ namespace Monetizr.SDK.Campaigns
             Log.PrintV($"VAST Settings: {res}");
 
             return res;
-        }
-        internal bool IsCampaignInsideLocation(MonetizrHttpClient.IpApiData locData)
-        {
-            if (locData == null)
-                return true;
-
-            if (locations.Count == 0)
-                return true;
-
-            var country = locations.Find(l => l.country == locData.country_code);
-
-            if (country == null)
-                return false;
-
-            if (country.regions == null)
-                return true;
-
-            if (country.regions.Count == 0)
-                return true;
-
-            var region = country.regions.Find(r => r.region == locData.region_code);
-
-            return region != null;
         }
 
         internal bool IsCampaignActivate()
