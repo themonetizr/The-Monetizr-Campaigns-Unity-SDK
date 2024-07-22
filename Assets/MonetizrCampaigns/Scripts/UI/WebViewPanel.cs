@@ -244,7 +244,7 @@ namespace Monetizr.SDK.UI
                     programmaticOk =
                         await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic);
                 }
-                catch (MonetizrHttpClient.DownloadUrlAsStringException e)
+                catch (DownloadUrlAsStringException e)
                 {
                     Log.PrintError($"Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
                     programmaticOk = false;

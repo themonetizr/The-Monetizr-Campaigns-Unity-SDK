@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -9,7 +8,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Net;
 using Monetizr.Raygun4Unity;
-using UnityEngine.Networking;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Analytics;
@@ -21,7 +19,7 @@ using Monetizr.SDK.New;
 
 namespace Monetizr.SDK.Networking
 {
-    internal partial class MonetizrHttpClient : MonetizrClient
+    internal class MonetizrHttpClient : MonetizrClient
     {
         private string _baseApiUrl = "https://api.themonetizr.com";
         private string CampaignsApiUrl => _baseApiUrl + "/api/campaigns";
@@ -44,8 +42,7 @@ namespace Monetizr.SDK.Networking
 
         internal override void SetTestMode(bool testEnvironment)
         {
-            if (testEnvironment)
-                _baseApiUrl = _baseTestApiUrl;
+            if (testEnvironment) _baseApiUrl = _baseTestApiUrl;
         }
 
         internal override void Close()

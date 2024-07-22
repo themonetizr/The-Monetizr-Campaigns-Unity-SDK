@@ -4,12 +4,9 @@ using System.Collections.Generic;
 
 namespace Monetizr.SDK.Networking
 {
-    internal partial class MonetizrHttpClient
+    [Serializable]
+    public class Campaigns
     {
-        [Serializable]
-        private class Campaigns
-        {
-            public List<ServerCampaign> campaigns;
-        }
+        public List<ServerCampaign> campaigns;
     }
 }
