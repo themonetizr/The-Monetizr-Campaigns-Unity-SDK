@@ -131,9 +131,7 @@ namespace mixpanel
                     if (request.isHttpError || request.isNetworkError)
                     #endif
                     {
-                        if (Config.LogConnectionErrors)
-                            Debug.LogError($"Monetizr SDK: Mixpanel error {request.error}!");
-                        
+                        if (Config.LogConnectionErrors) Debug.LogError($"Monetizr SDK: Mixpanel error {request.error}!");
                         Mixpanel.Log("API request to " + url + "has failed with reason " + request.error);
                         _retryCount += 1;
                         double retryIn = Math.Pow(2, _retryCount - 1) * 60;

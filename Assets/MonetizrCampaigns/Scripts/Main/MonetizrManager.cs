@@ -43,6 +43,8 @@ namespace Monetizr.SDK.Core
         private static int debugAttempt = 0;
         private static Vector2? tinyTeaserPosition = null;
         private static Transform teaserRoot;
+        private static bool isUsingEngagedUserAction = false;
+        private static bool hasCompletedEngagedUserAction = false;
         internal Action<bool> onUIVisible = null;
         internal MissionsManager missionsManager = null;
         internal LocalSettingsManager localSettings = null;
@@ -54,13 +56,14 @@ namespace Monetizr.SDK.Core
         private bool _isMissionsIsOutdated = true;
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
         private Action _gameOnInitSuccess;
+        private bool hasActiveEngageUserAction = false;
 
-        private void OnApplicationQuit ()
+        private void OnApplicationQuit()
         {
             Analytics?.OnApplicationQuit();
         }
 
-        public static void SetAdvertisingIds (string advertisingID, bool limitAdvertising)
+        public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
         {
             MonetizrMobileAnalytics.isAdvertisingIDDefined = true;
             MonetizrMobileAnalytics.advertisingID = advertisingID;
@@ -68,7 +71,7 @@ namespace Monetizr.SDK.Core
             Log.Print($"MonetizrManager SetAdvertisingIds: {MonetizrMobileAnalytics.advertisingID} {MonetizrMobileAnalytics.limitAdvertising}");
         }
 
-        public static void SetGameCoinAsset (RewardType rt, Sprite defaultRewardIcon, string title,
+        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title,
             Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
         {
             GameReward gr = new GameReward()
@@ -83,12 +86,12 @@ namespace Monetizr.SDK.Core
             gameRewards[rt] = gr;
         }
 
-        public static MonetizrManager Initialize (string apiKey, List<MissionDescription> sponsoredMissions = null, Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
+        public static MonetizrManager Initialize(string apiKey, List<MissionDescription> sponsoredMissions = null, Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
         {
             return _Initialize(apiKey, sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, null);
         }
 
-        private static MonetizrManager _Initialize (string apiKey, List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrClient connectionClient)
+        private static MonetizrManager _Initialize(string apiKey, List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrClient connectionClient)
         {
             if (Instance != null) return Instance;
 
@@ -136,7 +139,7 @@ namespace Monetizr.SDK.Core
             return Instance;
         }
 
-        private void Initialize (string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
+        private void Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
         {
 #if USING_WEBVIEW
             if (!UniWebView.IsWebViewSupported)
@@ -252,7 +255,7 @@ namespace Monetizr.SDK.Core
             onRequestComplete?.Invoke(true);
         }
 
-        private IEnumerator TryRequestCampaignsLater (float time)
+        private IEnumerator TryRequestCampaignsLater(float time)
         {
             while (true)
             {
@@ -300,7 +303,7 @@ namespace Monetizr.SDK.Core
             }
         }
 
-        internal static GameReward GetGameReward (RewardType rt)
+        internal static GameReward GetGameReward(RewardType rt)
         {
             LogGameRewards();
 
@@ -458,7 +461,7 @@ namespace Monetizr.SDK.Core
 
             Action onFail = () =>
             {
-                Log.Print("FAIL!");;
+                Log.Print("FAIL!"); ;
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.Error);
                 ShowMessage((bool _) => { onComplete?.Invoke(false); }, m, PanelId.BadEmailMessageNotification);
             };
@@ -623,28 +626,48 @@ namespace Monetizr.SDK.Core
 
         public static void EngagedUserAction(OnComplete onComplete)
         {
+            isUsingEngagedUserAction = true;
+            Log.Print("Started EngageUserAction");
+
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
             var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance?.GetActiveCampaign());
 
+            if (Instance.GetActiveCampaign() == null)
+            {
+                Log.Print("SKIPPED - NO CAMPAIGN");
+            }
+
             if (missions == null || missions.Count == 0)
             {
+                Log.Print("SKIPPED - NO MISSIONS");
                 onComplete(OnCompleteStatus.Skipped);
                 return;
             }
 
             if (missions[0].amountOfRVOffersShown == 0)
             {
+                Log.Print("SKIPPED - NO RV");
                 onComplete(OnCompleteStatus.Skipped);
                 return;
             }
 
             missions[0].amountOfRVOffersShown--;
 
-            MonetizrManager.ShowRewardCenter(null,(bool p) =>
+            MonetizrManager.ShowRewardCenter(null, (bool p) =>
             {
-                Log.PrintV("ShowRewardCenter OnComplete!");
-                onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
+                Log.Print("ShowRewardCenter OnComplete!");
+
+                onComplete(hasCompletedEngagedUserAction ? OnCompleteStatus.Completed : OnCompleteStatus.Skipped);
+                hasCompletedEngagedUserAction = false;
+
+                //onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
             });
+        }
+
+        public static void OnEngagedUserActionComplete ()
+        {
+            if (!isUsingEngagedUserAction) return;
+            hasCompletedEngagedUserAction = true;
         }
 
         public static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
@@ -655,8 +678,8 @@ namespace Monetizr.SDK.Core
 
             if (campaign == null)
             {
+                Log.Print("SKIPPED - No campaigns.");
                 onComplete?.Invoke(true);
-                Log.Print($"No active campaigns for reward center");
                 return;
             }
 
@@ -665,6 +688,7 @@ namespace Monetizr.SDK.Core
 
             if (missions.Count == 0)
             {
+                Log.Print("SKIPPED - No missions.");
                 onComplete?.Invoke(true);
                 return;
             }
@@ -747,7 +771,7 @@ namespace Monetizr.SDK.Core
         {
             _ShowWebView(onComplete, PanelId.ActionHtmlPanelView, m);
         }
-        
+
         internal static void ShowSurvey(Action<bool> onComplete, Mission m = null)
         {
             _ShowWebView(onComplete, PanelId.SurveyWebView, m);
@@ -962,7 +986,7 @@ namespace Monetizr.SDK.Core
             SetActiveCampaign(FindBestCampaignToActivate());
             _isMissionsIsOutdated = false;
         }
-        
+
         internal ServerCampaign GetActiveCampaign()
         {
             if (!IsActiveAndEnabled()) return null;
@@ -987,7 +1011,7 @@ namespace Monetizr.SDK.Core
 
             return null;
         }
-        
+
         internal bool HasCampaignsAndActive()
         {
             return _isActive && campaigns.Count > 0;
@@ -997,7 +1021,7 @@ namespace Monetizr.SDK.Core
         {
             return Instance != null && Instance.HasCampaignsAndActive();
         }
-        
+
         internal void SetActiveCampaign(ServerCampaign camp)
         {
             if (camp == _activeCampaignId) return;
@@ -1006,7 +1030,7 @@ namespace Monetizr.SDK.Core
             closeRewardCenterAfterEveryMission = camp.serverSettings.GetBoolParam("RewardCenter.close_after_mission_completion", closeRewardCenterAfterEveryMission);
             Log.PrintV($"Active campaign: {_activeCampaignId}");
         }
-        
+
         public bool HasActiveCampaign()
         {
             return _isActive && _activeCampaignId != null;
@@ -1016,7 +1040,7 @@ namespace Monetizr.SDK.Core
         {
             return Instance != null;
         }
-        
+
         internal bool HasCampaign(string campaignId)
         {
             return campaigns.FindIndex(c => c.id == campaignId) >= 0;
