@@ -17,29 +17,29 @@ namespace Monetizr.SDK.New
 
         private static void RemoveCampaignsWithNoAssets (List<ServerCampaign> result)
         {
-            result.RemoveAll(e =>
+            result.RemoveAll((System.Predicate<ServerCampaign>)(e =>
             {
                 bool noAssets = e.assets.Count == 0;
-                if (noAssets) Log.Print($"Removing campaign {e.id} with no assets");
+                if (noAssets) MonetizrLog.Print($"Removing campaign {e.id} with no assets");
                 return noAssets;
-            });
+            }));
         }
 
         private static void RemoveCampaignsWithWrongSDKVersion (List<ServerCampaign> result)
         {
-            result.RemoveAll(e =>
+            result.RemoveAll((System.Predicate<ServerCampaign>)(e =>
             {
                 string minSdkVersion = e.serverSettings.GetParam("min_sdk_version");
 
                 if (minSdkVersion != null)
                 {
                     bool sdkVersionCheck = MonetizrUtils.CompareVersions(MonetizrSettings.SDKVersion, minSdkVersion) < 0;
-                    if (sdkVersionCheck) Log.Print($"Removing campaign {e.id} because SDK version {MonetizrSettings.SDKVersion} less then required SDK version {minSdkVersion}");
+                    if (sdkVersionCheck) MonetizrLog.Print($"Removing campaign {e.id} because SDK version {MonetizrSettings.SDKVersion} less then required SDK version {minSdkVersion}");
                     return sdkVersionCheck;
                 }
 
                 return false;
-            });
+            }));
         }
 
         private static void CheckAllowedDevices (List<ServerCampaign> result)

@@ -68,7 +68,7 @@ namespace Monetizr.SDK.Core
             MonetizrMobileAnalytics.isAdvertisingIDDefined = true;
             MonetizrMobileAnalytics.advertisingID = advertisingID;
             MonetizrMobileAnalytics.limitAdvertising = limitAdvertising;
-            Log.Print($"MonetizrManager SetAdvertisingIds: {MonetizrMobileAnalytics.advertisingID} {MonetizrMobileAnalytics.limitAdvertising}");
+            MonetizrLog.Print($"MonetizrManager SetAdvertisingIds: {MonetizrMobileAnalytics.advertisingID} {MonetizrMobileAnalytics.limitAdvertising}");
         }
 
         public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title,
@@ -108,16 +108,16 @@ namespace Monetizr.SDK.Core
             {
                 soundSwitch = (bool isOn) =>
                 {
-                    Log.Print($"Audio listener pause state {!isOn}");
+                    MonetizrLog.Print($"Audio listener pause state {!isOn}");
                     AudioListener.pause = !isOn;
                 };
             }
 
-            Log.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {MonetizrSettings.SDKVersion}");
+            MonetizrLog.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {MonetizrSettings.SDKVersion}");
 
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
-                Log.PrintError($"MonetizrManager Initialize: Advertising ID is not defined. Be sure you called MonetizrManager.SetAdvertisingIds before Initialize call.");
+                MonetizrLog.PrintError($"MonetizrManager Initialize: Advertising ID is not defined. Be sure you called MonetizrManager.SetAdvertisingIds before Initialize call.");
                 return null;
             }
 
@@ -186,13 +186,13 @@ namespace Monetizr.SDK.Core
             }
             catch (Exception e)
             {
-                Log.PrintError($"Exception while getting list of campaigns\n{e}");
+                MonetizrLog.PrintError($"Exception while getting list of campaigns\n{e}");
                 onRequestComplete?.Invoke(false);
             }
 
             if (campaigns == null)
             {
-                Log.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
+                MonetizrLog.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
                 onRequestComplete?.Invoke(false);
             }
 
@@ -220,11 +220,11 @@ namespace Monetizr.SDK.Core
 
                 if (campaign.isLoaded)
                 {
-                    Log.Print($"Campaign {campaign.id} successfully loaded");
+                    MonetizrLog.Print($"Campaign {campaign.id} successfully loaded");
                 }
                 else
                 {
-                    Log.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
+                    MonetizrLog.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
                     ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
                 }
             }
@@ -236,12 +236,12 @@ namespace Monetizr.SDK.Core
 #endif
 
             localSettings.LoadOldAndUpdateNew(campaigns);
-            Log.Print($"RequestCampaigns completed with {campaigns.Count} campaigns.");
+            MonetizrLog.Print($"RequestCampaigns completed with {campaigns.Count} campaigns.");
             if (campaigns.Count > 0) ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
 
             if (gameRewards.Count == 0)
             {
-                Log.PrintError($"No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
+                MonetizrLog.PrintError($"No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
                 return;
             }
 
@@ -250,7 +250,7 @@ namespace Monetizr.SDK.Core
                 if (!i.Value.IsSetupValid()) return;
             }
 
-            Log.Print("MonetizrManager initialization okay!");
+            MonetizrLog.Print("MonetizrManager initialization okay!");
             _isActive = true;
             onRequestComplete?.Invoke(true);
         }
@@ -274,7 +274,7 @@ namespace Monetizr.SDK.Core
             }
             catch (Exception ex)
             {
-                Log.PrintError($"Exception in _CallUserDefinedEvent\n{ex}");
+                MonetizrLog.PrintError($"Exception in _CallUserDefinedEvent\n{ex}");
             }
         }
 
@@ -319,13 +319,13 @@ namespace Monetizr.SDK.Core
         {
             if (gameRewards == null || gameRewards.Count == 0)
             {
-                UnityEngine.Debug.Log("gameRewards dictionary is null or empty.");
+                MonetizrLog.Print("gameRewards dictionary is null or empty.");
                 return;
             }
 
             foreach (KeyValuePair<RewardType, GameReward> entry in gameRewards)
             {
-                UnityEngine.Debug.Log($"Key: {entry.Key}, Value: {entry.Value}");
+                MonetizrLog.Print($"Key: {entry.Key}, Value: {entry.Value}");
             }
         }
 
@@ -371,7 +371,7 @@ namespace Monetizr.SDK.Core
         internal bool ChangeAPIKey(string apiKey)
         {
             if (apiKey == ConnectionsClient.currentApiKey) return false;
-            Log.Print($"Changing api key to {apiKey}");
+            MonetizrLog.Print($"Changing api key to {apiKey}");
             ConnectionsClient.currentApiKey = apiKey;
             return true;
         }
@@ -421,7 +421,7 @@ namespace Monetizr.SDK.Core
 
             if (m == null)
             {
-                Log.Print($"Nothing to reset in ResetCampaign");
+                MonetizrLog.Print($"Nothing to reset in ResetCampaign");
                 return;
             }
 
@@ -437,7 +437,7 @@ namespace Monetizr.SDK.Core
             }
             catch (OperationCanceledException)
             {
-                Log.Print("\nTasks cancelled: timed out.\n");
+                MonetizrLog.Print("\nTasks cancelled: timed out.\n");
             }
             finally
             {
@@ -454,14 +454,14 @@ namespace Monetizr.SDK.Core
 
             Action onSuccess = () =>
             {
-                Log.Print("SUCCESS!");
+                MonetizrLog.Print("SUCCESS!");
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressOk);
                 MonetizrManager.Instance.OnClaimRewardComplete(m, false, onComplete, updateUIDelegate);
             };
 
             Action onFail = () =>
             {
-                Log.Print("FAIL!"); ;
+                MonetizrLog.Print("FAIL!"); ;
                 MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.Error);
                 ShowMessage((bool _) => { onComplete?.Invoke(false); }, m, PanelId.BadEmailMessageNotification);
             };
@@ -478,7 +478,7 @@ namespace Monetizr.SDK.Core
                 }
                 catch (OperationCanceledException)
                 {
-                    Log.Print("\nTasks cancelled: timed out.\n");
+                    MonetizrLog.Print("\nTasks cancelled: timed out.\n");
                 }
                 finally
                 {
@@ -512,7 +512,7 @@ namespace Monetizr.SDK.Core
         {
             if (Instance._uiController.HasActivePanel(PanelId.StartNotification))
             {
-                Log.Print($"ShowStartupNotification ContainsKey(PanelId.StartNotification) {placement}");
+                MonetizrLog.Print($"ShowStartupNotification ContainsKey(PanelId.StartNotification) {placement}");
                 return;
             }
 
@@ -545,19 +545,19 @@ namespace Monetizr.SDK.Core
                 forceSkip = mission.campaignServerSettings.GetParam("no_start_level_notifications") == "true";
 
                 if (forceSkip)
-                    Log.Print($"No notifications on level start defined on server-side");
+                    MonetizrLog.Print($"No notifications on level start defined on server-side");
             }
             else if (placement == NotificationPlacement.MainMenuShowNotification)
             {
                 forceSkip = mission.campaignServerSettings.GetParam("no_main_menu_notifications") == "true";
 
                 if (forceSkip)
-                    Log.Print($"No notifications in main menu defined on server-side");
+                    MonetizrLog.Print($"No notifications in main menu defined on server-side");
             }
 
             if (mission.campaignServerSettings.GetParam("no_campaigns_notification") == "true")
             {
-                Log.Print($"No notifications defined on serverside");
+                MonetizrLog.Print($"No notifications defined on serverside");
                 forceSkip = true;
             }
 
@@ -566,7 +566,7 @@ namespace Monetizr.SDK.Core
             if (mission.amountOfNotificationsSkipped <=
                 mission.campaignServerSettings.GetIntParam("amount_of_skipped_notifications"))
             {
-                Log.Print($"Amount of skipped notifications less then {mission.amountOfNotificationsSkipped}");
+                MonetizrLog.Print($"Amount of skipped notifications less then {mission.amountOfNotificationsSkipped}");
                 forceSkip = true;
             }
 
@@ -574,7 +574,7 @@ namespace Monetizr.SDK.Core
             var currentAmount = Instance.localSettings.GetSetting(mission.campaignId).amountNotificationsShown;
             if (currentAmount > serverMaxAmount)
             {
-                Log.Print($"Startup notification impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
+                MonetizrLog.Print($"Startup notification impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
                 forceSkip = true;
             }
 
@@ -584,7 +584,7 @@ namespace Monetizr.SDK.Core
 
             if (lastTime < serverDelay)
             {
-                Log.Print($"Startup notification last show time less then {serverDelay}");
+                MonetizrLog.Print($"Startup notification last show time less then {serverDelay}");
                 forceSkip = true;
             }
 
@@ -598,7 +598,7 @@ namespace Monetizr.SDK.Core
             Instance.localSettings.GetSetting(mission.campaignId).lastTimeShowNotification = DateTime.Now;
             Instance.localSettings.GetSetting(mission.campaignId).amountNotificationsShown++;
             Instance.localSettings.SaveData();
-            Log.Print($"Notification shown {currentAmount}/{serverMaxAmount} last time: {lastTime}/{serverDelay}");
+            MonetizrLog.Print($"Notification shown {currentAmount}/{serverMaxAmount} last time: {lastTime}/{serverDelay}");
             ShowNotification(onComplete, mission, PanelId.StartNotification);
         }
 
@@ -627,41 +627,41 @@ namespace Monetizr.SDK.Core
         public static void EngagedUserAction(OnComplete onComplete)
         {
             isUsingEngagedUserAction = true;
-            Log.Print("Started EngageUserAction");
+            MonetizrLog.Print("Started EngageUserAction");
 
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
             var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance?.GetActiveCampaign());
 
             if (Instance.GetActiveCampaign() == null)
             {
-                Log.Print("SKIPPED - NO CAMPAIGN");
+                MonetizrLog.Print("SKIPPED - NO CAMPAIGN");
             }
 
             if (missions == null || missions.Count == 0)
             {
-                Log.Print("SKIPPED - NO MISSIONS");
+                MonetizrLog.Print("SKIPPED - NO MISSIONS");
                 onComplete(OnCompleteStatus.Skipped);
                 return;
             }
 
             if (missions[0].amountOfRVOffersShown == 0)
             {
-                Log.Print("SKIPPED - NO RV");
+                MonetizrLog.Print("SKIPPED - NO RV");
                 onComplete(OnCompleteStatus.Skipped);
                 return;
             }
 
             missions[0].amountOfRVOffersShown--;
 
-            MonetizrManager.ShowRewardCenter(null, (bool p) =>
+            MonetizrManager.ShowRewardCenter(null, (Action<bool>)((bool p) =>
             {
-                Log.Print("ShowRewardCenter OnComplete!");
+                MonetizrLog.Print((object)"ShowRewardCenter OnComplete!");
 
                 onComplete(hasCompletedEngagedUserAction ? OnCompleteStatus.Completed : OnCompleteStatus.Skipped);
                 hasCompletedEngagedUserAction = false;
 
                 //onComplete(p ? OnCompleteStatus.Skipped : OnCompleteStatus.Completed);
-            });
+            }));
         }
 
         public static void OnEngagedUserActionComplete ()
@@ -678,7 +678,7 @@ namespace Monetizr.SDK.Core
 
             if (campaign == null)
             {
-                Log.Print("SKIPPED - No campaigns.");
+                MonetizrLog.Print("SKIPPED - No campaigns.");
                 onComplete?.Invoke(true);
                 return;
             }
@@ -688,7 +688,7 @@ namespace Monetizr.SDK.Core
 
             if (missions.Count == 0)
             {
-                Log.Print("SKIPPED - No missions.");
+                MonetizrLog.Print("SKIPPED - No missions.");
                 onComplete?.Invoke(true);
                 return;
             }
@@ -698,13 +698,13 @@ namespace Monetizr.SDK.Core
 
             if (missions.Count == 1 && !showRewardCenterForOneMission)
             {
-                Log.Print($"Only one mission available and RewardCenter.show_for_one_mission is false");
+                MonetizrLog.Print($"Only one mission available and RewardCenter.show_for_one_mission is false");
 
                 Instance._PressSingleMission(onComplete, m);
                 return;
             }
 
-            Log.PrintV($"ShowRewardCenter from campaign: {m?.campaignId}");
+            MonetizrLog.Print($"ShowRewardCenter from campaign: {m?.campaignId}");
             string uiItemPrefab = "MonetizrRewardCenterPanel2";
             Instance._uiController.ShowPanelFromPrefab(uiItemPrefab, PanelId.RewardCenter, onComplete, true, m);
         }
@@ -878,7 +878,7 @@ namespace Monetizr.SDK.Core
 
             if (campaign == null)
             {
-                Log.Print($"No active campaigns for teaser");
+                MonetizrLog.Print($"No active campaigns for teaser");
                 return;
             }
 
@@ -886,7 +886,7 @@ namespace Monetizr.SDK.Core
 
             if (Instance.missionsManager.GetActiveMissionsNum(campaign) == 0)
             {
-                Log.Print($"No active missions for teaser");
+                MonetizrLog.Print($"No active missions for teaser");
                 return;
             }
 
@@ -894,7 +894,7 @@ namespace Monetizr.SDK.Core
                 !campaign.HasAsset(AssetsType.TeaserGifPathString) &&
                 !campaign.HasAsset(AssetsType.BrandRewardLogoSprite))
             {
-                Log.Print("No texture for tiny teaser!");
+                MonetizrLog.Print("No texture for tiny teaser!");
                 return;
             }
 
@@ -904,11 +904,11 @@ namespace Monetizr.SDK.Core
             var currentAmount = Instance.localSettings.GetSetting(campaign.id).amountTeasersShown;
             if (currentAmount > serverMaxAmount)
             {
-                Log.Print($"Teaser impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
+                MonetizrLog.Print($"Teaser impressions reached maximum limit {currentAmount}/{serverMaxAmount}");
                 return;
             }
 
-            Log.Print($"Teaser shown {currentAmount}/{serverMaxAmount}");
+            MonetizrLog.Print($"Teaser shown {currentAmount}/{serverMaxAmount}");
             Instance.localSettings.GetSetting(campaign.id).amountTeasersShown++;
             Instance.localSettings.SaveData();
             int uiVersion = 4;
@@ -931,18 +931,18 @@ namespace Monetizr.SDK.Core
 
             if (isSkipped)
             {
-                Log.PrintV("OnClaimRewardComplete");
+                MonetizrLog.Print("OnClaimRewardComplete");
                 onComplete?.Invoke(true);
                 return;
             }
 
-            Log.PrintV($"OnClaimRewardComplete for {mission.serverId}");
+            MonetizrLog.Print($"OnClaimRewardComplete for {mission.serverId}");
 
             ShowCongratsNotification((bool _) =>
             {
                 bool updateUI = false;
 
-                Log.PrintV($"OnClaimRewardComplete --> ShowCongratsNotification {mission.serverId}");
+                MonetizrLog.Print($"OnClaimRewardComplete --> ShowCongratsNotification {mission.serverId}");
 
                 if (mission.campaignServerSettings.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
                 {
@@ -1028,7 +1028,7 @@ namespace Monetizr.SDK.Core
             if (camp != _activeCampaignId) _isMissionsIsOutdated = true;
             _activeCampaignId = camp;
             closeRewardCenterAfterEveryMission = camp.serverSettings.GetBoolParam("RewardCenter.close_after_mission_completion", closeRewardCenterAfterEveryMission);
-            Log.PrintV($"Active campaign: {_activeCampaignId}");
+            MonetizrLog.Print($"Active campaign: {_activeCampaignId}");
         }
 
         public bool HasActiveCampaign()
@@ -1054,7 +1054,7 @@ namespace Monetizr.SDK.Core
             }
             catch (Exception e)
             {
-                Log.PrintError($"Exception in ConnectionsClient.Claim for {campaign.id}\n{e}");
+                MonetizrLog.PrintError($"Exception in ConnectionsClient.Claim for {campaign.id}\n{e}");
                 onFailure.Invoke();
             }
         }

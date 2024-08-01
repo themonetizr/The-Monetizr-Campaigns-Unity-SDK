@@ -95,7 +95,7 @@ namespace Monetizr.SDK.UI
                     this,
                     isSkipped ? MonetizrManager.EventType.ButtonPressSkip : MonetizrManager.EventType.ButtonPressOk,
                     additionalEventValues);
-                Log.Print("SETACTIVE - IS SKIPPED: " + isSkipped);
+                MonetizrLog.Print("SETACTIVE - IS SKIPPED: " + isSkipped);
             }
 
             if (active)
@@ -169,7 +169,7 @@ namespace Monetizr.SDK.UI
             FinalizePanel(panelId);
             if (!SendImpressionEventManually()) MonetizrManager.Analytics?.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
             gameObject.SetActive(false);
-            //Log.Print("ONANIMATIONHIDE - IS SKIPPED: " + isSkipped);
+            //MonetizrLog.Print("ONANIMATIONHIDE - IS SKIPPED: " + isSkipped);
             _onComplete?.Invoke(isSkipped);
         }
 

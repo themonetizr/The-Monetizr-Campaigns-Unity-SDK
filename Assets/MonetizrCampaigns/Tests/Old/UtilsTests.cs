@@ -135,7 +135,7 @@ namespace Monetizr.Tests
 
             foreach (var td in testData)
             {
-                //Debug.Log($"{td.Item2}");
+                //Debug.MonetizrLog($"{td.Item2}");
                 Assert.AreEqual(td.Item1, MissionsManager.ServerMissionsHelper.CreateFromJson(td.Item2).missions.Count);
             }
             

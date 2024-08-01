@@ -70,7 +70,7 @@ namespace Monetizr.SDK.Debug
 
         public void DropdownValueChanged()
         {
-            Log.PrintV("Dropdown: " + apiKeysList.value);
+            MonetizrLog.Print("Dropdown: " + apiKeysList.value);
 
         }
         public void ResetLocalClaimData()

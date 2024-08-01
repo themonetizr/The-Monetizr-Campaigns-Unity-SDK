@@ -115,7 +115,7 @@ namespace Monetizr.Tests
 
             //------
 
-            //Log.Print("done");
+            //MonetizrLog.Print("done");
 
             yield return null;
         }

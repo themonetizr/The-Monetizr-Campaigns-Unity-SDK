@@ -240,7 +240,7 @@ namespace Monetizr.SDK.Utils
             }
             catch (Exception e)
             {
-                Log.PrintError($"Exception in ExtractAllToDirectory. Extracting {zipPath} to directory {extractPath} failed with error\n{e}");
+                MonetizrLog.PrintError($"Exception in ExtractAllToDirectory. Extracting {zipPath} to directory {extractPath} failed with error\n{e}");
 
                 return false;
             }
@@ -268,30 +268,30 @@ namespace Monetizr.SDK.Utils
 
                 if (cbCount < 0)
                 {
-                    Log.PrintV("Curly bracket problem");
+                    MonetizrLog.Print("Curly bracket problem");
                     return false;
                 }
 
                 if (sbCount < 0)
                 {
-                    Log.PrintV("Square bracket problem");
+                    MonetizrLog.Print("Square bracket problem");
                     return false;
                 }
             }
 
             if (quoteCount % 2 != 0)
             {
-                Log.PrintV($"Quote problem {quoteCount}");
+                MonetizrLog.Print($"Quote problem {quoteCount}");
             }
 
             if (cbCount != 0)
             {
-                Log.PrintV("Curly bracket problem");
+                MonetizrLog.Print("Curly bracket problem");
             }
 
             if (sbCount != 0)
             {
-                Log.PrintV("Square bracket problem");
+                MonetizrLog.Print("Square bracket problem");
             }
 
             return quoteCount % 2 == 0 && cbCount == 0 && sbCount == 0;

@@ -85,7 +85,7 @@ namespace Monetizr.SDK.Missions
 
             if (!hasSomething && !campaign.serverSettings.GetBoolParam("programmatic",false))
             {
-                Log.PrintWarning($"campaign {campaign} has no video asset!");
+                MonetizrLog.PrintWarning($"campaign {campaign} has no video asset!");
                 return null;
             }
             
@@ -342,7 +342,7 @@ namespace Monetizr.SDK.Missions
                 if (!m.hasUnitySurvey)
 #if UNITY_EDITOR_WIN
                 {
-                    Log.Print($"Completing survey {m.surveyUrl} on windows");
+                    MonetizrLog.Print($"Completing survey {m.surveyUrl} on windows");
                     onSurveyComplete.Invoke(false);
                 }
 #else
@@ -484,7 +484,7 @@ namespace Monetizr.SDK.Missions
 
             string serverMissionsJson = campaign.serverSettings.GetParam("custom_missions");
 
-            Log.PrintV($"Predefined missions from settings: {serverMissionsJson}");
+            MonetizrLog.Print($"Predefined missions from settings: {serverMissionsJson}");
 
             ServerMissionsHelper ic = null;
 
@@ -494,7 +494,7 @@ namespace Monetizr.SDK.Missions
             }
             catch (Exception e)
             {
-                Log.PrintError($"Exception in CreateMissionsFromCampaign with json {serverMissionsJson}\n{e}");
+                MonetizrLog.PrintError($"Exception in CreateMissionsFromCampaign with json {serverMissionsJson}\n{e}");
             }
 
             if (ic == null)
@@ -502,7 +502,7 @@ namespace Monetizr.SDK.Missions
 
             predefinedSponsoredMissions = ic.CreateMissionDescriptions(predefinedSponsoredMissions, campaign.serverSettings);
 
-            Log.Print($"Found {predefinedSponsoredMissions.Count} predefined missions in campaign");
+            MonetizrLog.Print($"Found {predefinedSponsoredMissions.Count} predefined missions in campaign");
 
             for (int i = 0; i < predefinedSponsoredMissions.Count; i++)
             {
@@ -522,12 +522,12 @@ namespace Monetizr.SDK.Missions
                     }
                     else
                     {
-                        Log.PrintError($"Can't create campaign with type {missionDescription.missionType}");
+                        MonetizrLog.PrintError($"Can't create campaign with type {missionDescription.missionType}");
                     }
                 }
                 else
                 {
-                    Log.PrintV($"Found mission {campaign.id}:{i} in local data");
+                    MonetizrLog.Print($"Found mission {campaign.id}:{i} in local data");
                 }
 
                 if (m == null)
@@ -576,7 +576,7 @@ namespace Monetizr.SDK.Missions
 
             }
 
-            Log.Print($"Loaded {missions.Count} missions from the campaign");
+            MonetizrLog.Print($"Loaded {missions.Count} missions from the campaign");
 
             UpdateMissionsActivity(null);
         }
@@ -667,7 +667,7 @@ namespace Monetizr.SDK.Missions
             bool isUpdateNeeded = finishedMission != null;
 
             if (finishedMission != null)
-                Log.PrintV($"-----UpdateMissionsActivity for {finishedMission.serverId}");
+                MonetizrLog.Print($"-----UpdateMissionsActivity for {finishedMission.serverId}");
 
             foreach (var m in missions)
             {
@@ -682,11 +682,11 @@ namespace Monetizr.SDK.Missions
 
                 bool hasActivateAfter = m.activateAfter.Count > 0;
 
-                Log.PrintV($"-----Updating activity for {m.serverId} has {hasActivateAfter} {m.isDeactivatedByCondition}");
+                MonetizrLog.Print($"-----Updating activity for {m.serverId} has {hasActivateAfter} {m.isDeactivatedByCondition}");
 
                 if (hasActivateAfter && m.activateAfter.FindIndex(_id => _id == m.serverId) > 0)
                 {
-                    Log.PrintWarning($"Mission id {m.serverId} activate after itself!");
+                    MonetizrLog.PrintWarning($"Mission id {m.serverId} activate after itself!");
                     hasActivateAfter = false;
                 }
 
@@ -722,7 +722,7 @@ namespace Monetizr.SDK.Missions
                     {
                         shouldBeDisabled = true;
 
-                        Log.PrintV($"------Mission {id} disabled because {_m.serverId} is not active");
+                        MonetizrLog.Print($"------Mission {id} disabled because {_m.serverId} is not active");
                     }
                 }
 

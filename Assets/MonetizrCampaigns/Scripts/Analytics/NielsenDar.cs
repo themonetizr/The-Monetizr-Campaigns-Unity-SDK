@@ -27,7 +27,7 @@ namespace Monetizr.SDK.Analytics
         {
             string darTagUrl = ReplaceMacros(serverCampaign.dar_tag, serverCampaign, type, "");
 
-            Log.PrintV($"DAR: {darTagUrl}");
+            MonetizrLog.Print($"DAR: {darTagUrl}");
 
 #if !UNITY_EDITOR
             UnityWebRequest www = UnityWebRequest.Get(darTagUrl);

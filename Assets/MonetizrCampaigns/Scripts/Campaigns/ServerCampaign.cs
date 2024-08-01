@@ -139,7 +139,7 @@ namespace Monetizr.SDK.Campaigns
         {
             if (assetsDict.ContainsKey(t))
             {
-                Log.PrintWarning($"An item {t} already exist in the campaign {id}");
+                MonetizrLog.PrintWarning($"An item {t} already exist in the campaign {id}");
             }
 
             MonetizrManager.HoldResource(asset);
@@ -157,7 +157,7 @@ namespace Monetizr.SDK.Campaigns
             
             if (AssetsSystemTypes[t] != typeof(T))
             {
-                Log.PrintError($"AssetsType {t} and {typeof(T)} do not match!");
+                MonetizrLog.PrintError($"AssetsType {t} and {typeof(T)} do not match!");
                 return false;
             }
 
@@ -206,7 +206,7 @@ namespace Monetizr.SDK.Campaigns
         {
             if (asset.url == null || asset.url.Length == 0)
             {
-                Log.PrintWarning($"Resource {texture} {sprite} has no url in path!");
+                MonetizrLog.PrintWarning($"Resource {texture} {sprite} has no url in path!");
                 this.isLoaded = false;
                 return;
             }
@@ -227,11 +227,11 @@ namespace Monetizr.SDK.Campaigns
 
                 if (data == null)
                 {
-                    Log.PrintWarning($"Loading {asset.url} failed!");
+                    MonetizrLog.PrintWarning($"Loading {asset.url} failed!");
 
                     if (!isOptional)
                     {
-                        Log.PrintError($"Campaign loading will fail, because asset is required!");
+                        MonetizrLog.PrintError($"Campaign loading will fail, because asset is required!");
 
                         this.loadingError = $"Nothing downloaded with a path {asset.url}";
                         this.isLoaded = false;
@@ -274,7 +274,7 @@ namespace Monetizr.SDK.Campaigns
         {
             if (string.IsNullOrEmpty(asset.url))
             {
-                Log.PrintWarning($"Malformed URL for {fileString} {this.id}");
+                MonetizrLog.PrintWarning($"Malformed URL for {fileString} {this.id}");
                 return;
             }
 
@@ -295,21 +295,21 @@ namespace Monetizr.SDK.Campaigns
                 zipFolder = path;
                 fileToCheck = zipFolder + "/index.html";
 
-                Log.PrintV($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
+                MonetizrLog.Print($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
             }
 
             byte[] data = null;
-            Log.PrintV($"PreloadAssetToCache: {fname} {fileToCheck}");
+            MonetizrLog.Print($"PreloadAssetToCache: {fname} {fileToCheck}");
 
             if (!File.Exists(fileToCheck))
             {
-                Log.PrintV($"Downloading archive {asset.url}");
+                MonetizrLog.Print($"Downloading archive {asset.url}");
 
                 data = await New_NetworkingManager.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
-                    Log.PrintWarning($"Nothing downloaded with an url {asset.url}!");
+                    MonetizrLog.PrintWarning($"Nothing downloaded with an url {asset.url}!");
 
                     if (required)
                     {
@@ -320,12 +320,12 @@ namespace Monetizr.SDK.Campaigns
                     return;
                 }
 
-                Log.PrintV($"WriteAllBytes to {fpath} size: {data.Length}");
+                MonetizrLog.Print($"WriteAllBytes to {fpath} size: {data.Length}");
                 File.WriteAllBytes(fpath, data);
 
                 if (zipFolder != null)
                 {
-                    Log.PrintV("Extracting to: " + zipFolder);
+                    MonetizrLog.Print("Extracting to: " + zipFolder);
                     var unzipResult = MonetizrUtils.ExtractAllToDirectory(fpath, zipFolder);
 
                     File.Delete(fpath);
@@ -355,18 +355,18 @@ namespace Monetizr.SDK.Campaigns
                 fpath = $"{path}/{asset.mainAssetName}";
             }
 
-            Log.PrintV($"Resource {fileString} {fpath}");
+            MonetizrLog.Print($"Resource {fileString} {fpath}");
             asset.localFullPath = fpath;
             SetAsset<string>(fileString, fpath);
         }
 
         internal async Task LoadCampaignAssets()
         {
-            Log.Print($"Campaign path: {Application.persistentDataPath}/{id}");
+            MonetizrLog.Print($"Campaign path: {Application.persistentDataPath}/{id}");
 
             foreach (var asset in assets)
             {
-                Log.PrintV($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
+                MonetizrLog.Print($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
 
                 switch (asset.type)
                 {
@@ -511,7 +511,7 @@ namespace Monetizr.SDK.Campaigns
         {
             string zipFolder = GetCampaignPath($"{asset.fpath}");
             string indexPath = $"{zipFolder}/index.html";
-            Log.PrintV($"{zipFolder}");
+            MonetizrLog.Print($"{zipFolder}");
             
             if (!Directory.Exists(zipFolder))
             {
@@ -525,7 +525,7 @@ namespace Monetizr.SDK.Campaigns
 
             if (data == null)
             {
-                Log.PrintError("Can't download video player for programmatic");
+                MonetizrLog.PrintError("Can't download video player for programmatic");
                 return;
             }
 
@@ -537,7 +537,7 @@ namespace Monetizr.SDK.Campaigns
 
             if (!File.Exists(indexPath))
             {
-                Log.PrintError($"Main html for video player {indexPath} doesn't exist");
+                MonetizrLog.PrintError($"Main html for video player {indexPath} doesn't exist");
             }
         }
 
@@ -549,7 +549,7 @@ namespace Monetizr.SDK.Campaigns
 
             string indexPath = $"{zipFolder}/index.html";
 
-            Log.PrintV($"{campPath} {zipFolder}");
+            MonetizrLog.Print($"{campPath} {zipFolder}");
             
             if (!Directory.Exists(zipFolder))
             {
@@ -647,7 +647,7 @@ namespace Monetizr.SDK.Campaigns
             
             res = res.Insert(res.Length - 1, campaignSettingsJson);
                         
-            Log.PrintV($"VAST Settings: {res}");
+            MonetizrLog.Print($"VAST Settings: {res}");
 
             return res;
         }
@@ -685,8 +685,8 @@ namespace Monetizr.SDK.Campaigns
 
         internal void PostCampaignLoad()
         {
-            Log.PrintV($"Content: {content}");
-            Log.PrintV($"Adm: {adm}");
+            MonetizrLog.Print($"Content: {content}");
+            MonetizrLog.Print($"Adm: {adm}");
 
             if (string.IsNullOrEmpty(content)) return;
             
@@ -694,7 +694,7 @@ namespace Monetizr.SDK.Campaigns
 
             serverSettings = new SettingsDictionary<string, string>(cd);
 
-            Log.Print($"Loaded campaign: {id}");
+            MonetizrLog.Print($"Loaded campaign: {id}");
         }
         
     }

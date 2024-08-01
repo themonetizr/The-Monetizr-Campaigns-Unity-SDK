@@ -23,7 +23,7 @@ namespace Monetizr.SDK.New
 
             if (uwr.isNetworkError || uwr.isHttpError)
             {
-                Log.PrintError($"Network error {uwr.error} with {url}");
+                MonetizrLog.PrintError($"Network error {uwr.error} with {url}");
                 onDownloadFailed?.Invoke();
                 return null;
             }

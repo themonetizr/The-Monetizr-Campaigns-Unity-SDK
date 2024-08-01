@@ -133,12 +133,12 @@ namespace Monetizr.SDK.UI
 
             var surveysContent = m.surveyUrl.Replace('\'', '\"');
 
-            Log.PrintV($"{m.surveyId}");
+            MonetizrLog.Print($"{m.surveyId}");
 
             if (!MonetizrUtils.ValidateJson(surveysContent))
             {
-                Log.PrintError($"Json isn't properly formatted.");
-                Log.PrintWarning($"{surveysContent}");
+                MonetizrLog.PrintError($"Json isn't properly formatted.");
+                MonetizrLog.PrintWarning($"{surveysContent}");
             }
 
             surveys = JsonUtility.FromJson<Surveys>(surveysContent);
@@ -150,7 +150,7 @@ namespace Monetizr.SDK.UI
 
             if (currentSurvey == null)
             {
-                Log.PrintError($"{m.surveyId} not found in surveys!");
+                MonetizrLog.PrintError($"{m.surveyId} not found in surveys!");
                 _OnSkipButton();
                 return false;
             }

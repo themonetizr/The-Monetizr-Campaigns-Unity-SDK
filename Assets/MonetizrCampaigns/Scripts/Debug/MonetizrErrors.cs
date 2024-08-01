@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Monetizr.SDK.Core
+namespace Monetizr.SDK.Debug
 {
     internal static class MonetizrErrors
     {

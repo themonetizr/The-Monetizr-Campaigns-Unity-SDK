@@ -87,7 +87,7 @@ namespace Monetizr.SDK.GIF
         {
             if (string.IsNullOrEmpty(url))
             {
-                Log.PrintError("URL is empty.");
+                MonetizrLog.PrintError("URL is empty.");
                 yield break;
             }
 
@@ -100,7 +100,7 @@ namespace Monetizr.SDK.GIF
 
             if (state == GifState.Loading)
             {
-                Log.PrintWarning("Already loading.");
+                MonetizrLog.PrintWarning("Already loading.");
                 yield break;
             }
 
@@ -108,7 +108,7 @@ namespace Monetizr.SDK.GIF
 
             if (bytes == null)
             {
-                Log.PrintError("File load error.\n");
+                MonetizrLog.PrintError("File load error.\n");
                 state = GifState.None;
                 yield break;
             }
@@ -187,12 +187,12 @@ namespace Monetizr.SDK.GIF
         {
             if (state != GifState.Ready)
             {
-                Log.PrintWarning("State is not READY.");
+                MonetizrLog.PrintWarning("State is not READY.");
                 return;
             }
             if (m_rawImage == null || m_gifTextureList == null || m_gifTextureList.Count <= 0)
             {
-                Log.PrintError($"Raw Image {m_rawImage} or GIF Texture list {m_gifTextureList} is null or empty {m_gifTextureList.Count}.");
+                MonetizrLog.PrintError($"Raw Image {m_rawImage} or GIF Texture list {m_gifTextureList} is null or empty {m_gifTextureList.Count}.");
                 return;
             }
             state = GifState.Playing;
@@ -206,7 +206,7 @@ namespace Monetizr.SDK.GIF
         {
             if (state != GifState.Playing && state != GifState.Pause)
             {
-                Log.PrintWarning("State is not Playing and Pause.");
+                MonetizrLog.PrintWarning("State is not Playing and Pause.");
                 return;
             }
             state = GifState.Ready;
@@ -216,7 +216,7 @@ namespace Monetizr.SDK.GIF
         {
             if (state != GifState.Playing)
             {
-                Log.PrintWarning("State is not Playing.");
+                MonetizrLog.PrintWarning("State is not Playing.");
                 return;
             }
             state = GifState.Pause;
@@ -226,7 +226,7 @@ namespace Monetizr.SDK.GIF
         {
             if (state != GifState.Pause)
             {
-                Log.PrintWarning("State is not Pause.");
+                MonetizrLog.PrintWarning("State is not Pause.");
                 return;
             }
             state = GifState.Playing;

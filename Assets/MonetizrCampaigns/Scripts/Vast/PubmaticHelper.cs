@@ -191,7 +191,7 @@ namespace Monetizr.SDK.VAST
 
             if (string.IsNullOrEmpty(openRtbUri))
             {
-                Log.PrintV($"No programmatic endpoint defined! Programmatic disabled!");
+                MonetizrLog.Print($"No programmatic endpoint defined! Programmatic disabled!");
                 return false;
             }
 
@@ -229,15 +229,15 @@ namespace Monetizr.SDK.VAST
 
             if (string.IsNullOrEmpty(openRtbRequest))
             {
-                Log.PrintError($"Can't create openRTB request for campaign {currentCampaign}!");
+                MonetizrLog.PrintError($"Can't create openRTB request for campaign {currentCampaign}!");
                 return false;
             }
 
             openRtbRequest = MonetizrUtils.UnescapeString(openRtbRequest);
             openRtbRequest = NielsenDar.ReplaceMacros(openRtbRequest, currentCampaign, AdPlacement.Html5, userAgent);
 
-            Log.PrintV($"OpenRTB request: {openRtbRequest}");
-            Log.PrintV($"Requesting OpenRTB campaign with url: {openRtbUri}");
+            MonetizrLog.Print($"OpenRTB request: {openRtbRequest}");
+            MonetizrLog.Print($"Requesting OpenRTB campaign with url: {openRtbUri}");
 
             var requestMessage = MonetizrHttpClient.GetOpenRtbRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
             var response = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
@@ -248,7 +248,7 @@ namespace Monetizr.SDK.VAST
                 if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
                     httpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
 
-                Log.PrintV($"Response unsuccessful with content: {res}");
+                MonetizrLog.Print($"Response unsuccessful with content: {res}");
                 return false;
             }
 
@@ -260,11 +260,11 @@ namespace Monetizr.SDK.VAST
 
             if (string.IsNullOrEmpty(adm)) return false;
 
-            Log.PrintV($"Open RTB response loaded with adm: {adm}");
+            MonetizrLog.Print($"Open RTB response loaded with adm: {adm}");
 
             if (!adm.Contains("<VAST"))
             {
-                Log.PrintError($"Open RTB response is not a VAST");
+                MonetizrLog.PrintError($"Open RTB response is not a VAST");
                 return false;
             }
             
@@ -272,11 +272,11 @@ namespace Monetizr.SDK.VAST
 
             if (!initializeResult)
             {
-                Log.PrintV($"InitializeServerCampaignForProgrammatic failed.");
+                MonetizrLog.Print($"InitializeServerCampaignForProgrammatic failed.");
                 return false;
             }
 
-            Log.PrintV($"GetOpenRTBResponseForCampaign {currentCampaign.id} successfully loaded.");
+            MonetizrLog.Print($"GetOpenRTBResponseForCampaign {currentCampaign.id} successfully loaded.");
 
             if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
             {

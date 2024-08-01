@@ -123,7 +123,7 @@ namespace Monetizr.SDK.Minigames
             if (_disabledClick || _gameItems[item].isOpened)
                 stats.amountOfTapsOnDisabledCells++;
 
-            Log.PrintV(stats.ToString());
+            MonetizrLog.Print(stats.ToString());
 
             if (_disabledClick)
                 return;
@@ -131,7 +131,7 @@ namespace Monetizr.SDK.Minigames
             if (_gameItems[item].isOpened)
                 return;
 
-            Log.PrintV("click" + item);
+            MonetizrLog.Print("click" + item);
 
             if (_gameItems[item].value != 0)
                 stats.amountOfTapsOnKnownCells++;
@@ -167,7 +167,7 @@ namespace Monetizr.SDK.Minigames
 
             _gameItems[item].isFullyOpened = true;
             
-            Log.PrintV($"OnOpenDone {item} {_gameItems[item].value}");
+            MonetizrLog.Print($"OnOpenDone {item} {_gameItems[item].value}");
 
             if (_amountOpened < 2)
                 return;
@@ -223,7 +223,7 @@ namespace Monetizr.SDK.Minigames
         internal override void OnCloseDone(int item)
         {
             _gameItems[item].isOpened = false;
-            Log.Print("OnCloseDone" + item);
+            MonetizrLog.Print("OnCloseDone" + item);
         }
         
         internal override void FinalizePanel(PanelId id)

@@ -283,7 +283,7 @@ namespace Monetizr.SDK.VAST
         {
             if (adVerifications.IsNullOrEmpty())
             {
-                Log.PrintWarning("AdVerifications is not defined in the VAST xml!");
+                MonetizrLog.PrintWarning("AdVerifications is not defined in the VAST xml!");
                 return;
             }
 
@@ -578,7 +578,7 @@ namespace Monetizr.SDK.VAST
 
                 if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
                 {
-                    Log.PrintV($"MediaFile is null in Linear creative");
+                    MonetizrLog.Print($"MediaFile is null in Linear creative");
                     return;
                 }
 
@@ -626,7 +626,7 @@ namespace Monetizr.SDK.VAST
                         });
                 }
 
-                Log.PrintV($"Chosen video file - type:{mediaFile.type} br:{mediaFile.bitrate} w:{mediaFile.width} h:{mediaFile.height} ");
+                MonetizrLog.Print($"Chosen video file - type:{mediaFile.type} br:{mediaFile.bitrate} w:{mediaFile.width} h:{mediaFile.height} ");
 
                 string value = mediaFile.Value;
                 string type = mediaFile.type;
@@ -704,7 +704,7 @@ namespace Monetizr.SDK.VAST
 
                     if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
                     {
-                        Log.PrintV($"MediaFile is null in Linear creative");
+                        MonetizrLog.Print($"MediaFile is null in Linear creative");
                         return false;
                     }
 
@@ -780,7 +780,7 @@ namespace Monetizr.SDK.VAST
 
             if (vastData == null)
             {
-                Log.PrintError("Vast isn't loaded");
+                MonetizrLog.PrintError("Vast isn't loaded");
                 return;
             }
 
@@ -809,7 +809,7 @@ namespace Monetizr.SDK.VAST
             if (string.IsNullOrEmpty(adItem.WrapperAdTagUri))
                 return;
 
-            Log.PrintV($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
+            MonetizrLog.Print($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
 
             var result = await MonetizrHttpClient.DownloadUrlAsString(new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri));
 
@@ -828,7 +828,7 @@ namespace Monetizr.SDK.VAST
 
             if (vastData == null)
             {
-                Log.PrintError("Vast isn't loaded");
+                MonetizrLog.PrintError("Vast isn't loaded");
                 return false;
             }
 
@@ -847,7 +847,7 @@ namespace Monetizr.SDK.VAST
             if (!string.IsNullOrEmpty(adItem.WrapperAdTagUri))
             {
                 string url = adItem.WrapperAdTagUri;
-                Log.PrintV($"Loading wrapper with the url {url}");
+                MonetizrLog.Print($"Loading wrapper with the url {url}");
                 HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
                 httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
                 
@@ -855,7 +855,7 @@ namespace Monetizr.SDK.VAST
 
                 if (!result.isSuccess)
                 {
-                    Log.PrintV($"Can't load wrapper with the url {url}");
+                    MonetizrLog.Print($"Can't load wrapper with the url {url}");
                     return false;
                 }
 
@@ -867,7 +867,7 @@ namespace Monetizr.SDK.VAST
 
         private async Task PrepareVideoAsset(ServerCampaign serverCampaign)
         {
-            Log.PrintV("Loading video player");
+            MonetizrLog.Print("Loading video player");
 
             if (!serverCampaign.TryGetAssetInList(new List<string>() { "html", "video" }, out var videoAsset))
             {
@@ -882,7 +882,7 @@ namespace Monetizr.SDK.VAST
             if (adParameters == null)
                 return;
 
-            Log.PrintV(adParameters.Value);
+            MonetizrLog.Print(adParameters.Value);
             string adp = adParameters.Value;
             adp = adp.Replace("\n", "");
             var parsedDict = MonetizrUtils.ParseContentString(adp);
@@ -890,7 +890,7 @@ namespace Monetizr.SDK.VAST
             foreach (var i in parsedDict)
             {
                 serverCampaign.serverSettings.Add(i.Key, i.Value);
-                Log.PrintV($"Additional settings from AdParameters [{i.Key}:{i.Value}]");
+                MonetizrLog.Print($"Additional settings from AdParameters [{i.Key}:{i.Value}]");
             }
         }
 
@@ -898,7 +898,7 @@ namespace Monetizr.SDK.VAST
         {
             string campPath = Application.persistentDataPath + "/" + serverCampaign.id;
             string zipFolder = campPath + "/" + videoAsset.fpath;
-            Log.PrintV($"{campPath} {zipFolder}");
+            MonetizrLog.Print($"{campPath} {zipFolder}");
             if (!Directory.Exists(zipFolder)) Directory.CreateDirectory(zipFolder);
             byte[] data = await New_NetworkingManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
             File.WriteAllBytes(zipFolder + "/html.zip", data);
@@ -908,7 +908,7 @@ namespace Monetizr.SDK.VAST
 
             if (!File.Exists(indexPath))
             {
-                Log.PrintError("index.html in video player is not exist!!!");
+                MonetizrLog.PrintError("index.html in video player is not exist!!!");
             }
             else
             {
@@ -940,7 +940,7 @@ namespace Monetizr.SDK.VAST
 
             if (data == null)
             {
-                Log.PrintWarning($"InitializeOMSDK failed! Download of {url} failed!");
+                MonetizrLog.PrintWarning($"InitializeOMSDK failed! Download of {url} failed!");
                 return false;
             }
 
@@ -950,8 +950,8 @@ namespace Monetizr.SDK.VAST
 
         internal void InitializeOMSDK(string vastAdVerificationParams)
         {
-            Log.PrintV($"InitializeOMSDK with {vastAdVerificationParams}");
-            Log.PrintV($"Service content: {_omidJsServiceContent}");
+            MonetizrLog.Print($"InitializeOMSDK with {vastAdVerificationParams}");
+            MonetizrLog.Print($"Service content: {_omidJsServiceContent}");
 
             UniWebViewInterface.InitOMSDK(vastAdVerificationParams, _omidJsServiceContent);
         }

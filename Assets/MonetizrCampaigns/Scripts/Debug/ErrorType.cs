@@ -1,4 +1,4 @@
-﻿namespace Monetizr.SDK.Core
+﻿namespace Monetizr.SDK.Debug
 {
     internal enum ErrorType
     {

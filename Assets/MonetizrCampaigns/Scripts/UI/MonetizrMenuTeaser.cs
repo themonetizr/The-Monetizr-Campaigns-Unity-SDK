@@ -121,7 +121,7 @@ namespace Monetizr.SDK.UI
             rewardText.gameObject.SetActive(true);
             string rewardTitle = MonetizrManager.gameRewards[m.rewardType].title;
             rewardText.text = rewardText.text.Replace("%ingame_reward%", $"{m.reward} {rewardTitle}");
-            Log.PrintV($"PreparePanel teaser: {m.campaignId} {m}");
+            MonetizrLog.Print($"PreparePanel teaser: {m.campaignId} {m}");
         }
 
         private void UpdateMissionAmountText()

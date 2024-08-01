@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.New;
+using Monetizr.SDK.Debug;
 
 namespace Monetizr.Sample
 {
@@ -38,6 +39,7 @@ namespace Monetizr.Sample
 
         private void Start()
         {
+            MonetizrLog.isEnabled = true;
             const string key = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
             GetAdvertisingId(out var advertisingID, out var limitAdvertising);
             MonetizrManager.SetAdvertisingIds(advertisingID, limitAdvertising);

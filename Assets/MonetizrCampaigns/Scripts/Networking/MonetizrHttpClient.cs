@@ -64,7 +64,7 @@ namespace Monetizr.SDK.Networking
             }
 
             string result = await response.Content.ReadAsStringAsync();
-            Log.PrintV($"Download response is: {result} {response.StatusCode}");
+            MonetizrLog.Print($"Download response is: {result} {response.StatusCode}");
             if (!response.IsSuccessStatusCode) return (false,"");
             if (result.Length == 0) return (false,"");
             return (true, result);
@@ -73,15 +73,15 @@ namespace Monetizr.SDK.Networking
         internal override async Task<string> GetResponseStringFromUrl(string url)
         {
             var requestMessage = New_NetworkingManager.GenerateHttpRequestMessage(userAgent, url);
-            Log.PrintV($"Sent request: {requestMessage}");
+            MonetizrLog.Print($"Sent request: {requestMessage}");
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
             var responseString = await response.Content.ReadAsStringAsync();
-            Log.Print($"Response is: {response.StatusCode}");
-            Log.PrintV(responseString);
+            MonetizrLog.Print($"Response is: {response.StatusCode}");
+            MonetizrLog.Print(responseString);
 
             if (!response.IsSuccessStatusCode)
             {
-                Log.PrintError($"GetStringFromUrl failed with code {response.StatusCode} for {url}");
+                MonetizrLog.PrintError($"GetStringFromUrl failed with code {response.StatusCode} for {url}");
                 return "";
             }
 
@@ -99,11 +99,11 @@ namespace Monetizr.SDK.Networking
 
             if (string.IsNullOrEmpty(responseString))
             {
-                Log.PrintV($"Unable to load settings!");
+                MonetizrLog.Print($"Unable to load settings!");
                 return new SettingsDictionary<string, string>();
             }
 
-            Log.PrintV($"Settings: {responseString}");
+            MonetizrLog.Print($"Settings: {responseString}");
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
 
@@ -111,7 +111,7 @@ namespace Monetizr.SDK.Networking
         {
             MonetizrManager.isVastActive = false;
             var loadResult = await GetServerCampaignsFromMonetizr();
-            Log.PrintV($"GetServerCampaignsFromMonetizr result {loadResult.Count}");
+            MonetizrLog.Print($"GetServerCampaignsFromMonetizr result {loadResult.Count}");
             return loadResult;
         }
 
@@ -120,7 +120,7 @@ namespace Monetizr.SDK.Networking
             GlobalSettings = await DownloadGlobalSettings();
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint", "");
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
-            Log.PrintV($"Api endpoint: {_baseApiUrl}");
+            MonetizrLog.Print($"Api endpoint: {_baseApiUrl}");
         }
 
         internal override async Task<List<ServerCampaign>> GetList()
@@ -129,7 +129,7 @@ namespace Monetizr.SDK.Networking
             New_CampaignUtils.FilterInvalidCampaigns(result);
             foreach (var ch in result)
             {
-                Log.Print($"Campaign passed filters: {ch.id}");
+                MonetizrLog.Print($"Campaign passed filters: {ch.id}");
             }
             return result;
         }
@@ -184,7 +184,7 @@ namespace Monetizr.SDK.Networking
             HttpRequestMessage requestMessage = New_NetworkingManager.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{campaignId}/reset");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
             string s = await response.Content.ReadAsStringAsync();
-            Log.PrintV($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+            MonetizrLog.Print($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -208,21 +208,21 @@ namespace Monetizr.SDK.Networking
 
                 if (reward == null)
                 {
-                    Log.PrintError($"Product reward doesn't found for campaign {ingame}");
+                    MonetizrLog.PrintError($"Product reward doesn't found for campaign {ingame}");
                     onFailure?.Invoke();
                     return;
                 }
 
-                Log.PrintV($"Reward {reward.id} found in_game_only {reward.in_game_only}");
+                MonetizrLog.Print($"Reward {reward.id} found in_game_only {reward.in_game_only}");
                 content = $"{{\"email\":\"{MonetizrManager.temporaryEmail}\",\"reward_id\":\"{reward.id}\"}}";
                 MonetizrManager.temporaryEmail = "";
             }
 
             requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
-            Log.PrintV($"Request:\n[{requestMessage}] content:\n[{content}]");
+            MonetizrLog.Print($"Request:\n[{requestMessage}] content:\n[{content}]");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
             string s = await response.Content.ReadAsStringAsync();
-            Log.PrintV($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+            MonetizrLog.Print($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
             {

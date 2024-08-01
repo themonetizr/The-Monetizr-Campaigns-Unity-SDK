@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Monetizr.SDK.Networking
+namespace Monetizr.SDK.Debug
 {
     public class DownloadUrlAsStringException : Exception
     {
