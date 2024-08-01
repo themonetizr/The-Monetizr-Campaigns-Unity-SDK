@@ -57,7 +57,7 @@ namespace Monetizr.Tests
 
                     MonetizrManager.claimForSkippedCampaigns = false;
 
-                    MonetizrManager.ShowTinyMenuTeaser();
+                    MonetizrManager.ShowTeaser();
                     //Do something
 
                     loadSuccess = 1;
@@ -444,11 +444,11 @@ namespace Monetizr.Tests
             {
                 if(show)
                 {                
-                    MonetizrManager.ShowTinyMenuTeaser();
+                    MonetizrManager.ShowTeaser();
                 }
                 else
                 {
-                    MonetizrManager.HideTinyMenuTeaser();
+                    MonetizrManager.HideTeaser();
                 }
             }
         }

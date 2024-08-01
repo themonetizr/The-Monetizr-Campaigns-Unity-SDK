@@ -1,13 +1,9 @@
 ﻿namespace Monetizr.SDK.Core
 {
-    public partial class MonetizrManager
+    public enum OnCompleteStatus
     {
-        public enum OnCompleteStatus
-        {
-            Skipped,
-            Completed
-        }
-
+        Skipped,
+        Completed
     }
 
 }

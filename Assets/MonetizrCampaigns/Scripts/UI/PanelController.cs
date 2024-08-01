@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
+using EventType = Monetizr.SDK.Core.EventType;
 
 namespace Monetizr.SDK.UI
 {
@@ -93,9 +94,8 @@ namespace Monetizr.SDK.UI
             {
                 MonetizrManager.Analytics.TrackEvent(currentMission,
                     this,
-                    isSkipped ? MonetizrManager.EventType.ButtonPressSkip : MonetizrManager.EventType.ButtonPressOk,
+                    isSkipped ? EventType.ButtonPressSkip : EventType.ButtonPressOk,
                     additionalEventValues);
-                MonetizrLog.Print("SETACTIVE - IS SKIPPED: " + isSkipped);
             }
 
             if (active)
@@ -167,9 +167,8 @@ namespace Monetizr.SDK.UI
         {
             state = State.Hidden;
             FinalizePanel(panelId);
-            if (!SendImpressionEventManually()) MonetizrManager.Analytics?.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
+            if (!SendImpressionEventManually()) MonetizrManager.Analytics?.TrackEvent(currentMission, this, EventType.ImpressionEnds);
             gameObject.SetActive(false);
-            //MonetizrLog.Print("ONANIMATIONHIDE - IS SKIPPED: " + isSkipped);
             _onComplete?.Invoke(isSkipped);
         }
 

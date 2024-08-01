@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+using EventType = Monetizr.SDK.Core.EventType;
 
 namespace Monetizr.SDK.Missions
 {
@@ -355,7 +356,7 @@ namespace Monetizr.SDK.Missions
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
         {
-            MonetizrManager.temporaryRewardTypeSelection = MonetizrManager.RewardSelectionType.Product;
+            MonetizrManager.temporaryRewardTypeSelection = RewardSelectionType.Product;
 
             bool needToPlayVideo = m.hasVideo;
 
@@ -384,7 +385,7 @@ namespace Monetizr.SDK.Missions
                     {
                         if (isMailSkipped)
                         {
-                            MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, MonetizrManager.EventType.ButtonPressSkip);
+                            MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, EventType.ButtonPressSkip);
                             onComplete?.Invoke(isMailSkipped);
                             return;
                         }

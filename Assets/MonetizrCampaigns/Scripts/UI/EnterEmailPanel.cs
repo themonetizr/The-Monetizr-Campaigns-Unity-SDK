@@ -33,7 +33,7 @@ namespace Monetizr.SDK.UI
         private Regex validateEmailRegex;
         private string result;
         private EnterEmailType enterEmailType;
-        private MonetizrManager.RewardSelectionType selection;
+        private RewardSelectionType selection;
         private AdPlacement adType;
         public Toggle termsToggle;
         private bool termsTogglePressed;
@@ -151,12 +151,12 @@ namespace Monetizr.SDK.UI
 
         public void OnFirstToggle(bool v)
         {
-            if(v) selection = MonetizrManager.RewardSelectionType.Ingame;
+            if(v) selection = RewardSelectionType.Ingame;
         }
         
         public void OnSecondToggle(bool v)
         {
-            if(v) selection = MonetizrManager.RewardSelectionType.Product;
+            if(v) selection = RewardSelectionType.Product;
         }
 
         public void OnTermsToggle(bool v)
@@ -170,12 +170,12 @@ namespace Monetizr.SDK.UI
 
             if (type == EnterEmailType.ProductReward)
             {
-                selection = MonetizrManager.RewardSelectionType.Product;
+                selection = RewardSelectionType.Product;
                 adType = AdPlacement.EmailEnterCouponRewardScreen;
             }
             else if (type == EnterEmailType.IngameReward)
             {
-                selection = MonetizrManager.RewardSelectionType.Ingame;
+                selection = RewardSelectionType.Ingame;
                 adType = AdPlacement.EmailEnterInGameRewardScreen;
             }
             else

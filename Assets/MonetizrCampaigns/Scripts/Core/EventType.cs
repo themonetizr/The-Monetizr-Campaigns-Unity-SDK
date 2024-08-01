@@ -1,18 +1,14 @@
 ﻿namespace Monetizr.SDK.Core
 {
-    public partial class MonetizrManager
+    public enum EventType
     {
-        public enum EventType
-        {
-            Impression,
-            ImpressionEnds,
-            ButtonPressSkip,
-            ButtonPressOk,
-            Error,
-            ActionSuccess,
-            Notification
-        }
-
+        Impression,
+        ImpressionEnds,
+        ButtonPressSkip,
+        ButtonPressOk,
+        Error,
+        ActionSuccess,
+        Notification
     }
 
 }

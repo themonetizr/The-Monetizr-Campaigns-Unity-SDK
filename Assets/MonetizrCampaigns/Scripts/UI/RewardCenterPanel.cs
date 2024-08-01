@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using EventType = Monetizr.SDK.Core.EventType;
 
 namespace Monetizr.SDK.UI
 {
@@ -72,7 +73,7 @@ namespace Monetizr.SDK.UI
 
             itemUI = (Resources.Load(uiItemPrefab) as GameObject).GetComponent<MonetizrRewardedItem>();
 
-            MonetizrManager.HideTinyMenuTeaser();
+            MonetizrManager.HideTeaser();
 
             this._onComplete = onComplete;
 
@@ -413,7 +414,7 @@ namespace Monetizr.SDK.UI
         internal void ButtonPressed(ButtonController buttonController, Mission missionDescription)
         {
             if (!missionDescription.isSponsored) MonetizrManager.CleanUserDefinedMissions();
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ButtonPressOk);
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
             missionDescription.onClaimButtonPress.Invoke();
             if (!missionDescription.isSponsored) UpdateUI();
         }
@@ -465,7 +466,7 @@ namespace Monetizr.SDK.UI
 
         internal override void FinalizePanel(PanelId id)
         {
-            if (MonetizrManager.tinyTeaserCanBeVisible) MonetizrManager.ShowTinyMenuTeaser(null);
+            if (MonetizrManager.canTeaserBeVisible) MonetizrManager.ShowTeaser(null);
         }
 
         void UpdateList()

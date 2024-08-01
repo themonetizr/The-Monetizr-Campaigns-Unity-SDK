@@ -15,18 +15,18 @@ namespace Monetizr.SDK.Analytics
         internal abstract void Initialize(bool testEnvironment, string mixPanelApiKey, bool logConnectionErrors);
         internal abstract void TrackEvent(Mission mission, 
             PanelController panel,
-            MonetizrManager.EventType eventType, 
+            EventType eventType, 
             Dictionary<string, string> additionalValues = null);
 
         internal abstract void TrackEvent(Mission currentMission, 
             AdPlacement adPlacement,
-            MonetizrManager.EventType eventType, 
+            EventType eventType, 
             Dictionary<string, string> additionalValues = null);
 
         internal abstract void TrackEvent(ServerCampaign currentCampaign, 
             Mission currentMission,
             AdPlacement adPlacement, 
-            MonetizrManager.EventType eventType,
+            EventType eventType,
             Dictionary<string, string> additionalValues = null);
 
         internal abstract void _TrackEvent(string name,

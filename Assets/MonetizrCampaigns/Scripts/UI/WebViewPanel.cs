@@ -13,6 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using EventType = Monetizr.SDK.Core.EventType;
 
 namespace Monetizr.SDK.UI
 {
@@ -305,7 +306,7 @@ namespace Monetizr.SDK.UI
                 _webView.Show();
                 MonetizrLog.Print($"Url to show {_webUrl}");
 
-                MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+                MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                 impressionStarts = true;
             }
             else
@@ -371,19 +372,19 @@ namespace Monetizr.SDK.UI
             {
                 case PanelId.SurveyWebView:
                     PrepareSurveyPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.HtmlWebPageView:
                     PrepareWebViewPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.ActionHtmlPanelView:
                     PrepareActionPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Impression);
+                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
             }
@@ -572,7 +573,7 @@ namespace Monetizr.SDK.UI
             if (impressionStarts)
             {
                 triggersButtonEventsOnDeactivate = true;
-                MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ImpressionEnds);
+                MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.ImpressionEnds);
                 impressionStarts = false;
             }
         }
@@ -643,7 +644,7 @@ namespace Monetizr.SDK.UI
             if (statusCode > 0)
                 p.Add("url_status_code", statusCode.ToString());
 
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.Error, p);
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Error, p);
         }
 
         internal override void FinalizePanel(PanelId id)

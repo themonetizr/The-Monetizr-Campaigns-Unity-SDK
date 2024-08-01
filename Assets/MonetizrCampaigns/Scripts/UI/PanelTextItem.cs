@@ -45,7 +45,7 @@ namespace Monetizr.SDK.UI
                 }
             }
             
-            if (MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame &&
+            if (MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Ingame &&
                 m.campaignServerSettings.ContainsKey(param2))
             {
                 param = param2;

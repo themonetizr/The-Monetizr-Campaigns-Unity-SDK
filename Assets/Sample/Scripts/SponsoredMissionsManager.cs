@@ -80,7 +80,7 @@ namespace Monetizr.Sample
                     //see DummyMainUI object in SampleScene
                     dummyUI.SetActive(true);
 
-                    //MonetizrManager.ShowTinyMenuTeaser();
+                    //MonetizrManager.ShowTeaser();
                     //Do something
                 }
             }, (bool soundOn) => { }, null);

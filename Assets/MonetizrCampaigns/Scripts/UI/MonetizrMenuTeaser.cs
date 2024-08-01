@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using UnityEngine;
 using UnityEngine.UI;
+using EventType = Monetizr.SDK.Core.EventType;
 
 namespace Monetizr.SDK.UI
 {
@@ -40,7 +41,7 @@ namespace Monetizr.SDK.UI
         }
         public void OnButtonClick()
         {
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, MonetizrManager.EventType.ButtonPressOk);
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
             MonetizrManager.ShowRewardCenter(null);
         }
 

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
+using EventType = Monetizr.SDK.Core.EventType;
 
 namespace Monetizr.SDK.UI
 {
@@ -117,7 +118,7 @@ namespace Monetizr.SDK.UI
                 ctrlPanel.PreparePanel(id, complete, m);
 
                 if(!ctrlPanel.SendImpressionEventManually())
-                    MonetizrManager.Analytics.TrackEvent(m, ctrlPanel, MonetizrManager.EventType.Impression);
+                    MonetizrManager.Analytics.TrackEvent(m, ctrlPanel, EventType.Impression);
 
                 panels.Add(id, ctrlPanel);
             }
@@ -151,7 +152,7 @@ namespace Monetizr.SDK.UI
             SetColorForElement(border, additionalParams, $"{id.ToString()}.bg_border_color");
         }
 
-        internal void DestroyTinyMenuTeaser()
+        internal void DestroyTeaser()
         {
             if (!panels.ContainsKey(PanelId.TinyMenuTeaser)) return;
             MonetizrMenuTeaser teaser = panels[PanelId.TinyMenuTeaser] as MonetizrMenuTeaser;
@@ -159,7 +160,7 @@ namespace Monetizr.SDK.UI
             panels.Remove(PanelId.TinyMenuTeaser);
         }
 
-        internal void ShowTinyMenuTeaser(Transform root, Vector2? screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
+        internal void ShowTeaser(Transform root, Vector2? screenPos, Action UpdateGameUI, int designVersion, ServerCampaign campaign)
         {
              MonetizrMenuTeaser teaser;     
 
@@ -202,7 +203,7 @@ namespace Monetizr.SDK.UI
 
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
 
-            MonetizrManager.Analytics.TrackEvent(m, teaser, MonetizrManager.EventType.Impression);
+            MonetizrManager.Analytics.TrackEvent(m, teaser, EventType.Impression);
 
             if(root == null) teaser.rectTransform.SetAsFirstSibling();
 

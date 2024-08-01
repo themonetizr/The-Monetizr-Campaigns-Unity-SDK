@@ -12,6 +12,7 @@ using Monetizr.SDK.Core;
 using Monetizr.SDK.UI;
 using CustomUniWebView;
 using Monetizr.SDK.New;
+using EventType = Monetizr.SDK.Core.EventType;
 
 
 #if UNITY_IOS
@@ -371,7 +372,7 @@ namespace Monetizr.SDK.Analytics
             return deviceIdentifier;
         }
 
-        internal override void TrackEvent(Mission currentMission, PanelController panel, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
+        internal override void TrackEvent(Mission currentMission, PanelController panel, EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             if (panel.GetAdPlacement() == null)
                 return;
@@ -381,12 +382,12 @@ namespace Monetizr.SDK.Analytics
             TrackEvent(currentMission.campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
-        internal override void TrackEvent(Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
+        internal override void TrackEvent(Mission currentMission, AdPlacement adPlacement, EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             TrackEvent(currentMission.campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
-        internal override void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, MonetizrManager.EventType eventType, Dictionary<string, string> additionalValues = null)
+        internal override void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             UnityEngine.Debug.Assert(currentCampaign != null);
 
@@ -443,13 +444,13 @@ namespace Monetizr.SDK.Analytics
                 return "pressed";
             };
 
-            var eventTypes = new Dictionary<MonetizrManager.EventType, string>()
+            var eventTypes = new Dictionary<EventType, string>()
             {
-                { MonetizrManager.EventType.ButtonPressOk, completedOrPressed(adPlacement) },
-                { MonetizrManager.EventType.ButtonPressSkip, "skipped" },
-                { MonetizrManager.EventType.Impression, "shown" },
-                { MonetizrManager.EventType.Error, "failed" },
-                { MonetizrManager.EventType.Notification, "notified" }
+                { EventType.ButtonPressOk, completedOrPressed(adPlacement) },
+                { EventType.ButtonPressSkip, "skipped" },
+                { EventType.Impression, "shown" },
+                { EventType.Error, "failed" },
+                { EventType.Notification, "notified" }
             };
 
             TrackNewEvents(currentCampaign, currentMission, adPlacement, placementName, eventType, additionalValues);
@@ -457,13 +458,13 @@ namespace Monetizr.SDK.Analytics
             if (!currentCampaign.serverSettings.GetBoolParam("send_old_events", false))
                 return;
 
-            if (eventType == MonetizrManager.EventType.Impression)
+            if (eventType == EventType.Impression)
             {
                 NielsenDar.Track(currentCampaign, adPlacement);
                 BeginShowAdAsset($"{adPlacement}", adPlacement, currentCampaign);
             }
 
-            if (eventType == MonetizrManager.EventType.ImpressionEnds)
+            if (eventType == EventType.ImpressionEnds)
             {
                 EndShowAdAsset(adPlacement, currentCampaign);
                 return;
@@ -478,7 +479,7 @@ namespace Monetizr.SDK.Analytics
             Mission currentMission,
             AdPlacement adPlacement,
             string placementName,
-            MonetizrManager.EventType eventType,
+            EventType eventType,
             Dictionary<string, string> additionalValues)
         {
             additionalValues.Add("placement", placementName);
@@ -498,7 +499,7 @@ namespace Monetizr.SDK.Analytics
                     break;
 
                 case AdPlacement.EmailEnterSelectionRewardScreen:
-                    additionalValues.Add("reward_type", MonetizrManager.temporaryRewardTypeSelection == MonetizrManager.RewardSelectionType.Ingame ? "ingame" : "product");
+                    additionalValues.Add("reward_type", MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Ingame ? "ingame" : "product");
                     break;
 
                 default: break;
@@ -508,23 +509,23 @@ namespace Monetizr.SDK.Analytics
 
             switch (eventType)
             {
-                case MonetizrManager.EventType.ButtonPressOk:
+                case EventType.ButtonPressOk:
                     eventName = "Action";
                     additionalValues.Add("action", "ok");
                     break;
 
-                case MonetizrManager.EventType.ButtonPressSkip:
+                case EventType.ButtonPressSkip:
                     additionalValues.Add("action", "skip");
                     eventName = "Action";
                     break;
 
-                case MonetizrManager.EventType.Impression:
+                case EventType.Impression:
                     eventName = "ImpressionStarts";
                     NielsenDar.Track(campaign, adPlacement);
                     adNewElements.Add(new AdElement("ImpressionEnds", adPlacement, campaign));
                     break;
 
-                case MonetizrManager.EventType.ImpressionEnds:
+                case EventType.ImpressionEnds:
                     timed = true;
                     eventName = "ImpressionEnds";
 
@@ -542,8 +543,8 @@ namespace Monetizr.SDK.Analytics
 
                     break;
 
-                case MonetizrManager.EventType.Error:
-                case MonetizrManager.EventType.Notification:
+                case EventType.Error:
+                case EventType.Notification:
                     eventName = eventType.ToString();
                     break;
 
@@ -573,19 +574,19 @@ namespace Monetizr.SDK.Analytics
             return false;
         }
 
-        private void TrackOMSDKEvents(MonetizrManager.EventType eventType, AdPlacement adPlacement, string placementGroup)
+        private void TrackOMSDKEvents(EventType eventType, AdPlacement adPlacement, string placementGroup)
         {
             if (!CanTrackInOMSDK(adPlacement)) return;
 
             string resourceUrl = $"https://image.themonetizr.com/{placementGroup.ToLower()}.png";
 
-            if (eventType == MonetizrManager.EventType.Impression)
+            if (eventType == EventType.Impression)
             {
                 UniWebViewInterface.InitOMSDKSession(resourceUrl);
                 UniWebViewInterface.StartImpression(resourceUrl);
             }
 
-            if (eventType == MonetizrManager.EventType.ImpressionEnds)
+            if (eventType == EventType.ImpressionEnds)
             {
                 UniWebViewInterface.StopImpression(resourceUrl);
             }

@@ -1,13 +1,9 @@
 ﻿namespace Monetizr.SDK.Core
 {
-    public partial class MonetizrManager
+    internal enum RewardSelectionType
     {
-        internal enum RewardSelectionType
-        {
-            Product,
-            Ingame
-        }
-
+        Product,
+        Ingame
     }
 
 }
