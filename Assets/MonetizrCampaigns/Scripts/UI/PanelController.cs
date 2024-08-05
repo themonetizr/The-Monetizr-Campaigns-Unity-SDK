@@ -105,7 +105,7 @@ namespace Monetizr.SDK.UI
                     BlockRaycasts(true);
 
                     gameObject.SetActive(true);
-                    animator.Play("PanelAnimator_Show");
+                    if (animator) animator.Play("PanelAnimator_Show");
 
                     state = State.Animating;
                 }
@@ -118,7 +118,7 @@ namespace Monetizr.SDK.UI
 
                 if (!immediately && state != State.Animating)
                 {
-                    animator.Play("PanelAnimator_Hide");
+                    if (animator) animator.Play("PanelAnimator_Hide");
 
                     state = State.Animating;
                 }

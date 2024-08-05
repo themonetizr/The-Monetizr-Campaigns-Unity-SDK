@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6387d76dbd86d374bb3205e279ef9d58, type: 3}
   m_Name: MonetizrSettings
   m_EditorClassIdentifier: 
-  androidBundleID: 
-  androidAPIKey: 
-  iOSBundleID: 
-  iOSAPIKey: 
-  gameRewards: []
+  shouldUnityUseAndroidSettings: 1
+  shouldBundleIDBeApplicationIdentifier: 0
+  androidBundleID: com.monetizr.sample
+  androidAPIKey: t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo
+  iOSBundleID: com.monetizr.sample
+  iOSAPIKey: t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo

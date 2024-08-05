@@ -10,9 +10,6 @@ namespace Monetizr.Tests
     {
         public static float sdkInitializationDelay = 2f;
 
-        private static string apiKey = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
-        private static string bundleID = "com.monetizr.sample";
-
         public static void Setup ()
         {
             GameObject camera = new GameObject("Default Camera", typeof(Camera));
@@ -22,11 +19,11 @@ namespace Monetizr.Tests
             PlayerPrefs.SetString("missions", "");
             Sprite mockImage = TestUtils.CreateMockSprite();
             Time.timeScale = 5;
-            MonetizrManager.bundleId = bundleID;
+            MonetizrSettingsMenu.LoadSettings();
             MonetizrManager.SetAdvertisingIds("", false);
             MonetizrManager.SetGameCoinAsset(RewardType.Coins, mockImage, "Coins", () => { return 0; }, (ulong reward) => { }, 100);
             MonetizrManager.SetTeaserPosition(New_MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
-            MonetizrManager.InitializeForTests(apiKey, null, () => { }, null, null);
+            MonetizrManager.InitializeForTests(null, () => { }, null, null);
         }
     }
 }

@@ -1,3 +1,4 @@
+using Monetizr.SDK.Core;
 using UnityEditor;
 
 namespace Monetizr

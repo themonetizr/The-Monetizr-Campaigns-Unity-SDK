@@ -2,94 +2,111 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using Monetizr.SDK.Core;
-using System.Collections.Generic;
+using Monetizr.SDK.Debug;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-public class MonetizrSettingsMenu : ScriptableObject
+namespace Monetizr.SDK.Core
 {
-    [Header("Android Settings")]
-    public string androidBundleID;
-    public string androidAPIKey;
-
-    [Header("iOS Settings")]
-    public string iOSBundleID;
-    public string iOSAPIKey;
-
-    [Header("Game Reward Settings")]
-    public List<TestGameReward> gameRewards;
-
-    private static MonetizrSettingsMenu _instance;
-
-    public static void LoadSettings()
+    public class MonetizrSettingsMenu : ScriptableObject
     {
-        if (!_instance)
-        {
-            _instance = FindOrCreateInstance();
-            MonetizrSettings.bundleID = _instance.androidBundleID;
-            MonetizrSettings.apiKey = _instance.androidAPIKey;
-        }
-    }
+        [Header("General Settings")]
+        [Tooltip("Should Unity Editor use the Android Settings.")]
+        public bool shouldUnityUseAndroidSettings = true;
+        [Tooltip("Should Bundle ID be automatically set as the Application Identifier.")]
+        public bool shouldBundleIDBeApplicationIdentifier = false;
 
-    public static MonetizrSettingsMenu Instance
-    {
-        get
-        {
-            LoadSettings();
-            return _instance;
-        }
-    }
+        [Header("Android Settings")]
+        public string androidBundleID;
+        public string androidAPIKey;
 
-    private static MonetizrSettingsMenu FindOrCreateInstance()
-    {
-        MonetizrSettingsMenu instance = null;
-        instance = instance ? null : Resources.Load<MonetizrSettingsMenu>("MonetizrSettings");
-        instance = instance ? instance : Resources.LoadAll<MonetizrSettingsMenu>(string.Empty).FirstOrDefault();
-        instance = instance ? instance : CreateAndSave<MonetizrSettingsMenu>();
-        if (instance == null) throw new Exception("Could not find or create settings for Monetizr.");
-        return instance;
-    }
+        [Header("iOS Settings")]
+        public string iOSBundleID;
+        public string iOSAPIKey;
 
-    private static T CreateAndSave<T>() where T : ScriptableObject
-    {
-        T instance = CreateInstance<T>();
-#if UNITY_EDITOR
-        if (EditorApplication.isPlayingOrWillChangePlaymode)
-        {
-            EditorApplication.delayCall += () => SaveAsset(instance);
-        }
-        else
-        {
-            SaveAsset(instance);
-        }
-#endif
-        return instance;
-    }
+        private static MonetizrSettingsMenu _instance;
 
-#if UNITY_EDITOR
-    private static void SaveAsset<T>(T obj) where T : ScriptableObject
-    {
-
-        string dirName = "Assets/Resources";
-        if (!Directory.Exists(dirName))
+        public static void LoadSettings()
         {
-            Directory.CreateDirectory(dirName);
-        }
-        AssetDatabase.CreateAsset(obj, "Assets/Resources/MonetizrSettings.asset");
-        AssetDatabase.SaveAssets();
-    }
+            if (!_instance)
+            {
+                _instance = FindOrCreateInstance();
+
+#if UNITY_ANDROID
+                MonetizrSettings.bundleID = _instance.androidBundleID;
+                MonetizrSettings.apiKey = _instance.androidAPIKey;
+#elif UNITY_IOS
+                MonetizrSettings.bundleID = _instance.iOSBundleID;
+                MonetizrSettings.apiKey = _instance.iOSAPIKey;
+#else
+                if (_instance.shouldUnityUseAndroidSettings)
+                {
+                    MonetizrSettings.bundleID = _instance.androidBundleID;
+                    MonetizrSettings.apiKey = _instance.androidAPIKey;
+                }
+                else
+                {
+                    MonetizrSettings.bundleID = _instance.iOSBundleID;
+                    MonetizrSettings.apiKey = _instance.iOSAPIKey;
+                }
 #endif
 
-}
+                if (_instance.shouldBundleIDBeApplicationIdentifier) MonetizrSettings.bundleID = Application.identifier;
+            }
+        }
 
-[Serializable]
-public class TestGameReward
-{
-    public RewardType rewardType;
-    public Texture2D icon;
-    public string name;
-    public int maxValue;
+        public static MonetizrSettingsMenu Instance
+        {
+            get
+            {
+                LoadSettings();
+                return _instance;
+            }
+        }
+
+        private static MonetizrSettingsMenu FindOrCreateInstance()
+        {
+            MonetizrSettingsMenu instance = null;
+            instance = instance ? null : Resources.Load<MonetizrSettingsMenu>("MonetizrSettings");
+            instance = instance ? instance : Resources.LoadAll<MonetizrSettingsMenu>(string.Empty).FirstOrDefault();
+            instance = instance ? instance : CreateAndSave<MonetizrSettingsMenu>();
+            if (instance == null) throw new Exception("Could not find or create settings for Monetizr.");
+            return instance;
+        }
+
+        private static T CreateAndSave<T>() where T : ScriptableObject
+        {
+            T instance = CreateInstance<T>();
+#if UNITY_EDITOR
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                EditorApplication.delayCall += () => SaveAsset(instance);
+            }
+            else
+            {
+                SaveAsset(instance);
+            }
+#endif
+            return instance;
+        }
+
+#if UNITY_EDITOR
+        private static void SaveAsset<T>(T obj) where T : ScriptableObject
+        {
+
+            string dirName = "Assets/Resources";
+            if (!Directory.Exists(dirName))
+            {
+                Directory.CreateDirectory(dirName);
+            }
+            AssetDatabase.CreateAsset(obj, "Assets/Resources/MonetizrSettings.asset");
+            AssetDatabase.SaveAssets();
+        }
+#endif
+
+    }
+
 }

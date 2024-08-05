@@ -98,9 +98,9 @@ namespace Monetizr.SDK.Core
             gameRewards[rt] = gr;
         }
 
-        public static MonetizrManager Initialize(string apiKey, List<MissionDescription> sponsoredMissions = null, Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
+        public static MonetizrManager Initialize(List<MissionDescription> sponsoredMissions = null, Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
         {
-            return _Initialize(apiKey, sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, null);
+            return _Initialize(sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, null);
         }
 
         public static void HoldResource(object o)
@@ -484,7 +484,7 @@ namespace Monetizr.SDK.Core
 
         #region Private Static Methods
 
-        private static MonetizrManager _Initialize(string apiKey, List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrClient connectionClient)
+        private static MonetizrManager _Initialize(List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrClient connectionClient)
         {
             if (Instance != null) return Instance;
 
@@ -506,15 +506,13 @@ namespace Monetizr.SDK.Core
                 };
             }
 
-            MonetizrLog.Print($"MonetizrManager Initialize: {apiKey} {bundleId} {MonetizrSettings.SDKVersion}");
-
-            if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
+            if (!IsInitializationSetupComplete())
             {
-                MonetizrLog.PrintError($"MonetizrManager Initialize: Advertising ID is not defined. Be sure you called MonetizrManager.SetAdvertisingIds before Initialize call.");
+                MonetizrLog.PrintError("Initialization Setup Failed.");
                 return null;
             }
 
-            if (string.IsNullOrEmpty(bundleId)) bundleId = Application.identifier;
+            MonetizrLog.Print($"MonetizrManager Initialize: {MonetizrSettings.apiKey} {MonetizrSettings.bundleID} {MonetizrSettings.SDKVersion}");
 
             var monetizrObject = new GameObject("MonetizrManager");
             var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
@@ -527,9 +525,40 @@ namespace Monetizr.SDK.Core
             Instance.userDefinedEvent = userEvent;
             Instance.onUIVisible = onUIVisible;
 
-            monetizrManager.Initialize(apiKey, onRequestComplete, soundSwitch, connectionClient);
+            monetizrManager.Initialize(onRequestComplete, soundSwitch, connectionClient);
 
             return Instance;
+        }
+
+        private static bool IsInitializationSetupComplete()
+        {
+            MonetizrSettingsMenu.LoadSettings();
+
+            if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
+            {
+                MonetizrLog.PrintError("Missing API Key. Please, provide API Key through the Monetizr Menu.");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
+            {
+                MonetizrLog.PrintError("Missing Bundle ID. Please, provide Bundle ID through the Monetizr Menu.");
+                return false;
+            }
+
+            if (gameRewards == null || gameRewards.Count <= 0)
+            {
+                MonetizrLog.PrintError("Missing Game Rewards. Please, setup at least one Game Reward.");
+                return false;
+            }
+
+            if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
+            {
+                MonetizrLog.PrintError("Missing Advertising ID. Please, call MonetizrManager.SetAdvertisingIds before Initialize call.");
+                return false;
+            }
+
+            return true;
         }
 
         internal static void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
@@ -556,9 +585,9 @@ namespace Monetizr.SDK.Core
             return null;
         }
 
-        internal static MonetizrManager InitializeForTests(string apiKey, List<MissionDescription> sponsoredMissions = null, Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null, MonetizrClient connectionClient = null)
+        internal static MonetizrManager InitializeForTests(List<MissionDescription> sponsoredMissions = null, Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null, MonetizrClient connectionClient = null)
         {
-            return _Initialize(apiKey, sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, connectionClient);
+            return _Initialize(sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, connectionClient);
         }
 
         internal static void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
@@ -848,7 +877,7 @@ namespace Monetizr.SDK.Core
             Analytics?.OnApplicationQuit();
         }
 
-        private void Initialize(string apiKey, Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
+        private void Initialize(Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
         {
 #if USING_WEBVIEW
             if (!UniWebView.IsWebViewSupported)
@@ -860,7 +889,7 @@ namespace Monetizr.SDK.Core
             localSettings = new LocalSettingsManager();
             missionsManager = new MissionsManager();
             this._soundSwitch = soundSwitch;
-            ConnectionsClient = connectionClient ?? new MonetizrHttpClient(apiKey);
+            ConnectionsClient = connectionClient ?? new MonetizrHttpClient(MonetizrSettings.apiKey);
             ConnectionsClient.Initialize();
             InitializeUI();
             _gameOnInitSuccess = gameOnInitSuccess;

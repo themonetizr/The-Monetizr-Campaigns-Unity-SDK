@@ -14,7 +14,6 @@ namespace Monetizr.SDK.Core
 
         public bool IsSetupValid ()
         {
-
             if (icon == null)
             {
                 MonetizrLog.PrintError("GameReward error: Icon is not set.");

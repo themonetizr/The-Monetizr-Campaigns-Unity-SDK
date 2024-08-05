@@ -15,6 +15,8 @@ namespace Monetizr.Sample
         public Sprite gemsRewardIcon;
         public GameObject dummyUI;
 
+        //private string testKey = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
+
         private static void GetAdvertisingId(out string advertisingID, out bool limitAdvertising)
         {
 #if !UNITY_EDITOR
@@ -40,7 +42,6 @@ namespace Monetizr.Sample
         private void Start()
         {
             MonetizrLog.isEnabled = true;
-            const string key = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
             GetAdvertisingId(out var advertisingID, out var limitAdvertising);
             MonetizrManager.SetAdvertisingIds(advertisingID, limitAdvertising);
 
@@ -72,7 +73,7 @@ namespace Monetizr.Sample
             MonetizrManager.SetTeaserPosition(New_MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
 
             //initialize SDK
-            MonetizrManager.Initialize(key, null, () =>
+            MonetizrManager.Initialize(null, () =>
             {
                 if (MonetizrManager.IsActiveAndEnabled())
                 {
