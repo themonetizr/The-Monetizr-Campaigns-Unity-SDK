@@ -16,6 +16,7 @@ namespace Monetizr.Sample
         public GameObject dummyUI;
 
         //private string testKey = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
+        //private string testBundleID = "com.monetizr.sample";
 
         private static void GetAdvertisingId(out string advertisingID, out bool limitAdvertising)
         {
