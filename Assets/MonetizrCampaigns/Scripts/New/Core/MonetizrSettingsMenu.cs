@@ -28,12 +28,14 @@ namespace Monetizr.SDK.Core
         public string iOSAPIKey;
 
         private static MonetizrSettingsMenu _instance;
+        private static bool hasLoadedTestSettings = false;
 
         public static void LoadSettings()
         {
             if (!_instance)
             {
                 _instance = FindOrCreateInstance();
+                if (hasLoadedTestSettings) return;
 
 #if UNITY_ANDROID
                 MonetizrSettings.bundleID = _instance.androidBundleID;
@@ -56,6 +58,13 @@ namespace Monetizr.SDK.Core
 
                 if (_instance.shouldBundleIDBeApplicationIdentifier) MonetizrSettings.bundleID = Application.identifier;
             }
+        }
+
+        public static void LoadTestSettings ()
+        {
+            hasLoadedTestSettings = true;
+            MonetizrSettings.bundleID = "com.monetizr.sample";
+            MonetizrSettings.apiKey = "t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo";
         }
 
         public static MonetizrSettingsMenu Instance

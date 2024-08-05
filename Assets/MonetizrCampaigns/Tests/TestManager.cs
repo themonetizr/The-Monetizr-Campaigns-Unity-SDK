@@ -19,7 +19,7 @@ namespace Monetizr.Tests
             PlayerPrefs.SetString("missions", "");
             Sprite mockImage = TestUtils.CreateMockSprite();
             Time.timeScale = 5;
-            MonetizrSettingsMenu.LoadSettings();
+            MonetizrSettingsMenu.LoadTestSettings();
             MonetizrManager.SetAdvertisingIds("", false);
             MonetizrManager.SetGameCoinAsset(RewardType.Coins, mockImage, "Coins", () => { return 0; }, (ulong reward) => { }, 100);
             MonetizrManager.SetTeaserPosition(New_MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));

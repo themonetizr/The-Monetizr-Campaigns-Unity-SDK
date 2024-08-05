@@ -33,7 +33,7 @@ namespace Monetizr.Tests
             UnityWebRequest request = isPost ? UnityWebRequest.Post(uri, "") : UnityWebRequest.Get(uri);
 
             request.SetRequestHeader("player-id", MonetizrMobileAnalytics.deviceIdentifier);
-            request.SetRequestHeader("app-bundle-id", MonetizrManager.bundleId);
+            request.SetRequestHeader("app-bundle-id", MonetizrSettings.bundleID);
             request.SetRequestHeader("sdk-version", MonetizrSettings.SDKVersion);
             request.SetRequestHeader("os-group", MonetizrMobileAnalytics.GetOsGroup());
             request.SetRequestHeader("ad-id", MonetizrMobileAnalytics.advertisingID);
