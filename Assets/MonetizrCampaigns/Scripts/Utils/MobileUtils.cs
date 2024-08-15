@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace Monetizr.SDK.New
+namespace Monetizr.SDK.Utils
 {
-    public static class New_MobileUtils
+    public static class MobileUtils
     {
         public static bool IsInLandscapeMode()
         {

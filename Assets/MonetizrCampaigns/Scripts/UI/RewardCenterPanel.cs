@@ -3,7 +3,6 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
-using Monetizr.SDK.New;
 using Monetizr.SDK.Utils;
 using System;
 using System.Collections.Generic;
@@ -90,7 +89,7 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            if (!New_MobileUtils.IsInLandscapeMode())
+            if (!MobileUtils.IsInLandscapeMode())
             {
                 var r = campaign.serverSettings.GetRectParam("RewardCenter.transform", new List<float> { 30, 0, 0, 0 });
                 scrollViewRect.offsetMin = new Vector2(r[0], r[3]);
@@ -111,7 +110,7 @@ namespace Monetizr.SDK.UI
             amountOfItems = 0;
             var hasBanner = camp.HasAsset(AssetsType.BrandBannerSprite);
 
-            if (New_MobileUtils.IsInLandscapeMode())
+            if (MobileUtils.IsInLandscapeMode())
             {
                 if (hasBanner)
                 {
@@ -130,7 +129,7 @@ namespace Monetizr.SDK.UI
                 }
             }
 
-            scrollListHasBanner = New_MobileUtils.IsInLandscapeMode() ? false : hasBanner;
+            scrollListHasBanner = MobileUtils.IsInLandscapeMode() ? false : hasBanner;
 
             if (scrollListHasBanner)
             {
@@ -471,7 +470,7 @@ namespace Monetizr.SDK.UI
 
         void UpdateList()
         {
-            if (New_MobileUtils.IsInLandscapeMode())
+            if (MobileUtils.IsInLandscapeMode())
                 bannerHeight = 0;
             else if (!scrollListHasBanner)
                 bannerHeight = 260;

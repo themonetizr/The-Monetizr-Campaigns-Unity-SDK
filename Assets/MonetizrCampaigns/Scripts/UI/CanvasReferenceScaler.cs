@@ -2,7 +2,6 @@
 using UnityEngine.UI;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
-using Monetizr.SDK.New;
 
 namespace Monetizr.SDK.UI
 {
@@ -39,7 +38,7 @@ namespace Monetizr.SDK.UI
             _cs = gameObject.GetComponent<CanvasScaler>();
             _initialRefRes = _cs.referenceResolution;
 
-            if (New_MobileUtils.IsInLandscapeMode())
+            if (MobileUtils.IsInLandscapeMode())
                 UpdateLandscape();
             else
                 UpdatePortrait();
@@ -59,7 +58,7 @@ namespace Monetizr.SDK.UI
         {
             MonetizrLog.Print("Orientation changed!");
             
-            if (New_MobileUtils.IsInLandscapeMode())
+            if (MobileUtils.IsInLandscapeMode())
                 UpdateLandscape();
             else
                 UpdatePortrait();

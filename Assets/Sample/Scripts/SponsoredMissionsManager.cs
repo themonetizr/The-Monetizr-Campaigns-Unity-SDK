@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Utils;
-using Monetizr.SDK.New;
 using Monetizr.SDK.Debug;
 
 namespace Monetizr.Sample
@@ -68,7 +67,7 @@ namespace Monetizr.Sample
 
 
             //good default placement for teaser
-            MonetizrManager.SetTeaserPosition(New_MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
+            MonetizrManager.SetTeaserPosition(MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
 
             //initialize SDK
             MonetizrManager.Initialize(null, () =>

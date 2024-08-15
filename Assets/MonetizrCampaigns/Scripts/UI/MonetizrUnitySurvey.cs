@@ -2,7 +2,6 @@ using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
-using Monetizr.SDK.New;
 using Monetizr.SDK.Utils;
 using System;
 using System.Collections;
@@ -201,7 +200,7 @@ namespace Monetizr.SDK.UI
 
                if (lastQuestion != null) lastQuestion.nextQuestion = q;
 
-               var qObj = GameObject.Instantiate<GameObject>(New_MobileUtils.IsInLandscapeMode() ?
+               var qObj = GameObject.Instantiate<GameObject>(MobileUtils.IsInLandscapeMode() ?
                    monetizrQuestionRootLandscape.gameObject :
                    monetizrQuestionRoot.gameObject, contentRoot);
 
@@ -235,7 +234,7 @@ namespace Monetizr.SDK.UI
                    questionRoot.imageGridLayoutRoot.gameObject.SetActive(true);
                }
 
-               if (New_MobileUtils.IsInLandscapeMode())
+               if (MobileUtils.IsInLandscapeMode())
                {
                    q.questionRoot.verticalLayout.childAlignment = TextAnchor.UpperCenter;
 
@@ -328,7 +327,7 @@ namespace Monetizr.SDK.UI
                    }
                });
 
-               if (New_MobileUtils.IsInLandscapeMode())
+               if (MobileUtils.IsInLandscapeMode())
                    height += 620;
                else
                    width += 1000;
@@ -510,11 +509,11 @@ namespace Monetizr.SDK.UI
 
         internal float scrollNormalizedPosition
         {
-            get => New_MobileUtils.IsInLandscapeMode() ? 1.0f - scroll.verticalNormalizedPosition : scroll.horizontalNormalizedPosition;
+            get => MobileUtils.IsInLandscapeMode() ? 1.0f - scroll.verticalNormalizedPosition : scroll.horizontalNormalizedPosition;
 
             set
             {
-                if (New_MobileUtils.IsInLandscapeMode())
+                if (MobileUtils.IsInLandscapeMode())
                     scroll.verticalNormalizedPosition = 1.0f - value;
                 else
                     scroll.horizontalNormalizedPosition = value;

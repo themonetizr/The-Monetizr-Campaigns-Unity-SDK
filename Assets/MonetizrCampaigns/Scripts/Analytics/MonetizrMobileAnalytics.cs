@@ -11,7 +11,6 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.UI;
 using CustomUniWebView;
-using Monetizr.SDK.New;
 using EventType = Monetizr.SDK.Core.EventType;
 
 
@@ -269,7 +268,7 @@ namespace Monetizr.SDK.Analytics
             props["device_memory"] = SystemInfo.systemMemorySize.ToString();
             props["device_model"] = SystemInfo.deviceModel;
             props["device_name"] = SystemInfo.deviceName;
-            props["internet_connection"] = New_NetworkingUtils.GetInternetConnectionType();
+            props["internet_connection"] = NetworkingUtils.GetInternetConnectionType();
 
             /*
             if (String.IsNullOrEmpty(props["country_code"]))

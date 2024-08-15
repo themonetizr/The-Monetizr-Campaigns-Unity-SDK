@@ -2,7 +2,6 @@
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
-using Monetizr.SDK.New;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
 using System;
@@ -223,7 +222,7 @@ namespace Monetizr.SDK.Campaigns
 
             if (!File.Exists(fpath))
             {
-                data = await New_NetworkingManager.DownloadAssetData(asset.url);
+                data = await NetworkingManager.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
@@ -305,7 +304,7 @@ namespace Monetizr.SDK.Campaigns
             {
                 MonetizrLog.Print($"Downloading archive {asset.url}");
 
-                data = await New_NetworkingManager.DownloadAssetData(asset.url);
+                data = await NetworkingManager.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
@@ -521,7 +520,7 @@ namespace Monetizr.SDK.Campaigns
             string playerUrl = serverSettings.GetParam("openrtb.player_url",
                 "https://image.themonetizr.com/videoplayer/html.zip");
 
-            byte[] data = await New_NetworkingManager.DownloadAssetData(playerUrl);
+            byte[] data = await NetworkingManager.DownloadAssetData(playerUrl);
 
             if (data == null)
             {
@@ -557,7 +556,7 @@ namespace Monetizr.SDK.Campaigns
                 this.loadingError = $"Folder for video player {zipFolder} doesn't exist";
             }
 
-            byte[] data = await New_NetworkingManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+            byte[] data = await NetworkingManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
 
             if (data == null)
             {

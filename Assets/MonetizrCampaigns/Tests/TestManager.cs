@@ -1,5 +1,4 @@
 using Monetizr.SDK.Core;
-using Monetizr.SDK.New;
 using Monetizr.SDK.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -22,7 +21,7 @@ namespace Monetizr.Tests
             MonetizrSettingsMenu.LoadTestSettings();
             MonetizrManager.SetAdvertisingIds("", false);
             MonetizrManager.SetGameCoinAsset(RewardType.Coins, mockImage, "Coins", () => { return 0; }, (ulong reward) => { }, 100);
-            MonetizrManager.SetTeaserPosition(New_MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
+            MonetizrManager.SetTeaserPosition(MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
             MonetizrManager.InitializeForTests(null, () => { }, null, null);
         }
     }

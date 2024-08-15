@@ -1,12 +1,11 @@
-using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Utils;
 using System.Collections.Generic;
 
-namespace Monetizr.SDK.New
+namespace Monetizr.SDK.Campaigns
 {
-    public static class New_CampaignUtils
+    public static class CampaignUtils
     {
         public static void FilterInvalidCampaigns (List<ServerCampaign> result)
         {

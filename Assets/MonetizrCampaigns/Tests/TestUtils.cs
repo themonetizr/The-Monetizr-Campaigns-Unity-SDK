@@ -5,7 +5,7 @@ using System.Globalization;
 using System;
 using UnityEngine;
 using UnityEngine.Networking;
-using Monetizr.SDK.New;
+using Monetizr.SDK.Networking;
 
 namespace Monetizr.Tests
 {
@@ -44,7 +44,7 @@ namespace Monetizr.Tests
             request.SetRequestHeader("device-memory", SystemInfo.systemMemorySize.ToString());
             request.SetRequestHeader("device-model", MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceModel));
             request.SetRequestHeader("device-name", MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceName));
-            request.SetRequestHeader("internet-connection", New_NetworkingUtils.GetInternetConnectionType());
+            request.SetRequestHeader("internet-connection", NetworkingUtils.GetInternetConnectionType());
             request.SetRequestHeader("local-time-stamp", ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString());
             request.SetRequestHeader("Authorization", "Bearer " + MonetizrManager.Instance.ConnectionsClient.currentApiKey);
             request.SetRequestHeader("Accept", "application/json");

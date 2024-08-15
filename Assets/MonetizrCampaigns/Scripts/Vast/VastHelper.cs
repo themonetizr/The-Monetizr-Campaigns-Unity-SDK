@@ -17,7 +17,6 @@ using Monetizr.SDK.Networking;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using CustomUniWebView;
-using Monetizr.SDK.New;
 
 namespace Monetizr.SDK.VAST
 {
@@ -900,7 +899,7 @@ namespace Monetizr.SDK.VAST
             string zipFolder = campPath + "/" + videoAsset.fpath;
             MonetizrLog.Print($"{campPath} {zipFolder}");
             if (!Directory.Exists(zipFolder)) Directory.CreateDirectory(zipFolder);
-            byte[] data = await New_NetworkingManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+            byte[] data = await NetworkingManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
             File.WriteAllBytes(zipFolder + "/html.zip", data);
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
             File.Delete(zipFolder + "/html.zip");
@@ -936,7 +935,7 @@ namespace Monetizr.SDK.VAST
         {
             var url = "https://image.themonetizr.com/omsdk/omsdk-v1.js";
 
-            byte[] data = await New_NetworkingManager.DownloadAssetData(url);
+            byte[] data = await NetworkingManager.DownloadAssetData(url);
 
             if (data == null)
             {

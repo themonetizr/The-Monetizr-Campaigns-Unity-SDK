@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace Monetizr.SDK.New
+namespace Monetizr.SDK.Networking
 {
-    public static class New_NetworkingUtils
+    public static class NetworkingUtils
     {
         public static string GetInternetConnectionType ()
         {

@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Monetizr.SDK.New
+namespace Monetizr.SDK.Networking
 {
-    public class New_NetworkingManager
+    public class NetworkingManager
     {
         public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
         {
@@ -53,7 +53,7 @@ namespace Monetizr.SDK.New
                     {"device-memory",SystemInfo.systemMemorySize.ToString()},
                     {"device-model",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
                     {"device-name",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceName)},
-                    {"internet-connection",New_NetworkingUtils.GetInternetConnectionType()},
+                    {"internet-connection",NetworkingUtils.GetInternetConnectionType()},
                     {"local-time-stamp",((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString()}
                 }
             };

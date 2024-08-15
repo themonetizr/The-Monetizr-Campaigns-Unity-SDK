@@ -15,7 +15,6 @@ using Monetizr.SDK.Missions;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.VAST;
-using Monetizr.SDK.New;
 
 namespace Monetizr.SDK.Networking
 {
@@ -72,7 +71,7 @@ namespace Monetizr.SDK.Networking
 
         internal override async Task<string> GetResponseStringFromUrl(string url)
         {
-            var requestMessage = New_NetworkingManager.GenerateHttpRequestMessage(userAgent, url);
+            var requestMessage = NetworkingManager.GenerateHttpRequestMessage(userAgent, url);
             MonetizrLog.Print($"Sent request: {requestMessage}");
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -126,7 +125,7 @@ namespace Monetizr.SDK.Networking
         internal override async Task<List<ServerCampaign>> GetList()
         {
             var result = await LoadCampaignsListFromServer();
-            New_CampaignUtils.FilterInvalidCampaigns(result);
+            CampaignUtils.FilterInvalidCampaigns(result);
             foreach (var ch in result)
             {
                 MonetizrLog.Print($"Campaign passed filters: {ch.id}");
@@ -181,7 +180,7 @@ namespace Monetizr.SDK.Networking
 
         internal override async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            HttpRequestMessage requestMessage = New_NetworkingManager.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{campaignId}/reset");
+            HttpRequestMessage requestMessage = NetworkingManager.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{campaignId}/reset");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
             string s = await response.Content.ReadAsStringAsync();
             MonetizrLog.Print($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
@@ -198,7 +197,7 @@ namespace Monetizr.SDK.Networking
 
         internal override async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            HttpRequestMessage requestMessage = New_NetworkingManager.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{challenge.id}/claim",true);
+            HttpRequestMessage requestMessage = NetworkingManager.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{challenge.id}/claim",true);
             string content = string.Empty;
 
             if (MonetizrManager.temporaryEmail != null && MonetizrManager.temporaryEmail.Length > 0)
