@@ -24,42 +24,29 @@ namespace Monetizr.SDK.Missions
         public int GetAutoStartId()
         {
             int res = -1;
-
-            if (auto_start_after == null)
-                return res;
-
-            if (int.TryParse(auto_start_after, out res))
-                return res;
-
+            if (auto_start_after == null) return res;
+            if (int.TryParse(auto_start_after, out res)) return res;
             return res;
         }
 
         public bool IsAlwaysHiddenInRC()
         {
             bool res = false;
-
-            if (bool.TryParse(hidden_in_rc, out res))
-                return res;
-
+            if (bool.TryParse(hidden_in_rc, out res)) return res;
             return res;
         }
 
         public int getId()
         {
             int res = -1;
-
-            if (int.TryParse(id, out res))
-                return res;
-
+            if (int.TryParse(id, out res)) return res;
             return -1;
         }
 
         public List<int> GetActivateRange()
         {
             List<int> result = new List<int>();
-
-            if (activate_after == null)
-                return result;
+            if (activate_after == null) return result;
 
             string[] p = activate_after.Split(';');
 
@@ -78,30 +65,21 @@ namespace Monetizr.SDK.Missions
         public RewardType GetRewardType()
         {
             RewardType rt;
-
-            if (System.Enum.TryParse<RewardType>(currency, out rt))
-                return rt;
-
+            if (System.Enum.TryParse<RewardType>(currency, out rt)) return rt;
             return RewardType.Coins;
         }
 
         public float GetRewardAmount()
         {
             float reward = 0;
-
-            if (float.TryParse(percent_amount, out reward))
-                return Mathf.Clamp(reward, 0, 100);
-
+            if (float.TryParse(percent_amount, out reward)) return Mathf.Clamp(reward, 0, 100);
             return 0;
         }
 
         public MissionType GetMissionType()
         {
             MissionType mt;
-
-            if (System.Enum.TryParse<MissionType>(type, out mt))
-                return mt;
-
+            if (System.Enum.TryParse<MissionType>(type, out mt)) return mt;
             return MissionType.Undefined;
         }
 
