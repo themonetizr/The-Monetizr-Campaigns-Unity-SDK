@@ -22,7 +22,7 @@ namespace Monetizr.Tests
             MonetizrManager.SetAdvertisingIds("", false);
             MonetizrManager.SetGameCoinAsset(RewardType.Coins, mockImage, "Coins", () => { return 0; }, (ulong reward) => { }, 100);
             MonetizrManager.SetTeaserPosition(MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
-            MonetizrManager.InitializeForTests(null, () => { }, null, null);
+            MonetizrManager.InitializeForTests(() => { }, null, null);
         }
     }
 }

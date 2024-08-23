@@ -12,8 +12,9 @@ using UnityEngine.Networking;
 
 namespace Monetizr.SDK.Networking
 {
-    public class NetworkingManager
+    public static class NetworkingManager
     {
+
         public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
         {
             UnityWebRequest uwr = UnityWebRequest.Get(url);

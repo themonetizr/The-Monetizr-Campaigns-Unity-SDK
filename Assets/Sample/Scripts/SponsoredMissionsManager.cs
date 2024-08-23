@@ -70,7 +70,7 @@ namespace Monetizr.Sample
             MonetizrManager.SetTeaserPosition(MobileUtils.IsInLandscapeMode() ? new Vector2(700, 300) : new Vector2(-230, -765));
 
             //initialize SDK
-            MonetizrManager.Initialize(null, () =>
+            MonetizrManager.Initialize(() =>
             {
                 if (MonetizrManager.IsActiveAndEnabled())
                 {

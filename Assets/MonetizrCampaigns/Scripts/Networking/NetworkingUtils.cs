@@ -18,5 +18,10 @@ namespace Monetizr.SDK.Networking
                     return "unknown";
             }
         }
+
+        public static bool IsInternetReachable()
+        {
+            return Application.internetReachability != NetworkReachability.NotReachable;
+        }
     }
 }

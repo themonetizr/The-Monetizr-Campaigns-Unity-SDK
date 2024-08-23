@@ -1,16 +1,17 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Assertions;
+﻿using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
-using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
-using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.UI;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Monetizr.SDK.Core
 {
@@ -25,6 +26,7 @@ namespace Monetizr.SDK.Core
         public static bool closeRewardCenterAfterEveryMission = false;
         public static string bundleId = null;
         public static int abTestSegment = 0;
+        public static bool shouldAutoReconect = false;
 
         #endregion
 
@@ -43,6 +45,11 @@ namespace Monetizr.SDK.Core
         private static Transform teaserRoot;
         private static bool isUsingEngagedUserAction = false;
         private static bool hasCompletedEngagedUserAction = false;
+        private static float statusCheckTime = 30f;
+        private static Action s_onRequestComplete = null;
+        private static Action<bool> s_soundSwitch = null;
+        private static Action<bool> s_onUIVisible = null;
+        private static UserDefinedEvent s_userEvent = null;
 
         #endregion
 
@@ -98,9 +105,13 @@ namespace Monetizr.SDK.Core
             gameRewards[rt] = gr;
         }
 
-        public static MonetizrManager Initialize(List<MissionDescription> sponsoredMissions = null, Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
+        public static MonetizrManager Initialize(Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
         {
-            return _Initialize(sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, null);
+            s_onRequestComplete = onRequestComplete;
+            s_soundSwitch = soundSwitch;
+            s_onUIVisible = onUIVisible;
+            s_userEvent = userEvent;
+            return _Initialize(onRequestComplete, soundSwitch, onUIVisible, userEvent, null);
         }
 
         public static void HoldResource(object o)
@@ -329,7 +340,6 @@ namespace Monetizr.SDK.Core
             if (missions.Count == 1 && !showRewardCenterForOneMission)
             {
                 MonetizrLog.Print($"Only one mission available and RewardCenter.show_for_one_mission is false");
-
                 Instance._PressSingleMission(onComplete, m);
                 return;
             }
@@ -484,7 +494,7 @@ namespace Monetizr.SDK.Core
 
         #region Private Static Methods
 
-        private static MonetizrManager _Initialize(List<MissionDescription> sponsoredMissions, Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrClient connectionClient)
+        private static MonetizrManager _Initialize(Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrClient connectionClient)
         {
             if (Instance != null) return Instance;
 
@@ -513,21 +523,23 @@ namespace Monetizr.SDK.Core
             }
 
             MonetizrLog.Print($"MonetizrManager Initialize: {MonetizrSettings.apiKey} {MonetizrSettings.bundleID} {MonetizrSettings.SDKVersion}");
-
-            var monetizrObject = new GameObject("MonetizrManager");
-            var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
-            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
-
-            DontDestroyOnLoad(monetizrObject);
-
-            Instance = monetizrManager;
-            Instance.sponsoredMissions = sponsoredMissions;
-            Instance.userDefinedEvent = userEvent;
-            Instance.onUIVisible = onUIVisible;
-
+            MonetizrManager monetizrManager = CreateMonetizrManagerInstance(onUIVisible, userEvent);
             monetizrManager.Initialize(onRequestComplete, soundSwitch, connectionClient);
 
             return Instance;
+        }
+
+        private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
+        {
+            var monetizrObject = new GameObject("MonetizrManager");
+            var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
+            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
+            DontDestroyOnLoad(monetizrObject);
+            Instance = monetizrManager;
+            Instance.sponsoredMissions = null;
+            Instance.userDefinedEvent = userEvent;
+            Instance.onUIVisible = onUIVisible;
+            return monetizrManager;
         }
 
         private static bool IsInitializationSetupComplete()
@@ -585,9 +597,9 @@ namespace Monetizr.SDK.Core
             return null;
         }
 
-        internal static MonetizrManager InitializeForTests(List<MissionDescription> sponsoredMissions = null, Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null, MonetizrClient connectionClient = null)
+        internal static MonetizrManager InitializeForTests(Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null, MonetizrClient connectionClient = null)
         {
-            return _Initialize(sponsoredMissions, onRequestComplete, soundSwitch, onUIVisible, userEvent, connectionClient);
+            return _Initialize(onRequestComplete, soundSwitch, onUIVisible, userEvent, connectionClient);
         }
 
         internal static void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
@@ -877,13 +889,32 @@ namespace Monetizr.SDK.Core
             Analytics?.OnApplicationQuit();
         }
 
+        private void Start()
+        {
+            if (!shouldAutoReconect) return;
+            InvokeRepeating(nameof(VerifySDKStatus), statusCheckTime, statusCheckTime);
+        }
+
+        private void VerifySDKStatus ()
+        {
+            if (IsInitialized()) 
+            {
+                if (!NetworkingUtils.IsInternetReachable())
+                {
+                    Instance.Initialize(s_onRequestComplete, _soundSwitch, null);
+                }
+            }
+            else
+            {
+                _Initialize(s_onRequestComplete, s_soundSwitch, s_onUIVisible, s_userEvent, null);
+            }
+        }
+
         private void Initialize(Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
         {
+
 #if USING_WEBVIEW
-            if (!UniWebView.IsWebViewSupported)
-            {
-                Log.Print("WebView isn't supported on current platform!");
-            }
+            if (!UniWebView.IsWebViewSupported) Log.Print("WebView isn't supported on current platform!");
 #endif
 
             localSettings = new LocalSettingsManager();
