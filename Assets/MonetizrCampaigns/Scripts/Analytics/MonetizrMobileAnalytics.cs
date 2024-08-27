@@ -96,7 +96,7 @@ namespace Monetizr.SDK.Analytics
 #elif UNITY_ANDROID
 
             float aspectRatio = Mathf.Max(Screen.width, Screen.height) / Mathf.Min(Screen.width, Screen.height);
-            bool isTablet = (New_MobileUtils.DeviceDiagonalSizeInInches() > 6.5f && aspectRatio < 2f);
+            bool isTablet = (MobileUtils.GetDeviceDiagonalSizeInInches() > 6.5f && aspectRatio < 2f);
 
             if (isTablet)
             {
