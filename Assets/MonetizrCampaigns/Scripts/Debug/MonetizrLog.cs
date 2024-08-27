@@ -1,5 +1,6 @@
 #define MONETIZR_VERBOSE
 
+using System;
 using UnityEngine;
 
 namespace Monetizr.SDK.Debug
@@ -19,7 +20,7 @@ namespace Monetizr.SDK.Debug
 #if UNITY_EDITOR
             UnityEngine.Debug.Log($"Monetizr SDK: {message}");
 #else
-            PrintLine($"Monetizr SDK: {message}");
+            Console.WriteLine($"Monetizr SDK: {message}");
 #endif
         }
 

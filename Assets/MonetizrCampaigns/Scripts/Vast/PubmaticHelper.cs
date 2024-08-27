@@ -211,7 +211,7 @@ namespace Monetizr.SDK.VAST
                 var targetDelay = 10;
                 if (delay < targetDelay)
                 {
-                    Log.PrintV($"Last programmatic request was earlier than {targetDelay} {delay}");
+                    MonetizrLog.Print($"Last programmatic request was earlier than {targetDelay} {delay}");
                     return false;
                 }
             }
