@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: MonetizrSettings
   m_EditorClassIdentifier: 
   shouldUnityUseAndroidSettings: 1
-  shouldBundleIDBeApplicationIdentifier: 1
-  androidBundleID: com.monetizr.landslice
-  androidAPIKey: 4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU
-  iOSBundleID: com.monetizr.landslice
-  iOSAPIKey: 4vdWpekbjsTcZF8EJFOSD5nzC82GL4NFrzY93KfUiGU
+  shouldBundleIDBeApplicationIdentifier: 0
+  androidBundleID: 
+  androidAPIKey: 
+  iOSBundleID: 
+  iOSAPIKey: 
