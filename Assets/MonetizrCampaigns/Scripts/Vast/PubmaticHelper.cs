@@ -253,8 +253,7 @@ namespace Monetizr.SDK.VAST
             }
 
             currentCampaign.openRtbRawResponse = res;
-            UnityEngine.Debug.Log("================================");
-            UnityEngine.Debug.Log($"Open RTB Raw Response: {res}");
+            MonetizrLog.Print($"Open RTB Raw Response: {res}");
             var openRtbResponse = OpenRTBResponse.Load(res);
             var adm = openRtbResponse.GetAdm();
 

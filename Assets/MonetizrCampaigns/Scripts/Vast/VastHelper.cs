@@ -749,6 +749,7 @@ namespace Monetizr.SDK.VAST
                 return true;
             }
         }
+
         internal async Task<ServerCampaign> PrepareServerCampaign(string campaignId, string vastContent, bool videoOnly = false)
         {
             ServerCampaign serverCampaign = new ServerCampaign(campaignId, "", GetDefaultSettingsForProgrammatic());
@@ -783,11 +784,8 @@ namespace Monetizr.SDK.VAST
                 return;
             }
 
-            if (vastData.Items == null || vastData.Items.Length == 0)
-                return;
-
-            if (!(vastData.Items[0] is VASTAD vad))
-                return;
+            if (vastData.Items == null || vastData.Items.Length == 0) return;
+            if (!(vastData.Items[0] is VASTAD vad)) return;
 
             int prefBitRate = httpClient.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
             int prefWidth = httpClient.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
@@ -800,30 +798,36 @@ namespace Monetizr.SDK.VAST
 
             
 
-            if (adItem.InUnknownAdType())
-                return;
+            if (adItem.InUnknownAdType()) return;
 
             adItem.AssignCreativesIntoAssets();
 
-            if (string.IsNullOrEmpty(adItem.WrapperAdTagUri))
-                return;
+            if (string.IsNullOrEmpty(adItem.WrapperAdTagUri)) return;
 
             MonetizrLog.Print($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
 
             var result = await MonetizrHttpClient.DownloadUrlAsString(new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri));
 
-            if (!result.isSuccess)
-                return;
+            if (!result.isSuccess) return;
 
             await LoadVastAndFindVideoAsset(result.content, serverCampaign);
 
             return;
         }
 
+        private int iteration = 0;
+
         private async Task<bool> LoadVastContent(string vastContent, bool videoOnly, ServerCampaign serverCampaign, bool isFirstCall)
         {
+            MonetizrLog.Print("***** ITERATION " + iteration + ": " + vastContent);
+            iteration++;
+
+            if (isFirstCall)
+            {
+                serverCampaign.openRtbRawResponse = vastContent;
+            }
+
             VAST vastData = CreateVastFromXml(vastContent);
-            serverCampaign.openRtbRawResponse = vastContent;
 
             if (vastData == null)
             {
@@ -878,8 +882,7 @@ namespace Monetizr.SDK.VAST
 
         private static void LoadCampagnSettingsFromAdParams(AdParameters_type adParameters, ServerCampaign serverCampaign)
         {
-            if (adParameters == null)
-                return;
+            if (adParameters == null) return;
 
             MonetizrLog.Print(adParameters.Value);
             string adp = adParameters.Value;

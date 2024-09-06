@@ -235,15 +235,12 @@ namespace Monetizr.SDK.UI
             if (isProgrammatic)
             {
                 campaign.vastSettings = new VastHelper.VastSettings();
-
                 showWebview = false;
-
                 var programmaticOk = false;
 
                 try
                 {
-                    programmaticOk =
-                        await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic);
+                    programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic);
                 }
                 catch (DownloadUrlAsStringException e)
                 {
@@ -272,9 +269,7 @@ namespace Monetizr.SDK.UI
             if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
                 var replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
-                
                 campaign.vastSettings.ReplaceVastTags(replacer);
-
                 campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
 
                 if (!string.IsNullOrEmpty(campaign.vastSettings.videoSettings.videoClickThroughUrl) ||
@@ -305,7 +300,6 @@ namespace Monetizr.SDK.UI
                 _webView.Load(_webUrl);
                 _webView.Show();
                 MonetizrLog.Print($"Url to show {_webUrl}");
-
                 MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                 impressionStarts = true;
             }
@@ -333,8 +327,7 @@ namespace Monetizr.SDK.UI
             bool fullScreen = true;
             bool useSafeFrame = false;
 
-            if (id == PanelId.HtmlWebPageView)
-                fullScreen = false;
+            if (id == PanelId.HtmlWebPageView) fullScreen = false;
 
             if (id == PanelId.SurveyWebView)
             {
@@ -348,9 +341,7 @@ namespace Monetizr.SDK.UI
             }
 
             claimButton.SetActive(false);
-
             PrepareWebViewComponent(fullScreen, useSafeFrame);
-
             closeButton.gameObject.SetActive(!fullScreen);
 
             _closeButtonDelay = m.campaignServerSettings.GetIntParam(
@@ -361,11 +352,8 @@ namespace Monetizr.SDK.UI
                 }, 0);
             
             StartCoroutine(ShowCloseButton(_closeButtonDelay));
-
             background.color = id == PanelId.Html5WebView ? Color.black : Color.white;
-
             adType = getAdPlacement();
-
             eventsPrefix = adType.ToString();
 
             switch (id)
@@ -388,7 +376,6 @@ namespace Monetizr.SDK.UI
                     impressionStarts = true;
                     break;
             }
-
 
             if (!string.IsNullOrEmpty(_webUrl))
             {

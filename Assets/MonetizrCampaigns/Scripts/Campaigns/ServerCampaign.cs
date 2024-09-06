@@ -584,18 +584,16 @@ namespace Monetizr.SDK.Campaigns
             string videoPath = $"{fpath}/video.mp4";
             string indexPath = $"{fpath}/{asset.mainAssetName}";
 
-            UnityEngine.Debug.Log("*********************************");
-            UnityEngine.Debug.Log("Injected Parameters: " + vastAdParameters);
+            MonetizrLog.Print("VastAdParameters: " + vastAdParameters);
+            MonetizrLog.Print("OpenRTBResponse: " + openRtbRawResponse);
 
             var str = File.ReadAllText(indexPath);
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
             string vastResponse = "`" + openRtbRawResponse + "`";
-            if (!string.IsNullOrEmpty(vastResponse))
-                str = str.Replace("\"${VAST_RESPONSE}\"", vastResponse);
 
-            if (!File.Exists(videoPath))
-                str = str.Replace("video.mp4", asset.url);
+            if (!string.IsNullOrEmpty(vastResponse)) str = str.Replace("\"${VAST_RESPONSE}\"", vastResponse);
+            if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
 
             File.WriteAllText(indexPath, str);
         }
@@ -640,45 +638,32 @@ namespace Monetizr.SDK.Campaigns
         
         internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
         {
-            string res = JsonUtility.ToJson(vastSettings);
-                        
+            string res = JsonUtility.ToJson(vastSettings); 
             var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
-            
-            res = res.Insert(res.Length - 1, campaignSettingsJson);
-                        
+            res = res.Insert(res.Length - 1, campaignSettingsJson);      
             MonetizrLog.Print($"VAST Settings: {res}");
-
             return res;
         }
 
         internal bool IsCampaignActivate()
         {
-            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(this) == 0)
-                return false;
+            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(this) == 0) return false;
 
             var serverMaxAmount = serverSettings.GetIntParam("amount_of_teasers");
             var currentAmount = MonetizrManager.Instance.localSettings.GetSetting(id).amountTeasersShown;
-
             bool hasNoTeasers = currentAmount > serverMaxAmount;
-
             var serverMaxNotificationsAmount = serverSettings.GetIntParam("amount_of_notifications");
             var currentNotificationsAmount = MonetizrManager.Instance.localSettings.GetSetting(id).amountNotificationsShown;
-
             bool hasNoNotifications = currentNotificationsAmount > serverMaxNotificationsAmount;
 
-            if (hasNoNotifications && hasNoTeasers)
-                return false;
-
+            if (hasNoNotifications && hasNoTeasers) return false;
             return true;
         }
 
         public bool IsConditionsTrue(Dictionary<string, string> mConditions)
         {
             var settings = MonetizrManager.Instance.localSettings.GetSetting(id).settings;
-
-            if (settings == null || settings.dictionary.Count == 0)
-                return false;
-
+            if (settings == null || settings.dictionary.Count == 0) return false;
             return mConditions.All(c => settings[c.Key] == c.Value);
         }
 
@@ -686,13 +671,9 @@ namespace Monetizr.SDK.Campaigns
         {
             MonetizrLog.Print($"Content: {content}");
             MonetizrLog.Print($"Adm: {adm}");
-
             if (string.IsNullOrEmpty(content)) return;
-            
             var cd = MonetizrUtils.ParseContentString(content);
-
             serverSettings = new SettingsDictionary<string, string>(cd);
-
             MonetizrLog.Print($"Loaded campaign: {id}");
         }
         
