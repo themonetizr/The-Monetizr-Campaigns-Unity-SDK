@@ -5,35 +5,28 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace CustomUniWebView 
-{
-    public class UniWebViewGradlePropertyPatcher
-    {
-        public static void Patch(string filePath)
-        {
-            string[] lines = File.ReadAllLines(filePath);
 
-            bool hasAndroidXProperty = lines.Any(text => text.Contains("android.useAndroidX"));
-            bool hasJetifierProperty = lines.Any(text => text.Contains("android.enableJetifier"));
+public class UniWebViewGradlePropertyPatcher {
+    public static void Patch(string filePath) {
+        string[] lines = File.ReadAllLines(filePath);
 
-            StringBuilder builder = new StringBuilder();
+        bool hasAndroidXProperty = lines.Any(text => text.Contains("android.useAndroidX"));
+        bool hasJetifierProperty = lines.Any(text => text.Contains("android.enableJetifier"));
 
-            foreach (string each in lines)
-            {
-                builder.AppendLine(each);
-            }
+        StringBuilder builder = new StringBuilder();
 
-            if (!hasAndroidXProperty)
-            {
-                builder.AppendLine("android.useAndroidX=true");
-            }
-
-            if (!hasJetifierProperty && UniWebViewEditorSettings.GetOrCreateSettings().enableJetifier)
-            {
-                builder.AppendLine("android.enableJetifier=true");
-            }
-
-            File.WriteAllText(filePath, builder.ToString());
+        foreach(string each in lines) {
+            builder.AppendLine(each);
         }
+
+        if (!hasAndroidXProperty) {
+            builder.AppendLine("android.useAndroidX=true");
+        }
+
+        if (!hasJetifierProperty && UniWebViewEditorSettings.GetOrCreateSettings().enableJetifier) {
+            builder.AppendLine("android.enableJetifier=true");
+        }
+
+        File.WriteAllText(filePath, builder.ToString());
     }
 }

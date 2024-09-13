@@ -1,6 +1,5 @@
 ﻿#define UNI_WEB_VIEW
 
-using CustomUniWebView;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;

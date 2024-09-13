@@ -20,171 +20,152 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace CustomUniWebView
-{
+/// <summary>
+/// A predefined authentication flow for Twitter.
+/// 
+/// This implementation follows the flow described here:
+/// https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code
+///
+/// See https://docs.uniwebview.com/guide/oauth2.html for a more detailed guide of authentication in UniWebView.
+/// </summary>
+public class UniWebViewAuthenticationFlowTwitter : UniWebViewAuthenticationCommonFlow, IUniWebViewAuthenticationFlow<UniWebViewAuthenticationTwitterToken> {
     /// <summary>
-    /// A predefined authentication flow for Twitter.
-    /// 
-    /// This implementation follows the flow described here:
-    /// https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code
-    ///
-    /// See https://docs.uniwebview.com/guide/oauth2.html for a more detailed guide of authentication in UniWebView.
+    /// The client ID of your Twitter application.
     /// </summary>
-    public class UniWebViewAuthenticationFlowTwitter : UniWebViewAuthenticationCommonFlow, IUniWebViewAuthenticationFlow<UniWebViewAuthenticationTwitterToken>
-    {
-        /// <summary>
-        /// The client ID of your Twitter application.
-        /// </summary>
-        public string clientId = "";
-        /// <summary>
-        /// The redirect URI of your Twitter application.
-        /// </summary>
-        public string redirectUri = "";
-        /// <summary>
-        /// The scope string of all your required scopes.
-        /// </summary>
-        public string scope = "";
-        /// <summary>
-        /// Optional to control this flow's behaviour.
-        /// </summary>
-        public UniWebViewAuthenticationFlowTwitterOptional optional;
+    public string clientId = "";
+    /// <summary>
+    /// The redirect URI of your Twitter application.
+    /// </summary>
+    public string redirectUri = "";
+    /// <summary>
+    /// The scope string of all your required scopes.
+    /// </summary>
+    public string scope = "";
+    /// <summary>
+    /// Optional to control this flow's behaviour.
+    /// </summary>
+    public UniWebViewAuthenticationFlowTwitterOptional optional;
+    
+    private string responseType = "code";
+    private string grantType = "authorization_code";
+    
+    private readonly UniWebViewAuthenticationConfiguration config = 
+        new UniWebViewAuthenticationConfiguration(
+            "https://twitter.com/i/oauth2/authorize", 
+            "https://api.twitter.com/2/oauth2/token"
+        );
 
-        private string responseType = "code";
-        private string grantType = "authorization_code";
+    /// <summary>
+    /// Starts the authentication flow with the standard OAuth 2.0.
+    /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
+    /// </summary>
+    public override void StartAuthenticationFlow() {
+        var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationTwitterToken>(this);
+        flow.StartAuth();
+    }
+    
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration() {
+        return config;
+    }
+    
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public string GetCallbackUrl() {
+        return redirectUri;
+    }
 
-        private readonly UniWebViewAuthenticationConfiguration config =
-            new UniWebViewAuthenticationConfiguration(
-                "https://twitter.com/i/oauth2/authorize",
-                "https://api.twitter.com/2/oauth2/token"
-            );
-
-        /// <summary>
-        /// Starts the authentication flow with the standard OAuth 2.0.
-        /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
-        /// </summary>
-        public override void StartAuthenticationFlow()
-        {
-            var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationTwitterToken>(this);
-            flow.StartAuth();
-        }
-
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration()
-        {
-            return config;
-        }
-
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public string GetCallbackUrl()
-        {
-            return redirectUri;
-        }
-
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public Dictionary<string, string> GetAuthenticationUriArguments()
-        {
-            var authorizeArgs = new Dictionary<string, string> {
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public Dictionary<string, string> GetAuthenticationUriArguments() {
+        var authorizeArgs = new Dictionary<string, string> {
             { "client_id", clientId },
             { "redirect_uri", redirectUri },
             { "scope", scope },
             { "response_type", responseType }
         };
-            if (optional != null)
-            {
-                if (optional.enableState)
-                {
-                    var state = GenerateAndStoreState();
-                    authorizeArgs.Add("state", state);
-                }
-
-                if (optional.PKCESupport != UniWebViewAuthenticationPKCE.None)
-                {
-                    var codeChallenge = GenerateCodeChallengeAndStoreCodeVerify(optional.PKCESupport);
-                    authorizeArgs.Add("code_challenge", codeChallenge);
-
-                    var method = UniWebViewAuthenticationUtils.ConvertPKCEToString(optional.PKCESupport);
-                    authorizeArgs.Add("code_challenge_method", method);
-                }
+        if (optional != null) {
+            if (optional.enableState) {
+                var state = GenerateAndStoreState();
+                authorizeArgs.Add("state", state);
             }
 
-            return authorizeArgs;
+            if (optional.PKCESupport != UniWebViewAuthenticationPKCE.None) {
+                var codeChallenge = GenerateCodeChallengeAndStoreCodeVerify(optional.PKCESupport);
+                authorizeArgs.Add("code_challenge", codeChallenge);
+
+                var method = UniWebViewAuthenticationUtils.ConvertPKCEToString(optional.PKCESupport);
+                authorizeArgs.Add("code_challenge_method", method);
+            }
         }
 
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse)
-        {
-            if (!authResponse.StartsWith(redirectUri))
-            {
-                throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
-            }
+        return authorizeArgs;
+    }
 
-            var uri = new Uri(authResponse);
-            var response = UniWebViewAuthenticationUtils.ParseFormUrlEncodedString(uri.Query);
-            if (!response.TryGetValue("code", out var code))
-            {
-                throw AuthenticationResponseException.InvalidResponse(authResponse);
-            }
-            if (optional.enableState)
-            {
-                VerifyState(response);
-            }
-            var parameters = new Dictionary<string, string> {
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse) {
+        if (!authResponse.StartsWith(redirectUri)) {
+            throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
+        }
+        
+        var uri = new Uri(authResponse);
+        var response = UniWebViewAuthenticationUtils.ParseFormUrlEncodedString(uri.Query);
+        if (!response.TryGetValue("code", out var code)) {
+            throw AuthenticationResponseException.InvalidResponse(authResponse);
+        }
+        if (optional.enableState) {
+            VerifyState(response);
+        }
+        var parameters = new Dictionary<string, string> {
             { "client_id", clientId },
             { "code", code },
             { "redirect_uri", redirectUri },
             { "grant_type", grantType },
         };
-            if (CodeVerify != null)
-            {
-                parameters.Add("code_verifier", CodeVerify);
-            }
-
-            return parameters;
+        if (CodeVerify != null) {
+            parameters.Add("code_verifier", CodeVerify);
         }
 
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public UniWebViewAuthenticationTwitterToken GenerateTokenFromExchangeResponse(string exchangeResponse)
-        {
-            return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationTwitterToken>.Parse(exchangeResponse);
-        }
-
-        [field: SerializeField]
-        public UnityEvent<UniWebViewAuthenticationTwitterToken> OnAuthenticationFinished { get; set; }
-        [field: SerializeField]
-        public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
+        return parameters;
     }
 
     /// <summary>
-    /// The authentication flow's optional settings for Twitter.
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
-    [Serializable]
-    public class UniWebViewAuthenticationFlowTwitterOptional
-    {
-        /// <summary>
-        /// Whether to enable PKCE when performing authentication.This has to be enabled as `S256`,
-        /// otherwise, Twitter will reject the authentication request.
-        /// </summary>
-        public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.S256;
-        /// <summary>
-        /// Whether to enable the state verification. If enabled, the state will be generated and verified in the
-        /// authentication callback. This has to be `true`, otherwise, Twitter will reject the authentication request.
-        /// </summary>
-        public bool enableState = true;
+    public UniWebViewAuthenticationTwitterToken GenerateTokenFromExchangeResponse(string exchangeResponse) {
+        return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationTwitterToken>.Parse(exchangeResponse);
     }
 
-    /// <summary>
-    /// The token object from Twitter. Check `UniWebViewAuthenticationStandardToken` for more.
-    /// </summary>
-    public class UniWebViewAuthenticationTwitterToken : UniWebViewAuthenticationStandardToken { }
+    [field: SerializeField]
+    public UnityEvent<UniWebViewAuthenticationTwitterToken> OnAuthenticationFinished { get; set; }
+    [field: SerializeField]
+    public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
 }
 
+/// <summary>
+/// The authentication flow's optional settings for Twitter.
+/// </summary>
+[Serializable]
+public class UniWebViewAuthenticationFlowTwitterOptional {
+    /// <summary>
+    /// Whether to enable PKCE when performing authentication.This has to be enabled as `S256`,
+    /// otherwise, Twitter will reject the authentication request.
+    /// </summary>
+    public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.S256;
+    /// <summary>
+    /// Whether to enable the state verification. If enabled, the state will be generated and verified in the
+    /// authentication callback. This has to be `true`, otherwise, Twitter will reject the authentication request.
+    /// </summary>
+    public bool enableState = true;
+}
+
+/// <summary>
+/// The token object from Twitter. Check `UniWebViewAuthenticationStandardToken` for more.
+/// </summary>
+public class UniWebViewAuthenticationTwitterToken : UniWebViewAuthenticationStandardToken { }

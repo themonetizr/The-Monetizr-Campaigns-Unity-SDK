@@ -20,188 +20,168 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace CustomUniWebView
-{
+/// <summary>
+/// A customizable authentication flow behavior.
+/// </summary>
+/// <remarks>
+/// Besides of the predefined authentication flows, such as Twitter (`UniWebViewAuthenticationFlowTwitter`) or Google
+/// (`UniWebViewAuthenticationFlowGoogle`), this class allows you to determine the details of the authentication flow,
+/// such as entry points, grant types, scopes and more. But similar to other target-specified flows, it follows the same
+/// OAuth 2.0 code auth pattern.
+///
+/// If you need to support other authentication flows for the platform targets other than the predefined ones, you can
+/// use this class and set all necessary parameters. It runs the standard OAuth 2.0 flow and gives out a
+/// `UniWebViewAuthenticationStandardToken` as the result.
+///
+/// If you need to support authentication flows other than `code` based OAuth 2.0, try to derive from
+/// `UniWebViewAuthenticationCommonFlow` and implement `IUniWebViewAuthenticationFlow` interface, or even use the 
+/// underneath `UniWebViewAuthenticationSession` to get a highly customizable flow.
+/// 
+/// </remarks>
+public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCommonFlow, IUniWebViewAuthenticationFlow<UniWebViewAuthenticationStandardToken> {
+
     /// <summary>
-    /// A customizable authentication flow behavior.
+    /// The config object which defines the basic information of the authentication flow.
     /// </summary>
-    /// <remarks>
-    /// Besides of the predefined authentication flows, such as Twitter (`UniWebViewAuthenticationFlowTwitter`) or Google
-    /// (`UniWebViewAuthenticationFlowGoogle`), this class allows you to determine the details of the authentication flow,
-    /// such as entry points, grant types, scopes and more. But similar to other target-specified flows, it follows the same
-    /// OAuth 2.0 code auth pattern.
+    public UniWebViewAuthenticationFlowCustomizeConfig config = new UniWebViewAuthenticationFlowCustomizeConfig();
+
+    /// <summary>
+    /// The client Id of your OAuth application.
+    /// </summary>
+    public string clientId = "";
+    
+    /// <summary>
+    /// The redirect URI of your OAuth application. The service provider is expected to call this URI to pass back the
+    /// authorization code. It should be something also set to your OAuth application.
     ///
-    /// If you need to support other authentication flows for the platform targets other than the predefined ones, you can
-    /// use this class and set all necessary parameters. It runs the standard OAuth 2.0 flow and gives out a
-    /// `UniWebViewAuthenticationStandardToken` as the result.
-    ///
-    /// If you need to support authentication flows other than `code` based OAuth 2.0, try to derive from
-    /// `UniWebViewAuthenticationCommonFlow` and implement `IUniWebViewAuthenticationFlow` interface, or even use the 
-    /// underneath `UniWebViewAuthenticationSession` to get a highly customizable flow.
-    /// 
-    /// </remarks>
-    public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCommonFlow, IUniWebViewAuthenticationFlow<UniWebViewAuthenticationStandardToken>
-    {
+    /// Also remember to add it to the "Auth Callback Urls" field in UniWebView's preference panel. 
+    /// </summary>
+    public string redirectUri = "";
+    
+    /// <summary>
+    /// The scope of the authentication request.
+    /// </summary>
+    public string scope = "";
 
-        /// <summary>
-        /// The config object which defines the basic information of the authentication flow.
-        /// </summary>
-        public UniWebViewAuthenticationFlowCustomizeConfig config = new UniWebViewAuthenticationFlowCustomizeConfig();
+    /// <summary>
+    /// The optional object which defines some optional parameters of the authentication flow, such as whether supports
+    /// `state` or `PKCE`.
+    /// </summary>
+    public UniWebViewAuthenticationFlowCustomizeOptional optional;
 
-        /// <summary>
-        /// The client Id of your OAuth application.
-        /// </summary>
-        public string clientId = "";
+    /// <summary>
+    /// Starts the authentication flow with the standard OAuth 2.0.
+    /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
+    /// </summary>
+    public override void StartAuthenticationFlow() {
+        var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationStandardToken>(this);
+        flow.StartAuth();
+    }
+    
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration() {
+        return new UniWebViewAuthenticationConfiguration(
+            config.authorizationEndpoint, 
+            config.tokenEndpoint
+        );
+    }
+    
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public string GetCallbackUrl() {
+        return redirectUri;
+    }
 
-        /// <summary>
-        /// The redirect URI of your OAuth application. The service provider is expected to call this URI to pass back the
-        /// authorization code. It should be something also set to your OAuth application.
-        ///
-        /// Also remember to add it to the "Auth Callback Urls" field in UniWebView's preference panel. 
-        /// </summary>
-        public string redirectUri = "";
-
-        /// <summary>
-        /// The scope of the authentication request.
-        /// </summary>
-        public string scope = "";
-
-        /// <summary>
-        /// The optional object which defines some optional parameters of the authentication flow, such as whether supports
-        /// `state` or `PKCE`.
-        /// </summary>
-        public UniWebViewAuthenticationFlowCustomizeOptional optional;
-
-        /// <summary>
-        /// Starts the authentication flow with the standard OAuth 2.0.
-        /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
-        /// </summary>
-        public override void StartAuthenticationFlow()
-        {
-            var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationStandardToken>(this);
-            flow.StartAuth();
-        }
-
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration()
-        {
-            return new UniWebViewAuthenticationConfiguration(
-                config.authorizationEndpoint,
-                config.tokenEndpoint
-            );
-        }
-
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public string GetCallbackUrl()
-        {
-            return redirectUri;
-        }
-
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public Dictionary<string, string> GetAuthenticationUriArguments()
-        {
-            var authorizeArgs = new Dictionary<string, string> {
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public Dictionary<string, string> GetAuthenticationUriArguments() {
+        var authorizeArgs = new Dictionary<string, string> {
             { "client_id", clientId },
             { "redirect_uri", redirectUri },
             { "scope", scope },
             { "response_type", config.responseType }
         };
-            if (optional != null)
-            {
-                if (optional.enableState)
-                {
-                    var state = GenerateAndStoreState();
-                    authorizeArgs.Add("state", state);
-                }
-
-                if (optional.PKCESupport != UniWebViewAuthenticationPKCE.None)
-                {
-                    var codeChallenge = GenerateCodeChallengeAndStoreCodeVerify(optional.PKCESupport);
-                    authorizeArgs.Add("code_challenge", codeChallenge);
-
-                    var method = UniWebViewAuthenticationUtils.ConvertPKCEToString(optional.PKCESupport);
-                    authorizeArgs.Add("code_challenge_method", method);
-                }
+        if (optional != null) {
+            if (optional.enableState) {
+                var state = GenerateAndStoreState();
+                authorizeArgs.Add("state", state);
             }
 
-            return authorizeArgs;
+            if (optional.PKCESupport != UniWebViewAuthenticationPKCE.None) {
+                var codeChallenge = GenerateCodeChallengeAndStoreCodeVerify(optional.PKCESupport);
+                authorizeArgs.Add("code_challenge", codeChallenge);
+
+                var method = UniWebViewAuthenticationUtils.ConvertPKCEToString(optional.PKCESupport);
+                authorizeArgs.Add("code_challenge_method", method);
+            }
         }
 
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse)
-        {
-            if (!authResponse.StartsWith(redirectUri))
-            {
-                throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
-            }
+        return authorizeArgs;
+    }
 
-            var uri = new Uri(authResponse);
-            var response = UniWebViewAuthenticationUtils.ParseFormUrlEncodedString(uri.Query);
-            if (!response.TryGetValue("code", out var code))
-            {
-                throw AuthenticationResponseException.InvalidResponse(authResponse);
-            }
-            if (optional.enableState)
-            {
-                VerifyState(response);
-            }
-            var parameters = new Dictionary<string, string> {
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse) {
+        if (!authResponse.StartsWith(redirectUri)) {
+            throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
+        }
+        
+        var uri = new Uri(authResponse);
+        var response = UniWebViewAuthenticationUtils.ParseFormUrlEncodedString(uri.Query);
+        if (!response.TryGetValue("code", out var code)) {
+            throw AuthenticationResponseException.InvalidResponse(authResponse);
+        }
+        if (optional.enableState) {
+            VerifyState(response);
+        }
+        var parameters = new Dictionary<string, string> {
             { "client_id", clientId },
             { "code", code },
             { "redirect_uri", redirectUri },
             { "grant_type", config.grantType },
         };
-            if (CodeVerify != null)
-            {
-                parameters.Add("code_verifier", CodeVerify);
-            }
-
-            return parameters;
+        if (CodeVerify != null) {
+            parameters.Add("code_verifier", CodeVerify);
         }
 
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        public UniWebViewAuthenticationStandardToken GenerateTokenFromExchangeResponse(string exchangeResponse)
-        {
-            return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationStandardToken>.Parse(exchangeResponse);
-        }
-
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        [field: SerializeField]
-        public UnityEvent<UniWebViewAuthenticationStandardToken> OnAuthenticationFinished { get; set; }
-
-        /// <summary>
-        /// Implements required method in `IUniWebViewAuthenticationFlow`.
-        /// </summary>
-        [field: SerializeField]
-        public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
+        return parameters;
     }
 
-    [Serializable]
-    public class UniWebViewAuthenticationFlowCustomizeConfig
-    {
-        public string authorizationEndpoint = "";
-        public string tokenEndpoint = "";
-        public string responseType = "code";
-        public string grantType = "authorization_code";
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public UniWebViewAuthenticationStandardToken GenerateTokenFromExchangeResponse(string exchangeResponse) {
+        return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationStandardToken>.Parse(exchangeResponse);
     }
 
-    [Serializable]
-    public class UniWebViewAuthenticationFlowCustomizeOptional
-    {
-        public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.None;
-        public bool enableState = false;
-    }
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    [field: SerializeField]
+    public UnityEvent<UniWebViewAuthenticationStandardToken> OnAuthenticationFinished { get; set; }
+    
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    [field: SerializeField]
+    public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
 }
 
+[Serializable]
+public class UniWebViewAuthenticationFlowCustomizeConfig {
+    public string authorizationEndpoint = "";
+    public string tokenEndpoint = "";
+    public string responseType = "code";
+    public string grantType = "authorization_code";
+}
+
+[Serializable]
+public class UniWebViewAuthenticationFlowCustomizeOptional {
+    public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.None; 
+    public bool enableState = false;
+}

@@ -14,33 +14,29 @@
 //  claim, damages or other liability, whether in action of contract, tort or otherwise, 
 //  arising from, out of or in connection with the software or the use of other dealing in the software.
 
-namespace CustomUniWebView
+/// <summary>
+/// Constants indicating how safe area insets are added to the adjusted content inset.
+/// This is only for iOS.
+/// </summary>
+public enum UniWebViewContentInsetAdjustmentBehavior
 {
     /// <summary>
-    /// Constants indicating how safe area insets are added to the adjusted content inset.
-    /// This is only for iOS.
+    /// Automatically adjust the scroll view insets.
     /// </summary>
-    public enum UniWebViewContentInsetAdjustmentBehavior
-    {
-        /// <summary>
-        /// Automatically adjust the scroll view insets.
-        /// </summary>
-        Automatic = 0,
+    Automatic = 0,
 
-        /// <summary>
-        /// Adjust the insets only in the scrollable directions.
-        /// </summary>
-        ScrollableAxes = 1,
+    /// <summary>
+    /// Adjust the insets only in the scrollable directions.
+    /// </summary>
+    ScrollableAxes = 1,
 
-        /// <summary>
-        /// Do not adjust the scroll view insets.
-        /// </summary>
-        Never = 2,
+    /// <summary>
+    /// Do not adjust the scroll view insets.
+    /// </summary>
+    Never = 2,
 
-        /// <summary>
-        /// Always include the safe area insets in the content adjustment.
-        /// </summary>
-        Always = 3
-    }
+    /// <summary>
+    /// Always include the safe area insets in the content adjustment.
+    /// </summary>
+    Always = 3
 }
-
