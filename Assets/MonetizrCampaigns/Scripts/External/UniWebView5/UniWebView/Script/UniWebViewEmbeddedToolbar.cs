@@ -100,8 +100,9 @@ public class UniWebViewEmbeddedToolbar {
     }
 
     /// <summary>
-    /// Hides the navigation buttons on the toolbar. When called, the back button and forward button will not be shown.
-    ///
+    /// Hides the navigation buttons on the toolbar. 
+    /// 
+    /// When called, the back button and forward button will not be shown.
     /// By default, the navigation buttons are shown.
     /// </summary>
     public void HideNavigationButtons() {
@@ -109,8 +110,9 @@ public class UniWebViewEmbeddedToolbar {
     }
 
     /// <summary>
-    /// Shows the navigation buttons on the toolbar. When called, the back button and forward button will be shown.
+    /// Shows the navigation buttons on the toolbar. 
     /// 
+    /// When called, the back button and forward button will be shown.
     /// By default, the navigation buttons are shown.
     /// </summary>
     public void ShowNavigationButtons() {

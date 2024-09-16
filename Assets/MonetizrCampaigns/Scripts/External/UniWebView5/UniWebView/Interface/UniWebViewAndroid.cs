@@ -2,6 +2,17 @@
 
 using UnityEngine;
 
+class UniWebViewMethodChannel: AndroidJavaProxy
+    {
+        public UniWebViewMethodChannel() : base("com.onevcat.uniwebview.UniWebViewNativeChannel") { }
+
+        string invokeChannelMethod(string name, string method, string parameters) {
+            UniWebViewLogger.Instance.Verbose("invokeChannelMethod invoked by native side. Name: " + name + " Method: " 
+                                          + method + " Params: " + parameters);
+            return UniWebViewChannelMethodManager.Instance.InvokeMethod(name, method, parameters);
+        }
+    }
+
 public class UniWebViewInterface {
     private static readonly AndroidJavaClass plugin;
     private static bool correctPlatform = Application.platform == RuntimePlatform.Android;
@@ -10,11 +21,16 @@ public class UniWebViewInterface {
         var go = new GameObject("UniWebViewAndroidStaticListener");
         go.AddComponent<UniWebViewAndroidStaticListener>();
         plugin = new AndroidJavaClass("com.onevcat.uniwebview.UniWebViewInterface");
+        
         CheckPlatform();
+
         plugin.CallStatic("prepare");
+
+        UniWebViewLogger.Instance.Info("Connecting to native side method channel.");
+        plugin.CallStatic("registerChannel", new UniWebViewMethodChannel());
     }
 
-    //OMSDK part-------
+//OMSDK part-------
 
     public static void InitOMSDK(string jsonSettings, string omidJSServiceContent) {
         CheckPlatform();
@@ -212,6 +228,15 @@ public class UniWebViewInterface {
         CheckPlatform();
         plugin.CallStatic("setAllowUniversalAccessFromFileURLs", flag);
     }
+    public static void BringContentToFront(string name) {
+        CheckPlatform();
+        plugin.CallStatic("bringContentToFront", name);
+    }
+
+    public static void SetForwardWebConsoleToNativeOutput(bool flag) {
+        CheckPlatform();
+        plugin.CallStatic("setForwardWebConsoleToNativeOutput", flag);
+    }
 
     public static void SetEnableKeyboardAvoidance(bool flag) {
         CheckPlatform();
@@ -226,6 +251,11 @@ public class UniWebViewInterface {
     public static void CleanCache(string name) {
         CheckPlatform();
         plugin.CallStatic("cleanCache", name);
+    }
+
+    public static void SetCacheMode(string name, int mode) {
+        CheckPlatform();
+        plugin.CallStatic("setCacheMode", name, mode);
     }
 
     public static void ClearCookies() {
@@ -281,6 +311,21 @@ public class UniWebViewInterface {
     public static void SetSpinnerText(string name, string text) {
         CheckPlatform();
         plugin.CallStatic("setSpinnerText", name, text);
+    }
+
+    public static void SetAllowUserDismissSpinnerByGesture(string name, bool flag) {
+        CheckPlatform();
+        plugin.CallStatic("setAllowUserDismissSpinnerByGesture", name, flag);
+    }
+
+    public static void ShowSpinner(string name) {
+        CheckPlatform();
+        plugin.CallStatic("showSpinner", name);
+    }
+
+    public static void HideSpinner(string name) {
+        CheckPlatform();
+        plugin.CallStatic("hideSpinner", name);
     }
 
     public static bool CanGoBack(string name) {
@@ -387,6 +432,11 @@ public class UniWebViewInterface {
         plugin.CallStatic("setSupportMultipleWindows", name, enabled, allowJavaScriptOpening);
     }
 
+    public static void SetDragInteractionEnabled(string name, bool flag) {
+        CheckPlatform();
+        plugin.CallStatic("setDragInteractionEnabled", name, flag);
+    }
+
     public static void SetDefaultFontSize(string name, int size) {
         CheckPlatform();
         plugin.CallStatic("setDefaultFontSize", name, size);
@@ -410,6 +460,11 @@ public class UniWebViewInterface {
     public static void SetDownloadEventForContextMenuEnabled(string name, bool enabled) {
         CheckPlatform();
         plugin.CallStatic("setDownloadEventForContextMenuEnabled", name, enabled);
+    }
+
+    public static void SetAllowUserEditFileNameBeforeDownloading(string name, bool allowed) {
+        CheckPlatform();
+        plugin.CallStatic("setAllowUserEditFileNameBeforeDownloading", name, allowed);
     }
 
     // Safe Browsing
@@ -504,6 +559,31 @@ public class UniWebViewInterface {
     public static void SetEmeddedToolbarNavigationButtonsShow(string name, bool show) {
         CheckPlatform();
         plugin.CallStatic("setEmbeddedToolbarNavigationButtonsShow", name, show);
+    }
+
+    public static void StartSnapshotForRendering(string name, string identifier) {
+        CheckPlatform();
+        plugin.CallStatic("startSnapshotForRendering", name, identifier);
+    }
+
+    public static void StopSnapshotForRendering(string name) {
+        CheckPlatform();
+        plugin.CallStatic("stopSnapshotForRendering", name);
+    }
+
+    public static byte[] GetRenderedData(string name, int x, int y, int width, int height) {
+        CheckPlatform();
+        var sbyteArray = plugin.CallStatic<sbyte[]>("getRenderedData", name, x, y, width, height);
+        if (sbyteArray == null) {
+            return null;
+        }
+        int length = sbyteArray.Length;
+        byte[] byteArray = new byte[length];
+        
+        for (int i = 0; i < length; i++) {
+            byteArray[i] = (byte)sbyteArray[i];
+        }   
+        return byteArray;
     }
 
     // Platform

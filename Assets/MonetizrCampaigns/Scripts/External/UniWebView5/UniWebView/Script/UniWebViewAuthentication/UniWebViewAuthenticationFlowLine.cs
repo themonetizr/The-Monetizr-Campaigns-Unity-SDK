@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -57,8 +58,8 @@ public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFl
     /// </summary>
     public UniWebViewAuthenticationFlowLineOptional optional;
     
-    private string responseType = "code";
-    private string grantType = "authorization_code";
+    private const string responseType = "code";
+    private const string grantType = "authorization_code";
 
     private string RedirectUri {
         get {
@@ -88,7 +89,17 @@ public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFl
         var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationLineToken>(this);
         flow.StartAuth();
     }
-    
+
+    /// <summary>
+    /// Starts the refresh flow with the standard OAuth 2.0.
+    /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
+    /// </summary>
+    /// <param name="refreshToken">The refresh token received with a previous access token response.</param>
+    public override void StartRefreshTokenFlow(string refreshToken) {
+        var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationLineToken>(this);
+        flow.RefreshToken(refreshToken);
+    }
+
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
@@ -114,13 +125,18 @@ public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFl
         
         return authorizeArgs;
     }
+    
+    public string GetAdditionalAuthenticationUriQuery() {
+        return optional.additionalAuthenticationUriQuery;
+    }
 
     private string GenerateReturnUri() {
-        var query = System.Web.HttpUtility.ParseQueryString("");
-        query.Add("response_type", responseType);
-        query.Add("client_id", clientId);
-        query.Add("redirect_uri", RedirectUri);
-        
+        var query = new Dictionary<string, string> {
+            { "response_type", responseType },
+            { "client_id", clientId },
+            { "redirect_uri", RedirectUri }
+        };
+
         // State is a must in LINE Login.
         var state = GenerateAndStoreState();
         query.Add("state", state);
@@ -139,7 +155,8 @@ public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFl
                 query.Add("code_challenge_method", method);
             }
         }
-        return "/oauth2/v2.1/authorize/consent?" + query;
+        var additionalQuery = GetAdditionalAuthenticationUriQuery();
+        return "/oauth2/v2.1/authorize/consent?" + UniWebViewAuthenticationUtils.CreateQueryString(query, additionalQuery);
     }
 
     /// <summary>
@@ -147,7 +164,7 @@ public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFl
     /// </summary>
     public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse) {
         var normalizedRedirectUri = UniWebViewAuthenticationUtils.ConvertIntentUri(RedirectUri);
-        if (!authResponse.StartsWith(normalizedRedirectUri)) {
+        if (!authResponse.StartsWith(normalizedRedirectUri, StringComparison.InvariantCultureIgnoreCase)) {
             throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
         }
         
@@ -173,6 +190,17 @@ public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFl
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
+    public Dictionary<string, string> GetRefreshTokenRequestParameters(string refreshToken) {
+        return new Dictionary<string, string> {
+            { "client_id", clientId }, 
+            { "refresh_token", refreshToken },
+            { "grant_type", "refresh_token" }
+        };
+    }
+
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
     public UniWebViewAuthenticationLineToken GenerateTokenFromExchangeResponse(string exchangeResponse) {
         return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationLineToken>.Parse(exchangeResponse);
     }
@@ -181,6 +209,10 @@ public class UniWebViewAuthenticationFlowLine : UniWebViewAuthenticationCommonFl
     public UnityEvent<UniWebViewAuthenticationLineToken> OnAuthenticationFinished { get; set; }
     [field: SerializeField]
     public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
+    [field: SerializeField]
+    public UnityEvent<UniWebViewAuthenticationLineToken> OnRefreshTokenFinished { get; set;  }
+    [field: SerializeField]
+    public UnityEvent<long, string> OnRefreshTokenErrored { get; set; }
 }
 
 /// <summary>
@@ -192,6 +224,16 @@ public class UniWebViewAuthenticationFlowLineOptional {
     /// Whether to enable PKCE when performing authentication. Default is `S256`.
     /// </summary>
     public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.S256;
+    
+    /// <summary>
+    /// The additional query arguments that are used to construct the query string of the authentication request.
+    /// 
+    /// This is useful when you want to add some custom parameters to the authentication request. This string will be 
+    /// appended to the query string that constructed from `GetAuthenticationUriArguments`. 
+    /// 
+    /// For example, if you set `prompt=consent&ui_locales=en`, it will be contained in the final authentication query.
+    /// </summary>
+    public string additionalAuthenticationUriQuery = "";
 }
 
 /// <summary>

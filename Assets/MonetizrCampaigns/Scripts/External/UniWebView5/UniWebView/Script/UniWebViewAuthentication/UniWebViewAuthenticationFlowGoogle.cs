@@ -57,8 +57,8 @@ public class UniWebViewAuthenticationFlowGoogle : UniWebViewAuthenticationCommon
     /// </summary>
     public UniWebViewAuthenticationFlowGoogleOptional optional;
     
-    private string responseType = "code";
-    private string grantType = "authorization_code";
+    private const string responseType = "code";
+    private const string grantType = "authorization_code";
 
     private readonly UniWebViewAuthenticationConfiguration config = 
         new UniWebViewAuthenticationConfiguration(
@@ -74,7 +74,17 @@ public class UniWebViewAuthenticationFlowGoogle : UniWebViewAuthenticationCommon
         var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationGoogleToken>(this);
         flow.StartAuth();
     }
-    
+
+    /// <summary>
+    /// Starts the refresh flow with the standard OAuth 2.0.
+    /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
+    /// </summary>
+    /// <param name="refreshToken">The refresh token received with a previous access token response.</param>
+    public override void StartRefreshTokenFlow(string refreshToken) {
+        var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationGoogleToken>(this);
+        flow.RefreshToken(refreshToken);
+    }
+
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
@@ -116,16 +126,23 @@ public class UniWebViewAuthenticationFlowGoogle : UniWebViewAuthenticationCommon
             if (!String.IsNullOrEmpty(optional.loginHint)) {
                 authorizeArgs.Add("login_hint", optional.loginHint);
             }
+            if (!String.IsNullOrEmpty(optional.prompt)) {
+                authorizeArgs.Add("prompt", optional.prompt);
+            }
         }
 
         return authorizeArgs;
+    }
+    
+    public string GetAdditionalAuthenticationUriQuery() {
+        return optional.additionalAuthenticationUriQuery;
     }
 
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
     public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse) {
-        if (!authResponse.StartsWith(redirectUri)) {
+        if (!authResponse.StartsWith(redirectUri, StringComparison.InvariantCultureIgnoreCase)) {
             throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
         }
         
@@ -149,7 +166,18 @@ public class UniWebViewAuthenticationFlowGoogle : UniWebViewAuthenticationCommon
 
         return parameters;
     }
-    
+
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public Dictionary<string, string> GetRefreshTokenRequestParameters(string refreshToken) {
+        return new Dictionary<string, string> {
+            { "client_id", clientId },
+            { "refresh_token", refreshToken },
+            { "grant_type", "refresh_token" }
+        };
+    }
+
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
@@ -157,10 +185,29 @@ public class UniWebViewAuthenticationFlowGoogle : UniWebViewAuthenticationCommon
         return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationGoogleToken>.Parse(exchangeResponse);
     }
 
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
     [field: SerializeField]
     public UnityEvent<UniWebViewAuthenticationGoogleToken> OnAuthenticationFinished { get; set; }
+    
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
     [field: SerializeField]
     public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
+
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    [field: SerializeField]
+    public UnityEvent<UniWebViewAuthenticationGoogleToken> OnRefreshTokenFinished { get; set; }
+    
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    [field: SerializeField]
+    public UnityEvent<long, string> OnRefreshTokenErrored { get; set; }
 }
 
 /// <summary>
@@ -182,6 +229,24 @@ public class UniWebViewAuthenticationFlowGoogleOptional {
     /// the Google Authentication Server. 
     /// </summary>
     public string loginHint = "";
+    
+    /// <summary>
+    /// The prompt that will be set to the authentication request query. For example, the possible values can be 
+    /// `login`, `consent`, `select_account` and so on.
+    /// 
+    /// See https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
+    /// </summary>
+    public string prompt = "";
+    
+    /// <summary>
+    /// The additional query arguments that are used to construct the query string of the authentication request.
+    /// 
+    /// This is useful when you want to add some custom parameters to the authentication request. This string will be 
+    /// appended to the query string that constructed from `GetAuthenticationUriArguments`. 
+    /// 
+    /// For example, if you set `prompt=consent&ui_locales=en`, it will be contained in the final authentication query.
+    /// </summary>
+    public string additionalAuthenticationUriQuery = "";
 }
 
 /// <summary>

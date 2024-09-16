@@ -71,7 +71,7 @@ public class UniWebViewAuthenticationSession: UnityEngine.Object {
   /// </summary>
   public event AuthErrorReceivedDelegate OnAuthenticationErrorReceived;
 
-  private string id = Guid.NewGuid().ToString();
+  private readonly string id = Guid.NewGuid().ToString();
   private UniWebViewNativeListener listener;
   
   /// <summary>
@@ -134,11 +134,7 @@ public class UniWebViewAuthenticationSession: UnityEngine.Object {
   /// Returns `true` if the safe browsing mode is supported and the page will be opened in safe browsing 
   /// mode. Otherwise, `false`.
   /// </returns>
-  public static bool IsAuthenticationSupported { 
-    get {
-      return UniWebViewInterface.IsAuthenticationIsSupported(); 
-    }
-  }
+  public static bool IsAuthenticationSupported => UniWebViewInterface.IsAuthenticationIsSupported();
 
   /// <summary>
   /// Creates a new authentication session with a given authentication page URL and a callback scheme.
@@ -165,6 +161,17 @@ public class UniWebViewAuthenticationSession: UnityEngine.Object {
   /// </summary>
   public void Start() {
     UniWebViewInterface.AuthenticationStart(listener.Name);
+  }
+
+  /// <summary>
+  /// Cancels the authentication session.
+  /// 
+  /// This method is only available on iOS.
+  /// </summary>
+  internal void Cancel() {
+#if UNITY_IOS && !UNITY_EDITOR
+    UniWebViewInterface.AuthenticationCancel(listener.Name);
+#endif
   }
 
   /// <summary>

@@ -49,7 +49,7 @@ public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCom
     /// The client Id of your OAuth application.
     /// </summary>
     public string clientId = "";
-    
+
     /// <summary>
     /// The redirect URI of your OAuth application. The service provider is expected to call this URI to pass back the
     /// authorization code. It should be something also set to your OAuth application.
@@ -77,11 +77,21 @@ public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCom
         var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationStandardToken>(this);
         flow.StartAuth();
     }
-    
+
+    /// <summary>
+    /// Starts the refresh flow with the standard OAuth 2.0.
+    /// This implements the abstract method in `UniWebViewAuthenticationCommonFlow`.
+    /// </summary>
+    /// <param name="refreshToken">The refresh token received with a previous access token response.</param>
+    public override void StartRefreshTokenFlow(string refreshToken) {
+        var flow = new UniWebViewAuthenticationFlow<UniWebViewAuthenticationStandardToken>(this);
+        flow.RefreshToken(refreshToken);
+    }
+
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
-    public UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration() {
+    public virtual UniWebViewAuthenticationConfiguration GetAuthenticationConfiguration() {
         return new UniWebViewAuthenticationConfiguration(
             config.authorizationEndpoint, 
             config.tokenEndpoint
@@ -91,14 +101,14 @@ public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCom
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
-    public string GetCallbackUrl() {
+    public virtual string GetCallbackUrl() {
         return redirectUri;
     }
 
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
-    public Dictionary<string, string> GetAuthenticationUriArguments() {
+    public virtual Dictionary<string, string> GetAuthenticationUriArguments() {
         var authorizeArgs = new Dictionary<string, string> {
             { "client_id", clientId },
             { "redirect_uri", redirectUri },
@@ -122,12 +132,16 @@ public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCom
 
         return authorizeArgs;
     }
+    
+    public string GetAdditionalAuthenticationUriQuery() {
+        return optional.additionalAuthenticationUriQuery;
+    }
 
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
-    public Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse) {
-        if (!authResponse.StartsWith(redirectUri)) {
+    public virtual Dictionary<string, string> GetAccessTokenRequestParameters(string authResponse) {
+        if (!authResponse.StartsWith(redirectUri, StringComparison.InvariantCultureIgnoreCase)) {
             throw AuthenticationResponseException.UnexpectedAuthCallbackUrl;
         }
         
@@ -136,7 +150,7 @@ public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCom
         if (!response.TryGetValue("code", out var code)) {
             throw AuthenticationResponseException.InvalidResponse(authResponse);
         }
-        if (optional.enableState) {
+        if (optional != null && optional.enableState) {
             VerifyState(response);
         }
         var parameters = new Dictionary<string, string> {
@@ -148,6 +162,9 @@ public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCom
         if (CodeVerify != null) {
             parameters.Add("code_verifier", CodeVerify);
         }
+        if (optional != null && !String.IsNullOrEmpty(optional.clientSecret)) {
+            parameters.Add("client_secret", optional.clientSecret);
+        }
 
         return parameters;
     }
@@ -155,7 +172,22 @@ public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCom
     /// <summary>
     /// Implements required method in `IUniWebViewAuthenticationFlow`.
     /// </summary>
-    public UniWebViewAuthenticationStandardToken GenerateTokenFromExchangeResponse(string exchangeResponse) {
+    public virtual Dictionary<string, string> GetRefreshTokenRequestParameters(string refreshToken) {
+        var parameters = new Dictionary<string, string> {
+            { "client_id", clientId },
+            { "refresh_token", refreshToken },
+            { "grant_type", config.refreshTokenGrantType }
+        };
+        if (optional != null && !String.IsNullOrEmpty(optional.clientSecret)) {
+            parameters.Add("client_secret", optional.clientSecret);
+        }
+        return parameters;
+    }
+
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    public virtual UniWebViewAuthenticationStandardToken GenerateTokenFromExchangeResponse(string exchangeResponse) {
         return UniWebViewAuthenticationTokenFactory<UniWebViewAuthenticationStandardToken>.Parse(exchangeResponse);
     }
 
@@ -170,6 +202,18 @@ public class UniWebViewAuthenticationFlowCustomize : UniWebViewAuthenticationCom
     /// </summary>
     [field: SerializeField]
     public UnityEvent<long, string> OnAuthenticationErrored { get; set; }
+
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    [field: SerializeField]
+    public UnityEvent<UniWebViewAuthenticationStandardToken> OnRefreshTokenFinished { get; set; }
+
+    /// <summary>
+    /// Implements required method in `IUniWebViewAuthenticationFlow`.
+    /// </summary>
+    [field: SerializeField]
+    public UnityEvent<long, string> OnRefreshTokenErrored { get; set; }
 }
 
 [Serializable]
@@ -178,10 +222,14 @@ public class UniWebViewAuthenticationFlowCustomizeConfig {
     public string tokenEndpoint = "";
     public string responseType = "code";
     public string grantType = "authorization_code";
+
+    public string refreshTokenGrantType = "refresh_token";
 }
 
 [Serializable]
 public class UniWebViewAuthenticationFlowCustomizeOptional {
     public UniWebViewAuthenticationPKCE PKCESupport = UniWebViewAuthenticationPKCE.None; 
     public bool enableState = false;
+    public string clientSecret = "";
+    public string additionalAuthenticationUriQuery = "";
 }

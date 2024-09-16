@@ -37,6 +37,7 @@ namespace Monetizr.SDK.UI
         private int _claimButtonDelay;
         private bool impressionStarts = false;
         private int _closeButtonDelay;
+        public RectTransform safeArea;
 
         internal override bool SendImpressionEventManually()
         {
@@ -107,6 +108,7 @@ namespace Monetizr.SDK.UI
             MonetizrManager.Instance.SoundSwitch(false);
 
             _webView = gameObject.AddComponent<UniWebView>();
+            _webView.ReferenceRectTransform = safeArea;
 
             SetWebviewFrame(fullScreen, useSafeFrame);
 
@@ -541,8 +543,7 @@ namespace Monetizr.SDK.UI
 
             bool verifyWithOMSDK = currentMission.campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
 
-            if(verifyWithOMSDK)
-                _webView.StopOMIDAdSession();
+            if(verifyWithOMSDK) _webView.StopOMIDAdSession();
 
             float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay", 1.0f);
 

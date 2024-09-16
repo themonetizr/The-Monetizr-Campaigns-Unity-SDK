@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using UnityEngine.Networking;
 
 /// <summary>
@@ -83,7 +84,7 @@ public class UniWebViewAuthenticationUtils {
     /// <param name="input">The Base64URL encoded string.</param>
     /// <returns>A string with Base64 encoded for the input.</returns>
     public static string ConvertToBase64String(string input) {
-        string result = input.Replace('_', '/').Replace('-', '+');
+        var result = input.Replace('_', '/').Replace('-', '+');
         switch (input.Length % 4) {
             case 2:
                 result += "==";
@@ -103,14 +104,13 @@ public class UniWebViewAuthenticationUtils {
     /// <returns>A generated code verifier for PKCE usage.</returns>
     public static string GenerateCodeVerifier(int length = 64) {
         var randomNumber = new byte[32];
-        string value = "";
+        string value;
 
-        using (var rng = RandomNumberGenerator.Create()) {
-            rng.GetBytes(randomNumber);
-            String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";
-            Random random = new Random(System.BitConverter.ToInt32(randomNumber, 0));
-            value = new String(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
-        }
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";
+        var random = new Random(System.BitConverter.ToInt32(randomNumber, 0));
+        value = new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
 
         return value;
     }
@@ -157,7 +157,6 @@ public class UniWebViewAuthenticationUtils {
 
         var host = uri.Host;
         string scheme = null;
-        var fragmentPairs = new Dictionary<string, string>();
         var fragments = uri.Fragment;
         fragments.Split(';').ToList().ForEach(fragment => {
             var kv = fragment.Split('=');
@@ -171,6 +170,28 @@ public class UniWebViewAuthenticationUtils {
         }
 
         return input;
+    }
+
+    public static string CreateQueryString(Dictionary<string, string> collection, string additionalQuery = "") {
+        int count = collection.Count;
+        if (count == 0) {
+            return additionalQuery ?? "";            
+        }
+        StringBuilder sb = new StringBuilder();
+        string [] keys = collection.Keys.ToArray();
+        for (int i = 0; i < count; i++) {
+            sb.AppendFormat ("{0}={1}&", keys[i], UnityWebRequest.EscapeURL(collection[keys[i]]));
+        }
+
+        if (sb.Length > 0) {
+            if (string.IsNullOrEmpty(additionalQuery)) {
+                sb.Length--;
+            } else {
+                sb.AppendFormat("{0}", additionalQuery);
+            }
+        }
+
+        return sb.ToString();
     }
 }
 

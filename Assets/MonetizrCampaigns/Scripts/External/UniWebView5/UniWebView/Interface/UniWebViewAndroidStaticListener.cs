@@ -25,6 +25,7 @@ public class UniWebViewAndroidStaticListener: MonoBehaviour {
         MethodInfo methodInfo = typeof(UniWebViewNativeListener).GetMethod(parts[1]);
         if (methodInfo == null) {
             Debug.Log("Cannot find correct method to invoke: " + parts[1]);
+            return;
         }
         
         var leftLength = parts.Length - 2;

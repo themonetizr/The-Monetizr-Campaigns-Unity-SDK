@@ -6,28 +6,23 @@ using System;
 
 public class UniWebViewGradleConfig
 {
-    private UniWebViewGradleNode m_root;
-    private String m_filePath;
-    private UniWebViewGradleNode m_curNode;
+    private readonly string m_filePath;
 
-    public UniWebViewGradleNode ROOT
-    {
-        get { return m_root; }
-    }
+    public UniWebViewGradleNode Root { get; }
 
     public UniWebViewGradleConfig(string filePath)
     {
-        string file = File.ReadAllText(filePath);
+        var file = File.ReadAllText(filePath);
         TextReader reader = new StringReader(file);
 
         m_filePath = filePath;
-        m_root = new UniWebViewGradleNode("root");
-        m_curNode = m_root;
+        Root = new UniWebViewGradleNode("root");
+        var curNode = Root;
 
-        StringBuilder str = new StringBuilder();
-        bool inDoubleQuote = false;
-        bool inSingleQuote = false;
-        bool inDollarVariable = false;
+        var str = new StringBuilder();
+        var inDoubleQuote = false;
+        var inSingleQuote = false;
+        var inDollarVariable = false;
 
         while (reader.Peek() > 0)
         {
@@ -40,7 +35,7 @@ public class UniWebViewGradleConfig
                 //         reader.Read();
                 //         string comment = reader.ReadLine();
                 //         Debug.Log("Comment line: " + comment);
-                //         m_curNode.AppendChildNode(new UniWebViewGradleCommentNode(comment, m_curNode));
+                //         curNode.AppendChildNode(new UniWebViewGradleCommentNode(comment, curNode));
                 //     }
                 //     else
                 //     {
@@ -53,7 +48,7 @@ public class UniWebViewGradleConfig
                         var strf = FormatStr(str);
                         if (!string.IsNullOrEmpty(strf))
                         {
-                            m_curNode.AppendChildNode(new UniWebViewGradleContentNode(strf, m_curNode));
+                            curNode.AppendChildNode(new UniWebViewGradleContentNode(strf, curNode));
                         }
                     }
                     inDollarVariable = false;
@@ -77,9 +72,9 @@ public class UniWebViewGradleConfig
                         var n = FormatStr(str);
                         if (!string.IsNullOrEmpty(n))
                         {
-                            UniWebViewGradleNode node = new UniWebViewGradleNode(n, m_curNode);
-                            m_curNode.AppendChildNode(node);
-                            m_curNode = node;
+                            UniWebViewGradleNode node = new UniWebViewGradleNode(n, curNode);
+                            curNode.AppendChildNode(node);
+                            curNode = node;
                         }
                     }
                     str = new StringBuilder();
@@ -93,9 +88,9 @@ public class UniWebViewGradleConfig
                         var strf = FormatStr(str);
                         if (!string.IsNullOrEmpty(strf))
                         {
-                            m_curNode.AppendChildNode(new UniWebViewGradleContentNode(strf, m_curNode));
+                            curNode.AppendChildNode(new UniWebViewGradleContentNode(strf, curNode));
                         }
-                        m_curNode = m_curNode.PARENT;
+                        curNode = curNode.Parent;
                     }
                     str = new StringBuilder();
                     break;
@@ -131,27 +126,36 @@ public class UniWebViewGradleConfig
             }
         }
 
+        // End of file.
+        var endline = FormatStr(str);
+        if (!string.IsNullOrEmpty(endline))
+        {
+            curNode.AppendChildNode(new UniWebViewGradleContentNode(endline, curNode));
+        }
         //Debug.Log("Gradle parse done!");
     }
 
     public void Save(string path = null)
     {
-        if (path == null)
+        if (path == null) {
             path = m_filePath;
+        }
+            
         File.WriteAllText(path, Print());
-        //Debug.Log("Gradle parse done! " + path);
     }
 
-    private string FormatStr(StringBuilder sb)
+    private static string FormatStr(StringBuilder sb)
     {
-        string str = sb.ToString();
+        var str = sb.ToString();
         str = str.Trim();
         return str;
     }
     public string Print()
     {
         StringBuilder sb = new StringBuilder();
-        printNode(sb, m_root, -1);
+        PrintNode(sb, Root, -1);
+        // Remove the first empty line.
+        sb.Remove(0, 1);
         return sb.ToString();
     }
     private string GetLevelIndent(int level)
@@ -164,69 +168,52 @@ public class UniWebViewGradleConfig
         }
         return sb.ToString();
     }
-    private void printNode(StringBuilder stringBuilder, UniWebViewGradleNode node, int level)
+    private void PrintNode(StringBuilder stringBuilder, UniWebViewGradleNode node, int level)
     {
-        if (node.PARENT != null)
-        {
+        if (node.Parent != null) {
             if (node is UniWebViewGradleCommentNode)
             {
-                stringBuilder.Append("\n" + GetLevelIndent(level) + @"//" + node.NAME);
+                stringBuilder.Append("\n" + GetLevelIndent(level) + @"//" + node.Name);
             }
             else
             {
-                stringBuilder.Append("\n" + GetLevelIndent(level) + node.NAME);
+                stringBuilder.Append("\n" + GetLevelIndent(level) + node.Name);
             }
 
         }
 
-        if (!(node is UniWebViewGradleContentNode) && !(node is UniWebViewGradleCommentNode))
-        {
-            if (node.PARENT != null)
-            {
-                stringBuilder.Append(" {");
-            }
-            foreach (var c in node.CHILDREN)
-            {
-                printNode(stringBuilder, c, level + 1);
-            }
-            if (node.PARENT != null)
-            {
-                stringBuilder.Append("\n" + GetLevelIndent(level) + "}");
-            }
+        if (node is UniWebViewGradleContentNode || node is UniWebViewGradleCommentNode) return;
+        if (node.Parent != null)  {
+            stringBuilder.Append(" {");
+        }
+        foreach (var c in node.Children) {
+            PrintNode(stringBuilder, c, level + 1);
+        }
+        if (node.Parent != null) {
+            stringBuilder.Append("\n" + GetLevelIndent(level) + "}");
         }
     }
 }
 
 public class UniWebViewGradleNode
 {
-    protected List<UniWebViewGradleNode> m_children = new List<UniWebViewGradleNode>();
-    protected UniWebViewGradleNode m_parent;
-    protected String m_name;
-    public UniWebViewGradleNode PARENT
-    {
-        get { return m_parent; }
-    }
+    protected string m_name;
+    public UniWebViewGradleNode Parent { get; private set; }
 
-    public string NAME
-    {
-        get { return m_name; }
-    }
+    public string Name => m_name;
 
-    public List<UniWebViewGradleNode> CHILDREN
-    {
-        get { return m_children; }
-    }
+    public List<UniWebViewGradleNode> Children { get; private set; } = new List<UniWebViewGradleNode>();
 
     public UniWebViewGradleNode(string name, UniWebViewGradleNode parent = null)
     {
-        m_parent = parent;
+        Parent = parent;
         m_name = name;
     }
 
     public void Each(Action<UniWebViewGradleNode> f)
     {
         f(this);
-        foreach (var n in m_children)
+        foreach (var n in Children)
         {
             n.Each(f);
         }
@@ -234,20 +221,19 @@ public class UniWebViewGradleNode
 
     public void AppendChildNode(UniWebViewGradleNode node)
     {
-        if (m_children == null) m_children = new List<UniWebViewGradleNode>();
-        m_children.Add(node);
-        node.m_parent = this;
+        if (Children == null) Children = new List<UniWebViewGradleNode>();
+        Children.Add(node);
+        node.Parent = this;
     }
 
     public UniWebViewGradleNode TryGetNode(string path)
     {
-        string[] subpath = path.Split('/');
-        UniWebViewGradleNode cnode = this;
-        for (int i = 0; i < subpath.Length; i++)
+        var subpath = path.Split('/');
+        var cnode = this;
+        foreach (var p in subpath)
         {
-            var p = subpath[i];
             if (string.IsNullOrEmpty(p)) continue;
-            UniWebViewGradleNode tnode = cnode.FindChildNodeByName(p);
+            var tnode = cnode.FindChildNodeByName(p);
             if (tnode == null)
             {
                 Debug.Log("Can't find Node:" + p);
@@ -255,7 +241,6 @@ public class UniWebViewGradleNode
             }
 
             cnode = tnode;
-            tnode = null;
         }
 
         return cnode;
@@ -263,22 +248,22 @@ public class UniWebViewGradleNode
 
     public UniWebViewGradleNode FindChildNodeByName(string name)
     {
-        foreach (var n in m_children)
+        foreach (var n in Children)
         {
             if (n is UniWebViewGradleCommentNode || n is UniWebViewGradleContentNode)
                 continue;
-            if (n.NAME == name)
+            if (n.Name == name)
                 return n;
         }
         return null;
     }
 
-    public bool ReplaceContenStartsWith(string patten, string value)
+    public bool ReplaceContentStartsWith(string pattern, string value)
     {
-        foreach (var n in m_children)
+        foreach (var n in Children)
         {
             if (!(n is UniWebViewGradleContentNode)) continue;
-            if (n.m_name.StartsWith(patten))
+            if (n.m_name.StartsWith(pattern))
             {
                 n.m_name = value;
                 return true;
@@ -287,12 +272,12 @@ public class UniWebViewGradleNode
         return false;
     }
 
-    public UniWebViewGradleContentNode ReplaceContenOrAddStartsWith(string patten, string value)
+    public UniWebViewGradleContentNode ReplaceContentOrAddStartsWith(string pattern, string value)
     {
-        foreach (var n in m_children)
+        foreach (var n in Children)
         {
             if (!(n is UniWebViewGradleContentNode)) continue;
-            if (n.m_name.StartsWith(patten))
+            if (n.m_name.StartsWith(pattern))
             {
                 n.m_name = value;
                 return (UniWebViewGradleContentNode)n;
@@ -300,15 +285,10 @@ public class UniWebViewGradleNode
         }
         return AppendContentNode(value);
     }
-
-    /// <summary>
-    /// 添加子节点
-    /// </summary>
-    /// <param name="content"></param>
-    /// <returns></returns>
+    
     public UniWebViewGradleContentNode AppendContentNode(string content)
     {
-        foreach (var n in m_children)
+        foreach (var n in Children)
         {
             if (!(n is UniWebViewGradleContentNode)) continue;
             if (n.m_name == content)
@@ -325,12 +305,12 @@ public class UniWebViewGradleNode
 
     public bool RemoveContentNode(string contentPattern)
     {
-        for(int i=0;i<m_children.Count;i++)
+        for(int i=0;i<Children.Count;i++)
         {
-            if (!(m_children[i] is UniWebViewGradleContentNode)) continue;
-            if(m_children[i].m_name.Contains(contentPattern))
+            if (!(Children[i] is UniWebViewGradleContentNode)) continue;
+            if(Children[i].m_name.Contains(contentPattern))
             {
-                m_children.RemoveAt(i);
+                Children.RemoveAt(i);
                 return true;
             }
         }
