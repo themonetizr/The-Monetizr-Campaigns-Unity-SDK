@@ -157,14 +157,18 @@ namespace Monetizr.SDK.Networking
             var admCampaigns = new List<ServerCampaign>();
             var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
 
+            MonetizrLog.Print("Campaigns Count: " + campaigns.Count);
+
             foreach (var c in campaigns)
             {
+                MonetizrLog.Print("Pre Content: " + c.content);
                 if (string.IsNullOrEmpty(c.adm)) continue;
                 var admCampaign = await ph.PrepareServerCampaign(c.id, c.adm, false);
                 if (admCampaign != null) admCampaigns.Add(admCampaign);
+                MonetizrLog.Print("Post Content (AdmCampaign): " + admCampaign.content);
             }
 
-            if (admCampaigns.Count <= 0)  return campaigns;
+            if (admCampaigns.Count <= 0) return campaigns;
             campaigns.Clear();
             return admCampaigns;
         }

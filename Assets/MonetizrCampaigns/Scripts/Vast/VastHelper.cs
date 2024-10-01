@@ -535,6 +535,7 @@ namespace Monetizr.SDK.VAST
 
             private void LoadExtentions(AdDefinitionBase_typeExtension[] extensions)
             {
+                MonetizrLog.Print("Extensions Count: " + extensions.Length);
                 if (extensions.IsNullOrEmpty()) return;
 
                 foreach (var ad in extensions)
@@ -544,11 +545,14 @@ namespace Monetizr.SDK.VAST
                         if (av.Name == "MonetizrCampaignSettings")
                         {
                             string campaignSettings = av.InnerText.Trim();
-
+                            MonetizrLog.Print("Extensions Settings: " + campaignSettings);
                             var cs = MonetizrUtils.ParseContentString(campaignSettings);
-
+                            MonetizrLog.Print("Parsed Settings: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cs));
                             if (cs.TryGetValue("content", out var c))
+                            {
+                                MonetizrLog.Print("Final Settings: " + c);
                                 _serverCampaign.content = c;
+                            }
                         }
                         else
                         {
@@ -818,31 +822,45 @@ namespace Monetizr.SDK.VAST
 
         private async Task<bool> LoadVastContent(string vastContent, bool videoOnly, ServerCampaign serverCampaign, bool isFirstCall)
         {
-            MonetizrLog.Print("***** ITERATION " + iteration + ": " + vastContent);
+            MonetizrLog.Print("Vast Wrapper Iteration " + iteration + ": " + vastContent);
             iteration++;
 
             if (isFirstCall)
             {
                 serverCampaign.openRtbRawResponse = vastContent;
+                serverCampaign.omidResponse = MonetizrUtils.GetOMIDResponseFromJSON(vastContent);
             }
 
             VAST vastData = CreateVastFromXml(vastContent);
 
             if (vastData == null)
             {
-                MonetizrLog.PrintError("Vast isn't loaded");
+                MonetizrLog.PrintError("Vast isn't loaded.");
                 return false;
             }
 
-            if (vastData.Items == null || vastData.Items.Length == 0) return false;
-            if (!(vastData.Items[0] is VASTAD vad)) return false;
+            if (vastData.Items == null || vastData.Items.Length == 0)
+            {
+                MonetizrLog.PrintError("Vast is null or empty.");
+                return false;
+            }
+
+            if (!(vastData.Items[0] is VASTAD vad))
+            {
+                MonetizrLog.PrintError("Vast is not readable.");
+                return false;
+            }
 
             int prefBitRate = httpClient.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
             int prefWidth = httpClient.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
             int prefHeight = httpClient.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
             var adItem = new VastAdItem(vad.Item, serverCampaign, new VastAdItem.PreferableVideoSize(prefBitRate, prefWidth, prefHeight), videoOnly);
 
-            if (adItem.InUnknownAdType()) return false;
+            if (adItem.InUnknownAdType())
+            {
+                MonetizrLog.PrintError("Vast is Unknown type.");
+                return false;
+            }
 
             adItem.AssignCreativesIntoAssets();
 

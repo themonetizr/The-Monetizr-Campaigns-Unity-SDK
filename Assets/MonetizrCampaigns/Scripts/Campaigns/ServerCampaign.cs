@@ -91,6 +91,9 @@ namespace Monetizr.SDK.Campaigns
         [System.NonSerialized]
         public string openRtbRawResponse = "";
 
+        [System.NonSerialized]
+        public string omidResponse = "";
+
         internal bool HasAssetInList(string type)
         {
             return assets.FindIndex(a => a.type == type) >= 0;
@@ -147,6 +150,7 @@ namespace Monetizr.SDK.Campaigns
 
         internal bool HasAsset(AssetsType t)
         {
+            return assetsDict.ContainsKey(t);
             return assetsDict.ContainsKey(t);
         }
 
@@ -593,6 +597,8 @@ namespace Monetizr.SDK.Campaigns
             string vastResponse = "`" + openRtbRawResponse + "`";
 
             if (!string.IsNullOrEmpty(vastResponse)) str = str.Replace("\"${VAST_RESPONSE}\"", vastResponse);
+            if (!string.IsNullOrEmpty(omidResponse)) str = str.Replace("\"${VAST_VERIFICATIONS}\"", omidResponse);
+
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
 
             File.WriteAllText(indexPath, str);
