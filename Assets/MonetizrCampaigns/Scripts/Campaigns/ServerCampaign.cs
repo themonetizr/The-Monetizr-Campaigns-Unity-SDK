@@ -57,6 +57,7 @@ namespace Monetizr.SDK.Campaigns
         public List<Asset> assets = new List<Asset>();
         public string end_date;
         public string adm;
+        public string verifications_vast_node;
 
         public ServerCampaign(string id, string darTag, SettingsDictionary<string,string> defaultServerSettings)
         {
@@ -90,9 +91,6 @@ namespace Monetizr.SDK.Campaigns
 
         [System.NonSerialized]
         public string openRtbRawResponse = "";
-
-        [System.NonSerialized]
-        public string omidResponse = "";
 
         internal bool HasAssetInList(string type)
         {
@@ -594,10 +592,17 @@ namespace Monetizr.SDK.Campaigns
             var str = File.ReadAllText(indexPath);
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
-            string vastResponse = "`" + openRtbRawResponse + "`";
+            if (!string.IsNullOrEmpty(openRtbRawResponse))
+            {
+                openRtbRawResponse = "`" + openRtbRawResponse + "`";
+                str = str.Replace("\"${VAST_RESPONSE}\"", openRtbRawResponse);
+            }
 
-            if (!string.IsNullOrEmpty(vastResponse)) str = str.Replace("\"${VAST_RESPONSE}\"", vastResponse);
-            if (!string.IsNullOrEmpty(omidResponse)) str = str.Replace("\"${VAST_VERIFICATIONS}\"", omidResponse);
+            if (!string.IsNullOrEmpty(verifications_vast_node))
+            {
+                verifications_vast_node = "`" + verifications_vast_node + "`";
+                str = str.Replace("\"${VAST_VERIFICATIONS}\"", verifications_vast_node);
+            }
 
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
 

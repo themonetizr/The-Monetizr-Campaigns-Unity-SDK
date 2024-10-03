@@ -828,7 +828,6 @@ namespace Monetizr.SDK.VAST
             if (isFirstCall)
             {
                 serverCampaign.openRtbRawResponse = vastContent;
-                serverCampaign.omidResponse = MonetizrUtils.GetOMIDResponseFromJSON(vastContent);
             }
 
             VAST vastData = CreateVastFromXml(vastContent);

@@ -161,11 +161,10 @@ namespace Monetizr.SDK.Networking
 
             foreach (var c in campaigns)
             {
-                MonetizrLog.Print("Pre Content: " + c.content);
+                MonetizrLog.Print("Verification Node: " + c.verifications_vast_node);
                 if (string.IsNullOrEmpty(c.adm)) continue;
                 var admCampaign = await ph.PrepareServerCampaign(c.id, c.adm, false);
                 if (admCampaign != null) admCampaigns.Add(admCampaign);
-                MonetizrLog.Print("Post Content (AdmCampaign): " + admCampaign.content);
             }
 
             if (admCampaigns.Count <= 0) return campaigns;

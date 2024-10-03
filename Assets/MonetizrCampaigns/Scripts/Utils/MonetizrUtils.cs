@@ -417,26 +417,5 @@ namespace Monetizr.SDK.Utils
             return sb.ToString();
         }
 
-        public static string GetOMIDResponseFromJSON (string jsonString)
-        {
-            string key = "\"verifications_vast_node\"";
-
-            int startIndex = jsonString.IndexOf(key);
-            if (startIndex == -1) return null;
-
-            int colonIndex = jsonString.IndexOf(':', startIndex);
-            if (colonIndex == -1) return null;
-
-            int valueStartIndex = jsonString.IndexOf('"', colonIndex + 1);
-            if (valueStartIndex == -1) return null;
-
-            int valueEndIndex = jsonString.IndexOf('"', valueStartIndex + 1);
-            if (valueEndIndex == -1) return null;
-
-            string value = jsonString.Substring(valueStartIndex + 1, valueEndIndex - valueStartIndex - 1);
-
-            return value;
-        }
-
     }
 }
