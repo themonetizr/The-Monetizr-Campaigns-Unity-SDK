@@ -1,4 +1,5 @@
 using Monetizr.SDK.Core;
+using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Utils;
 using System.Text;
@@ -42,6 +43,17 @@ namespace Monetizr.SDK.UI
                 foreach (var t in textVars)
                 {
                     UIController.SetColorForElement(textElement, m.campaignServerSettings, t);
+                }
+            }
+            else
+            {
+                if (m.campaignServerSettings.TryGetValue("button_text_color", out string buttonTextColor))
+                {
+                    if (ColorUtility.TryParseHtmlString(buttonTextColor, out var c))
+                    {
+                        textElement.color = c;
+                        MonetizrLog.Print("BUTTON TEXT COLOR SUCCESFUL");
+                    }
                 }
             }
             

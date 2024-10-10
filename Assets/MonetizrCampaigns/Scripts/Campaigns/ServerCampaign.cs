@@ -588,6 +588,7 @@ namespace Monetizr.SDK.Campaigns
 
             MonetizrLog.Print("VastAdParameters: " + vastAdParameters);
             MonetizrLog.Print("OpenRTBResponse: " + openRtbRawResponse);
+            MonetizrLog.Print("Vast Verification Node: " + verifications_vast_node);
 
             var str = File.ReadAllText(indexPath);
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
@@ -603,6 +604,8 @@ namespace Monetizr.SDK.Campaigns
                 verifications_vast_node = "`" + verifications_vast_node + "`";
                 str = str.Replace("\"${VAST_VERIFICATIONS}\"", verifications_vast_node);
             }
+
+            MonetizrLog.Print("Final HTML: " + str);
 
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
 
