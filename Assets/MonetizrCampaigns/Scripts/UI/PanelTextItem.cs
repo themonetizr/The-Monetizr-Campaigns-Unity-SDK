@@ -52,7 +52,6 @@ namespace Monetizr.SDK.UI
                     if (ColorUtility.TryParseHtmlString(buttonTextColor, out var c))
                     {
                         textElement.color = c;
-                        MonetizrLog.Print("BUTTON TEXT COLOR SUCCESFUL");
                     }
                 }
             }
