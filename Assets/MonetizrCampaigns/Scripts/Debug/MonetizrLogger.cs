@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Monetizr.SDK.Debug
 {
-    public static class MonetizrLog
+    public static class MonetizrLogger
     {
         public static bool isEnabled { set; get; } = false;
         

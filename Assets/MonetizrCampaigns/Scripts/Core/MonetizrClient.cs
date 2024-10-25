@@ -24,9 +24,9 @@ namespace Monetizr.SDK.Core
 
         internal abstract Task<List<ServerCampaign>> GetList();
 
-        internal abstract Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null);
+        internal abstract Task ClaimReward(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null);
 
-        internal abstract Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null);
+        internal abstract Task ResetCampaign(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null);
 
         internal abstract void Initialize();
 

@@ -53,7 +53,7 @@ namespace Monetizr.SDK.UI
 
         internal void UpdateUI()
         {
-            MonetizrLog.Print("UpdateUI");
+            MonetizrLogger.Print("UpdateUI");
 
             CleanListView();
 
@@ -85,7 +85,7 @@ namespace Monetizr.SDK.UI
 
             if (campaign == null)
             {
-                MonetizrLog.PrintWarning("No active campaigns for RC!");
+                MonetizrLogger.PrintWarning("No active campaigns for RC!");
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace Monetizr.SDK.UI
 
             if (missionsForRewardCenter.Count == 0)
             {
-                MonetizrLog.PrintWarning("No sponsored challenges for RC!");
+                MonetizrLogger.PrintWarning("No sponsored challenges for RC!");
                 return;
             }
 
@@ -213,7 +213,7 @@ namespace Monetizr.SDK.UI
             var money = camp.serverSettings.GetParam("RewardCenter.money_num_text", "%claimed_reward_value%/%possible_reward_value%");
             var playerMoney = MonetizrManager.gameRewards[RewardType.Coins].GetCurrencyFunc();
 
-            //MonetizrLog.Print("\n| PlayerMoney: " + playerMoney + " \n| TotalRewards: " + totalRewardsValue + " \n| ClaimedRewards: " + claimedRewardsValue + " \n| PossibleRewards: " + possibleRewardsValue);
+            //MonetizrLogger.Print("\n| PlayerMoney: " + playerMoney + " \n| TotalRewards: " + totalRewardsValue + " \n| ClaimedRewards: " + claimedRewardsValue + " \n| PossibleRewards: " + possibleRewardsValue);
 
             money = new StringBuilder(money)
                 .Replace("%total_money%", $"{MonetizrUtils.ScoresToString(playerMoney)}")
@@ -224,7 +224,7 @@ namespace Monetizr.SDK.UI
 
             money = MonetizrUtils.ScoresToString(claimedRewardsValue) + "/" + MonetizrUtils.ScoresToString(totalRewardsValue);
 
-            //MonetizrLog.Print(money);
+            //MonetizrLogger.Print(money);
 
             headerText.text = statusText;
             moneyText.text = money;
@@ -385,7 +385,7 @@ namespace Monetizr.SDK.UI
                 case MissionType.CodeReward: AddMission(item, m, missionId); break;
             }
 
-            MonetizrLog.Print(m.missionTitle);
+            MonetizrLogger.Print(m.missionTitle);
             item.UpdateWithDescription(this, m, missionId);
             item.gameObject.SetActive(m.state != MissionUIState.Hidden);
         }

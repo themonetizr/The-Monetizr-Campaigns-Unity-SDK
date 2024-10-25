@@ -24,7 +24,7 @@ namespace Monetizr.SDK.Video
             videoPlayer.loopPointReached += EndReached;
             videoPlayer.Play();
 
-            MonetizrLog.Print($"{videoPlayer.width} {videoPlayer.height}");
+            MonetizrLogger.Print($"{videoPlayer.width} {videoPlayer.height}");
 
             MonetizrManager.Instance.SoundSwitch(false);
         }
@@ -37,7 +37,7 @@ namespace Monetizr.SDK.Video
 
         public void OnSkip ()
         {
-            MonetizrLog.Print("OnSkip!");
+            MonetizrLogger.Print("OnSkip!");
 
             isSkipped = true;
 

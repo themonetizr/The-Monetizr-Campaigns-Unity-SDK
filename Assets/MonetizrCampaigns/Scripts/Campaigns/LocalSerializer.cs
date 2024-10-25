@@ -17,7 +17,7 @@ namespace Monetizr.SDK.Campaigns
             if (jsonString.Length == 0)
                 return;
 
-            MonetizrLog.Print($"Loading {GetDataKey()}: {jsonString}");
+            MonetizrLogger.Print($"Loading {GetDataKey()}: {jsonString}");
 
             data = JsonUtility.FromJson<T>(jsonString);
         }
@@ -26,7 +26,7 @@ namespace Monetizr.SDK.Campaigns
         {
             string jsonString = JsonUtility.ToJson(data);
 
-            MonetizrLog.Print($"Saving {GetDataKey()}: {jsonString}");
+            MonetizrLogger.Print($"Saving {GetDataKey()}: {jsonString}");
 
             PlayerPrefs.SetString(GetDataKey(), jsonString);
         }

@@ -36,7 +36,7 @@ namespace Monetizr.SDK.Campaigns
 
             if(deleted > 0)
             {
-                MonetizrLog.Print($"Deleted {deleted} incorrect(wrong SDK version or api key) missions");
+                MonetizrLogger.Print($"Deleted {deleted} incorrect(wrong SDK version or api key) missions");
                 SaveAll();
             }
         }

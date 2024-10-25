@@ -25,7 +25,7 @@ namespace Monetizr.SDK.UI
 
         void OnButtonClicked()
         {
-            MonetizrLog.Print($"Clicked: {buttonType} id: {id}");
+            MonetizrLogger.Print($"Clicked: {buttonType} id: {id}");
 
             clickReceiver.ButtonPressed(this);
         }

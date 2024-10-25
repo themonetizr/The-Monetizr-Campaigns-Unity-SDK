@@ -11,8 +11,8 @@ namespace Monetizr.SDK
         {
             PlayerPrefs.SetString("campaigns", "");
             PlayerPrefs.SetString("missions", "");
-            MonetizrLog.Print($"PlayerPrefs cleaned {PlayerPrefs.GetString("campaigns")}");
-            MonetizrLog.Print($"PlayerPrefs cleaned {PlayerPrefs.GetString("missions")}");
+            MonetizrLogger.Print($"PlayerPrefs cleaned {PlayerPrefs.GetString("campaigns")}");
+            MonetizrLogger.Print($"PlayerPrefs cleaned {PlayerPrefs.GetString("missions")}");
         }
     }
 }

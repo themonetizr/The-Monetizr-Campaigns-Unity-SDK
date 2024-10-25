@@ -43,7 +43,7 @@ namespace Monetizr.Sample
 
         private void Start()
         {
-            MonetizrLog.isEnabled = true;
+            MonetizrLogger.isEnabled = true;
             GetAdvertisingId(out var advertisingID, out var limitAdvertising);
             MonetizrManager.SetAdvertisingIds(advertisingID, limitAdvertising);
 

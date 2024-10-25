@@ -55,7 +55,7 @@ namespace Monetizr.SDK.Analytics
             if (!string.IsNullOrEmpty(value))
                 return value;
 
-            MonetizrLog.PrintError($"Unknown VAST tag {tag}");
+            MonetizrLogger.PrintError($"Unknown VAST tag {tag}");
             return "-1";
         }
 

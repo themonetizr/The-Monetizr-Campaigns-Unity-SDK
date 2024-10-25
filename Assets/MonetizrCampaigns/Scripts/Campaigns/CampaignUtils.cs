@@ -21,7 +21,7 @@ namespace Monetizr.SDK.Campaigns
             result.RemoveAll((System.Predicate<ServerCampaign>)(e =>
             {
                 bool noAssets = e.assets.Count == 0;
-                if (noAssets) MonetizrLog.Print($"Removing campaign {e.id} with no assets");
+                if (noAssets) MonetizrLogger.Print($"Removing campaign {e.id} with no assets");
                 return noAssets;
             }));
         }
@@ -35,7 +35,7 @@ namespace Monetizr.SDK.Campaigns
                 if (minSdkVersion != null)
                 {
                     bool sdkVersionCheck = MonetizrUtils.CompareVersions(MonetizrSettings.SDKVersion, minSdkVersion) < 0;
-                    if (sdkVersionCheck) MonetizrLog.Print($"Removing campaign {e.id} because SDK version {MonetizrSettings.SDKVersion} less then required SDK version {minSdkVersion}");
+                    if (sdkVersionCheck) MonetizrLogger.Print($"Removing campaign {e.id} because SDK version {MonetizrSettings.SDKVersion} less then required SDK version {minSdkVersion}");
                     return sdkVersionCheck;
                 }
 
@@ -57,12 +57,12 @@ namespace Monetizr.SDK.Campaigns
 
                     if (allowed_device_id.Length == 0)
                     {
-                        MonetizrLog.Print($"Campaign {e.id} has no allowed list");
+                        MonetizrLogger.Print($"Campaign {e.id} has no allowed list");
                         return false;
                     }
                     else
                     {
-                        MonetizrLog.Print($"Campaign {e.id} has allowed list: {allowed_device_id}");
+                        MonetizrLogger.Print($"Campaign {e.id} has allowed list: {allowed_device_id}");
 
                         bool isKeyFound = false;
 
@@ -74,12 +74,12 @@ namespace Monetizr.SDK.Campaigns
 
                         if (!isKeyFound)
                         {
-                            MonetizrLog.Print($"Device {MonetizrMobileAnalytics.advertisingID} isn't allowed for campaign {e.id}");
+                            MonetizrLogger.Print($"Device {MonetizrMobileAnalytics.advertisingID} isn't allowed for campaign {e.id}");
                             return true;
                         }
                         else
                         {
-                            MonetizrLog.Print($"Device {MonetizrMobileAnalytics.advertisingID} is OK for campaign {e.id}");
+                            MonetizrLogger.Print($"Device {MonetizrMobileAnalytics.advertisingID} is OK for campaign {e.id}");
                             return false;
                         }
                     }
@@ -87,7 +87,7 @@ namespace Monetizr.SDK.Campaigns
             }
             else
             {
-                MonetizrLog.Print($"No ad id defined to filter campaigns. Please allow ad tracking!");
+                MonetizrLogger.Print($"No ad id defined to filter campaigns. Please allow ad tracking!");
             }
 #endif
         }

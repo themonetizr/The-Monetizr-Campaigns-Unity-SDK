@@ -44,7 +44,7 @@ namespace Monetizr.SDK.Missions
 
                 ulong rewardAmount2 = (ulong)Math.Ceiling(gameReward.maximumAmount * rewardAmount);
 
-                MonetizrLog.Print($"CreateMissionDescriptions:max:{gameReward.maximumAmount}:real:{rewardAmount2}:percent:{rewardAmount}");
+                MonetizrLogger.Print($"CreateMissionDescriptions:max:{gameReward.maximumAmount}:real:{rewardAmount2}:percent:{rewardAmount}");
 
                 m.Add(new MissionDescription
                 {

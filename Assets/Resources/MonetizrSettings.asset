@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shouldUnityUseAndroidSettings: 1
   shouldBundleIDBeApplicationIdentifier: 0
-  androidBundleID: 
-  androidAPIKey: 
-  iOSBundleID: 
-  iOSAPIKey: 
+  androidBundleID: com.monetizr.landslice
+  androidAPIKey: t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo
+  iOSBundleID: com.monetizr.landslice
+  iOSAPIKey: t_rsNjLXzbaWkJrXdvUVEc4IW2zppWyevl9j_S5Valo

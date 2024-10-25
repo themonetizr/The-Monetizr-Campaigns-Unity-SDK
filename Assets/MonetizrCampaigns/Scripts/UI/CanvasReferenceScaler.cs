@@ -56,7 +56,7 @@ namespace Monetizr.SDK.UI
 
         private void OnOrientationChanged(ScreenOrientation orientation)
         {
-            MonetizrLog.Print("Orientation changed!");
+            MonetizrLogger.Print("Orientation changed!");
             
             if (MobileUtils.IsInLandscapeMode())
                 UpdateLandscape();
