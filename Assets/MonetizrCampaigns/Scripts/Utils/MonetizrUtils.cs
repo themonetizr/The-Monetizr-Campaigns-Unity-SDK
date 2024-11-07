@@ -1,4 +1,5 @@
-﻿using Monetizr.SDK.Debug;
+﻿using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Debug;
 using SimpleJSON;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -415,6 +417,22 @@ namespace Monetizr.SDK.Utils
             if (sb.Length > 0) sb.Length -= 2;
 
             return sb.ToString();
+        }
+
+        public static string GetVideoPlayerURL (ServerCampaign serverCampaign)
+        {
+            string fallbackVideoPlayerURL = "https://image.themonetizr.com/videoplayer/html.zip";
+            string globalSettingsVideoPlayerURL = serverCampaign.serverSettings.GetParam("videoplayer", "");
+            if (string.IsNullOrEmpty(globalSettingsVideoPlayerURL))
+            {
+                MonetizrLogger.Print("VideoPlayer URL is from GlobalSettings.");
+                return fallbackVideoPlayerURL;
+            }
+            else
+            {
+                MonetizrLogger.Print("VideoPlayer URL is from FallbackURL.");
+                return globalSettingsVideoPlayerURL;
+            }
         }
 
     }

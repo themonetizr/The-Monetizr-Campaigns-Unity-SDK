@@ -109,20 +109,6 @@ namespace Monetizr.SDK.Networking
             return uwr.downloadHandler.data;
         }
 
-        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
-        {
-            var responseString = await GetResponseStringFromUrl(SettingsApiUrl);
-
-            if (string.IsNullOrEmpty(responseString))
-            {
-                MonetizrLogger.Print($"Unable to load settings!");
-                return new SettingsDictionary<string, string>();
-            }
-
-            MonetizrLogger.Print($"Settings: {responseString}");
-            return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
-        }
-
         internal async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
         {
             MonetizrManager.isVastActive = false;
@@ -137,6 +123,20 @@ namespace Monetizr.SDK.Networking
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint", "");
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
             MonetizrLogger.Print($"Api endpoint: {_baseApiUrl}");
+        }
+
+        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
+        {
+            var responseString = await GetResponseStringFromUrl(SettingsApiUrl);
+
+            if (string.IsNullOrEmpty(responseString))
+            {
+                MonetizrLogger.PrintError("Global Settings are empty.");
+                return new SettingsDictionary<string, string>();
+            }
+
+            MonetizrLogger.Print("Global Settings: " + responseString);
+            return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
 
         internal override async Task<List<ServerCampaign>> GetList()

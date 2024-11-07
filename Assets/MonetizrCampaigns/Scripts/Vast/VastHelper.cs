@@ -728,11 +728,11 @@ namespace Monetizr.SDK.VAST
             string vastJsonSettings = serverCampaign.DumpsVastSettings(null);
             serverCampaign.vastAdParameters = vastJsonSettings;
             await CheckVideoPlayer(serverCampaign);
-            //MakeProgrammaticBidRequest(serverCampaign);
+            //MakeEarlyProgrammaticBidRequest(serverCampaign);
             return serverCampaign;
         }
 
-        internal async void MakeProgrammaticBidRequest (ServerCampaign campaign)
+        internal async void MakeEarlyProgrammaticBidRequest (ServerCampaign campaign)
         {
             MonetizrLogger.Print("CREATING WEBVIEW");
             GameObject prefab = Resources.Load("MonetizrWebViewPanel2") as GameObject;
@@ -934,18 +934,19 @@ namespace Monetizr.SDK.VAST
 
         private async Task CheckVideoPlayer(ServerCampaign serverCampaign)
         {
-            MonetizrLogger.Print("Loading video player");
+            MonetizrLogger.Print("Checking VideoPlayer");
             if (!serverCampaign.TryGetAssetInList(new List<string>() { "html", "video" }, out var videoAsset)) return;
             await DownloadAndPrepareHtmlVideoPlayer(serverCampaign, videoAsset);
         }
 
         private static async Task DownloadAndPrepareHtmlVideoPlayer(ServerCampaign serverCampaign, Asset videoAsset)
         {
+            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(serverCampaign);
             string campPath = Application.persistentDataPath + "/" + serverCampaign.id;
             string zipFolder = campPath + "/" + videoAsset.fpath;
             MonetizrLogger.Print($"{campPath} {zipFolder}");
             if (!Directory.Exists(zipFolder)) Directory.CreateDirectory(zipFolder);
-            byte[] data = await MonetizrHttpClient.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+            byte[] data = await MonetizrHttpClient.DownloadAssetData(videoPlayerURL);
             File.WriteAllBytes(zipFolder + "/html.zip", data);
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
             File.Delete(zipFolder + "/html.zip");
