@@ -1,5 +1,6 @@
 ﻿using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Datadog;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
@@ -518,11 +519,11 @@ namespace Monetizr.SDK.Core
 
             if (!IsInitializationSetupComplete())
             {
-                MonetizrLogger.PrintError("Initialization Setup Failed.");
+                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(100));
                 return null;
             }
 
-            MonetizrLogger.Print($"MonetizrManager Initialize: {MonetizrSettings.apiKey} {MonetizrSettings.bundleID} {MonetizrSettings.SDKVersion}");
+            MonetizrLogger.Print($"Initializing MonetizrManager with: {MonetizrSettings.apiKey} {MonetizrSettings.bundleID} {MonetizrSettings.SDKVersion}");
             MonetizrManager monetizrManager = CreateMonetizrManagerInstance(onUIVisible, userEvent);
             monetizrManager.Initialize(onRequestComplete, soundSwitch, connectionClient);
 
@@ -534,6 +535,7 @@ namespace Monetizr.SDK.Core
             var monetizrObject = new GameObject("MonetizrManager");
             var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
             var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
+            var datadogManager = monetizrObject.AddComponent<DatadogManager>();
             DontDestroyOnLoad(monetizrObject);
             Instance = monetizrManager;
             Instance.sponsoredMissions = null;
@@ -548,25 +550,25 @@ namespace Monetizr.SDK.Core
 
             if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
             {
-                MonetizrLogger.PrintError("Missing API Key. Please, provide API Key through the Monetizr Menu.");
+                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(101));
                 return false;
             }
 
             if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
             {
-                MonetizrLogger.PrintError("Missing Bundle ID. Please, provide Bundle ID through the Monetizr Menu.");
+                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(102));
                 return false;
             }
 
             if (gameRewards == null || gameRewards.Count <= 0)
             {
-                MonetizrLogger.PrintError("Missing Game Rewards. Please, setup at least one Game Reward.");
+                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(103));
                 return false;
             }
 
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
-                MonetizrLogger.PrintError("Missing Advertising ID. Please, call MonetizrManager.SetAdvertisingIds before Initialize call.");
+                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(104));
                 return false;
             }
 
@@ -801,12 +803,14 @@ namespace Monetizr.SDK.Core
             }
             catch (Exception e)
             {
+                DatadogManager.Instance.Log("error", 203);
                 MonetizrLogger.PrintError($"Exception while getting list of campaigns\n{e}");
                 onRequestComplete?.Invoke(false);
             }
 
             if (campaigns == null)
             {
+                DatadogManager.Instance.Log("error", 203);
                 MonetizrLogger.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
                 onRequestComplete?.Invoke(false);
             }
@@ -815,12 +819,14 @@ namespace Monetizr.SDK.Core
 
             if (campaigns.Count > 0)
             {
+                DatadogManager.Instance.Log("info", 302);
                 ConnectionsClient.SetTestMode(campaigns[0].testmode);
                 ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
                 ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
             }
             else
             {
+                DatadogManager.Instance.Log("info", 303);
                 ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
             }
 
@@ -835,10 +841,12 @@ namespace Monetizr.SDK.Core
 
                 if (campaign.isLoaded)
                 {
+                    DatadogManager.Instance.Log("info", 304);
                     MonetizrLogger.Print($"Campaign {campaign.id} successfully loaded");
                 }
                 else
                 {
+                    DatadogManager.Instance.Log("error", 204);
                     MonetizrLogger.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
                     ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
                 }
@@ -853,12 +861,6 @@ namespace Monetizr.SDK.Core
             localSettings.LoadOldAndUpdateNew(campaigns);
             MonetizrLogger.Print($"RequestCampaigns completed with {campaigns.Count} campaigns.");
             if (campaigns.Count > 0) ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
-
-            if (gameRewards.Count == 0)
-            {
-                MonetizrLogger.PrintError($"No in-game rewards defined. Don't forget to call MonetizrManager.SetGameCoinAsset after SDK initialization.");
-                return;
-            }
 
             foreach (var i in gameRewards)
             {
@@ -886,6 +888,7 @@ namespace Monetizr.SDK.Core
 
         private void OnApplicationQuit()
         {
+            DatadogManager.Instance.Log("info", 305);
             Analytics?.OnApplicationQuit();
         }
 

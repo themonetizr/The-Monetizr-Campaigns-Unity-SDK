@@ -1,5 +1,3 @@
-#define MONETIZR_VERBOSE
-
 using System;
 using UnityEngine;
 

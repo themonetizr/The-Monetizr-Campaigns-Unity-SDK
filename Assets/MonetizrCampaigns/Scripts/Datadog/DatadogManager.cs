@@ -1,48 +1,56 @@
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public static class DatadogManager
+namespace Monetizr.SDK.Datadog
 {
-    private static string postURL = "https://http-intake.logs.us5.datadoghq.com/api/v2/logs";
-    private static string apiKey = "558f6d31be858ca8c13cff336d4ecd98";
-    private static string applicationKey = "2ec3f5a8d60631134b6a544ec8d8a8a051292059";
-
-    public static IEnumerator PostLogData ()
+    public class DatadogManager: MonoBehaviour
     {
-        MonetizrLogger.Print("DATADOG - Sending log.");
+        public static DatadogManager Instance;
+        private static string postURL = "https://http-intake.logs.us5.datadoghq.com/api/v2/logs";
+        private static string apiKey = "";
 
-        string ddsource = "MonetizrSDK";
-        string ddtags = "env:dev,version:1.1.3";
-        string hostname = "Monetizr";
-        string message = System.DateTime.Now.ToLongDateString() + " " + System.DateTime.Now.ToLongTimeString() + " - Test Message.";
-        string service = Application.identifier;
-        var jsonData = $"{{\"ddsource\":\"{ddsource}\",\"ddtags\":\"{ddtags}\",\"hostname\":\"{hostname}\",\"message\":\"{message}\",\"service\":\"{service}\"}}";
-
-        UnityWebRequest request = new UnityWebRequest(postURL, "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-
-        //request.SetRequestHeader("DD-SITE", "us5.datadoghq.com");
-        //request.SetRequestHeader("Content-Encoding", "deflate");
-        request.SetRequestHeader("DD-API-KEY", apiKey);
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        yield return request.SendWebRequest();
-
-        MonetizrLogger.Print("DATADOG - Result: " + request.result.ToString());
-
-        if (request.result != UnityWebRequest.Result.Success)
+        private void Awake ()
         {
-            MonetizrLogger.Print("DATADOG - Error sending log: " + request.error);
-            MonetizrLogger.Print($"DATADOG - Status Code: {request.responseCode}");
-            MonetizrLogger.Print($"DATADOG - Response: {request.downloadHandler.text}");
+            Instance = this;
         }
-        else
+
+        public void Log (string logType, int code)
         {
-            MonetizrLogger.Print("DATADOG - Log sent successfully!");
+            string logMessage = ErrorDictionary.GetErrorMessage(code);
+            StartCoroutine(PostLogData(logType, code.ToString(), logMessage));
+        }
+
+        private IEnumerator PostLogData (string logType, string code, string logMessage)
+        {
+            string ddsource = "UnitySDK";
+            string ddtags = "env:prod,code:" + code + ",sdk-version:" + MonetizrSettings.SDKVersion + ",app-version:" + Application.version;
+            string hostname = "Monetizr";
+            string message = logMessage;
+            string service = Application.identifier;
+            string status = "info";
+            if (logType == "error") status = "error";
+
+            var jsonData = $"{{\"ddsource\":\"{ddsource}\",\"ddtags\":\"{ddtags}\",\"hostname\":\"{hostname}\",\"message\":\"{message}\",\"status\":\"{status}\",\"service\":\"{service}\"}}";
+
+            UnityWebRequest request = new UnityWebRequest(postURL, "POST");
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            request.SetRequestHeader("DD-API-KEY", apiKey);
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                MonetizrLogger.Print("DATADOG - Error sending log: " + request.error);
+            }
         }
     }
+
 }

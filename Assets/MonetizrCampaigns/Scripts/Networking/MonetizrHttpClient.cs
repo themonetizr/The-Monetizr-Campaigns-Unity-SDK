@@ -15,6 +15,7 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.VAST;
 using UnityEngine.Networking;
+using Monetizr.SDK.Datadog;
 
 namespace Monetizr.SDK.Networking
 {
@@ -101,6 +102,7 @@ namespace Monetizr.SDK.Networking
 
             if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.DataProcessingError)
             {
+                DatadogManager.Instance.Log("error", 205);
                 MonetizrLogger.PrintError($"Network error {uwr.error} with {url}");
                 onDownloadFailed?.Invoke();
                 return null;
@@ -131,10 +133,12 @@ namespace Monetizr.SDK.Networking
 
             if (string.IsNullOrEmpty(responseString))
             {
-                MonetizrLogger.PrintError("Global Settings are empty.");
+                DatadogManager.Instance.Log("error", 202);
+                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(202));
                 return new SettingsDictionary<string, string>();
             }
 
+            DatadogManager.Instance.Log("info", 301);
             MonetizrLogger.Print("Global Settings: " + responseString);
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
