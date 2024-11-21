@@ -1,3 +1,4 @@
+using Monetizr.SDK.Utils;
 using System;
 using UnityEngine;
 
@@ -30,6 +31,18 @@ namespace Monetizr.SDK.Debug
         public static void PrintWarning (object message)
         {
             UnityEngine.Debug.LogWarning($"Monetizr SDK: {message}");
+        }
+
+        public static void PrintMessage (MessageEnum messageEnum)
+        {
+            string messageString = EnumUtils.GetEnumDescription(messageEnum);
+            PrintToConsole(messageString);
+        }
+
+        public static void PrintAndLogMessage (MessageEnum messageEnum)
+        {
+            string messageString = EnumUtils.GetEnumDescription(messageEnum);
+            PrintToConsole(messageString);
         }
 
     }

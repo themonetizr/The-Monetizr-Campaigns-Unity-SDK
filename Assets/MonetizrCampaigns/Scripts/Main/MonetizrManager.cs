@@ -1,6 +1,5 @@
 ﻿using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
-using Monetizr.SDK.Datadog;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
@@ -519,7 +518,7 @@ namespace Monetizr.SDK.Core
 
             if (!IsInitializationSetupComplete())
             {
-                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(100));
+                MonetizrLogger.PrintMessage(MessageEnum.M600);
                 return null;
             }
 
@@ -535,7 +534,7 @@ namespace Monetizr.SDK.Core
             var monetizrObject = new GameObject("MonetizrManager");
             var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
             var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
-            var datadogManager = monetizrObject.AddComponent<DatadogManager>();
+            var datadogManager = monetizrObject.AddComponent<GCPManager>();
             DontDestroyOnLoad(monetizrObject);
             Instance = monetizrManager;
             Instance.sponsoredMissions = null;
@@ -550,25 +549,25 @@ namespace Monetizr.SDK.Core
 
             if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
             {
-                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(101));
+                MonetizrLogger.PrintMessage(MessageEnum.M601);
                 return false;
             }
 
             if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
             {
-                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(102));
+                MonetizrLogger.PrintMessage(MessageEnum.M602);
                 return false;
             }
 
             if (gameRewards == null || gameRewards.Count <= 0)
             {
-                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(103));
+                MonetizrLogger.PrintMessage(MessageEnum.M603);
                 return false;
             }
 
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
-                MonetizrLogger.PrintError(ErrorDictionary.GetErrorMessage(104));
+                MonetizrLogger.PrintMessage(MessageEnum.M604);
                 return false;
             }
 
@@ -803,14 +802,14 @@ namespace Monetizr.SDK.Core
             }
             catch (Exception e)
             {
-                DatadogManager.Instance.Log("error", 203);
+                MonetizrLogger.PrintAndLogMessage(MessageEnum.M401);
                 MonetizrLogger.PrintError($"Exception while getting list of campaigns\n{e}");
                 onRequestComplete?.Invoke(false);
             }
 
             if (campaigns == null)
             {
-                DatadogManager.Instance.Log("error", 203);
+                MonetizrLogger.PrintAndLogMessage(MessageEnum.M401);
                 MonetizrLogger.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
                 onRequestComplete?.Invoke(false);
             }
@@ -819,14 +818,14 @@ namespace Monetizr.SDK.Core
 
             if (campaigns.Count > 0)
             {
-                DatadogManager.Instance.Log("info", 302);
+                MonetizrLogger.PrintAndLogMessage(MessageEnum.M102);
                 ConnectionsClient.SetTestMode(campaigns[0].testmode);
                 ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
                 ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
             }
             else
             {
-                DatadogManager.Instance.Log("info", 303);
+                MonetizrLogger.PrintAndLogMessage(MessageEnum.M103);
                 ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
             }
 
@@ -841,12 +840,12 @@ namespace Monetizr.SDK.Core
 
                 if (campaign.isLoaded)
                 {
-                    DatadogManager.Instance.Log("info", 304);
+                    MonetizrLogger.PrintAndLogMessage(MessageEnum.M104);
                     MonetizrLogger.Print($"Campaign {campaign.id} successfully loaded");
                 }
                 else
                 {
-                    DatadogManager.Instance.Log("error", 204);
+                    MonetizrLogger.PrintAndLogMessage(MessageEnum.M402);
                     MonetizrLogger.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
                     ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
                 }
@@ -888,7 +887,7 @@ namespace Monetizr.SDK.Core
 
         private void OnApplicationQuit()
         {
-            DatadogManager.Instance.Log("info", 305);
+            MonetizrLogger.PrintAndLogMessage(MessageEnum.M105);
             Analytics?.OnApplicationQuit();
         }
 
