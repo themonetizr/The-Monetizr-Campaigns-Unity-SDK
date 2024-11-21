@@ -1,4 +1,5 @@
 using Monetizr.SDK.Core;
+using Monetizr.SDK.Utils;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -8,27 +9,22 @@ namespace Monetizr.SDK.Debug
     public class GCPManager: MonoBehaviour
     {
         public static GCPManager Instance;
-        private static string postURL = "https://http-intake.logs.us5.datadoghq.com/api/v2/logs";
+        private static string postURL = "https://us-central1-gcp-monetizr-project.cloudfunctions.net/unity_notification_channel_to_slack";
 
         private void Awake ()
         {
             Instance = this;
         }
 
-        /*
-        public void Log (string logType, int code)
+        public void Log (MessageEnum messageEnum)
         {
-            //string logMessage = ErrorDictionary.GetErrorMessage(code);
-            StartCoroutine(GCPLog());
+            string jsonContent = BuildJSONContent(messageEnum);
+            StartCoroutine(GCPLog(jsonContent));
         }
-        */
 
-        private IEnumerator GCPLog ()
+        private IEnumerator GCPLog (string jsonContent)
         {
-            string url = "https://us-central1-gcp-monetizr-project.cloudfunctions.net/unity_notification_channel_to_slack";
-            string jsonContent = "{\"msg\": \"TEST - Unity logging message.\", \"level\": \"error\"}";
-
-            UnityWebRequest request = new UnityWebRequest(url, "POST");
+            UnityWebRequest request = new UnityWebRequest(postURL, "POST");
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonContent);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -36,13 +32,26 @@ namespace Monetizr.SDK.Debug
 
             yield return request.SendWebRequest();
 
-            MonetizrLogger.Print("GCP - Result: " + request.result);
-            MonetizrLogger.Print("GCP - Text: " + request.downloadHandler.text);
+            MonetizrLogger.Print("GCP - Result: " + request.result + " / Text: " + request.downloadHandler.text);
 
             if (request.result != UnityWebRequest.Result.Success)
             {
                 MonetizrLogger.Print("GCP - Error sending log: " + request.error);
             }
+        }
+
+        private string BuildJSONContent (MessageEnum messageEnum)
+        {
+            string message = EnumUtils.GetEnumDescription(messageEnum);
+            string code = ((int) messageEnum).ToString();
+            string sdkVersion = MonetizrSettings.SDKVersion;
+            string appVersion = Application.version;
+            string bundleID = MonetizrSettings.bundleID;
+            string campaignID = "";
+            string missionID = "";
+            string level = EnumUtils.IsEnumError(messageEnum) ? "error" : "info";
+            string jsonContent = $"{{\"msg\": \"{message}\", \"code\": \"{code}\", \"sdk_version\": \"{sdkVersion}\", \"app_version\": \"{appVersion}\", \"bundle\": \"{bundleID}\", \"camp_id\": \"{campaignID}\", \"mission_id\": \"{missionID}\", \"level\": \"{level}\"}}";
+            return jsonContent;
         }
     }
 

@@ -101,7 +101,7 @@ namespace Monetizr.SDK.Networking
 
             if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.DataProcessingError)
             {
-                MonetizrLogger.PrintAndLogMessage(MessageEnum.M403);
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M403);
                 MonetizrLogger.PrintError($"Network error {uwr.error} with {url}");
                 onDownloadFailed?.Invoke();
                 return null;
@@ -132,10 +132,10 @@ namespace Monetizr.SDK.Networking
 
             if (string.IsNullOrEmpty(responseString))
             {
-                MonetizrLogger.PrintAndLogMessage(MessageEnum.M400);
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M400);
                 return new SettingsDictionary<string, string>();
             }
-            MonetizrLogger.PrintAndLogMessage(MessageEnum.M101);
+            MonetizrLogger.PrintRemoteMessage(MessageEnum.M101);
             MonetizrLogger.Print("Global Settings: " + responseString);
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }

@@ -33,16 +33,23 @@ namespace Monetizr.SDK.Debug
             UnityEngine.Debug.LogWarning($"Monetizr SDK: {message}");
         }
 
-        public static void PrintMessage (MessageEnum messageEnum)
+        public static void PrintLocalMessage (MessageEnum messageEnum)
         {
             string messageString = EnumUtils.GetEnumDescription(messageEnum);
-            PrintToConsole(messageString);
+            if (EnumUtils.IsEnumError(messageEnum))
+            {
+                PrintError(messageString);
+            }
+            else
+            {
+                PrintToConsole(messageString);
+            }
         }
 
-        public static void PrintAndLogMessage (MessageEnum messageEnum)
+        public static void PrintRemoteMessage (MessageEnum messageEnum)
         {
-            string messageString = EnumUtils.GetEnumDescription(messageEnum);
-            PrintToConsole(messageString);
+            PrintLocalMessage(messageEnum);
+            GCPManager.Instance.Log(messageEnum);
         }
 
     }

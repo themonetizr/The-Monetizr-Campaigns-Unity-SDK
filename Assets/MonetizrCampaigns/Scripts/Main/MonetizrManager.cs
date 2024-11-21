@@ -518,7 +518,7 @@ namespace Monetizr.SDK.Core
 
             if (!IsInitializationSetupComplete())
             {
-                MonetizrLogger.PrintMessage(MessageEnum.M600);
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M600);
                 return null;
             }
 
@@ -549,25 +549,25 @@ namespace Monetizr.SDK.Core
 
             if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
             {
-                MonetizrLogger.PrintMessage(MessageEnum.M601);
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M601);
                 return false;
             }
 
             if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
             {
-                MonetizrLogger.PrintMessage(MessageEnum.M602);
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M602);
                 return false;
             }
 
             if (gameRewards == null || gameRewards.Count <= 0)
             {
-                MonetizrLogger.PrintMessage(MessageEnum.M603);
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M603);
                 return false;
             }
 
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
-                MonetizrLogger.PrintMessage(MessageEnum.M604);
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M604);
                 return false;
             }
 
@@ -802,14 +802,14 @@ namespace Monetizr.SDK.Core
             }
             catch (Exception e)
             {
-                MonetizrLogger.PrintAndLogMessage(MessageEnum.M401);
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M401);
                 MonetizrLogger.PrintError($"Exception while getting list of campaigns\n{e}");
                 onRequestComplete?.Invoke(false);
             }
 
             if (campaigns == null)
             {
-                MonetizrLogger.PrintAndLogMessage(MessageEnum.M401);
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M401);
                 MonetizrLogger.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
                 onRequestComplete?.Invoke(false);
             }
@@ -818,14 +818,14 @@ namespace Monetizr.SDK.Core
 
             if (campaigns.Count > 0)
             {
-                MonetizrLogger.PrintAndLogMessage(MessageEnum.M102);
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M102);
                 ConnectionsClient.SetTestMode(campaigns[0].testmode);
                 ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
                 ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
             }
             else
             {
-                MonetizrLogger.PrintAndLogMessage(MessageEnum.M103);
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M103);
                 ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
             }
 
@@ -840,12 +840,12 @@ namespace Monetizr.SDK.Core
 
                 if (campaign.isLoaded)
                 {
-                    MonetizrLogger.PrintAndLogMessage(MessageEnum.M104);
+                    MonetizrLogger.PrintRemoteMessage(MessageEnum.M104);
                     MonetizrLogger.Print($"Campaign {campaign.id} successfully loaded");
                 }
                 else
                 {
-                    MonetizrLogger.PrintAndLogMessage(MessageEnum.M402);
+                    MonetizrLogger.PrintRemoteMessage(MessageEnum.M402);
                     MonetizrLogger.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
                     ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
                 }
@@ -887,7 +887,7 @@ namespace Monetizr.SDK.Core
 
         private void OnApplicationQuit()
         {
-            MonetizrLogger.PrintAndLogMessage(MessageEnum.M105);
+            MonetizrLogger.PrintRemoteMessage(MessageEnum.M105);
             Analytics?.OnApplicationQuit();
         }
 
