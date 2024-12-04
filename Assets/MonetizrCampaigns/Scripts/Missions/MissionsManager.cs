@@ -121,12 +121,7 @@ namespace Monetizr.SDK.Missions
             bool hasHtml = campaign.HasAsset(AssetsType.Html5PathString);
             bool hasVideo = campaign.HasAsset(AssetsType.VideoFilePathString);
             bool video = !(campaign.serverSettings.GetParam("email_giveaway_mission_without_video") == "true");
-
-            if (video && !hasHtml && !hasVideo)
-            {
-                return null;
-            }
-
+            if (video && !hasHtml && !hasVideo) return null;
             RewardType rt = RewardType.Coins;
 
             return new Mission()
@@ -204,10 +199,7 @@ namespace Monetizr.SDK.Missions
             {
                 onComplete = (bool skipped) =>
                 {
-                    if (!skipped)
-                    {
-                        ClaimAction(nextMission, __onComplete, updateUIDelegate).Invoke();
-                    }
+                    if (!skipped) ClaimAction(nextMission, __onComplete, updateUIDelegate).Invoke();
                 };
             }
 
@@ -424,16 +416,13 @@ namespace Monetizr.SDK.Missions
             {
                 if (!m.isServerCampaignActive) return m;
             }
-
             return null;
         }
 
         internal void CreateMissionsFromCampaign(ServerCampaign campaign)
         {
             var predefinedSponsoredMissions = MonetizrManager.Instance.sponsoredMissions;
-
             if (campaign == null && predefinedSponsoredMissions == null) return;
-
             string serverMissionsJson = campaign.serverSettings.GetParam("custom_missions");
             MonetizrLogger.Print($"Predefined missions from settings: {serverMissionsJson}");
             ServerMissionsHelper ic = null;
@@ -590,7 +579,6 @@ namespace Monetizr.SDK.Missions
         internal int GetActiveMissionsNum(ServerCampaign campaign)
         {
             var res = GetMissionsForRewardCenter(campaign);
-       
             return res?.Count ?? 0;
         }
 
@@ -603,8 +591,7 @@ namespace Monetizr.SDK.Missions
         {
             bool isUpdateNeeded = finishedMission != null;
 
-            if (finishedMission != null)
-                MonetizrLogger.Print($"-----UpdateMissionsActivity for {finishedMission.serverId}");
+            if (finishedMission != null) MonetizrLogger.Print($"-----UpdateMissionsActivity for {finishedMission.serverId}");
 
             foreach (var m in missions)
             {
@@ -651,7 +638,6 @@ namespace Monetizr.SDK.Missions
                     if (_m != null && _m.isClaimed != ClaimState.Claimed)
                     {
                         shouldBeDisabled = true;
-
                         MonetizrLogger.Print($"------Mission {id} disabled because {_m.serverId} is not active");
                     }
                 }
@@ -659,7 +645,6 @@ namespace Monetizr.SDK.Missions
                 if (!shouldBeDisabled)
                 {
                     if (m.isDisabled) isUpdateNeeded = true;
-
                     m.isDisabled = shouldBeDisabled;
                     m.state = MissionUIState.ToBeShown;
                 }

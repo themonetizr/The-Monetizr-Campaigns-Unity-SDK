@@ -10,6 +10,7 @@ namespace Monetizr.SDK.Debug
     {
         public static GCPManager Instance;
         private static string postURL = "https://us-central1-gcp-monetizr-project.cloudfunctions.net/unity_notification_channel_to_slack";
+        private static bool isEnabled = false;
 
         private void Awake ()
         {
@@ -18,6 +19,7 @@ namespace Monetizr.SDK.Debug
 
         public void Log (MessageEnum messageEnum)
         {
+            if (!isEnabled) return;
             string jsonContent = BuildJSONContent(messageEnum);
             StartCoroutine(GCPLog(jsonContent));
         }

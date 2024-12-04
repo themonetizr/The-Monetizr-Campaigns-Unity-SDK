@@ -67,6 +67,8 @@ namespace Monetizr.SDK.Campaigns
         public string adm;
         public string verifications_vast_node;
 
+        public bool hasMadeEarlyBidRequest = false;
+
         public ServerCampaign () { }
 
         public ServerCampaign(string id, string darTag, SettingsDictionary<string,string> defaultServerSettings)
@@ -74,11 +76,6 @@ namespace Monetizr.SDK.Campaigns
             this.id = id;
             dar_tag = darTag;
             serverSettings = defaultServerSettings;
-        }
-
-        internal bool HasAssetInList(string type)
-        {
-            return assets.FindIndex(a => a.type == type) >= 0;
         }
 
         internal bool TryGetAssetInList(List<string> types, out Asset asset)
@@ -96,7 +93,6 @@ namespace Monetizr.SDK.Campaigns
         internal bool TryGetAssetInList(string type, out Asset asset)
         {
             asset = assets.Find(a => a.type == type);
-
             return asset != null;
         }
 
@@ -213,8 +209,7 @@ namespace Monetizr.SDK.Campaigns
             tex.LoadImage(data);
             tex.wrapMode = TextureWrapMode.Clamp;
 
-            if (texture != AssetsType.Unknown)
-                SetAsset<Texture2D>(texture, tex);
+            if (texture != AssetsType.Unknown) SetAsset<Texture2D>(texture, tex);
 
             Sprite s = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
             asset.spriteAsset = s;
@@ -259,7 +254,6 @@ namespace Monetizr.SDK.Campaigns
             if (!File.Exists(fileToCheck))
             {
                 MonetizrLogger.Print($"Downloading archive {asset.url}");
-
                 data = await MonetizrHttpClient.DownloadAssetData(asset.url);
 
                 if (data == null)
@@ -271,7 +265,6 @@ namespace Monetizr.SDK.Campaigns
                         this.isLoaded = false;
                         this.loadingError = $"Nothing downloaded with an url {asset.url}";
                     }
-
                     return;
                 }
 
@@ -282,7 +275,6 @@ namespace Monetizr.SDK.Campaigns
                 {
                     MonetizrLogger.Print("Extracting to: " + zipFolder);
                     var unzipResult = MonetizrUtils.ExtractAllToDirectory(fpath, zipFolder);
-
                     File.Delete(fpath);
 
                     if (!unzipResult)
@@ -292,24 +284,13 @@ namespace Monetizr.SDK.Campaigns
                             this.isLoaded = false;
                             this.loadingError = $"Zip {fpath} extracting failed!";
                         }
-
                         return;
                     }
-
                 }
-
             }
 
-            if (zipFolder != null)
-            {
-                fpath = fileToCheck;
-            }
-
-            if (!string.IsNullOrEmpty(asset.mainAssetName))
-            {
-                fpath = $"{path}/{asset.mainAssetName}";
-            }
-
+            if (zipFolder != null) fpath = fileToCheck;
+            if (!string.IsNullOrEmpty(asset.mainAssetName)) fpath = $"{path}/{asset.mainAssetName}";
             MonetizrLogger.Print($"Resource {fileString} {fpath}");
             asset.localFullPath = fpath;
             SetAsset<string>(fileString, fpath);
@@ -327,88 +308,71 @@ namespace Monetizr.SDK.Campaigns
                 {
                     case "icon":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.BrandLogoSprite);
-
                         break;
+
                     case "banner":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.BrandBannerSprite);
-
                         break;
+
                     case "logo":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.BrandRewardLogoSprite);
-
                         break;
+
                     case "reward_banner":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.BrandRewardBannerSprite);
-
                         break;
 
                     case "tiny_teaser":
                         await AssignAssetTextures(asset, AssetsType.TinyTeaserTexture, AssetsType.TinyTeaserSprite);
-
                         break;
 
                     case "custom_coin_icon":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.CustomCoinSprite, true);
-
                         break;
 
                     case "loading_screen":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.LoadingScreenSprite, true);
-
                         break;
 
                     case "reward_image":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.RewardSprite, true);
-
                         break;
 
                     case "ingame_reward_image":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.IngameRewardSprite, true);
-
                         break;
 
                     case "unknown_reward_image":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.UnknownRewardSprite, true);
-
                         break;
 
-
                     case "minigame_asset1":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.MinigameSprite1, true);
-
                         break;
 
                     case "minigame_asset2":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.MinigameSprite2, true);
-
                         break;
 
                     case "minigame_asset3":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.MinigameSprite3, true);
-
                         break;
 
                     case "leaderboard_banner":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.LeaderboardBannerSprite, true);
-
                         break;
 
                     case "survey":
-
                         if (!string.IsNullOrEmpty(asset.survey_content))
+                        {
                             SetAsset<string>(AssetsType.SurveyURLString, asset.survey_content);
+                        }
                         else
+                        {
                             SetAsset<string>(AssetsType.SurveyURLString, asset.url);
-
+                        }
                         break;
+
                     case "video":
                         asset.fpath = MonetizrUtils.ConvertCreativeToFname(asset.url);
                         asset.fname = "video";
@@ -420,29 +384,22 @@ namespace Monetizr.SDK.Campaigns
 
                     case "text":
                             SetAsset<string>(AssetsType.BrandTitleString, asset.title);
-
                         break;
 
                     case "html":
-
                         asset.fpath = MonetizrUtils.ConvertCreativeToFname(asset.url);
                         asset.fname = "video";
                         asset.fext = MonetizrUtils.ConvertCreativeToExt("", asset.url);
                         asset.mainAssetName = $"index.html";
-                        
                         await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
-
                         break;
 
                     case "tiny_teaser_gif":
                         await PreloadAssetToCache(asset, AssetsType.TeaserGifPathString, true);
-
                         break;
-
 
                     case "tiled_background":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.TiledBackgroundSprite, true);
-
                         break;
 
                     case "custom_coin_title":
@@ -450,12 +407,9 @@ namespace Monetizr.SDK.Campaigns
                         break;
 
                     case "image":
-                        
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.Unknown, true);
                         break;
-
                 }
-
             }
         }
 
@@ -472,7 +426,6 @@ namespace Monetizr.SDK.Campaigns
             }
 
             string playerUrl = serverSettings.GetParam("openrtb.player_url", videoPlayerURL);
-
             byte[] data = await MonetizrHttpClient.DownloadAssetData(playerUrl);
 
             if (data == null)
@@ -482,9 +435,7 @@ namespace Monetizr.SDK.Campaigns
             }
 
             File.WriteAllBytes(zipFolder + "/html.zip", data);
-
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-
             File.Delete(zipFolder + "/html.zip");
 
             if (!File.Exists(indexPath))
@@ -553,9 +504,7 @@ namespace Monetizr.SDK.Campaigns
             }
 
             MonetizrLogger.Print("Final HTML: " + str);
-
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
-
             File.WriteAllText(indexPath, str);
         }
 
@@ -576,18 +525,9 @@ namespace Monetizr.SDK.Campaigns
 
             Directory.Delete(target_dir, false);
         }
-
-        [Serializable]
-        public struct KeyValue
-        {
-            [SerializeField] public string key;
-            [SerializeField] public string value;
-        }
         
         internal string DumpCampaignSettings(TagsReplacer tagsReplacer)
         {
-            var values = new List<KeyValue>();
-
             string result = string.Join(",", serverSettings.Select(kvp =>
             {
                 var v = tagsReplacer == null ? kvp.Value : tagsReplacer.ReplaceAngularMacros(kvp.Value);

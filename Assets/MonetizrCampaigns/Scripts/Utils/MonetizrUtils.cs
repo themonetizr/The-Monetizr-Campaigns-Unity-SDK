@@ -435,5 +435,79 @@ namespace Monetizr.SDK.Utils
             }
         }
 
+        public static string ExtractValueFromJSON(string jsonString, string parameter)
+        {
+            string key = $"\"{parameter}\"";
+
+            int keyIndex = jsonString.IndexOf(key, StringComparison.Ordinal);
+            if (keyIndex == -1)
+            {
+                return null;
+            }
+
+            int colonIndex = jsonString.IndexOf(':', keyIndex);
+            if (colonIndex == -1)
+            {
+                return null;
+            }
+
+            int valueStartIndex = colonIndex + 1;
+            while (valueStartIndex < jsonString.Length && char.IsWhiteSpace(jsonString[valueStartIndex]))
+            {
+                valueStartIndex++;
+            }
+
+            char startingChar = jsonString[valueStartIndex];
+            bool isQuoted = startingChar == '"';
+            int valueEndIndex;
+
+            if (isQuoted)
+            {
+                valueEndIndex = valueStartIndex + 1;
+                while (valueEndIndex < jsonString.Length)
+                {
+                    valueEndIndex = jsonString.IndexOf('"', valueEndIndex);
+                    if (valueEndIndex == -1 || jsonString[valueEndIndex - 1] != '\\')
+                        break;
+                    valueEndIndex++;
+                }
+
+                if (valueEndIndex == -1)
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                char[] delimiters = { ',', '}', ']' };
+                valueEndIndex = jsonString.IndexOfAny(delimiters, valueStartIndex);
+                if (valueEndIndex == -1)
+                {
+                    valueEndIndex = jsonString.Length;
+                }
+            }
+
+            string value = jsonString.Substring(valueStartIndex, valueEndIndex - valueStartIndex).Trim();
+
+            if (isQuoted)
+            {
+                value = value.Trim('"');
+            }
+
+            value = value.Replace("\\/", "/").Replace("\\\"", "\"").Replace("\\\\", "\\");
+
+            return value;
+        }
+
+        public static string ExtractNestedValue(string jsonString, string parentKey, string nestedKey)
+        {
+            string parentValue = ExtractValueFromJSON(jsonString, parentKey);
+
+            if (parentValue == null)
+                return null;
+
+            return ExtractValueFromJSON(parentValue, nestedKey);
+        }
+
     }
 }

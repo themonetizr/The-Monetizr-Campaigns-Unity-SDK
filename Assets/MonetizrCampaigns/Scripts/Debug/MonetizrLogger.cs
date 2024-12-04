@@ -1,6 +1,4 @@
 using Monetizr.SDK.Utils;
-using System;
-using UnityEngine;
 
 namespace Monetizr.SDK.Debug
 {
@@ -16,11 +14,7 @@ namespace Monetizr.SDK.Debug
         
         private static void PrintToConsole (object message)
         {
-#if UNITY_EDITOR
             UnityEngine.Debug.Log($"Monetizr SDK: {message}");
-#else
-            Console.WriteLine($"Monetizr SDK: {message}");
-#endif
         }
 
         public static void PrintError (object message)
@@ -51,7 +45,5 @@ namespace Monetizr.SDK.Debug
             PrintLocalMessage(messageEnum);
             GCPManager.Instance.Log(messageEnum);
         }
-
     }
-
 }

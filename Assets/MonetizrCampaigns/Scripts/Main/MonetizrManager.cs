@@ -710,11 +710,6 @@ namespace Monetizr.SDK.Core
             Instance.missionsManager.CleanUserDefinedMissions();
         }
 
-        internal static void HideRewardCenter()
-        {
-            Instance._uiController.HidePanel(PanelId.RewardCenter);
-        }
-
         internal static void ShowCodeView(Action<bool> onComplete, Mission m = null)
         {
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
@@ -756,12 +751,6 @@ namespace Monetizr.SDK.Core
             Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", id, onComplete, false, m);
         }
 
-        internal static void GoToLink(Action<bool> onComplete, Mission m = null)
-        {
-            Application.OpenURL(m.surveyUrl);
-            onComplete.Invoke(false);
-        }
-
         internal static void ShowActionView(Action<bool> onComplete, Mission m = null)
         {
             _ShowWebView(onComplete, PanelId.ActionHtmlPanelView, m);
@@ -780,11 +769,6 @@ namespace Monetizr.SDK.Core
         internal static void ShowHTML5(Action<bool> onComplete, Mission m = null)
         {
             _ShowWebView(onComplete, PanelId.Html5WebView, m);
-        }
-
-        internal static void ShowWebVideo(Action<bool> onComplete, Mission m = null)
-        {
-            _ShowWebView(onComplete, PanelId.VideoWebView, m);
         }
 
         #endregion
