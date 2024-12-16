@@ -471,7 +471,7 @@ namespace Monetizr.SDK.VAST
                             MonetizrLogger.Print("Parsed Settings: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cs));
                             if (cs.TryGetValue("content", out var c))
                             {
-                                MonetizrLogger.Print("Final Settings: " + c);
+                                MonetizrLogger.Print("Final Content Settings: " + c);
                                 _serverCampaign.content = c;
                             }
                         }
@@ -623,36 +623,7 @@ namespace Monetizr.SDK.VAST
             string vastJsonSettings = serverCampaign.DumpsVastSettings(null);
             serverCampaign.vastAdParameters = vastJsonSettings;
             await CheckVideoPlayer(serverCampaign);
-            await MakeEarlyProgrammaticBidRequest(serverCampaign);
             return serverCampaign;
-        }
-
-        internal async Task<bool> MakeEarlyProgrammaticBidRequest (ServerCampaign campaign)
-        {
-            MonetizrLogger.Print("EARLY PROGRAMMATIC BID REQUEST");
-
-            PubmaticHelper ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
-            string openRTBRequest = "";
-
-            bool isProgrammaticOK = false;
-            try
-            {
-                isProgrammaticOK = await ph.GetOpenRtbResponseForCampaign(campaign, openRTBRequest);
-            }
-            catch (DownloadUrlAsStringException e)
-            {
-                MonetizrLogger.PrintError($"Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
-                isProgrammaticOK = false;
-            }
-            catch (Exception e)
-            {
-                MonetizrLogger.PrintError($"Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
-                isProgrammaticOK = false;
-            }
-
-            campaign.hasMadeEarlyBidRequest = isProgrammaticOK;
-
-            return true;
         }
 
         internal async Task<bool> InitializeServerCampaignForProgrammatic(ServerCampaign campaign, string vastContent)

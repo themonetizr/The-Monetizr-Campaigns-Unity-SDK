@@ -280,12 +280,13 @@ namespace Monetizr.SDK.UI
             if (campaign.hasMadeEarlyBidRequest)
             {
                 isProgrammaticOK = true;
+                MonetizrLogger.Print("Early Bid Request was succesfully made.");
             }
             else
             {
                 try
                 {
-                    isProgrammaticOK = await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic);
+                    isProgrammaticOK = await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic, "");
                 }
                 catch (DownloadUrlAsStringException e)
                 {

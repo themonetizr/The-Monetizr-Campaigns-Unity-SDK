@@ -1,14 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Utils;
 using SimpleJSON;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Monetizr.SDK.VAST
@@ -144,16 +145,25 @@ namespace Monetizr.SDK.VAST
             return res;
         }
         
-        internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign, string currentMissionOpenRtbRequest)
+        internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign, string currentMissionOpenRtbRequest, string openrtbEndpoint)
         {
             var settings = currentCampaign.serverSettings;
             var openRtbUri = settings.GetParam("openrtb.endpoint");
 
+            MonetizrLogger.Print("PBR - Endpoint Param: " + openrtbEndpoint);
+
             if (string.IsNullOrEmpty(openRtbUri))
             {
-                MonetizrLogger.Print($"No programmatic endpoint defined! Programmatic disabled!");
+                openRtbUri = openrtbEndpoint;
+            }
+
+            if (string.IsNullOrEmpty(openRtbUri))
+            {
+                MonetizrLogger.Print("PBR - No endpoint defined.");
                 return false;
             }
+
+            MonetizrLogger.Print("PBR - Endpoint found.");
 
             var requestParameterName = string.IsNullOrEmpty(currentMissionOpenRtbRequest) ? "openrtb.request" : currentMissionOpenRtbRequest;
             var timeParameterName = $"openrtb.last_request.{requestParameterName}";
@@ -183,7 +193,7 @@ namespace Monetizr.SDK.VAST
 
             if (string.IsNullOrEmpty(openRtbRequest))
             {
-                MonetizrLogger.PrintError($"Can't create openRTB request for campaign {currentCampaign}!");
+                MonetizrLogger.PrintError("PBR - Can't create openRTB request for campaign {currentCampaign}!");
                 return false;
             }
 
@@ -234,6 +244,93 @@ namespace Monetizr.SDK.VAST
                 httpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
             }
 
+            return true;
+        }
+
+        internal async Task<bool> TEST_GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign)
+        {
+            SettingsDictionary<string, string> settings = currentCampaign.serverSettings;
+            if (!AreRequestParametersInSettings(settings)) return false;
+
+            string openRTBEndpoint = settings.GetParam("openrtb.endpoint");
+            string openRTBRequest = settings.GetParam("openrtb.request");
+
+            openRTBRequest = MonetizrUtils.UnescapeString(openRTBRequest);
+            openRTBRequest = NielsenDar.ReplaceMacros(openRTBRequest, currentCampaign, AdPlacement.Html5, userAgent);
+            MonetizrLogger.Print("PBR - Final request: " + openRTBRequest);
+
+            string responseContent = await GetOpenRTBResponseAsync(openRTBEndpoint, openRTBRequest);
+            if (string.IsNullOrEmpty(responseContent))
+            {
+                if (settings.ContainsKey("openrtb.sent_report_to_mixpanel")) httpClient.Analytics.SendOpenRtbReportToMixpanel(openRTBRequest, "error", "NoContent", currentCampaign);
+                return false;
+            }
+
+            currentCampaign.openRtbRawResponse = responseContent;
+            OpenRTBResponse openRtbResponse = OpenRTBResponse.Load(responseContent);
+            
+            string adm = openRtbResponse.GetAdm();
+            if (!IsADMValid(adm)) return false;
+
+            bool initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, adm);
+            if (!initializeResult)
+            {
+                MonetizrLogger.Print("PBR - InitializeServerCampaignForProgrammatic failed.");
+                return false;
+            }
+
+            if (settings.ContainsKey("openrtb.sent_report_to_mixpanel")) httpClient.Analytics.SendOpenRtbReportToMixpanel(openRTBRequest, "ok", responseContent, currentCampaign);
+
+            return true;
+        }
+
+        internal bool AreRequestParametersInSettings (SettingsDictionary<string, string> settings)
+        {
+            string openRtbUri = settings.GetParam("openrtb.endpoint");
+            if (string.IsNullOrEmpty(openRtbUri))
+            {
+                MonetizrLogger.Print("PBR - No endpoint defined.");
+                return false;
+            }
+
+            string openRTBRequest = settings.GetParam("openrtb.request");
+            if (string.IsNullOrEmpty(openRTBRequest))
+            {
+                MonetizrLogger.Print("PBR - No request defined.");
+                return false;
+            }
+
+            MonetizrLogger.Print("PBR - Request Parameters found. Endpoint: " + openRtbUri + " / Request: " + openRTBRequest);
+            return true;
+        }
+
+        internal async Task<string> GetOpenRTBResponseAsync (string endpoint, string request)
+        {
+            HttpRequestMessage requestMessage = NetworkingUtils.GenerateOpenRTBRequestMessage(endpoint, request, HttpMethod.Post);
+            var response = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
+            string responseContent = response.content;
+            MonetizrLogger.Print("PBR - Response Succesful: " + response.isSuccess + " / Content: " + responseContent);
+
+            if (!response.isSuccess || responseContent.Contains("Request failed!") || responseContent.Length <= 0) return "";
+
+            return responseContent;
+        }
+
+        internal bool IsADMValid (string adm)
+        {
+            if (string.IsNullOrEmpty(adm))
+            {
+                MonetizrLogger.Print("PBR - ADM not found.");
+                return false;
+            }
+
+            if (!adm.Contains("<VAST"))
+            {
+                MonetizrLogger.PrintError("PBR - Response is not a VAST.");
+                return false;
+            }
+
+            MonetizrLogger.Print("PBR - ADM is valid: " + adm);
             return true;
         }
     }

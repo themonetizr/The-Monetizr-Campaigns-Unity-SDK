@@ -36,7 +36,6 @@ namespace Monetizr.SDK.Core
         internal static MonetizrAnalytics Analytics => Instance.ConnectionsClient.Analytics;
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
-        internal static bool isVastActive = false;
         internal static bool canTeaserBeVisible;
         internal static RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
         internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
