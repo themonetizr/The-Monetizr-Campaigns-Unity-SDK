@@ -777,6 +777,7 @@ namespace Monetizr.SDK.Core
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
             await ConnectionsClient.GetGlobalSettings();
+            CheckCGPLogging();
             campaigns = new List<ServerCampaign>();
 
             try
@@ -852,6 +853,15 @@ namespace Monetizr.SDK.Core
             MonetizrLogger.Print("MonetizrManager initialization okay!");
             _isActive = true;
             onRequestComplete?.Invoke(true);
+        }
+
+        private void CheckCGPLogging()
+        {
+            string gcpLoggingKillswitch = "";
+            if (ConnectionsClient.GlobalSettings.TryGetValue("unity_logging", out gcpLoggingKillswitch))
+            {
+                if (gcpLoggingKillswitch == "0") GCPManager.Instance.EnableLogging();
+            }
         }
 
         public void SoundSwitch(bool on)

@@ -134,6 +134,7 @@ namespace Monetizr.SDK.Networking
                 MonetizrLogger.PrintRemoteMessage(MessageEnum.M400);
                 return new SettingsDictionary<string, string>();
             }
+
             MonetizrLogger.PrintRemoteMessage(MessageEnum.M101);
             MonetizrLogger.Print("Global Settings: " + responseString);
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
@@ -162,14 +163,14 @@ namespace Monetizr.SDK.Networking
             
             foreach (var c in campaigns.campaigns)
             {
+                if (c.hasMadeEarlyBidRequest) continue;
                 c.PostCampaignLoad();
-                MakeEarlyProgrammaticBidRequest(c);
             }
 
             return campaigns.campaigns;
         }
 
-        internal async void MakeEarlyProgrammaticBidRequest(ServerCampaign campaign)
+        internal async Task MakeEarlyProgrammaticBidRequest(ServerCampaign campaign)
         {
             MonetizrLogger.Print("PBR - Started");
             PubmaticHelper ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
@@ -181,12 +182,12 @@ namespace Monetizr.SDK.Networking
             }
             catch (DownloadUrlAsStringException e)
             {
-                MonetizrLogger.PrintError($"Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
+                MonetizrLogger.PrintError($"PBR - Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
                 isProgrammaticOK = false;
             }
             catch (Exception e)
             {
-                MonetizrLogger.PrintError($"Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
+                MonetizrLogger.PrintError($"PBR - Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
                 isProgrammaticOK = false;
             }
 
@@ -205,8 +206,9 @@ namespace Monetizr.SDK.Networking
             {
                 if (string.IsNullOrEmpty(c.adm))
                 {
+                    c.PostCampaignLoad();
+                    await MakeEarlyProgrammaticBidRequest(c);
                     admCampaigns.Add(c);
-                    continue;
                 }
 
                 var admCampaign = await ph.PrepareServerCampaign(c.id, c.adm, false);

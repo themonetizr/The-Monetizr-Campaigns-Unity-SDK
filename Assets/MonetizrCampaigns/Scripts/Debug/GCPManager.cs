@@ -1,6 +1,7 @@
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Utils;
 using System.Collections;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -11,10 +12,18 @@ namespace Monetizr.SDK.Debug
         public static GCPManager Instance;
         private static string postURL = "https://us-central1-gcp-monetizr-project.cloudfunctions.net/unity_notification_channel_to_slack";
         private static bool isEnabled = false;
+        private static bool localOverride = true;
 
         private void Awake ()
         {
             Instance = this;
+        }
+
+        public void EnableLogging ()
+        {
+            if (localOverride) return;
+            MonetizrLogger.Print("GCP - Enabled.");
+            isEnabled = true;
         }
 
         public void Log (MessageEnum messageEnum)

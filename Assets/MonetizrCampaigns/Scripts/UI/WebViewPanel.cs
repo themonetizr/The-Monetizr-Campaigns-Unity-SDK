@@ -281,6 +281,8 @@ namespace Monetizr.SDK.UI
             {
                 isProgrammaticOK = true;
                 MonetizrLogger.Print("Early Bid Request was succesfully made.");
+                bool hasInitilizedProgrammaticCampaign = await ph.TEST_InitializeProgrammaticCampaign(campaign);
+                if (!hasInitilizedProgrammaticCampaign) return false;
             }
             else
             {
@@ -307,6 +309,10 @@ namespace Monetizr.SDK.UI
                 _webUrl = $"file://{campaign.GetCampaignPath($"{programmaticVideoAsset.fpath}/index.html")}";
                 videoAsset = programmaticVideoAsset;
                 showWebview = true;
+            }
+            else
+            {
+                MonetizrLogger.PrintError("PBR - No video asset in campaign.");
             }
 
             return showWebview;

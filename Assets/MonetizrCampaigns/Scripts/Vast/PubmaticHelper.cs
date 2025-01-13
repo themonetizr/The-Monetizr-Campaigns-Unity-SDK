@@ -9,6 +9,7 @@ using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -249,6 +250,17 @@ namespace Monetizr.SDK.VAST
 
         internal async Task<bool> TEST_GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign)
         {
+            if (ShouldUseCachedRequestData(currentCampaign))
+            {
+                MonetizrLogger.Print("PBR - Last successful request is within 12 hours cooldown - Loading cached data.");
+                string cachedAdm = PlayerPrefs.GetString("Campaign_" + currentCampaign.id + "_lastSuccessfulRequestData");
+                if (!string.IsNullOrEmpty(cachedAdm))
+                {
+                    currentCampaign.adm = cachedAdm;
+                    return true;
+                }
+            }
+
             SettingsDictionary<string, string> settings = currentCampaign.serverSettings;
             if (!AreRequestParametersInSettings(settings)) return false;
 
@@ -268,20 +280,33 @@ namespace Monetizr.SDK.VAST
 
             currentCampaign.openRtbRawResponse = responseContent;
             OpenRTBResponse openRtbResponse = OpenRTBResponse.Load(responseContent);
-            
+
             string adm = openRtbResponse.GetAdm();
             if (!IsADMValid(adm)) return false;
+            currentCampaign.adm = adm;
 
-            bool initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, adm);
-            if (!initializeResult)
-            {
-                MonetizrLogger.Print("PBR - InitializeServerCampaignForProgrammatic failed.");
-                return false;
-            }
-
-            if (settings.ContainsKey("openrtb.sent_report_to_mixpanel")) httpClient.Analytics.SendOpenRtbReportToMixpanel(openRTBRequest, "ok", responseContent, currentCampaign);
+            PlayerPrefs.SetString("Campaign_" + currentCampaign.id + "_lastSuccessfulRequestTime", DateTime.Now.ToString());
+            PlayerPrefs.SetString("Campaign_" + currentCampaign.id + "_lastSuccessfulRequestData", adm);
 
             return true;
+        }
+
+        private static bool ShouldUseCachedRequestData (ServerCampaign currentCampaign)
+        {
+            string lastSuccessfulRequestTimeString = PlayerPrefs.GetString("Campaign_" + currentCampaign.id + "_lastSuccessfulRequestTime", "");
+            if (!string.IsNullOrEmpty(lastSuccessfulRequestTimeString))
+            {
+                if (DateTime.TryParse(lastSuccessfulRequestTimeString, out DateTime lastSuccessfulRequestTime))
+                {
+                    double timeSinceLastSuccesfulRequest = (DateTime.Now - lastSuccessfulRequestTime).TotalHours;
+                    int cooldownHours = 12;
+                    if (timeSinceLastSuccesfulRequest < cooldownHours)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         internal bool AreRequestParametersInSettings (SettingsDictionary<string, string> settings)
@@ -331,6 +356,21 @@ namespace Monetizr.SDK.VAST
             }
 
             MonetizrLogger.Print("PBR - ADM is valid: " + adm);
+            return true;
+        }
+
+        public async Task<bool> TEST_InitializeProgrammaticCampaign (ServerCampaign currentCampaign)
+        {
+            MonetizrLogger.Print("PBR - Initializing.");
+            string adm = currentCampaign.adm;
+            bool initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, adm);
+            if (!initializeResult)
+            {
+                MonetizrLogger.Print("PBR - InitializeServerCampaignForProgrammatic failed.");
+                return false;
+            }
+            MonetizrLogger.Print("PBR - Initialize successful.");
+            // if (settings.ContainsKey("openrtb.sent_report_to_mixpanel")) httpClient.Analytics.SendOpenRtbReportToMixpanel(openRTBRequest, "ok", responseContent, currentCampaign);
             return true;
         }
     }
