@@ -1,10 +1,13 @@
-﻿using Monetizr.SDK.Debug;
+﻿using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Debug;
+using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -125,7 +128,7 @@ namespace Monetizr.SDK.Utils
             return result;
         }
 
-         public static Dictionary<string, string> ParseContentString(string content)
+        public static Dictionary<string, string> ParseContentString(string content)
         {
             var res = ParseJson(content);
 
@@ -240,7 +243,7 @@ namespace Monetizr.SDK.Utils
             }
             catch (Exception e)
             {
-                MonetizrLog.PrintError($"Exception in ExtractAllToDirectory. Extracting {zipPath} to directory {extractPath} failed with error\n{e}");
+                MonetizrLogger.PrintError($"Exception in ExtractAllToDirectory. Extracting {zipPath} to directory {extractPath} failed with error\n{e}");
 
                 return false;
             }
@@ -268,30 +271,30 @@ namespace Monetizr.SDK.Utils
 
                 if (cbCount < 0)
                 {
-                    MonetizrLog.Print("Curly bracket problem");
+                    MonetizrLogger.Print("Curly bracket problem");
                     return false;
                 }
 
                 if (sbCount < 0)
                 {
-                    MonetizrLog.Print("Square bracket problem");
+                    MonetizrLogger.Print("Square bracket problem");
                     return false;
                 }
             }
 
             if (quoteCount % 2 != 0)
             {
-                MonetizrLog.Print($"Quote problem {quoteCount}");
+                MonetizrLogger.Print($"Quote problem {quoteCount}");
             }
 
             if (cbCount != 0)
             {
-                MonetizrLog.Print("Curly bracket problem");
+                MonetizrLogger.Print("Curly bracket problem");
             }
 
             if (sbCount != 0)
             {
-                MonetizrLog.Print("Square bracket problem");
+                MonetizrLogger.Print("Square bracket problem");
             }
 
             return quoteCount % 2 == 0 && cbCount == 0 && sbCount == 0;
@@ -400,6 +403,110 @@ namespace Monetizr.SDK.Utils
         public static string UnescapeString(string content)
         {
             return content.Replace("\\\"", "\"").Replace("\\\\", "\\");
+        }
+
+        public static string PrintDictionaryValuesInOneLine(Dictionary<string, string> dict)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var pair in dict)
+            {
+                sb.Append($"Key: {pair.Key}, Value: {pair.Value}; ");
+            }
+
+            if (sb.Length > 0) sb.Length -= 2;
+
+            return sb.ToString();
+        }
+
+        public static string GetVideoPlayerURL (ServerCampaign serverCampaign)
+        {
+            string fallbackVideoPlayerURL = "https://image.themonetizr.com/videoplayer/html.zip";
+            string globalSettingsVideoPlayerURL = serverCampaign.serverSettings.GetParam("videoplayer", "");
+            if (string.IsNullOrEmpty(globalSettingsVideoPlayerURL))
+            {
+                MonetizrLogger.Print("VideoPlayer URL is from GlobalSettings.");
+                return fallbackVideoPlayerURL;
+            }
+            else
+            {
+                MonetizrLogger.Print("VideoPlayer URL is from FallbackURL.");
+                return globalSettingsVideoPlayerURL;
+            }
+        }
+
+        public static string ExtractValueFromJSON(string jsonString, string parameter)
+        {
+            string key = $"\"{parameter}\"";
+
+            int keyIndex = jsonString.IndexOf(key, StringComparison.Ordinal);
+            if (keyIndex == -1)
+            {
+                return null;
+            }
+
+            int colonIndex = jsonString.IndexOf(':', keyIndex);
+            if (colonIndex == -1)
+            {
+                return null;
+            }
+
+            int valueStartIndex = colonIndex + 1;
+            while (valueStartIndex < jsonString.Length && char.IsWhiteSpace(jsonString[valueStartIndex]))
+            {
+                valueStartIndex++;
+            }
+
+            char startingChar = jsonString[valueStartIndex];
+            bool isQuoted = startingChar == '"';
+            int valueEndIndex;
+
+            if (isQuoted)
+            {
+                valueEndIndex = valueStartIndex + 1;
+                while (valueEndIndex < jsonString.Length)
+                {
+                    valueEndIndex = jsonString.IndexOf('"', valueEndIndex);
+                    if (valueEndIndex == -1 || jsonString[valueEndIndex - 1] != '\\')
+                        break;
+                    valueEndIndex++;
+                }
+
+                if (valueEndIndex == -1)
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                char[] delimiters = { ',', '}', ']' };
+                valueEndIndex = jsonString.IndexOfAny(delimiters, valueStartIndex);
+                if (valueEndIndex == -1)
+                {
+                    valueEndIndex = jsonString.Length;
+                }
+            }
+
+            string value = jsonString.Substring(valueStartIndex, valueEndIndex - valueStartIndex).Trim();
+
+            if (isQuoted)
+            {
+                value = value.Trim('"');
+            }
+
+            value = value.Replace("\\/", "/").Replace("\\\"", "\"").Replace("\\\\", "\\");
+
+            return value;
+        }
+
+        public static string ExtractNestedValue(string jsonString, string parentKey, string nestedKey)
+        {
+            string parentValue = ExtractValueFromJSON(jsonString, parentKey);
+
+            if (parentValue == null)
+                return null;
+
+            return ExtractValueFromJSON(parentValue, nestedKey);
         }
 
     }

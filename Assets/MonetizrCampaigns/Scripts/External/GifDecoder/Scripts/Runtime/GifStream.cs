@@ -68,7 +68,7 @@ namespace ThreeDISevenZeroR.UnityGifDecoder
 
         /// <summary>
         /// <p>Is this stream hast more data or it is completed.
-        /// If this value is False, you can close this stream or call Reset() and read everything again</p>
+        /// If this value is False, you can close this stream or call ResetCampaign() and read everything again</p>
         /// <br/>
         /// <p>Essentially it equals to CurrentToken != EndOfFile</p>
         /// </summary>

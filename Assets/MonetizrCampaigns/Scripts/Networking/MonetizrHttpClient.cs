@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +14,7 @@ using Monetizr.SDK.Missions;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.VAST;
+using UnityEngine.Networking;
 
 namespace Monetizr.SDK.Networking
 {
@@ -63,7 +63,7 @@ namespace Monetizr.SDK.Networking
             }
 
             string result = await response.Content.ReadAsStringAsync();
-            MonetizrLog.Print($"Download response is: {result} {response.StatusCode}");
+            MonetizrLogger.Print($"Download response is: {result} {response.StatusCode}");
             if (!response.IsSuccessStatusCode) return (false,"");
             if (result.Length == 0) return (false,"");
             return (true, result);
@@ -71,16 +71,16 @@ namespace Monetizr.SDK.Networking
 
         internal override async Task<string> GetResponseStringFromUrl(string url)
         {
-            var requestMessage = NetworkingManager.GenerateHttpRequestMessage(userAgent, url);
-            MonetizrLog.Print($"Sent request: {requestMessage}");
+            var requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, url);
+            MonetizrLogger.Print($"Sent request: {requestMessage}");
             HttpResponseMessage response = await Client.SendAsync(requestMessage);
             var responseString = await response.Content.ReadAsStringAsync();
-            MonetizrLog.Print($"Response is: {response.StatusCode}");
-            MonetizrLog.Print(responseString);
+            MonetizrLogger.Print($"Response is: {response.StatusCode}");
+            MonetizrLogger.Print(responseString);
 
             if (!response.IsSuccessStatusCode)
             {
-                MonetizrLog.PrintError($"GetStringFromUrl failed with code {response.StatusCode} for {url}");
+                MonetizrLogger.PrintError($"GetStringFromUrl failed with code {response.StatusCode} for {url}");
                 return "";
             }
 
@@ -92,25 +92,28 @@ namespace Monetizr.SDK.Networking
             return responseString;
         }
 
-        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
+        public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
         {
-            var responseString = await GetResponseStringFromUrl(SettingsApiUrl);
+            UnityWebRequest uwr = UnityWebRequest.Get(url);
+            uwr.timeout = 10;
 
-            if (string.IsNullOrEmpty(responseString))
+            await uwr.SendWebRequest();
+
+            if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.DataProcessingError)
             {
-                MonetizrLog.Print($"Unable to load settings!");
-                return new SettingsDictionary<string, string>();
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M403);
+                MonetizrLogger.PrintError($"Network error {uwr.error} with {url}");
+                onDownloadFailed?.Invoke();
+                return null;
             }
 
-            MonetizrLog.Print($"Settings: {responseString}");
-            return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
+            return uwr.downloadHandler.data;
         }
 
         internal async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
         {
-            MonetizrManager.isVastActive = false;
             var loadResult = await GetServerCampaignsFromMonetizr();
-            MonetizrLog.Print($"GetServerCampaignsFromMonetizr result {loadResult.Count}");
+            MonetizrLogger.Print($"GetServerCampaignsFromMonetizr result {loadResult.Count}");
             return loadResult;
         }
 
@@ -119,7 +122,22 @@ namespace Monetizr.SDK.Networking
             GlobalSettings = await DownloadGlobalSettings();
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint", "");
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
-            MonetizrLog.Print($"Api endpoint: {_baseApiUrl}");
+            MonetizrLogger.Print($"Api endpoint: {_baseApiUrl}");
+        }
+
+        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
+        {
+            var responseString = await GetResponseStringFromUrl(SettingsApiUrl);
+
+            if (string.IsNullOrEmpty(responseString))
+            {
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M400);
+                return new SettingsDictionary<string, string>();
+            }
+
+            MonetizrLogger.PrintRemoteMessage(MessageEnum.M101);
+            MonetizrLogger.Print("Global Settings: " + responseString);
+            return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
 
         internal override async Task<List<ServerCampaign>> GetList()
@@ -128,7 +146,7 @@ namespace Monetizr.SDK.Networking
             CampaignUtils.FilterInvalidCampaigns(result);
             foreach (var ch in result)
             {
-                MonetizrLog.Print($"Campaign passed filters: {ch.id}");
+                MonetizrLogger.Print($"Campaign passed filters: {ch.id}");
             }
             return result;
         }
@@ -136,20 +154,45 @@ namespace Monetizr.SDK.Networking
         private async Task<List<ServerCampaign>> GetServerCampaignsFromMonetizr()
         {
             var responseString = await GetResponseStringFromUrl(CampaignsApiUrl);
-            if (string.IsNullOrEmpty(responseString))
-            {
-                return new List<ServerCampaign>();
-            }
+            if (string.IsNullOrEmpty(responseString)) return new List<ServerCampaign>();
             
-            var campaigns = JsonUtility.FromJson<Campaigns>("{\"campaigns\":" + responseString + "}");
-            if (campaigns == null)
+            var campaigns = JsonUtility.FromJson<Campaigns.Campaigns>("{\"campaigns\":" + responseString + "}");
+            if (campaigns == null) return new List<ServerCampaign>();
+
+            if (GlobalSettings.GetBoolParam("campaign.use_adm",true)) campaigns.campaigns = await TryRecreateCampaignsFromAdm(campaigns.campaigns);
+            
+            foreach (var c in campaigns.campaigns)
             {
-                return new List<ServerCampaign>();
+                if (c.hasMadeEarlyBidRequest) continue;
+                c.PostCampaignLoad();
             }
 
-            if(GlobalSettings.GetBoolParam("campaign.use_adm",true)) campaigns.campaigns = await TryRecreateCampaignsFromAdm(campaigns.campaigns);
-            campaigns.campaigns.ForEach(c => c.PostCampaignLoad());
             return campaigns.campaigns;
+        }
+
+        internal async Task MakeEarlyProgrammaticBidRequest(ServerCampaign campaign)
+        {
+            MonetizrLogger.Print("PBR - Started");
+            PubmaticHelper ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
+
+            bool isProgrammaticOK = false;
+            try
+            {
+                isProgrammaticOK = await ph.TEST_GetOpenRtbResponseForCampaign(campaign);
+            }
+            catch (DownloadUrlAsStringException e)
+            {
+                MonetizrLogger.PrintError($"PBR - Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
+                isProgrammaticOK = false;
+            }
+            catch (Exception e)
+            {
+                MonetizrLogger.PrintError($"PBR - Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
+                isProgrammaticOK = false;
+            }
+
+            MonetizrLogger.Print(isProgrammaticOK ? "PBR - COMPLETED" : "PBR - FAILED");
+            campaign.hasMadeEarlyBidRequest = isProgrammaticOK;
         }
 
         internal async Task<List<ServerCampaign>> TryRecreateCampaignsFromAdm(List<ServerCampaign> campaigns)
@@ -157,33 +200,32 @@ namespace Monetizr.SDK.Networking
             var admCampaigns = new List<ServerCampaign>();
             var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
 
+            MonetizrLogger.Print("Campaigns Count: " + campaigns.Count);
+
             foreach (var c in campaigns)
             {
-                if (string.IsNullOrEmpty(c.adm)) continue;
+                if (string.IsNullOrEmpty(c.adm))
+                {
+                    c.PostCampaignLoad();
+                    await MakeEarlyProgrammaticBidRequest(c);
+                    admCampaigns.Add(c);
+                }
+
                 var admCampaign = await ph.PrepareServerCampaign(c.id, c.adm, false);
                 if (admCampaign != null) admCampaigns.Add(admCampaign);
             }
 
-            if (admCampaigns.Count <= 0)  return campaigns;
+            if (admCampaigns.Count <= 0) return campaigns;
             campaigns.Clear();
             return admCampaigns;
         }
-        
-        internal static HttpRequestMessage GetOpenRtbRequestMessage(string url, string content, HttpMethod method)
-        {
-            HttpRequestMessage httpRequest = new HttpRequestMessage(method, url);
-            httpRequest.Headers.Add("x-openrtb-version", "2.5");
-            httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            httpRequest.Content = new StringContent(content, Encoding.UTF8, "application/json");
-            return httpRequest;
-        }
 
-        internal override async Task Reset(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal override async Task ResetCampaign(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            HttpRequestMessage requestMessage = NetworkingManager.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{campaignId}/reset");
+            HttpRequestMessage requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{campaignId}/reset");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
             string s = await response.Content.ReadAsStringAsync();
-            MonetizrLog.Print($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+            MonetizrLogger.Print($"Reset response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -195,9 +237,9 @@ namespace Monetizr.SDK.Networking
             }
         }
 
-        internal override async Task Claim(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal override async Task ClaimReward(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
-            HttpRequestMessage requestMessage = NetworkingManager.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{challenge.id}/claim",true);
+            HttpRequestMessage requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{challenge.id}/claim",true);
             string content = string.Empty;
 
             if (MonetizrManager.temporaryEmail != null && MonetizrManager.temporaryEmail.Length > 0)
@@ -207,21 +249,21 @@ namespace Monetizr.SDK.Networking
 
                 if (reward == null)
                 {
-                    MonetizrLog.PrintError($"Product reward doesn't found for campaign {ingame}");
+                    MonetizrLogger.PrintError($"Product reward doesn't found for campaign {ingame}");
                     onFailure?.Invoke();
                     return;
                 }
 
-                MonetizrLog.Print($"Reward {reward.id} found in_game_only {reward.in_game_only}");
+                MonetizrLogger.Print($"Reward {reward.id} found in_game_only {reward.in_game_only}");
                 content = $"{{\"email\":\"{MonetizrManager.temporaryEmail}\",\"reward_id\":\"{reward.id}\"}}";
                 MonetizrManager.temporaryEmail = "";
             }
 
             requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
-            MonetizrLog.Print($"Request:\n[{requestMessage}] content:\n[{content}]");
+            MonetizrLogger.Print($"Request:\n[{requestMessage}] content:\n[{content}]");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
             string s = await response.Content.ReadAsStringAsync();
-            MonetizrLog.Print($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
+            MonetizrLogger.Print($"Response: {response.IsSuccessStatusCode} -- {s} -- {response}");
 
             if (response.IsSuccessStatusCode)
             {

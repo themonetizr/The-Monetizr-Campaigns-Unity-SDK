@@ -16,37 +16,37 @@ namespace Monetizr.SDK.Core
         {
             if (icon == null)
             {
-                MonetizrLog.PrintError("GameReward error: Icon is not set.");
+                MonetizrLogger.PrintError("GameReward error: Icon is not set.");
                 return false;
             }
 
             if (icon.rect.width < 128 || icon.rect.height < 128 || Mathf.Abs(icon.rect.height - icon.rect.width) > 0.1f)
             {
-                MonetizrLog.PrintError("GameReward error: Icon '" + icon.name + "' size less than 256 pixels on one or more dimensions or it's not square.");
+                MonetizrLogger.PrintError("GameReward error: Icon '" + icon.name + "' size less than 256 pixels on one or more dimensions or it's not square.");
                 return false;
             }
 
             if (string.IsNullOrEmpty(title))
             {
-                MonetizrLog.PrintError("GameReward error: Title is empty.");
+                MonetizrLogger.PrintError("GameReward error: Title is empty.");
                 return false;
             }
 
             if (_GetCurrencyFunc == null)
             {
-                MonetizrLog.PrintError("GameReward error: GetCurrency function is not set.");
+                MonetizrLogger.PrintError("GameReward error: GetCurrency function is not set.");
                 return false;
             }
 
             if (_AddCurrencyAction == null)
             {
-                MonetizrLog.PrintError("GameReward error: AddCurrency action is not set.");
+                MonetizrLogger.PrintError("GameReward error: AddCurrency action is not set.");
                 return false;
             }
 
             if (maximumAmount <= 0)
             {
-                MonetizrLog.PrintError("GameReward error: Maximum amount is zero or less.");
+                MonetizrLogger.PrintError("GameReward error: Maximum amount is zero or less.");
                 return false;
             }
 
@@ -61,7 +61,7 @@ namespace Monetizr.SDK.Core
             }
             catch (Exception exception)
             {
-                MonetizrLog.PrintError($"Exception in GetCurrencyFunc of {title}\n{exception.Message}");
+                MonetizrLogger.PrintError($"Exception in GetCurrencyFunc of {title}\n{exception.Message}");
                 return 0;
             }
         }
@@ -74,7 +74,7 @@ namespace Monetizr.SDK.Core
             }
             catch (Exception exception)
             {
-                MonetizrLog.PrintError($"Exception in AddCurrencyAction {amount} to {title}\n{exception}");
+                MonetizrLogger.PrintError($"Exception in AddCurrencyAction {amount} to {title}\n{exception}");
             }
         }
 

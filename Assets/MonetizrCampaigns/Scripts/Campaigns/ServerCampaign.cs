@@ -42,6 +42,14 @@ namespace Monetizr.SDK.Campaigns
             { AssetsType.LeaderboardBannerSprite, typeof(Sprite) },
         };
 
+        [System.NonSerialized] internal string vastAdParameters = "";
+        [System.NonSerialized] internal VastHelper.VastSettings vastSettings = new VastHelper.VastSettings();
+        [System.NonSerialized] private Dictionary<AssetsType, object> assetsDict = new Dictionary<AssetsType, object>();
+        [System.NonSerialized] public bool isLoaded = true;
+        [System.NonSerialized] public string loadingError = "";
+        [System.NonSerialized] public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
+        [System.NonSerialized] public string openRtbRawResponse = "";
+
         public string id;
         public string brand_id;
         public string application_id;
@@ -57,43 +65,17 @@ namespace Monetizr.SDK.Campaigns
         public List<Asset> assets = new List<Asset>();
         public string end_date;
         public string adm;
+        public string verifications_vast_node;
+
+        public bool hasMadeEarlyBidRequest = false;
+
+        public ServerCampaign () { }
 
         public ServerCampaign(string id, string darTag, SettingsDictionary<string,string> defaultServerSettings)
         {
             this.id = id;
             dar_tag = darTag;
             serverSettings = defaultServerSettings;
-        }
-
-        public ServerCampaign()
-        {
-           
-        }
-
-        [System.NonSerialized]
-        internal string vastAdParameters = "";
-
-        [System.NonSerialized]
-        internal VastHelper.VastSettings vastSettings = new VastHelper.VastSettings();
-
-        [System.NonSerialized]
-        private Dictionary<AssetsType, object> assetsDict = new Dictionary<AssetsType, object>();
-
-        [System.NonSerialized]
-        public bool isLoaded = true;
-
-        [System.NonSerialized]
-        public string loadingError = "";
-
-        [System.NonSerialized]
-        public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
-
-        [System.NonSerialized]
-        public string openRtbRawResponse = "";
-
-        internal bool HasAssetInList(string type)
-        {
-            return assets.FindIndex(a => a.type == type) >= 0;
         }
 
         internal bool TryGetAssetInList(List<string> types, out Asset asset)
@@ -111,7 +93,6 @@ namespace Monetizr.SDK.Campaigns
         internal bool TryGetAssetInList(string type, out Asset asset)
         {
             asset = assets.Find(a => a.type == type);
-
             return asset != null;
         }
 
@@ -138,7 +119,7 @@ namespace Monetizr.SDK.Campaigns
         {
             if (assetsDict.ContainsKey(t))
             {
-                MonetizrLog.PrintWarning($"An item {t} already exist in the campaign {id}");
+                MonetizrLogger.PrintWarning($"An item {t} already exist in the campaign {id}");
             }
 
             MonetizrManager.HoldResource(asset);
@@ -156,44 +137,20 @@ namespace Monetizr.SDK.Campaigns
             
             if (AssetsSystemTypes[t] != typeof(T))
             {
-                MonetizrLog.PrintError($"AssetsType {t} and {typeof(T)} do not match!");
+                MonetizrLogger.PrintError($"AssetsType {t} and {typeof(T)} do not match!");
                 return false;
             }
 
-            if (!assetsDict.ContainsKey(t))
-                return false;
-            
+            if (!assetsDict.ContainsKey(t)) return false;
             res = (T)Convert.ChangeType(assetsDict[t], typeof(T));
-            
             return true;
         }
         
         internal T GetAsset<T>(AssetsType t)
         {
-            if (AssetsSystemTypes[t] != typeof(T))
-                throw new ArgumentException($"AssetsType {t} and {typeof(T)} do not match!");
-
-            if (!assetsDict.ContainsKey(t))
-                return default(T);
-
+            if (AssetsSystemTypes[t] != typeof(T)) throw new ArgumentException($"AssetsType {t} and {typeof(T)} do not match!");
+            if (!assetsDict.ContainsKey(t)) return default(T);
             return (T)Convert.ChangeType(assetsDict[t], typeof(T));
-        }
-
-        internal Sprite LoadSpriteFromCache(string campaignId, string assetUrl)
-        {
-            string fname = Path.GetFileName(assetUrl);
-            string fpath = Application.persistentDataPath + "/" + campaignId + "/" + fname;
-
-            if (!File.Exists(fpath))
-                return null;
-
-            byte[] data = File.ReadAllBytes(fpath);
-
-            Texture2D tex = new Texture2D(0, 0);
-            tex.LoadImage(data);
-            tex.wrapMode = TextureWrapMode.Clamp;
-
-            return Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
         }
 
         internal string GetCampaignPath(string fname)
@@ -205,15 +162,14 @@ namespace Monetizr.SDK.Campaigns
         {
             if (asset.url == null || asset.url.Length == 0)
             {
-                MonetizrLog.PrintWarning($"Resource {texture} {sprite} has no url in path!");
+                MonetizrLogger.PrintWarning($"Resource {texture} {sprite} has no url in path!");
                 this.isLoaded = false;
                 return;
             }
 
             string path = Application.persistentDataPath + "/" + this.id;
 
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
             string fname = Path.GetFileName(asset.url);
             string fpath = path + "/" + fname;
@@ -222,22 +178,19 @@ namespace Monetizr.SDK.Campaigns
 
             if (!File.Exists(fpath))
             {
-                data = await NetworkingManager.DownloadAssetData(asset.url);
+                data = await MonetizrHttpClient.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
-                    MonetizrLog.PrintWarning($"Loading {asset.url} failed!");
+                    MonetizrLogger.PrintWarning($"Loading {asset.url} failed!");
 
                     if (!isOptional)
                     {
-                        MonetizrLog.PrintError($"Campaign loading will fail, because asset is required!");
+                        MonetizrLogger.PrintError($"Campaign loading will fail, because asset is required!");
 
                         this.loadingError = $"Nothing downloaded with a path {asset.url}";
                         this.isLoaded = false;
                     }
-
-                   
-
                     return;
                 }
 
@@ -256,8 +209,7 @@ namespace Monetizr.SDK.Campaigns
             tex.LoadImage(data);
             tex.wrapMode = TextureWrapMode.Clamp;
 
-            if (texture != AssetsType.Unknown)
-                SetAsset<Texture2D>(texture, tex);
+            if (texture != AssetsType.Unknown) SetAsset<Texture2D>(texture, tex);
 
             Sprite s = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
             asset.spriteAsset = s;
@@ -266,14 +218,13 @@ namespace Monetizr.SDK.Campaigns
             { 
                 SetAsset<Sprite>(sprite, s);
             }
-
         }
 
         internal async Task PreloadAssetToCache(Asset asset, AssetsType fileString, bool required = true)
         {
             if (string.IsNullOrEmpty(asset.url))
             {
-                MonetizrLog.PrintWarning($"Malformed URL for {fileString} {this.id}");
+                MonetizrLogger.PrintWarning($"Malformed URL for {fileString} {this.id}");
                 return;
             }
 
@@ -294,39 +245,36 @@ namespace Monetizr.SDK.Campaigns
                 zipFolder = path;
                 fileToCheck = zipFolder + "/index.html";
 
-                MonetizrLog.Print($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
+                MonetizrLogger.Print($"archive: {zipFolder} {fileToCheck} {File.Exists(fileToCheck)}");
             }
 
             byte[] data = null;
-            MonetizrLog.Print($"PreloadAssetToCache: {fname} {fileToCheck}");
+            MonetizrLogger.Print($"PreloadAssetToCache: {fname} {fileToCheck}");
 
             if (!File.Exists(fileToCheck))
             {
-                MonetizrLog.Print($"Downloading archive {asset.url}");
-
-                data = await NetworkingManager.DownloadAssetData(asset.url);
+                MonetizrLogger.Print($"Downloading archive {asset.url}");
+                data = await MonetizrHttpClient.DownloadAssetData(asset.url);
 
                 if (data == null)
                 {
-                    MonetizrLog.PrintWarning($"Nothing downloaded with an url {asset.url}!");
+                    MonetizrLogger.PrintWarning($"Nothing downloaded with an url {asset.url}!");
 
                     if (required)
                     {
                         this.isLoaded = false;
                         this.loadingError = $"Nothing downloaded with an url {asset.url}";
                     }
-
                     return;
                 }
 
-                MonetizrLog.Print($"WriteAllBytes to {fpath} size: {data.Length}");
+                MonetizrLogger.Print($"WriteAllBytes to {fpath} size: {data.Length}");
                 File.WriteAllBytes(fpath, data);
 
                 if (zipFolder != null)
                 {
-                    MonetizrLog.Print("Extracting to: " + zipFolder);
+                    MonetizrLogger.Print("Extracting to: " + zipFolder);
                     var unzipResult = MonetizrUtils.ExtractAllToDirectory(fpath, zipFolder);
-
                     File.Delete(fpath);
 
                     if (!unzipResult)
@@ -336,160 +284,122 @@ namespace Monetizr.SDK.Campaigns
                             this.isLoaded = false;
                             this.loadingError = $"Zip {fpath} extracting failed!";
                         }
-
                         return;
                     }
-
                 }
-
             }
 
-            if (zipFolder != null)
-            {
-                fpath = fileToCheck;
-            }
-
-            if (!string.IsNullOrEmpty(asset.mainAssetName))
-            {
-                fpath = $"{path}/{asset.mainAssetName}";
-            }
-
-            MonetizrLog.Print($"Resource {fileString} {fpath}");
+            if (zipFolder != null) fpath = fileToCheck;
+            if (!string.IsNullOrEmpty(asset.mainAssetName)) fpath = $"{path}/{asset.mainAssetName}";
+            MonetizrLogger.Print($"Resource {fileString} {fpath}");
             asset.localFullPath = fpath;
             SetAsset<string>(fileString, fpath);
         }
 
         internal async Task LoadCampaignAssets()
         {
-            MonetizrLog.Print($"Campaign path: {Application.persistentDataPath}/{id}");
+            MonetizrLogger.Print($"Campaign path: {Application.persistentDataPath}/{id}");
 
             foreach (var asset in assets)
             {
-                MonetizrLog.Print($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
+                MonetizrLogger.Print($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
 
                 switch (asset.type)
                 {
                     case "icon":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.BrandLogoSprite);
-
                         break;
+
                     case "banner":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.BrandBannerSprite);
-
                         break;
+
                     case "logo":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.BrandRewardLogoSprite);
-
                         break;
+
                     case "reward_banner":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.BrandRewardBannerSprite);
-
                         break;
 
                     case "tiny_teaser":
                         await AssignAssetTextures(asset, AssetsType.TinyTeaserTexture, AssetsType.TinyTeaserSprite);
-
                         break;
 
                     case "custom_coin_icon":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.CustomCoinSprite, true);
-
                         break;
 
                     case "loading_screen":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.LoadingScreenSprite, true);
-
                         break;
 
                     case "reward_image":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.RewardSprite, true);
-
                         break;
 
                     case "ingame_reward_image":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.IngameRewardSprite, true);
-
                         break;
 
                     case "unknown_reward_image":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.UnknownRewardSprite, true);
-
                         break;
 
-
                     case "minigame_asset1":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.MinigameSprite1, true);
-
                         break;
 
                     case "minigame_asset2":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.MinigameSprite2, true);
-
                         break;
 
                     case "minigame_asset3":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.MinigameSprite3, true);
-
                         break;
 
                     case "leaderboard_banner":
-
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.LeaderboardBannerSprite, true);
-
                         break;
 
                     case "survey":
-
                         if (!string.IsNullOrEmpty(asset.survey_content))
+                        {
                             SetAsset<string>(AssetsType.SurveyURLString, asset.survey_content);
+                        }
                         else
+                        {
                             SetAsset<string>(AssetsType.SurveyURLString, asset.url);
-
+                        }
                         break;
+
                     case "video":
                         asset.fpath = MonetizrUtils.ConvertCreativeToFname(asset.url);
                         asset.fname = "video";
                         asset.fext = MonetizrUtils.ConvertCreativeToExt("", asset.url);
                         asset.mainAssetName = $"index.html";
-
                         await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
-
                         await PreloadVideoPlayer(asset);
-
                         break;
 
                     case "text":
                             SetAsset<string>(AssetsType.BrandTitleString, asset.title);
-
                         break;
 
                     case "html":
-
                         asset.fpath = MonetizrUtils.ConvertCreativeToFname(asset.url);
                         asset.fname = "video";
                         asset.fext = MonetizrUtils.ConvertCreativeToExt("", asset.url);
                         asset.mainAssetName = $"index.html";
-                        
                         await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
-
                         break;
 
                     case "tiny_teaser_gif":
                         await PreloadAssetToCache(asset, AssetsType.TeaserGifPathString, true);
-
                         break;
-
 
                     case "tiled_background":
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.TiledBackgroundSprite, true);
-
                         break;
 
                     case "custom_coin_title":
@@ -497,58 +407,50 @@ namespace Monetizr.SDK.Campaigns
                         break;
 
                     case "image":
-                        
                         await AssignAssetTextures(asset, AssetsType.Unknown, AssetsType.Unknown, true);
                         break;
-
                 }
-
             }
         }
 
         internal async Task PreloadVideoPlayerForProgrammatic(Asset asset)
         {
+            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
             string zipFolder = GetCampaignPath($"{asset.fpath}");
             string indexPath = $"{zipFolder}/index.html";
-            MonetizrLog.Print($"{zipFolder}");
+            MonetizrLogger.Print($"{zipFolder}");
             
             if (!Directory.Exists(zipFolder))
             {
                 Directory.CreateDirectory(zipFolder);
             }
 
-            string playerUrl = serverSettings.GetParam("openrtb.player_url",
-                "https://image.themonetizr.com/videoplayer/html.zip");
-
-            byte[] data = await NetworkingManager.DownloadAssetData(playerUrl);
+            string playerUrl = serverSettings.GetParam("openrtb.player_url", videoPlayerURL);
+            byte[] data = await MonetizrHttpClient.DownloadAssetData(playerUrl);
 
             if (data == null)
             {
-                MonetizrLog.PrintError("Can't download video player for programmatic");
+                MonetizrLogger.PrintError("Can't download video player for programmatic");
                 return;
             }
 
             File.WriteAllBytes(zipFolder + "/html.zip", data);
-
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-
             File.Delete(zipFolder + "/html.zip");
 
             if (!File.Exists(indexPath))
             {
-                MonetizrLog.PrintError($"Main html for video player {indexPath} doesn't exist");
+                MonetizrLogger.PrintError($"Main html for video player {indexPath} doesn't exist");
             }
         }
 
         internal async Task PreloadVideoPlayer(Asset asset)
         {
+            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
             string campPath = Application.persistentDataPath + "/" + id;
-
             string zipFolder = campPath + "/" + asset.fpath;
-
             string indexPath = $"{zipFolder}/index.html";
-
-            MonetizrLog.Print($"{campPath} {zipFolder}");
+            MonetizrLogger.Print($"{campPath} {zipFolder}");
             
             if (!Directory.Exists(zipFolder))
             {
@@ -556,7 +458,7 @@ namespace Monetizr.SDK.Campaigns
                 this.loadingError = $"Folder for video player {zipFolder} doesn't exist";
             }
 
-            byte[] data = await NetworkingManager.DownloadAssetData("https://image.themonetizr.com/videoplayer/html.zip");
+            byte[] data = await MonetizrHttpClient.DownloadAssetData(videoPlayerURL);
 
             if (data == null)
             {
@@ -566,9 +468,7 @@ namespace Monetizr.SDK.Campaigns
             }
 
             File.WriteAllBytes(zipFolder + "/html.zip", data);
-            
             MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-
             File.Delete(zipFolder + "/html.zip");
             
             if (!File.Exists(indexPath))
@@ -584,17 +484,27 @@ namespace Monetizr.SDK.Campaigns
             string videoPath = $"{fpath}/video.mp4";
             string indexPath = $"{fpath}/{asset.mainAssetName}";
 
-            MonetizrLog.Print("VastAdParameters: " + vastAdParameters);
-            MonetizrLog.Print("OpenRTBResponse: " + openRtbRawResponse);
+            MonetizrLogger.Print("VastAdParameters: " + vastAdParameters);
+            MonetizrLogger.Print("OpenRTBResponse: " + openRtbRawResponse);
+            MonetizrLogger.Print("Vast Verification Node: " + verifications_vast_node);
 
             var str = File.ReadAllText(indexPath);
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
-            string vastResponse = "`" + openRtbRawResponse + "`";
+            if (!string.IsNullOrEmpty(openRtbRawResponse))
+            {
+                openRtbRawResponse = "`" + openRtbRawResponse + "`";
+                str = str.Replace("\"${VAST_RESPONSE}\"", openRtbRawResponse);
+            }
 
-            if (!string.IsNullOrEmpty(vastResponse)) str = str.Replace("\"${VAST_RESPONSE}\"", vastResponse);
+            if (!string.IsNullOrEmpty(verifications_vast_node))
+            {
+                verifications_vast_node = "`" + verifications_vast_node + "`";
+                str = str.Replace("\"${VAST_VERIFICATIONS}\"", verifications_vast_node);
+            }
+
+            MonetizrLogger.Print("Final HTML: " + str);
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
-
             File.WriteAllText(indexPath, str);
         }
 
@@ -615,18 +525,9 @@ namespace Monetizr.SDK.Campaigns
 
             Directory.Delete(target_dir, false);
         }
-
-        [Serializable]
-        public struct KeyValue
-        {
-            [SerializeField] public string key;
-            [SerializeField] public string value;
-        }
         
         internal string DumpCampaignSettings(TagsReplacer tagsReplacer)
         {
-            var values = new List<KeyValue>();
-
             string result = string.Join(",", serverSettings.Select(kvp =>
             {
                 var v = tagsReplacer == null ? kvp.Value : tagsReplacer.ReplaceAngularMacros(kvp.Value);
@@ -641,7 +542,7 @@ namespace Monetizr.SDK.Campaigns
             string res = JsonUtility.ToJson(vastSettings); 
             var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
             res = res.Insert(res.Length - 1, campaignSettingsJson);      
-            MonetizrLog.Print($"VAST Settings: {res}");
+            MonetizrLogger.Print($"VAST Settings: {res}");
             return res;
         }
 
@@ -660,7 +561,7 @@ namespace Monetizr.SDK.Campaigns
             return true;
         }
 
-        public bool IsConditionsTrue(Dictionary<string, string> mConditions)
+        public bool AreConditionsTrue(Dictionary<string, string> mConditions)
         {
             var settings = MonetizrManager.Instance.localSettings.GetSetting(id).settings;
             if (settings == null || settings.dictionary.Count == 0) return false;
@@ -669,12 +570,11 @@ namespace Monetizr.SDK.Campaigns
 
         internal void PostCampaignLoad()
         {
-            MonetizrLog.Print($"Content: {content}");
-            MonetizrLog.Print($"Adm: {adm}");
+            MonetizrLogger.Print("Initial PostCampaign Data: \n" + "Content: " + content + "\n" + "ADM: " + adm);
             if (string.IsNullOrEmpty(content)) return;
             var cd = MonetizrUtils.ParseContentString(content);
             serverSettings = new SettingsDictionary<string, string>(cd);
-            MonetizrLog.Print($"Loaded campaign: {id}");
+            MonetizrLogger.Print("Final PostCampaign Data: \n" + "Campaign ID: " + id + "\n" + "Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
         }
         
     }

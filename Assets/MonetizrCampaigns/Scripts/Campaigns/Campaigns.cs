@@ -1,8 +1,7 @@
-﻿using Monetizr.SDK.Campaigns;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Monetizr.SDK.Networking
+namespace Monetizr.SDK.Campaigns
 {
     [Serializable]
     public class Campaigns

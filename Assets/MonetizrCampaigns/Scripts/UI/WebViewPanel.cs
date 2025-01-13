@@ -10,6 +10,7 @@ using Monetizr.SDK.VAST;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using EventType = Monetizr.SDK.Core.EventType;
@@ -20,24 +21,26 @@ namespace Monetizr.SDK.UI
     {
         public TextAsset closeButtonImageAsset;
         public Button closeButton;
-#if UNI_WEB_VIEW
-        private UniWebView _webView = null;
-#endif
+        public Image background;
+        public GameObject claimButton;
+        public Animator crossButtonAnimator;
+        public string successReason;
+        public bool claimPageReached = false;
+        public string programmaticStatus;
+        public RectTransform safeArea;
+
         private string _webUrl;
         private string _rewardWebUrl;
         private string eventsPrefix;
         private AdPlacement adType;
-        public Image background;
-        public GameObject claimButton;
-        public Animator crossButtonAnimator;
         private int _pagesSwitchesAmount = -1;
-        public string successReason;
-        public bool claimPageReached = false;
-        public string programmaticStatus;
         private int _claimButtonDelay;
         private bool impressionStarts = false;
         private int _closeButtonDelay;
-        public RectTransform safeArea;
+
+#if UNI_WEB_VIEW
+        private UniWebView _webView = null;
+#endif
 
         internal override bool SendImpressionEventManually()
         {
@@ -84,16 +87,11 @@ namespace Monetizr.SDK.UI
 #if UNI_WEB_VIEW
         internal void PrepareWebViewComponent(bool fullScreen, bool useSafeFrame)
         {
-
-
 #if UNITY_EDITOR
             fullScreen = false;
 #endif
 
-            if (MonetizrLog.isEnabled)
-                UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
-
-
+            if (MonetizrLogger.isEnabled) UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
 
@@ -103,8 +101,6 @@ namespace Monetizr.SDK.UI
 
             UniWebView.SetJavaScriptEnabled(true);
             UniWebView.SetAllowUniversalAccessFromFileURLs(true);
-
-
             MonetizrManager.Instance.SoundSwitch(false);
 
             _webView = gameObject.AddComponent<UniWebView>();
@@ -112,7 +108,7 @@ namespace Monetizr.SDK.UI
 
             SetWebviewFrame(fullScreen, useSafeFrame);
 
-            MonetizrLog.Print($"frame: {fullScreen} {_webView.Frame}");
+            MonetizrLogger.Print($"frame: {fullScreen} {_webView.Frame}");
 
             _webView.OnMessageReceived += OnMessageReceived;
             _webView.OnPageStarted += OnPageStarted;
@@ -126,7 +122,7 @@ namespace Monetizr.SDK.UI
         {
             _rewardWebUrl = "themonetizr.com";
             
-            MonetizrLog.Print($"currentMissionDesc: {currentMission == null}");
+            MonetizrLogger.Print($"currentMissionDesc: {currentMission == null}");
 
             _webUrl = m.campaignServerSettings.GetParam(m.surveyId);
             _webView.Load(_webUrl);
@@ -164,7 +160,7 @@ namespace Monetizr.SDK.UI
 
             if (string.IsNullOrEmpty(_webUrl))
             {
-                MonetizrLog.PrintError($"ActionReward.url is null");
+                MonetizrLogger.PrintError($"ActionReward.url is null");
             }
 
             _webView.Load(_webUrl);
@@ -179,16 +175,13 @@ namespace Monetizr.SDK.UI
         internal IEnumerator ShowClaimButtonCoroutine(int delay)
         {
             yield return new WaitForSeconds(delay);
-
             successReason = "timer";
-
             ShowClaimButton();
         }
 
         internal void ShowClaimButton()
         {
-            if (!claimButton.activeSelf)
-                claimButton.SetActive(true);
+            if (!claimButton.activeSelf) claimButton.SetActive(true);
         }
 
         internal void HideClaimButton()
@@ -196,21 +189,9 @@ namespace Monetizr.SDK.UI
             claimButton.SetActive(false);
         }
 
-        public void PrintServerSettings()
-        {
-            string logMessage = "Server Settings:\n";
-            foreach (KeyValuePair<string, string> pair in currentMission.campaign.serverSettings)
-            {
-                logMessage += pair.Key + ": " + pair.Value + "\n";
-            }
-            UnityEngine.Debug.Log(logMessage);
-        }
-
         private async void PrepareHtml5Panel()
         {
-            bool fullScreen = true;
             var campaign = currentMission.campaign;
-
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
 
             if (hasVideo)
@@ -223,7 +204,7 @@ namespace Monetizr.SDK.UI
 
             if (!isProgrammatic && !hasVideo)
             {
-                MonetizrLog.PrintError($"Video expected, but didn't loaded for campaign {campaign.id}");
+                MonetizrLogger.PrintError($"Video expected, but didn't loaded for campaign {campaign.id}");
                 _OnSkipPress();
                 return;
             }
@@ -235,33 +216,7 @@ namespace Monetizr.SDK.UI
 
             if (isProgrammatic)
             {
-                campaign.vastSettings = new VastHelper.VastSettings();
-                showWebview = false;
-                var programmaticOk = false;
-
-                try
-                {
-                    programmaticOk = await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic);
-                }
-                catch (DownloadUrlAsStringException e)
-                {
-                    MonetizrLog.PrintError($"Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
-                    programmaticOk = false;
-                }
-                catch (Exception e)
-                {
-                    MonetizrLog.PrintError($"Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
-                    programmaticOk = false;
-                }
-
-                Asset programmaticVideoAsset = null;
-
-                if (programmaticOk && campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
-                {
-                    _webUrl = $"file://{campaign.GetCampaignPath($"{programmaticVideoAsset.fpath}/index.html")}";
-                    videoAsset = programmaticVideoAsset;
-                    showWebview = true;
-                }
+                showWebview = await HandleProgrammaticCampaign(campaign, videoAsset, ph);
             }
 
             bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
@@ -272,13 +227,6 @@ namespace Monetizr.SDK.UI
                 var replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
                 campaign.vastSettings.ReplaceVastTags(replacer);
                 campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
-
-                if (!string.IsNullOrEmpty(campaign.vastSettings.videoSettings.videoClickThroughUrl) ||
-                   !string.IsNullOrEmpty(campaign.serverSettings.GetParam("VideoReward.clickthrough_url")))
-                {
-                    fullScreen = false;
-                }
-
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
 
                 if (verifyWithOMSDK)
@@ -300,22 +248,74 @@ namespace Monetizr.SDK.UI
                 programmaticStatus = "no_programmatic_or_success";
                 _webView.Load(_webUrl);
                 _webView.Show();
-                MonetizrLog.Print($"Url to show {_webUrl}");
+                MonetizrLogger.Print($"Url to show {_webUrl}");
                 MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                 impressionStarts = true;
             }
             else
             {
-                programmaticStatus = "failed";
-                if (campaign.serverSettings.GetBoolParam("openrtb.give_reward_on_programmatic_fail", true))
+                HandleProgrammaticFailure(campaign);
+            }
+        }
+
+        private void HandleProgrammaticFailure(ServerCampaign campaign)
+        {
+            programmaticStatus = "failed";
+            if (campaign.serverSettings.GetBoolParam("openrtb.give_reward_on_programmatic_fail", true))
+            {
+                OnCompleteEvent();
+            }
+            else
+            {
+                _OnSkipPress();
+            }
+        }
+
+        private async Task<bool> HandleProgrammaticCampaign(ServerCampaign campaign, Asset videoAsset, PubmaticHelper ph)
+        {
+            bool showWebview = false;
+            bool isProgrammaticOK = false;
+            campaign.vastSettings = new VastHelper.VastSettings();
+
+            if (campaign.hasMadeEarlyBidRequest)
+            {
+                isProgrammaticOK = true;
+                MonetizrLogger.Print("Early Bid Request was succesfully made.");
+                bool hasInitilizedProgrammaticCampaign = await ph.TEST_InitializeProgrammaticCampaign(campaign);
+                if (!hasInitilizedProgrammaticCampaign) return false;
+            }
+            else
+            {
+                try
                 {
-                    OnCompleteEvent();
+                    isProgrammaticOK = await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic, "");
                 }
-                else
+                catch (DownloadUrlAsStringException e)
                 {
-                    _OnSkipPress();
+                    MonetizrLogger.PrintError($"Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
+                    isProgrammaticOK = false;
+                }
+                catch (Exception e)
+                {
+                    MonetizrLogger.PrintError($"Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
+                    isProgrammaticOK = false;
                 }
             }
+
+            Asset programmaticVideoAsset = null;
+
+            if (isProgrammaticOK && campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
+            {
+                _webUrl = $"file://{campaign.GetCampaignPath($"{programmaticVideoAsset.fpath}/index.html")}";
+                videoAsset = programmaticVideoAsset;
+                showWebview = true;
+            }
+            else
+            {
+                MonetizrLogger.PrintError("PBR - No video asset in campaign.");
+            }
+
+            return showWebview;
         }
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -380,7 +380,7 @@ namespace Monetizr.SDK.UI
 
             if (!string.IsNullOrEmpty(_webUrl))
             {
-                MonetizrLog.Print($"Url to show {_webUrl}");
+                MonetizrLogger.Print($"Url to show {_webUrl}");
                 _webView.Show();
             }
 
@@ -418,7 +418,7 @@ namespace Monetizr.SDK.UI
 #if UNI_WEB_VIEW
         void OnMessageReceived(UniWebView webView, UniWebViewMessage message)
         {
-            MonetizrLog.Print($"OnMessageReceived: {message.RawMessage} {message.Args.ToString()}");
+            MonetizrLogger.Print($"OnMessageReceived: {message.RawMessage} {message.Args.ToString()}");
 
             if (message.RawMessage.Contains("close"))
             {
@@ -433,12 +433,12 @@ namespace Monetizr.SDK.UI
 
         void OnPageStarted(UniWebView webView, string url)
         {
-            MonetizrLog.Print($"OnPageStarted: { url} ");
+            MonetizrLogger.Print($"OnPageStarted: { url} ");
         }
 
         void OnPageFinished(UniWebView webView, int statusCode, string url)
         {
-            MonetizrLog.Print($"OnPageFinished: {url} code: {statusCode}");
+            MonetizrLogger.Print($"OnPageFinished: {url} code: {statusCode}");
 
             if (url.Contains("monetizr_key=show_ui"))
             {
@@ -471,7 +471,7 @@ namespace Monetizr.SDK.UI
 
         void OnPageErrorReceived(UniWebView webView, int errorCode, string url)
         {
-            MonetizrLog.PrintError($"OnPageErrorReceived: {url} code: {errorCode}");
+            MonetizrLogger.PrintError($"OnPageErrorReceived: {url} code: {errorCode}");
 
             TrackErrorEvent($"{eventsPrefix} error", errorCode);
 
@@ -495,7 +495,7 @@ namespace Monetizr.SDK.UI
             _webUrl = currentUrl;
             _pagesSwitchesAmount--;
 
-            MonetizrLog.Print($"Update: [{_webUrl}] [{currentUrl}] [{_pagesSwitchesAmount}]");
+            MonetizrLogger.Print($"Update: [{_webUrl}] [{currentUrl}] [{_pagesSwitchesAmount}]");
 
             if (_pagesSwitchesAmount == 0)
             {
@@ -539,22 +539,13 @@ namespace Monetizr.SDK.UI
             additionalEventValues.Add("url", _webUrl);
             additionalEventValues.Add("programmatic_status", programmaticStatus);
 
-            MonetizrLog.Print($"Stopping OMID ad session at time: {Time.time}");
+            MonetizrLogger.Print($"Stopping OMID ad session at time: {Time.time}");
 
             bool verifyWithOMSDK = currentMission.campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
-
             if(verifyWithOMSDK) _webView.StopOMIDAdSession();
-
             float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay", 1.0f);
-
-            if (panelId != PanelId.Html5WebView)
-                time = 0;
-
-            if (!verifyWithOMSDK)
-                time = 0;
-            
+            if (panelId != PanelId.Html5WebView || !verifyWithOMSDK) time = 0;
             Invoke("DestroyWebView", time);
-            
             triggersButtonEventsOnDeactivate = false;
 
             if (impressionStarts)
@@ -567,7 +558,7 @@ namespace Monetizr.SDK.UI
 
         private void DestroyWebView()
         {
-            MonetizrLog.Print($"Destroying webview isSkipped: {isSkipped} current time: {Time.time}");
+            MonetizrLogger.Print($"Destroying webview isSkipped: {isSkipped} current time: {Time.time}");
             Destroy(_webView);
             _webView = null;
             SetActive(false);
@@ -580,7 +571,7 @@ namespace Monetizr.SDK.UI
 
         public void OnClaimRewardPress()
         {
-            MonetizrLog.Print("OnClaimRewardPress");
+            MonetizrLogger.Print("OnClaimRewardPress");
             OnCompleteEvent();
         }
 
@@ -621,16 +612,10 @@ namespace Monetizr.SDK.UI
 #endif
         private void TrackErrorEvent(string eventName, int statusCode = 0)
         {
-            if (currentMission.campaignId == null)
-                return;
-
+            if (currentMission.campaignId == null) return;
             Dictionary<string, string> p = new Dictionary<string, string>();
-
             p.Add("url", _webUrl);
-
-            if (statusCode > 0)
-                p.Add("url_status_code", statusCode.ToString());
-
+            if (statusCode > 0) p.Add("url_status_code", statusCode.ToString());
             MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Error, p);
         }
 

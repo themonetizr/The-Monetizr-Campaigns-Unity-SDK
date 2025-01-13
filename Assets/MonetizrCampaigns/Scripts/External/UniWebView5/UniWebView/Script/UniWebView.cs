@@ -326,7 +326,7 @@ public class UniWebView: MonoBehaviour {
 
     private bool started;
 
-    private bool backButtonEnabled = true;
+    private bool backButtonEnabled = false;
 
     /// <summary>
     /// The url of current loaded web page.

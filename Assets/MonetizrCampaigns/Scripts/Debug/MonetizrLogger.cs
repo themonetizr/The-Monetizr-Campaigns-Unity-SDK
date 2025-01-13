@@ -1,11 +1,8 @@
-#define MONETIZR_VERBOSE
-
-using System;
-using UnityEngine;
+using Monetizr.SDK.Utils;
 
 namespace Monetizr.SDK.Debug
 {
-    public static class MonetizrLog
+    public static class MonetizrLogger
     {
         public static bool isEnabled { set; get; } = false;
         
@@ -17,11 +14,7 @@ namespace Monetizr.SDK.Debug
         
         private static void PrintToConsole (object message)
         {
-#if UNITY_EDITOR
             UnityEngine.Debug.Log($"Monetizr SDK: {message}");
-#else
-            Console.WriteLine($"Monetizr SDK: {message}");
-#endif
         }
 
         public static void PrintError (object message)
@@ -34,6 +27,23 @@ namespace Monetizr.SDK.Debug
             UnityEngine.Debug.LogWarning($"Monetizr SDK: {message}");
         }
 
-    }
+        public static void PrintLocalMessage (MessageEnum messageEnum)
+        {
+            string messageString = EnumUtils.GetEnumDescription(messageEnum);
+            if (EnumUtils.IsEnumError(messageEnum))
+            {
+                PrintError(messageString);
+            }
+            else
+            {
+                PrintToConsole(messageString);
+            }
+        }
 
+        public static void PrintRemoteMessage (MessageEnum messageEnum)
+        {
+            PrintLocalMessage(messageEnum);
+            GCPManager.Instance.Log(messageEnum);
+        }
+    }
 }

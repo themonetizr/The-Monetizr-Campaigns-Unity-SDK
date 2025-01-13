@@ -125,7 +125,7 @@ namespace Monetizr.SDK.Analytics
         {
             LoadUserId();
 
-            MonetizrLog.Print($"MonetizrMobileAnalytics initialized with user id: {GetUserId()}");
+            MonetizrLogger.Print($"MonetizrMobileAnalytics initialized with user id: {GetUserId()}");
 
 
             osVersion = "0.0";
@@ -141,7 +141,7 @@ namespace Monetizr.SDK.Analytics
 #endif
             deviceSizeGroup = GetDeviceGroup();
 
-            MonetizrLog.Print($"OS Version {osVersion} Ad id: {advertisingID} Limit ads: {limitAdvertising} Device group: {deviceSizeGroup}");
+            MonetizrLogger.Print($"OS Version {osVersion} Ad id: {advertisingID} Limit ads: {limitAdvertising} Device group: {deviceSizeGroup}");
 
             isMixpanelInitialized = false;
 
@@ -189,14 +189,14 @@ namespace Monetizr.SDK.Analytics
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.SetLogConnectionErrors(logConnectionErrors);
 
-            MonetizrLog.Print($"Mixpanel init called {key}");
+            MonetizrLogger.Print($"Mixpanel init called {key}");
         }
 
         private void BeginShowAdAsset(string eventName, AdPlacement placement, ServerCampaign campaign)
         {
             if (campaign == null)
             {
-                MonetizrLog.PrintWarning($"MonetizrMobileAnalytics BeginShowAdAsset: MissionUIDescription shouldn't be null");
+                MonetizrLogger.PrintWarning($"MonetizrMobileAnalytics BeginShowAdAsset: MissionUIDescription shouldn't be null");
                 return;
             }
 
@@ -204,7 +204,7 @@ namespace Monetizr.SDK.Analytics
 
             if (visibleAdAsset.Contains(adElement))
             {
-                MonetizrLog.Print(MonetizrErrors.msg[ErrorType.AdAssetStillShowing]);
+                MonetizrLogger.Print(MonetizrErrors.msg[ErrorType.AdAssetStillShowing]);
             }
 
 
@@ -639,7 +639,7 @@ namespace Monetizr.SDK.Analytics
 
             logString += $" id:{campaign.id}";
 
-            MonetizrLog.Print(logString);
+            MonetizrLogger.Print(logString);
 
             var eventName = $"[UNITY_SDK] {name}";
 
@@ -650,7 +650,7 @@ namespace Monetizr.SDK.Analytics
             
             if (campaign == null)
             {
-                MonetizrLog.PrintWarning($"MonetizrMobileAnalytics TrackEvent: ServerCampaign shouldn't be null");
+                MonetizrLogger.PrintWarning($"MonetizrMobileAnalytics TrackEvent: ServerCampaign shouldn't be null");
                 return;
             }
 
@@ -725,7 +725,7 @@ namespace Monetizr.SDK.Analytics
             props["response_pieces"] = MonetizrUtils.SplitStringIntoPieces(openRtbResponse, 255);
             props["request_pieces"] = MonetizrUtils.SplitStringIntoPieces(openRtbRequest, 255);
 
-            MonetizrLog.Print($"SendReport: {props}");
+            MonetizrLogger.Print($"SendReport: {props}");
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track("Programmatic-request-client", props);
         }
@@ -739,7 +739,7 @@ namespace Monetizr.SDK.Analytics
             props["condition"] = condition;
             props["callstack"] = callstack;
 
-            MonetizrLog.Print($"SendError: {props}");
+            MonetizrLogger.Print($"SendError: {props}");
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track("[UNITY_SDK] Error", props);
         }

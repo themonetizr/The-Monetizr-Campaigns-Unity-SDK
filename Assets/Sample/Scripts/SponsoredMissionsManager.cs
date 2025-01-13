@@ -6,6 +6,11 @@ using Monetizr.SDK.Core;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
 
+#if UNITY_IOS
+    using UnityEngine.iOS;
+    using Unity.Advertisement.IosSupport;
+#endif
+
 namespace Monetizr.Sample
 {
     public class SponsoredMissionsManager : MonoBehaviour
@@ -38,7 +43,7 @@ namespace Monetizr.Sample
 
         private void Start()
         {
-            MonetizrLog.isEnabled = true;
+            MonetizrLogger.isEnabled = true;
             GetAdvertisingId(out var advertisingID, out var limitAdvertising);
             MonetizrManager.SetAdvertisingIds(advertisingID, limitAdvertising);
 

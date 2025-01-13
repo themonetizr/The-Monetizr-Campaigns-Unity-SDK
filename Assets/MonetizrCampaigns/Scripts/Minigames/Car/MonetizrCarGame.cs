@@ -69,7 +69,7 @@ namespace Monetizr.SDK.Minigames
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
-            MonetizrLog.Print("Prepare panel - car game");
+            MonetizrLogger.Print("Prepare panel - car game");
 
             this._onComplete = onComplete;
             this.panelId = id;
@@ -207,12 +207,12 @@ namespace Monetizr.SDK.Minigames
                 });
             }
             
-            MonetizrLog.Print("OnOpenDone" + item);
+            MonetizrLogger.Print("OnOpenDone" + item);
         }
 
         internal IEnumerator RestartGame()
         {
-            MonetizrLog.Print("RestartGame");
+            MonetizrLogger.Print("RestartGame");
 
             yield return new WaitForSeconds(0.5f);
 
@@ -256,7 +256,7 @@ namespace Monetizr.SDK.Minigames
         {
             _gameItems[item].isOpened = false;
 
-            MonetizrLog.Print("OnCloseDone" + item);
+            MonetizrLogger.Print("OnCloseDone" + item);
         }
 
         internal override void FinalizePanel(PanelId id)
