@@ -9,7 +9,6 @@ using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using UnityEngine;
 

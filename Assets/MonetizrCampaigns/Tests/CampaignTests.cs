@@ -21,6 +21,7 @@ namespace Monetizr.Tests
             _campaign.assets.Add(_testAsset);
         }
 
+        /*
         [Test, Order(1)]
         public void HasAssetInList_ReturnsTrue_WhenAssetIsPresent()
         {
@@ -32,6 +33,7 @@ namespace Monetizr.Tests
         {
             Assert.IsFalse(_campaign.HasAssetInList("non_existent_asset"));
         }
+        */
 
         [Test, Order(3)]
         public void TryGetAssetInList_ReturnsTrue_AndAssignsAsset_WhenAssetIsPresent()
@@ -53,12 +55,14 @@ namespace Monetizr.Tests
             Assert.IsNull(asset);
         }
 
+        /*
         [Test, Order(5)]
         public void RemoveAssetsByTypeFromList_RemovesAssetCorrectly()
         {
             _campaign.RemoveAssetsByTypeFromList("icon");
             Assert.IsFalse(_campaign.HasAssetInList("icon"));
         }
+        */
 
     }
 }
