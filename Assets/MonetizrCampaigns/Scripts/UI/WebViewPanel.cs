@@ -54,6 +54,8 @@ namespace Monetizr.SDK.UI
 
         internal void SetWebviewFrame(bool fullScreen, bool useSafeFrame)
         {
+            Rect frame = new Rect(0, 0, 0 ,0);
+
             var w = Screen.width;
             var h = Screen.width * 1.5f;
             var x = 0;
@@ -68,20 +70,33 @@ namespace Monetizr.SDK.UI
             }
 
 #if UNITY_EDITOR
-            if (fullScreen)
-                _webView.Frame = new Rect(0, 0, 600, 1200);
-            else
-                _webView.Frame = new Rect(0, 0, 600, 800);
+            if (fullScreen) 
+            { 
+                frame = new Rect(0, 0, 600, 1200);
+            }
+            else 
+            { 
+                frame = new Rect(0, 0, 600, 800);
+            }
 #else
             if (fullScreen)
             {
-                _webView.Frame = new Rect(0, 0, Screen.width, Screen.height);
+                frame = new Rect(0, 0, Screen.width, Screen.height);
             }
             else
             {
-                _webView.Frame = new Rect(x, y, w, h);
+                frame = new Rect(x, y, w, h);
             }
 #endif
+
+            _webView.Frame = frame;
+            StartCoroutine(SetFrameWithDelay(frame));
+        }
+
+        private IEnumerator SetFrameWithDelay(Rect frame)
+        {
+            yield return new WaitForEndOfFrame();
+            _webView.Frame = frame;
         }
 
 #if UNI_WEB_VIEW
@@ -104,7 +119,7 @@ namespace Monetizr.SDK.UI
             MonetizrManager.Instance.SoundSwitch(false);
 
             _webView = gameObject.AddComponent<UniWebView>();
-            _webView.ReferenceRectTransform = safeArea;
+            //_webView.ReferenceRectTransform = safeArea;
 
             SetWebviewFrame(fullScreen, useSafeFrame);
 
@@ -155,7 +170,6 @@ namespace Monetizr.SDK.UI
         internal void PrepareActionPanel(Mission m)
         {
             closeButton.gameObject.SetActive(true);
-
             GetActionMissionParameters(m);
 
             if (string.IsNullOrEmpty(_webUrl))
@@ -181,7 +195,10 @@ namespace Monetizr.SDK.UI
 
         internal void ShowClaimButton()
         {
-            if (!claimButton.activeSelf) claimButton.SetActive(true);
+            if (!claimButton.activeSelf)
+            {
+                claimButton.SetActive(true);
+            }
         }
 
         internal void HideClaimButton()
@@ -360,18 +377,21 @@ namespace Monetizr.SDK.UI
             switch (id)
             {
                 case PanelId.SurveyWebView:
+                    MonetizrLogger.Print("Preparing Survey.");
                     PrepareSurveyPanel(m);
                     MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.HtmlWebPageView:
+                    MonetizrLogger.Print("Preparing HTML.");
                     PrepareWebViewPanel(m);
                     MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.ActionHtmlPanelView:
+                    MonetizrLogger.Print("Preparing Action.");
                     PrepareActionPanel(m);
                     MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
@@ -514,8 +534,6 @@ namespace Monetizr.SDK.UI
                 claimPageReached = true;
                 OnCompleteEvent();
             }
-            
-            return;
         }
 
         private void OnCompleteEvent()
