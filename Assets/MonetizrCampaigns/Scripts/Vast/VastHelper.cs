@@ -374,6 +374,7 @@ namespace Monetizr.SDK.VAST
                         AddWrapperCreativesIntoTrackingEvents();
                         break;
                     case Type.Unknown:
+                        MonetizrLogger.PrintError("Creative Type Unknown.");
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

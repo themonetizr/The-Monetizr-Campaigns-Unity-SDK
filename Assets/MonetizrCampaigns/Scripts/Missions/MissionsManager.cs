@@ -66,7 +66,7 @@ namespace Monetizr.SDK.Missions
 
             if (!hasSomething && !campaign.serverSettings.GetBoolParam("programmatic",false))
             {
-                MonetizrLogger.PrintWarning($"campaign {campaign} has no video asset!");
+                MonetizrLogger.PrintError($"Campaign {campaign.id} has no video asset: hasPath = " + hasSomething + " / isProgrammatic: " + !campaign.serverSettings.GetBoolParam("programmatic", false));
                 return null;
             }
             
@@ -168,7 +168,11 @@ namespace Monetizr.SDK.Missions
                 case MissionType.CodeReward: m = PrepareMission(mt, campaign, false, true); break;
             }
 
-            if (m == null) return null;
+            if (m == null)
+            {
+                MonetizrLogger.PrintError("Mission Type Undefined.");
+                return null;
+            }
 
             m.rewardType = md.rewardCurrency;
             m.startMoney = MonetizrManager.gameRewards[m.rewardType].GetCurrencyFunc();

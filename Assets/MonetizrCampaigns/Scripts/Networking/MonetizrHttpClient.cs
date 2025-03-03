@@ -159,8 +159,23 @@ namespace Monetizr.SDK.Networking
             var campaigns = JsonUtility.FromJson<Campaigns.Campaigns>("{\"campaigns\":" + responseString + "}");
             if (campaigns == null) return new List<ServerCampaign>();
 
-            if (GlobalSettings.GetBoolParam("campaign.use_adm",true)) campaigns.campaigns = await TryRecreateCampaignsFromAdm(campaigns.campaigns);
-            
+            List<ServerCampaign> campaignsWithADM = new List<ServerCampaign>();
+            foreach (ServerCampaign campaign in campaigns.campaigns)
+            {
+                bool useADM = bool.Parse(MonetizrUtils.ExtractValueFromJSON(campaign.content, "campaign.use_adm"));
+                if (useADM)
+                {
+                    MonetizrLogger.Print("CampaignID " + campaign.id + " HAS ADM");
+                    campaignsWithADM.Add(campaign);
+                }
+                else
+                {
+                    MonetizrLogger.Print("CampaignID " + campaign.id + " DOES NOT HAVE ADM");
+                }
+            }
+
+            if (campaignsWithADM.Count > 0) await TryRecreateCampaignsFromAdm(campaignsWithADM);
+
             foreach (var c in campaigns.campaigns)
             {
                 if (c.hasMadeEarlyBidRequest) continue;
@@ -200,7 +215,7 @@ namespace Monetizr.SDK.Networking
             var admCampaigns = new List<ServerCampaign>();
             var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
 
-            MonetizrLogger.Print("Campaigns Count: " + campaigns.Count);
+            MonetizrLogger.Print("ADM Campaigns Count: " + campaigns.Count);
 
             foreach (var c in campaigns)
             {
