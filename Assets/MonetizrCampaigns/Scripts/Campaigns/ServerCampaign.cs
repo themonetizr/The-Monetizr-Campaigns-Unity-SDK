@@ -68,6 +68,7 @@ namespace Monetizr.SDK.Campaigns
         public string verifications_vast_node;
 
         public bool hasMadeEarlyBidRequest = false;
+        public CampaignType campaignType = CampaignType.None;
 
         public ServerCampaign () { }
 
@@ -570,11 +571,11 @@ namespace Monetizr.SDK.Campaigns
 
         internal void PostCampaignLoad()
         {
-            MonetizrLogger.Print("Initial PostCampaign Data: \n" + "Content: " + content + "\n" + "ADM: " + adm);
+            MonetizrLogger.Print("CampaignID: " + id + "\n" + "Initial PostCampaignLoad Content: " + content);
             if (string.IsNullOrEmpty(content)) return;
             var cd = MonetizrUtils.ParseContentString(content);
             serverSettings = new SettingsDictionary<string, string>(cd);
-            MonetizrLogger.Print("Final PostCampaign Data: \n" + "Campaign ID: " + id + "\n" + "Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
+            MonetizrLogger.Print("CampaignID: " + id + "\n" + "Final PostCampaignLoad Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
         }
         
     }

@@ -721,7 +721,7 @@ namespace Monetizr.SDK.VAST
 
                 if (!result.isSuccess)
                 {
-                    MonetizrLogger.Print($"Can't load wrapper with the url {url}");
+                    MonetizrLogger.PrintError($"Can't load wrapper with the url {url}");
                     return false;
                 }
 

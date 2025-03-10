@@ -4,6 +4,7 @@ using Monetizr.SDK.Debug;
 using Monetizr.SDK.Utils;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Monetizr.SDK.Campaigns
 {
@@ -90,6 +91,52 @@ namespace Monetizr.SDK.Campaigns
                 MonetizrLogger.Print($"No ad id defined to filter campaigns. Please allow ad tracking!");
             }
 #endif
+        }
+
+        public static void SetupCampaignsType (List<ServerCampaign> serverCampaigns)
+        {
+            foreach (ServerCampaign campaign in serverCampaigns)
+            {
+                if (IsADM(campaign))
+                {
+                    campaign.campaignType = CampaignType.ADM;
+                    continue;
+                }
+
+                if (IsProgrammatic(campaign))
+                {
+                    campaign.campaignType = CampaignType.Programmatic;
+                    continue;
+                }
+
+                campaign.campaignType = CampaignType.MonetizrBackend;
+            }
+        }
+
+        private static bool IsADM (ServerCampaign campaign)
+        {
+            string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, "campaign.use_adm");
+            bool useADM = bool.TryParse(extractedValue, out bool result) && result;
+            return useADM;
+        }
+
+        private static bool IsProgrammatic (ServerCampaign campaign)
+        {
+            string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, "programmatic");
+            bool isProgrammatic = bool.TryParse(extractedValue, out bool result) && result;
+            return isProgrammatic;
+        }
+
+        public static string PrintAssetsTypeList(ServerCampaign serverCampaign)
+        {
+            StringBuilder result = new StringBuilder();
+
+            foreach (var asset in serverCampaign.assets)
+            {
+                result.AppendLine($"{serverCampaign.id}: {asset.type}");
+            }
+
+            return result.ToString();
         }
     }
 }
