@@ -111,12 +111,6 @@ namespace Monetizr.SDK.Networking
             return uwr.downloadHandler.data;
         }
 
-        internal async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
-        {
-            var loadResult = await GetServerCampaignsFromMonetizr();
-            return loadResult;
-        }
-
         internal override async Task GetGlobalSettings()
         {
             GlobalSettings = await DownloadGlobalSettings();
@@ -140,6 +134,12 @@ namespace Monetizr.SDK.Networking
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
 
+        internal async Task<List<ServerCampaign>> LoadCampaignsListFromServer()
+        {
+            var loadResult = await GetServerCampaignsFromMonetizr();
+            return loadResult;
+        }
+
         internal override async Task<List<ServerCampaign>> GetList()
         {
             var result = await LoadCampaignsListFromServer();
@@ -159,17 +159,15 @@ namespace Monetizr.SDK.Networking
             var campaigns = JsonUtility.FromJson<Campaigns.Campaigns>("{\"campaigns\":" + responseString + "}");
             if (campaigns == null) return new List<ServerCampaign>();
 
-            CampaignUtils.SetupCampaignsType(campaigns.campaigns);
-
             MonetizrLogger.Print("Received Campaigns Count: " + campaigns.campaigns.Count);
             foreach (ServerCampaign campaign in campaigns.campaigns)
             {
+                CampaignUtils.SetupCampaignType(campaign);
                 MonetizrLogger.Print(campaign.id + " / Type: " + campaign.campaignType);
                 MonetizrLogger.Print(CampaignUtils.PrintAssetsTypeList(campaign));
             }
 
             List<ServerCampaign> processedCampaigns = await ProcessCampaigns(campaigns.campaigns);
-
             return processedCampaigns;
         }
 
@@ -200,14 +198,14 @@ namespace Monetizr.SDK.Networking
 
             if (campaignsADM.Count > 0) campaignsADM = await ProcessADMCampaigns(campaignsADM);
             if (campaignsBackend.Count > 0) campaignsBackend = ProcessBackendCampaigns(campaignsBackend);
-            if (campaignsProgrammatic.Count > 0) campaignsProgrammatic = ProcessProgrammaticCampaigns(campaignsProgrammatic);
+            if (campaignsProgrammatic.Count > 0) campaignsProgrammatic = await ProcessProgrammaticCampaigns(campaignsProgrammatic);
 
             return campaignsADM.Concat(campaignsBackend).Concat(campaignsProgrammatic).ToList();
         }
 
         private async Task<List<ServerCampaign>> ProcessADMCampaigns (List<ServerCampaign> campaigns)
         {
-            List<ServerCampaign> admCampaigns = await TryRecreateCampaignsFromAdm(campaigns);
+            List<ServerCampaign> admCampaigns = await RecreateCampaignsFromADM(campaigns);
             foreach (ServerCampaign campaign in admCampaigns)
             {
                 campaign.PostCampaignLoad();
@@ -224,48 +222,59 @@ namespace Monetizr.SDK.Networking
             return campaigns;
         }
 
-        private List<ServerCampaign> ProcessProgrammaticCampaigns (List<ServerCampaign> campaigns)
+        private async Task<List<ServerCampaign>> ProcessProgrammaticCampaigns (List<ServerCampaign> campaigns)
         {
             foreach (ServerCampaign campaign in campaigns)
             {
-                if (campaign.hasMadeEarlyBidRequest) continue;
                 campaign.PostCampaignLoad();
+                await MakeEarlyProgrammaticBidRequest(campaign);
             }
-            return campaigns;
+
+            List<ServerCampaign> admCampaigns = await RecreateCampaignsFromADM(campaigns);
+            return admCampaigns;
         }
 
-        internal async Task<List<ServerCampaign>> TryRecreateCampaignsFromAdm(List<ServerCampaign> campaigns)
+        internal async Task<List<ServerCampaign>> RecreateCampaignsFromADM (List<ServerCampaign> campaigns)
         {
-            var admCampaigns = new List<ServerCampaign>();
-            var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
+            List<ServerCampaign> admCampaigns = new List<ServerCampaign>();
+            PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
 
-            foreach (var c in campaigns)
+            foreach (ServerCampaign campaign in campaigns)
             {
-                if (string.IsNullOrEmpty(c.adm))
-                {
-                    c.PostCampaignLoad();
-                    await MakeEarlyProgrammaticBidRequest(c);
-                    admCampaigns.Add(c);
-                }
-
-                var admCampaign = await ph.PrepareServerCampaign(c.id, c.adm, false);
+                ServerCampaign admCampaign = await pubmaticHelper.PrepareServerCampaign(campaign.id, campaign.adm, false);
                 if (admCampaign != null) admCampaigns.Add(admCampaign);
             }
 
             if (admCampaigns.Count <= 0) return campaigns;
-            //campaigns.Clear();
             return admCampaigns;
         }
 
         internal async Task MakeEarlyProgrammaticBidRequest(ServerCampaign campaign)
         {
             MonetizrLogger.Print("PBR - Started");
-            PubmaticHelper ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
+            PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
+
+            if (!String.IsNullOrEmpty(campaign.adm))
+            {
+                bool initializeResult = await pubmaticHelper.InitializeServerCampaignForProgrammatic(campaign, campaign.adm);
+                campaign.hasMadeEarlyBidRequest = initializeResult;
+
+                if (initializeResult)
+                {
+                    MonetizrLogger.Print("Programmatic with ADM initialization successful.");
+                }
+                else
+                {
+                    MonetizrLogger.Print("Programmatic with ADM initialization failed.");
+                }
+
+                return;
+            }
 
             bool isProgrammaticOK = false;
             try
             {
-                isProgrammaticOK = await ph.TEST_GetOpenRtbResponseForCampaign(campaign);
+                isProgrammaticOK = await pubmaticHelper.TEST_GetOpenRtbResponseForCampaign(campaign);
             }
             catch (DownloadUrlAsStringException e)
             {

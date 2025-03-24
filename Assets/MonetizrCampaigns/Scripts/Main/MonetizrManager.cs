@@ -81,6 +81,11 @@ namespace Monetizr.SDK.Core
 
         #region Public Static Methods
 
+        public void SetUserConsentParameters (bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
+        {
+
+        }
+
         public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
         {
             MonetizrMobileAnalytics.isAdvertisingIDDefined = true;
@@ -446,11 +451,9 @@ namespace Monetizr.SDK.Core
                 return;
             }
 
-            if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) &&
-                !campaign.HasAsset(AssetsType.TeaserGifPathString) &&
-                !campaign.HasAsset(AssetsType.BrandRewardLogoSprite))
+            if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) && !campaign.HasAsset(AssetsType.TeaserGifPathString) && !campaign.HasAsset(AssetsType.BrandRewardLogoSprite))
             {
-                MonetizrLogger.Print("No texture for tiny teaser!");
+                MonetizrLogger.Print("No texture for teaser. ");
                 return;
             }
 
@@ -528,20 +531,6 @@ namespace Monetizr.SDK.Core
             return Instance;
         }
 
-        private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
-        {
-            var monetizrObject = new GameObject("MonetizrManager");
-            var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
-            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
-            var datadogManager = monetizrObject.AddComponent<GCPManager>();
-            DontDestroyOnLoad(monetizrObject);
-            Instance = monetizrManager;
-            Instance.sponsoredMissions = null;
-            Instance.userDefinedEvent = userEvent;
-            Instance.onUIVisible = onUIVisible;
-            return monetizrManager;
-        }
-
         private static bool IsInitializationSetupComplete()
         {
             MonetizrSettingsMenu.LoadSettings();
@@ -564,6 +553,15 @@ namespace Monetizr.SDK.Core
                 return false;
             }
 
+            foreach (KeyValuePair<RewardType, GameReward> gameReward in gameRewards)
+            {
+                if (!gameReward.Value.IsSetupValid())
+                {
+                    MonetizrLogger.PrintLocalMessage(MessageEnum.M606);
+                    return false;
+                }
+            }
+
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
                 MonetizrLogger.PrintLocalMessage(MessageEnum.M604);
@@ -571,6 +569,20 @@ namespace Monetizr.SDK.Core
             }
 
             return true;
+        }
+
+        private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
+        {
+            var monetizrObject = new GameObject("MonetizrManager");
+            var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
+            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
+            var datadogManager = monetizrObject.AddComponent<GCPManager>();
+            DontDestroyOnLoad(monetizrObject);
+            Instance = monetizrManager;
+            Instance.sponsoredMissions = null;
+            Instance.userDefinedEvent = userEvent;
+            Instance.onUIVisible = onUIVisible;
+            return monetizrManager;
         }
 
         internal static void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
@@ -844,11 +856,6 @@ namespace Monetizr.SDK.Core
             localSettings.LoadOldAndUpdateNew(campaigns);
             MonetizrLogger.Print($"RequestCampaigns completed with {campaigns.Count} campaigns.");
             if (campaigns.Count > 0) ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
-
-            foreach (var i in gameRewards)
-            {
-                if (!i.Value.IsSetupValid()) return;
-            }
 
             MonetizrLogger.Print("MonetizrManager initialization okay!");
             _isActive = true;

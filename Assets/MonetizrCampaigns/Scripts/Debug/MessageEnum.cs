@@ -26,6 +26,7 @@ namespace Monetizr.SDK.Debug
         [Description("Missing SDK Settings - GameReward. Please, setup at least one Game Reward before SDK initialization.")] M603 = 603,
         [Description("Missing SDK Settings - Advertising ID. Please, call MonetizrManager.SetAdvertisingIds before SDK initialization.")] M604 = 604,
         [Description("Unable to reach network - Please, make sure that Network access is reacheable.")] M605 = 605,
+        [Description("Invalid GameReward Setup - Please, make sure that the Game Rewards setup is valid.")] M606 = 606,
 
     }
 }

@@ -412,6 +412,11 @@ namespace Monetizr.SDK.Campaigns
                         break;
                 }
             }
+
+            if (!HasTeaserAsset())
+            {
+                await SetDefaultTeaser();
+            }
         }
 
         internal async Task PreloadVideoPlayerForProgrammatic(Asset asset)
@@ -576,6 +581,26 @@ namespace Monetizr.SDK.Campaigns
             var cd = MonetizrUtils.ParseContentString(content);
             serverSettings = new SettingsDictionary<string, string>(cd);
             MonetizrLogger.Print("CampaignID: " + id + "\n" + "Final PostCampaignLoad Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
+        }
+
+        private bool HasTeaserAsset ()
+        {
+            if (!HasAsset(AssetsType.TinyTeaserSprite) && !HasAsset(AssetsType.TeaserGifPathString) && !HasAsset(AssetsType.BrandRewardLogoSprite))
+            {
+                MonetizrLogger.Print("CampaignID: " + id + " has no teaser texture. Loading default.");
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> SetDefaultTeaser ()
+        {
+            Asset defaultTeaser = new Asset();
+            defaultTeaser.type = "tiny_teaser_gif";
+            defaultTeaser.url = "https://cdn.monetizr.com/px_track/d957e956-319e-46f6-971d-b6c10d16e449.gif";
+            await PreloadAssetToCache(defaultTeaser, AssetsType.TeaserGifPathString, true);
+            return true;
         }
         
     }

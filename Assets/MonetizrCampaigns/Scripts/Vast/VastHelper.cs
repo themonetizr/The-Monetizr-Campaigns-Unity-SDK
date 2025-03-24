@@ -642,19 +642,33 @@ namespace Monetizr.SDK.VAST
 
             if (vastData == null)
             {
-                MonetizrLogger.PrintError("Vast isn't loaded");
+                MonetizrLogger.PrintError("Vast isn't loaded.");
                 return;
             }
 
-            if (vastData.Items == null || vastData.Items.Length == 0) return;
-            if (!(vastData.Items[0] is VASTAD vad)) return;
+            if (vastData.Items == null || vastData.Items.Length == 0)
+            {
+                MonetizrLogger.PrintError("Vast is null or empty.");
+                return;
+            }
+
+            if (!(vastData.Items[0] is VASTAD vad))
+            {
+                MonetizrLogger.PrintError("Vast is not readable.");
+                return;
+            }
 
             int prefBitRate = httpClient.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
             int prefWidth = httpClient.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
             int prefHeight = httpClient.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
             var adItem = new VastAdItem(vad.Item, serverCampaign, new VastAdItem.PreferableVideoSize(prefBitRate, prefWidth, prefHeight), true);
 
-            if (adItem.InUnknownAdType()) return;
+            if (adItem.InUnknownAdType())
+            {
+                MonetizrLogger.PrintError("Vast is Unknown type.");
+                return;
+            }
+
             adItem.AssignCreativesIntoAssets();
             if (string.IsNullOrEmpty(adItem.WrapperAdTagUri)) return;
             MonetizrLogger.Print($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
@@ -740,6 +754,8 @@ namespace Monetizr.SDK.VAST
 
         private static async Task DownloadAndPrepareHtmlVideoPlayer(ServerCampaign serverCampaign, Asset videoAsset)
         {
+            MonetizrLogger.PrintError("Downloading and Preparing VideoPlayer.");
+
             string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(serverCampaign);
             string campPath = Application.persistentDataPath + "/" + serverCampaign.id;
             string zipFolder = campPath + "/" + videoAsset.fpath;

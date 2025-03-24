@@ -93,6 +93,23 @@ namespace Monetizr.SDK.Campaigns
 #endif
         }
 
+        public static void SetupCampaignType (ServerCampaign campaign)
+        {
+            if (IsProgrammatic(campaign))
+            {
+                campaign.campaignType = CampaignType.Programmatic;
+                return;
+            }
+
+            if (IsADM(campaign))
+            {
+                campaign.campaignType = CampaignType.ADM;
+                return;
+            }
+
+            campaign.campaignType = CampaignType.MonetizrBackend;
+        }
+
         public static void SetupCampaignsType (List<ServerCampaign> serverCampaigns)
         {
             foreach (ServerCampaign campaign in serverCampaigns)

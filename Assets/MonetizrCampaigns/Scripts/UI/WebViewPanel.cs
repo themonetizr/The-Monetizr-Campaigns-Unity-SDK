@@ -208,8 +208,9 @@ namespace Monetizr.SDK.UI
 
         private async void PrepareHtml5Panel()
         {
-            var campaign = currentMission.campaign;
+            ServerCampaign campaign = currentMission.campaign;
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
+            MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo);
 
             if (hasVideo)
             {
@@ -217,7 +218,7 @@ namespace Monetizr.SDK.UI
                 campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
-            var isProgrammatic = campaign.serverSettings.GetBoolParam("programmatic", false);
+            bool isProgrammatic = campaign.serverSettings.GetBoolParam("programmatic", false);
 
             if (!isProgrammatic && !hasVideo)
             {
@@ -226,7 +227,7 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            var showWebview = true;
+            bool showWebview = true;
             var oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
             string userAgent = _webView.GetUserAgent();
             var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, userAgent);
@@ -241,6 +242,8 @@ namespace Monetizr.SDK.UI
 
             if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
+                MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will embed VAST into VideoPlayer.");
+
                 var replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
                 campaign.vastSettings.ReplaceVastTags(replacer);
                 campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
@@ -251,6 +254,10 @@ namespace Monetizr.SDK.UI
                     hasDownloaded = await ph.DownloadOMSDKServiceContent();
                     if (hasDownloaded) ph.InitializeOMSDK(campaign.vastAdParameters);
                 }
+            }
+            else
+            {
+                MonetizrLogger.PrintError("CampaignID: " + campaign.id + " / VastSettings are empty.");
             }
 
             campaign.vastSettings = oldVastSettings;
@@ -300,23 +307,11 @@ namespace Monetizr.SDK.UI
                 MonetizrLogger.Print("Early Bid Request was succesfully made.");
                 bool hasInitilizedProgrammaticCampaign = await ph.TEST_InitializeProgrammaticCampaign(campaign);
                 if (!hasInitilizedProgrammaticCampaign) return false;
+                MonetizrLogger.Print("Programmatic Campaign was succesfully initialized.");
             }
             else
             {
-                try
-                {
-                    isProgrammaticOK = await ph.GetOpenRtbResponseForCampaign(campaign, currentMission.openRtbRequestForProgrammatic, "");
-                }
-                catch (DownloadUrlAsStringException e)
-                {
-                    MonetizrLogger.PrintError($"Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
-                    isProgrammaticOK = false;
-                }
-                catch (Exception e)
-                {
-                    MonetizrLogger.PrintError($"Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
-                    isProgrammaticOK = false;
-                }
+                isProgrammaticOK = false;
             }
 
             Asset programmaticVideoAsset = null;
