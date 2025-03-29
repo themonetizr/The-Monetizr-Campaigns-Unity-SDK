@@ -7,6 +7,8 @@ using System.Net.Http;
 using System.Text;
 using System;
 using UnityEngine;
+using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Debug;
 
 namespace Monetizr.SDK.Networking
 {
@@ -41,11 +43,11 @@ namespace Monetizr.SDK.Networking
             return httpRequest;
         }
 
-        public static HttpRequestMessage GenerateHttpRequestMessage(string userAgent, string uri, bool isPost = false)
+        public static HttpRequestMessage GenerateHttpRequestMessage (string userAgent, string uri, bool isPost = false, string apiKey = null)
         {
-            var httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
+            HttpMethod httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
 
-            var output = new HttpRequestMessage
+            HttpRequestMessage output = new HttpRequestMessage
             {
                 Method = httpMethod,
                 RequestUri = new Uri(uri),
@@ -68,7 +70,8 @@ namespace Monetizr.SDK.Networking
                 }
             };
 
-            output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", MonetizrManager.Instance.ConnectionsClient.currentApiKey);
+            string key = String.IsNullOrEmpty(apiKey) ? MonetizrManager.Instance.ConnectionsClient.currentApiKey : apiKey;
+            output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
             output.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (string.IsNullOrEmpty(userAgent)) return output;
             output.Headers.Add("User-Agent", userAgent);

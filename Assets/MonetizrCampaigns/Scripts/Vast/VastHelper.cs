@@ -18,6 +18,7 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.UI;
+using Monetizr.SDK.Video;
 
 namespace Monetizr.SDK.VAST
 {
@@ -277,38 +278,6 @@ namespace Monetizr.SDK.VAST
                     verificationParameters = av.VerificationParameters
                 });
             }
-        }
-
-        internal SettingsDictionary<string, string> GetDefaultSettingsForProgrammatic()
-        {
-            var settings = new Dictionary<string, string>()
-            {
-                { "design_version", "2" },
-                { "amount_of_teasers", "100" },
-                { "teaser_design_version", "3" },
-                { "amount_of_notifications", "100" },
-                { "RewardCenter.show_for_one_mission", "true" },
-
-                { "bg_color", "#124674" },
-                { "bg_color2", "#124674" },
-                { "link_color", "#AAAAFF" },
-                { "text_color", "#FFFFFF" },
-                { "bg_border_color", "#FFFFFF" },
-                { "RewardCenter.reward_text_color", "#2196F3" },
-
-                { "CongratsNotification.button_text", "Awesome!" },
-                { "CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr" },
-                { "CongratsNotification.header_text", "Get your awesome reward!" },
-
-                { "StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>" },
-                { "StartNotification.button_text", "Learn more!" },
-                { "StartNotification.content_text", "Join Monetizr<br/>to get game rewards" },
-                { "StartNotification.header_text", "<b>Rewards by Monetizr</b>" },
-
-                { "RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%" }
-            };
-
-            return new SettingsDictionary<string, string>(settings);
         }
 
         class VastAdItem
@@ -619,7 +588,7 @@ namespace Monetizr.SDK.VAST
 
         internal async Task<ServerCampaign> PrepareServerCampaign(string campaignId, string vastContent, bool videoOnly = false)
         {
-            ServerCampaign serverCampaign = new ServerCampaign(campaignId, "", GetDefaultSettingsForProgrammatic());
+            ServerCampaign serverCampaign = new ServerCampaign(campaignId, "", CampaignUtils.GetDefaultSettingsDictionaryForProgrammatic());
             if (!await LoadVastContent(vastContent, videoOnly, serverCampaign, true)) return null;
             string vastJsonSettings = serverCampaign.DumpsVastSettings(null);
             serverCampaign.vastAdParameters = vastJsonSettings;
@@ -633,6 +602,7 @@ namespace Monetizr.SDK.VAST
             await LoadVastAndFindVideoAsset(vastContent, campaign);
             if (!campaign.TryGetAssetInList("programmatic_video", out var video)) return false;
             await campaign.PreloadVideoPlayerForProgrammatic(video);
+            //await VideoUtils.GetVideoPlayer(campaign, video, true);
             return true;
         }
 
@@ -745,18 +715,22 @@ namespace Monetizr.SDK.VAST
             return true;
         }
 
-        private async Task CheckVideoPlayer(ServerCampaign serverCampaign)
+        private async Task CheckVideoPlayer (ServerCampaign serverCampaign)
         {
-            MonetizrLogger.Print("Checking VideoPlayer");
-            if (!serverCampaign.TryGetAssetInList(new List<string>() { "html", "video" }, out var videoAsset)) return;
+            if (!serverCampaign.TryGetAssetInList(new List<string>() { "html", "video" }, out var videoAsset))
+            {
+                MonetizrLogger.Print("No videoplayer asset found.");
+                return;
+            }
             await DownloadAndPrepareHtmlVideoPlayer(serverCampaign, videoAsset);
+            //await VideoUtils.GetVideoPlayer(serverCampaign, videoAsset, false);
         }
 
         private static async Task DownloadAndPrepareHtmlVideoPlayer(ServerCampaign serverCampaign, Asset videoAsset)
         {
             MonetizrLogger.PrintError("Downloading and Preparing VideoPlayer.");
 
-            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(serverCampaign);
+            string videoPlayerURL = VideoPlayerUtils.GetVideoPlayerURL(serverCampaign);
             string campPath = Application.persistentDataPath + "/" + serverCampaign.id;
             string zipFolder = campPath + "/" + videoAsset.fpath;
             MonetizrLogger.Print($"{campPath} {zipFolder}");

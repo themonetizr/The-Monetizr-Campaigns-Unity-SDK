@@ -419,22 +419,6 @@ namespace Monetizr.SDK.Utils
             return sb.ToString();
         }
 
-        public static string GetVideoPlayerURL (ServerCampaign serverCampaign)
-        {
-            string fallbackVideoPlayerURL = "https://image.themonetizr.com/videoplayer/html.zip";
-            string globalSettingsVideoPlayerURL = serverCampaign.serverSettings.GetParam("videoplayer", "");
-            if (string.IsNullOrEmpty(globalSettingsVideoPlayerURL))
-            {
-                MonetizrLogger.Print("VideoPlayer URL is from GlobalSettings.");
-                return fallbackVideoPlayerURL;
-            }
-            else
-            {
-                MonetizrLogger.Print("VideoPlayer URL is from FallbackURL.");
-                return globalSettingsVideoPlayerURL;
-            }
-        }
-
         public static string ExtractValueFromJSON(string jsonString, string parameter)
         {
             string key = $"\"{parameter}\"";
@@ -507,6 +491,26 @@ namespace Monetizr.SDK.Utils
                 return null;
 
             return ExtractValueFromJSON(parentValue, nestedKey);
+        }
+
+        public static void GetAdvertisingId (out string advertisingID, out bool limitAdvertising)
+        {
+#if !UNITY_EDITOR
+#if UNITY_ANDROID
+               AndroidJavaClass up = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
+               AndroidJavaObject currentActivity = up.GetStatic<AndroidJavaObject> ("currentActivity");
+               AndroidJavaClass client = new AndroidJavaClass ("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+               AndroidJavaObject adInfo = client.CallStatic<AndroidJavaObject> ("getAdvertisingIdInfo",currentActivity);
+               advertisingID = adInfo.Call<string> ("getId").ToString();   
+               limitAdvertising = (adInfo.Call<bool> ("isLimitAdTrackingEnabled"));
+#elif UNITY_IOS
+               limitAdvertising = !(ATTrackingStatusBinding.GetAuthorizationTrackingStatus() == ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED);
+               advertisingID = Device.advertisingIdentifier;
+#endif
+#else
+            advertisingID = "";
+            limitAdvertising = false;
+#endif
         }
 
     }
