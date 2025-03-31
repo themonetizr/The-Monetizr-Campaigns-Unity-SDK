@@ -210,7 +210,7 @@ namespace Monetizr.SDK.UI
         {
             ServerCampaign campaign = currentMission.campaign;
 
-            if (campaign.HasTimeoutPassed())
+            if (campaign.campaignType != CampaignType.MonetizrBackend && campaign.HasTimeoutPassed())
             {
                 HandleProgrammaticFailure(campaign);
                 return;

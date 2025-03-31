@@ -82,7 +82,7 @@ namespace Monetizr.SDK.Campaigns
 
         public bool HasTimeoutPassed ()
         {
-            if (Time.time >= campaignTimeoutStart + 2f) return true;
+            if (Time.time >= campaignTimeoutStart + 120f) return true;
             return false;
         }
 

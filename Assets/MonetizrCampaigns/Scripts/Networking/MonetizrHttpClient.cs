@@ -209,6 +209,7 @@ namespace Monetizr.SDK.Networking
             foreach (ServerCampaign campaign in admCampaigns)
             {
                 campaign.PostCampaignLoad();
+                campaign.campaignTimeoutStart = Time.time;
             }
             return admCampaigns;
         }
@@ -228,6 +229,7 @@ namespace Monetizr.SDK.Networking
             {
                 campaign.PostCampaignLoad();
                 await MakeEarlyProgrammaticBidRequest(campaign);
+                campaign.campaignTimeoutStart = Time.time;
             }
 
             List<ServerCampaign> admCampaigns = await RecreateCampaignsFromADM(campaigns);
