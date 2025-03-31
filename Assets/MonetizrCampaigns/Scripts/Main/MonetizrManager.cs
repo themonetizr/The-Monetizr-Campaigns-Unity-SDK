@@ -81,7 +81,7 @@ namespace Monetizr.SDK.Core
         internal bool coppa = false;
         internal bool gdpr = false;
         internal bool us_privacy = false;
-        internal bool uoo = false;
+        internal bool uoo = true;
         internal string consent = "";
 
         #endregion

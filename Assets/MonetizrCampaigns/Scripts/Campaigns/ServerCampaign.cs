@@ -69,6 +69,7 @@ namespace Monetizr.SDK.Campaigns
 
         public bool hasMadeEarlyBidRequest = false;
         public CampaignType campaignType = CampaignType.None;
+        public float campaignTimeoutStart;
 
         public ServerCampaign () { }
 
@@ -77,6 +78,12 @@ namespace Monetizr.SDK.Campaigns
             this.id = id;
             dar_tag = darTag;
             serverSettings = defaultServerSettings;
+        }
+
+        public bool HasTimeoutPassed ()
+        {
+            if (Time.time >= campaignTimeoutStart + 2f) return true;
+            return false;
         }
 
         internal bool TryGetAssetInList(List<string> types, out Asset asset)

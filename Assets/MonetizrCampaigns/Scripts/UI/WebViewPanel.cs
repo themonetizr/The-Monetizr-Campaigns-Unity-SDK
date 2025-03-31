@@ -209,6 +209,13 @@ namespace Monetizr.SDK.UI
         private async void PrepareHtml5Panel()
         {
             ServerCampaign campaign = currentMission.campaign;
+
+            if (campaign.HasTimeoutPassed())
+            {
+                HandleProgrammaticFailure(campaign);
+                return;
+            }
+
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
             MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo);
 
