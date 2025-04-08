@@ -842,7 +842,7 @@ namespace Monetizr.SDK.Core
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
 
-            foreach (var campaign in campaigns)
+            foreach (ServerCampaign campaign in campaigns)
             {
                 await campaign.LoadCampaignAssets();
 

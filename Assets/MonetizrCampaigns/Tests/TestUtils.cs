@@ -30,7 +30,7 @@ namespace Monetizr.Tests
 
         public static UnityWebRequest GetUnityWebRequest(string uri, bool isPost = false)
         {
-            UnityWebRequest request = isPost ? UnityWebRequest.Post(uri, "") : UnityWebRequest.Get(uri);
+            UnityWebRequest request = isPost ? UnityWebRequest.PostWwwForm(uri, "") : UnityWebRequest.Get(uri);
 
             request.SetRequestHeader("player-id", MonetizrMobileAnalytics.deviceIdentifier);
             request.SetRequestHeader("app-bundle-id", MonetizrSettings.bundleID);

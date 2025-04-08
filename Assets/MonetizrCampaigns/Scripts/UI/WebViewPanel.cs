@@ -212,36 +212,42 @@ namespace Monetizr.SDK.UI
 
             if (campaign.campaignType != CampaignType.MonetizrBackend && campaign.HasTimeoutPassed())
             {
+                MonetizrLogger.Print("CampaignID: " + campaign.id + " video has timed out.");
                 HandleProgrammaticFailure(campaign);
                 return;
             }
 
+            bool hasProgrammaticVideo = campaign.TryGetAssetInList(new List<string>() {"programmatic_video" }, out var programmaticVideoAsset);
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
-            MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo);
+            MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo + " / hasProgrammaticVideo: " + hasProgrammaticVideo);
 
-            if (hasVideo)
+            if (!hasVideo && !hasProgrammaticVideo)
             {
-                _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
-                campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
-            }
-
-            bool isProgrammatic = campaign.serverSettings.GetBoolParam("programmatic", false);
-
-            if (!isProgrammatic && !hasVideo)
-            {
-                MonetizrLogger.PrintError($"Video expected, but didn't loaded for campaign {campaign.id}");
-                _OnSkipPress();
+                MonetizrLogger.PrintError("No video asset loaded for CampaignID: " + campaign.id);
+                if (campaign.campaignType == CampaignType.Programmatic)
+                {
+                    HandleProgrammaticFailure(campaign);
+                }
+                else
+                {
+                    OnSkipPress();
+                }
                 return;
             }
 
             bool showWebview = true;
-            var oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
+            VastHelper.VastSettings oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
             string userAgent = _webView.GetUserAgent();
-            var ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, userAgent);
+            PubmaticHelper ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, userAgent);
 
-            if (isProgrammatic)
+            if (hasProgrammaticVideo)
             {
-                showWebview = await HandleProgrammaticCampaign(campaign, videoAsset, ph);
+                showWebview = AssignProgrammaticVideoAssetPath(campaign, programmaticVideoAsset);
+            }
+            else
+            {
+                _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
+                campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
             bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
@@ -264,7 +270,7 @@ namespace Monetizr.SDK.UI
             }
             else
             {
-                MonetizrLogger.PrintError("CampaignID: " + campaign.id + " / VastSettings are empty.");
+                MonetizrLogger.PrintError("CampaignID: " + campaign.id + " / VastSettings not empty: " + !campaign.vastSettings.IsEmpty() + " / showWebView: " + showWebview);
             }
 
             campaign.vastSettings = oldVastSettings;
@@ -332,6 +338,26 @@ namespace Monetizr.SDK.UI
             else
             {
                 MonetizrLogger.PrintError("PBR - No video asset in campaign.");
+            }
+
+            return showWebview;
+        }
+
+        private bool AssignProgrammaticVideoAssetPath (ServerCampaign campaign, Asset videoAsset)
+        {
+            Asset programmaticVideoAsset = null;
+            bool showWebview = false;
+            campaign.vastSettings = new VastHelper.VastSettings();
+
+            if (campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
+            {
+                _webUrl = $"file://{campaign.GetCampaignPath($"{programmaticVideoAsset.fpath}/index.html")}";
+                videoAsset = programmaticVideoAsset;
+                showWebview = true;
+            }
+            else
+            {
+                MonetizrLogger.PrintError("No video asset in campaign.");
             }
 
             return showWebview;

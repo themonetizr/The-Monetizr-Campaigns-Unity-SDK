@@ -132,6 +132,7 @@ namespace Monetizr.SDK.Campaigns
 
         private static bool IsADM (ServerCampaign campaign)
         {
+            if (String.IsNullOrEmpty(campaign.adm)) return false;
             string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, "campaign.use_adm");
             bool useADM = bool.TryParse(extractedValue, out bool result) && result;
             return useADM;
