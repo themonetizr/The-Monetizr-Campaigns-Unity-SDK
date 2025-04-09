@@ -10,11 +10,12 @@ namespace Monetizr.SDK.Campaigns
 {
     public static class CampaignUtils
     {
-        public static void FilterInvalidCampaigns (List<ServerCampaign> result)
+        public static List<ServerCampaign> FilterInvalidCampaigns (List<ServerCampaign> result)
         {
             RemoveCampaignsWithNoAssets(result);
             RemoveCampaignsWithWrongSDKVersion(result);
             CheckAllowedDevices(result);
+            return result;
         }
 
         private static void RemoveCampaignsWithNoAssets (List<ServerCampaign> result)

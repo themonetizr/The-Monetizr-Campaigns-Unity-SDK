@@ -137,10 +137,8 @@ namespace Monetizr.SDK.Networking
         internal override async Task<List<ServerCampaign>> GetList()
         {
             List<ServerCampaign> campaigns = await GetServerCampaignsFromMonetizr();
-
-            await ProcessCampaigns(campaigns);
-
-            CampaignUtils.FilterInvalidCampaigns(campaigns);
+            campaigns = await ProcessCampaigns(campaigns);
+            campaigns = CampaignUtils.FilterInvalidCampaigns(campaigns);
             foreach (ServerCampaign campaign in campaigns)
             {
                 MonetizrLogger.Print($"Campaign passed filters: {campaign.id}");
@@ -161,59 +159,69 @@ namespace Monetizr.SDK.Networking
             return campaigns.campaigns;
         }
 
-        private async Task ProcessCampaigns (List<ServerCampaign> campaigns)
+        private async Task<List<ServerCampaign>> ProcessCampaigns(List<ServerCampaign> campaigns)
         {
-            foreach (ServerCampaign campaign in campaigns)
+            for (int i = 0; i < campaigns.Count; i++)
             {
-                CampaignUtils.SetupCampaignType(campaign);
-                MonetizrLogger.Print(campaign.id + " / Type: " + campaign.campaignType + "\n" + CampaignUtils.PrintAssetsTypeList(campaign));
+                CampaignUtils.SetupCampaignType(campaigns[i]);
+                MonetizrLogger.Print(campaigns[i].id + " / Type: " + campaigns[i].campaignType + "\n" + CampaignUtils.PrintAssetsTypeList(campaigns[i]));
 
-                switch (campaign.campaignType)
+                switch (campaigns[i].campaignType)
                 {
                     case CampaignType.MonetizrBackend:
-                        ProcessBackendCampaign(campaign);
+                        campaigns[i] = ProcessBackendCampaign(campaigns[i]);
                         break;
                     case CampaignType.ADM:
-                        await ProcessADMCampaign(campaign);
+                        campaigns[i] = await ProcessADMCampaign(campaigns[i]);
                         break;
                     case CampaignType.Programmatic:
-                        await ProcessProgrammaticCampaign(campaign);
+                        campaigns[i] = await ProcessProgrammaticCampaign(campaigns[i]);
                         break;
                     default:
-                        MonetizrLogger.PrintError("CampaignID: " + campaign.id + " - No CampaignType was assigned.");
+                        MonetizrLogger.PrintError("CampaignID: " + campaigns[i].id + " - No CampaignType was assigned.");
                         break;
                 }
             }
+
+            campaigns = campaigns.Where(c => c != null).ToList();
+
+            return campaigns;
         }
 
-        private async Task ProcessADMCampaign (ServerCampaign campaign)
+        private async Task<ServerCampaign> ProcessADMCampaign (ServerCampaign campaign)
         {
-            await RecreateCampaignFromADM(campaign);
+            campaign = await RecreateCampaignFromADM(campaign);
+            if (campaign == null) return null;
             campaign.PostCampaignLoad();
             campaign.campaignTimeoutStart = Time.time;
             campaign.hasMadeEarlyBidRequest = true;
+            return campaign;
         }
 
-        private void ProcessBackendCampaign (ServerCampaign campaign)
+        private ServerCampaign ProcessBackendCampaign (ServerCampaign campaign)
         {
             campaign.PostCampaignLoad();
+            return campaign;
         }
 
-        private async Task ProcessProgrammaticCampaign (ServerCampaign campaign)
+        private async Task<ServerCampaign> ProcessProgrammaticCampaign (ServerCampaign campaign)
         {
             campaign.PostCampaignLoad();
-            await MakeEarlyProgrammaticBidRequest(campaign);
+            campaign = await MakeEarlyProgrammaticBidRequest(campaign);
+            if (campaign == null) return null;
             campaign.campaignTimeoutStart = Time.time;
-            await RecreateCampaignFromADM(campaign);
+            campaign = await RecreateCampaignFromADM(campaign);
+            return campaign;
         }
 
-        internal async Task RecreateCampaignFromADM (ServerCampaign campaign)
+        internal async Task<ServerCampaign> RecreateCampaignFromADM (ServerCampaign campaign)
         {
             PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
             campaign = await pubmaticHelper.PrepareServerCampaign(campaign.id, campaign.adm, false);
+            return campaign;
         }
 
-        internal async Task MakeEarlyProgrammaticBidRequest(ServerCampaign campaign)
+        internal async Task<ServerCampaign> MakeEarlyProgrammaticBidRequest(ServerCampaign campaign)
         {
             MonetizrLogger.Print("PBR - Started");
             PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
@@ -232,7 +240,7 @@ namespace Monetizr.SDK.Networking
                     MonetizrLogger.Print("Programmatic with ADM initialization failed.");
                 }
 
-                return;
+                return null;
             }
 
             bool isProgrammaticOK = false;
@@ -253,6 +261,7 @@ namespace Monetizr.SDK.Networking
 
             MonetizrLogger.Print(isProgrammaticOK ? "PBR - COMPLETED" : "PBR - FAILED");
             campaign.hasMadeEarlyBidRequest = isProgrammaticOK;
+            return campaign;
         }
 
         internal override async Task ResetCampaign(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)

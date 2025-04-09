@@ -631,7 +631,12 @@ namespace Monetizr.SDK.VAST
         internal async Task<ServerCampaign> PrepareServerCampaign (string campaignId, string vastContent, bool videoOnly = false)
         {
             ServerCampaign serverCampaign = new ServerCampaign(campaignId, "", GetDefaultSettingsForProgrammatic());
-            if (!await LoadVastContent(vastContent, videoOnly, serverCampaign, true)) return null;
+            if (!await LoadVastContent(vastContent, videoOnly, serverCampaign, true))
+            {
+                MonetizrLogger.PrintError("VAST was not loaded successfully.");
+                return null;
+            }
+
             string vastJsonSettings = serverCampaign.DumpsVastSettings(null);
             serverCampaign.vastAdParameters = vastJsonSettings;
 
