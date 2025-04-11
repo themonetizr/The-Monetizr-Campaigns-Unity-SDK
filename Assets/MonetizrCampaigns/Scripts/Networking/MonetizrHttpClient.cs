@@ -188,19 +188,21 @@ namespace Monetizr.SDK.Networking
             return campaigns;
         }
 
+        private ServerCampaign ProcessBackendCampaign(ServerCampaign campaign)
+        {
+            campaign.PostCampaignLoad();
+            return campaign;
+        }
+
         private async Task<ServerCampaign> ProcessADMCampaign (ServerCampaign campaign)
         {
             campaign = await RecreateCampaignFromADM(campaign);
             if (campaign == null) return null;
+
             campaign.PostCampaignLoad();
             campaign.campaignTimeoutStart = Time.time;
             campaign.hasMadeEarlyBidRequest = true;
-            return campaign;
-        }
 
-        private ServerCampaign ProcessBackendCampaign (ServerCampaign campaign)
-        {
-            campaign.PostCampaignLoad();
             return campaign;
         }
 
@@ -208,9 +210,11 @@ namespace Monetizr.SDK.Networking
         {
             campaign.PostCampaignLoad();
             campaign = await MakeEarlyProgrammaticBidRequest(campaign);
-            if (campaign == null) return null;
+            if (campaign == null || !campaign.hasMadeEarlyBidRequest) return null;
+
             campaign.campaignTimeoutStart = Time.time;
             campaign = await RecreateCampaignFromADM(campaign);
+
             return campaign;
         }
 
@@ -223,30 +227,12 @@ namespace Monetizr.SDK.Networking
 
         internal async Task<ServerCampaign> MakeEarlyProgrammaticBidRequest(ServerCampaign campaign)
         {
-            MonetizrLogger.Print("PBR - Started");
             PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
-
-            if (!String.IsNullOrEmpty(campaign.adm))
-            {
-                bool initializeResult = await pubmaticHelper.InitializeServerCampaignForProgrammatic(campaign, campaign.adm);
-                campaign.hasMadeEarlyBidRequest = initializeResult;
-
-                if (initializeResult)
-                {
-                    MonetizrLogger.Print("Programmatic with ADM initialization successful.");
-                }
-                else
-                {
-                    MonetizrLogger.Print("Programmatic with ADM initialization failed.");
-                }
-
-                return null;
-            }
-
             bool isProgrammaticOK = false;
+
             try
             {
-                isProgrammaticOK = await pubmaticHelper.TEST_GetOpenRtbResponseForCampaign(campaign);
+                isProgrammaticOK = await pubmaticHelper.GetOpenRTBResponseForCampaign(campaign);
             }
             catch (DownloadUrlAsStringException e)
             {

@@ -308,41 +308,6 @@ namespace Monetizr.SDK.UI
             }
         }
 
-        private async Task<bool> HandleProgrammaticCampaign(ServerCampaign campaign, Asset videoAsset, PubmaticHelper ph)
-        {
-            bool showWebview = false;
-            bool isProgrammaticOK = false;
-            campaign.vastSettings = new VastHelper.VastSettings();
-
-            if (campaign.hasMadeEarlyBidRequest)
-            {
-                isProgrammaticOK = true;
-                MonetizrLogger.Print("Early Bid Request was succesfully made.");
-                bool hasInitilizedProgrammaticCampaign = await ph.TEST_InitializeProgrammaticCampaign(campaign);
-                if (!hasInitilizedProgrammaticCampaign) return false;
-                MonetizrLogger.Print("Programmatic Campaign was succesfully initialized.");
-            }
-            else
-            {
-                isProgrammaticOK = false;
-            }
-
-            Asset programmaticVideoAsset = null;
-
-            if (isProgrammaticOK && campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
-            {
-                _webUrl = $"file://{campaign.GetCampaignPath($"{programmaticVideoAsset.fpath}/index.html")}";
-                videoAsset = programmaticVideoAsset;
-                showWebview = true;
-            }
-            else
-            {
-                MonetizrLogger.PrintError("PBR - No video asset in campaign.");
-            }
-
-            return showWebview;
-        }
-
         private bool AssignProgrammaticVideoAssetPath (ServerCampaign campaign, Asset videoAsset)
         {
             Asset programmaticVideoAsset = null;

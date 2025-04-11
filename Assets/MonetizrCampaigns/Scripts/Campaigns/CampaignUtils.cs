@@ -111,26 +111,6 @@ namespace Monetizr.SDK.Campaigns
             campaign.campaignType = CampaignType.MonetizrBackend;
         }
 
-        public static void SetupCampaignsType (List<ServerCampaign> serverCampaigns)
-        {
-            foreach (ServerCampaign campaign in serverCampaigns)
-            {
-                if (IsADM(campaign))
-                {
-                    campaign.campaignType = CampaignType.ADM;
-                    continue;
-                }
-
-                if (IsProgrammatic(campaign))
-                {
-                    campaign.campaignType = CampaignType.Programmatic;
-                    continue;
-                }
-
-                campaign.campaignType = CampaignType.MonetizrBackend;
-            }
-        }
-
         private static bool IsADM (ServerCampaign campaign)
         {
             if (String.IsNullOrEmpty(campaign.adm)) return false;
@@ -141,6 +121,7 @@ namespace Monetizr.SDK.Campaigns
 
         private static bool IsProgrammatic (ServerCampaign campaign)
         {
+            if (!String.IsNullOrEmpty(campaign.adm)) return false;
             string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, "programmatic");
             bool isProgrammatic = bool.TryParse(extractedValue, out bool result) && result;
             return isProgrammatic;

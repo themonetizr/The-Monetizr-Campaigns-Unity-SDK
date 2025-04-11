@@ -661,61 +661,9 @@ namespace Monetizr.SDK.VAST
             return serverCampaign;
         }
 
-        internal async Task<bool> InitializeServerCampaignForProgrammatic(ServerCampaign campaign, string vastContent)
-        {
-            campaign.RemoveAssetsByTypeFromList("programmatic_video");
-            await LoadVastAndFindVideoAsset(vastContent, campaign);
-            if (!campaign.TryGetAssetInList("programmatic_video", out var video)) return false;
-            await campaign.PreloadVideoPlayerForProgrammatic(video);
-            return true;
-        }
-
-        private async Task LoadVastAndFindVideoAsset(string vastContent, ServerCampaign serverCampaign)
-        {
-            VAST vastData = CreateVastFromXml(vastContent);
-
-            if (vastData == null)
-            {
-                MonetizrLogger.PrintError("Vast isn't loaded.");
-                return;
-            }
-
-            if (vastData.Items == null || vastData.Items.Length == 0)
-            {
-                MonetizrLogger.PrintError("Vast is null or empty.");
-                return;
-            }
-
-            if (!(vastData.Items[0] is VASTAD vad))
-            {
-                MonetizrLogger.PrintError("Vast is not readable.");
-                return;
-            }
-
-            int prefBitRate = httpClient.GlobalSettings.GetIntParam("openrtb.pref_bitrate", 10000);
-            int prefWidth = httpClient.GlobalSettings.GetIntParam("openrtb.pref_width", 1920);
-            int prefHeight = httpClient.GlobalSettings.GetIntParam("openrtb.pref_height", 1080);
-            var adItem = new VastAdItem(vad.Item, serverCampaign, new VastAdItem.PreferableVideoSize(prefBitRate, prefWidth, prefHeight), true);
-
-            if (adItem.InUnknownAdType())
-            {
-                MonetizrLogger.PrintError("Vast is Unknown type.");
-                return;
-            }
-
-            adItem.AssignCreativesIntoAssets();
-            if (string.IsNullOrEmpty(adItem.WrapperAdTagUri)) return;
-            MonetizrLogger.Print($"Loading wrapper with the url {adItem.WrapperAdTagUri}");
-            var result = await MonetizrHttpClient.DownloadUrlAsString(new HttpRequestMessage(HttpMethod.Get, adItem.WrapperAdTagUri));
-            if (!result.isSuccess) return;
-            await LoadVastAndFindVideoAsset(result.content, serverCampaign);
-
-            return;
-        }
-
         private int iteration = 0;
 
-        private async Task<bool> LoadVastContent(string vastContent, bool videoOnly, ServerCampaign serverCampaign, bool isFirstCall)
+        private async Task<bool> LoadVastContent (string vastContent, bool videoOnly, ServerCampaign serverCampaign, bool isFirstCall)
         {
             if (isFirstCall)
             {
@@ -785,13 +733,6 @@ namespace Monetizr.SDK.VAST
             }
 
             return true;
-        }
-
-        private async Task CheckVideoPlayer(ServerCampaign serverCampaign)
-        {
-            MonetizrLogger.Print("Checking VideoPlayer");
-            if (!serverCampaign.TryGetAssetInList(new List<string>() { "html", "video" }, out var videoAsset)) return;
-            await DownloadAndPrepareHtmlVideoPlayer(serverCampaign, videoAsset);
         }
 
         private static async Task DownloadAndPrepareHtmlVideoPlayer(ServerCampaign serverCampaign, Asset videoAsset)
