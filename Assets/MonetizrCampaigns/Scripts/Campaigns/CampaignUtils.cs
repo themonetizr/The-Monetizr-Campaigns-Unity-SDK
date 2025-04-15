@@ -1,7 +1,6 @@
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
-using Monetizr.SDK.Missions;
 using Monetizr.SDK.Utils;
 using System;
 using System.Collections.Generic;
@@ -11,95 +10,6 @@ namespace Monetizr.SDK.Campaigns
 {
     public static class CampaignUtils
     {
-        public static bool IsCampaignValid (ServerCampaign campaign)
-        {
-            if (DoesCampaignHaveAssets(campaign))
-            {
-                MonetizrLogger.PrintError("Removing CampaignID: " + campaign.id + " for it has no assets.");
-                return false;
-            }
-
-            if (IsCampaignCompatibleWithSDKVersion(campaign))
-            {
-                MonetizrLogger.PrintError("Removing CampaignID: " + campaign.id + " for it does not have correct SDK version.");
-                return false;
-            }
-
-            if (IsCampaignCompatibleWithDevice(campaign))
-            {
-                MonetizrLogger.PrintError("Removing CampaignID: " + campaign.id + " for it is not compatible with device.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool DoesCampaignHaveAssets (ServerCampaign campaign)
-        {
-            bool hasAssets = campaign.assets.Count != 0;
-            return hasAssets;
-        }
-
-        private static bool IsCampaignCompatibleWithSDKVersion (ServerCampaign campaign)
-        {
-            string minSdkVersion = campaign.serverSettings.GetParam("min_sdk_version");
-
-            if (minSdkVersion != null)
-            {
-                bool sdkVersionCheck = MonetizrUtils.CompareVersions(MonetizrSettings.SDKVersion, minSdkVersion) < 0;
-                return !sdkVersionCheck;
-            }
-
-            return false;
-        }
-
-        private static bool IsCampaignCompatibleWithDevice (ServerCampaign campaign)
-        {
-#if !UNITY_EDITOR
-            bool hasAdId = !string.IsNullOrEmpty(MonetizrMobileAnalytics.advertisingID);
-
-            if (hasAdId)
-            {
-                string allowed_device_id = campaign.serverSettings.GetParam("allowed_ad_id", "");
-
-                if (allowed_device_id.Length == 0)
-                {
-                    MonetizrLogger.Print($"Campaign {campaign.id} has no allowed list");
-                    return true;
-                }
-                else
-                {
-                    MonetizrLogger.Print($"Campaign {campaign.id} has allowed list: {allowed_device_id}");
-
-                    bool isKeyFound = false;
-
-                    Array.ForEach(allowed_device_id.Split(';'), id =>
-                    {
-                        if (id == MonetizrMobileAnalytics.advertisingID) isKeyFound = true;
-                    });
-
-                    if (!isKeyFound)
-                    {
-                        MonetizrLogger.Print($"Device {MonetizrMobileAnalytics.advertisingID} isn't allowed for campaign {campaign.id}");
-                        return false;
-                    }
-                    else
-                    {
-                        MonetizrLogger.Print($"Device {MonetizrMobileAnalytics.advertisingID} is OK for campaign {campaign.id}");
-                        return true;
-                    }
-                }
-            }
-            else
-            {
-                MonetizrLogger.Print($"No ad id defined to filter campaigns. Please allow ad tracking!");
-                return false;
-            }
-#endif
-
-            return true;
-        }
-
         public static void FilterInvalidCampaigns (List<ServerCampaign> result)
         {
             RemoveCampaignsWithNoAssets(result);
@@ -244,38 +154,6 @@ namespace Monetizr.SDK.Campaigns
             }
 
             return result.ToString();
-        }
-
-        public static SettingsDictionary<string, string> GetDefaultSettingsDictionaryForProgrammatic ()
-        {
-            Dictionary<string, string> settingsDictionary = new Dictionary<string, string>()
-            {
-                { "design_version", "2" },
-                { "amount_of_teasers", "100" },
-                { "teaser_design_version", "3" },
-                { "amount_of_notifications", "100" },
-                { "RewardCenter.show_for_one_mission", "true" },
-
-                { "bg_color", "#124674" },
-                { "bg_color2", "#124674" },
-                { "link_color", "#AAAAFF" },
-                { "text_color", "#FFFFFF" },
-                { "bg_border_color", "#FFFFFF" },
-                { "RewardCenter.reward_text_color", "#2196F3" },
-
-                { "CongratsNotification.button_text", "Awesome!" },
-                { "CongratsNotification.content_text", "You have earned <b>%ingame_reward%</b> from Monetizr" },
-                { "CongratsNotification.header_text", "Get your awesome reward!" },
-
-                { "StartNotification.SurveyReward.header_text", "<b>Survey by Monetizr</b>" },
-                { "StartNotification.button_text", "Learn more!" },
-                { "StartNotification.content_text", "Join Monetizr<br/>to get game rewards" },
-                { "StartNotification.header_text", "<b>Rewards by Monetizr</b>" },
-
-                { "RewardCenter.VideoReward.content_text", "Watch video and get reward %ingame_reward%" }
-            };
-
-            return new SettingsDictionary<string, string>(settingsDictionary);
         }
     }
 }

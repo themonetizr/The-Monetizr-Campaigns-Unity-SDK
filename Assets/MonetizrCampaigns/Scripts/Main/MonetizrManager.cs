@@ -76,7 +76,6 @@ namespace Monetizr.SDK.Core
         private bool _isMissionsIsOutdated = true;
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
         private Action _gameOnInitSuccess;
-        private SettingsDictionary<string, string> globalSettings = new SettingsDictionary<string, string>();
 
         #endregion
 
@@ -532,24 +531,57 @@ namespace Monetizr.SDK.Core
             return Instance;
         }
 
-        private static MonetizrManager CreateMonetizrManagerInstance (Action<bool> onUIVisible, UserDefinedEvent userEvent)
+        private static bool IsInitializationSetupComplete()
         {
-            GameObject monetizrObject = new GameObject("MonetizrManager");
-            MonetizrManager monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
-            MonetizrErrorLogger monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
-            GCPManager datadogManager = monetizrObject.AddComponent<GCPManager>();
-            NetworkManager networkManager = monetizrObject.AddComponent<NetworkManager>();
-            CampaignManager campaignManager = monetizrObject.AddComponent<CampaignManager>();
+            MonetizrSettingsMenu.LoadSettings();
 
-            networkManager.Setup(MonetizrSettings.apiKey);
+            if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
+            {
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M601);
+                return false;
+            }
 
+            if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
+            {
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M602);
+                return false;
+            }
+
+            if (gameRewards == null || gameRewards.Count <= 0)
+            {
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M603);
+                return false;
+            }
+
+            foreach (KeyValuePair<RewardType, GameReward> gameReward in gameRewards)
+            {
+                if (!gameReward.Value.IsSetupValid())
+                {
+                    MonetizrLogger.PrintLocalMessage(MessageEnum.M606);
+                    return false;
+                }
+            }
+
+            if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
+            {
+                MonetizrLogger.PrintLocalMessage(MessageEnum.M604);
+                return false;
+            }
+
+            return true;
+        }
+
+        private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
+        {
+            var monetizrObject = new GameObject("MonetizrManager");
+            var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
+            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
+            var datadogManager = monetizrObject.AddComponent<GCPManager>();
             DontDestroyOnLoad(monetizrObject);
-
             Instance = monetizrManager;
             Instance.sponsoredMissions = null;
             Instance.userDefinedEvent = userEvent;
             Instance.onUIVisible = onUIVisible;
-
             return monetizrManager;
         }
 
@@ -754,10 +786,8 @@ namespace Monetizr.SDK.Core
 
         #region Public Methods
 
-        public async void RequestCampaigns (Action<bool> onRequestComplete)
+        public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
-            globalSettings = await NetworkManager.Instance.GetGlobalSettings();
-
             await ConnectionsClient.GetGlobalSettings();
             CheckCGPLogging();
             campaigns = new List<ServerCampaign>();
@@ -780,7 +810,7 @@ namespace Monetizr.SDK.Core
                 onRequestComplete?.Invoke(false);
             }
 
-            bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
+            var logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
 
             if (campaigns.Count > 0)
             {
@@ -800,7 +830,7 @@ namespace Monetizr.SDK.Core
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
 
-            foreach (ServerCampaign campaign in campaigns)
+            foreach (var campaign in campaigns)
             {
                 await campaign.LoadCampaignAssets();
 
@@ -1120,80 +1150,6 @@ namespace Monetizr.SDK.Core
 
         #endregion
 
-
-        public static void NEW_Initialize (Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
-        {
-            if (soundSwitch == null)
-            {
-                soundSwitch = (bool isOn) =>
-                {
-                    MonetizrLogger.Print("Audio listener pause state: " + !isOn);
-                    AudioListener.pause = !isOn;
-                };
-            }
-
-            if (!IsInitializationSetupComplete())
-            {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M600);
-                return;
-            }
-
-            InitializeMonetizrInstance(onUIVisible, userEvent);
-            MonetizrInstance.Instance.StartSDKProcess();
-        }
-
-        private static bool IsInitializationSetupComplete()
-        {
-            MonetizrSettingsMenu.LoadSettings();
-
-            if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
-            {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M601);
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
-            {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M602);
-                return false;
-            }
-
-            if (gameRewards == null || gameRewards.Count <= 0)
-            {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M603);
-                return false;
-            }
-
-            foreach (KeyValuePair<RewardType, GameReward> gameReward in gameRewards)
-            {
-                if (!gameReward.Value.IsSetupValid())
-                {
-                    MonetizrLogger.PrintLocalMessage(MessageEnum.M606);
-                    return false;
-                }
-            }
-
-            if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
-            {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M604);
-                return false;
-            }
-
-            return true;
-        }
-
-        private static void InitializeMonetizrInstance (Action<bool> onUIVisible, UserDefinedEvent userEvent)
-        {
-            if (MonetizrInstance.Instance != null)
-            {
-                MonetizrLogger.PrintError("MonetizrInstance was already created.");
-                return;
-            }
-
-            GameObject monetizrObject = new GameObject("MonetizrInstance");
-            MonetizrInstance monetizrInstance = monetizrObject.AddComponent<MonetizrInstance>();
-            monetizrInstance.Setup(onUIVisible, userEvent);
-        }
     }
 
 }

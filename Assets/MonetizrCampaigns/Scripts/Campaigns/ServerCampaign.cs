@@ -4,7 +4,6 @@ using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
-using Monetizr.SDK.Video;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -382,7 +381,6 @@ namespace Monetizr.SDK.Campaigns
                         asset.mainAssetName = $"index.html";
                         await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
                         await PreloadVideoPlayer(asset);
-                        //await VideoUtils.GetVideoPlayer(this, asset, false);
                         break;
 
                     case "text":
@@ -423,7 +421,7 @@ namespace Monetizr.SDK.Campaigns
 
         internal async Task PreloadVideoPlayerForProgrammatic(Asset asset)
         {
-            string videoPlayerURL = VideoPlayerUtils.GetVideoPlayerURL(this);
+            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
             string zipFolder = GetCampaignPath($"{asset.fpath}");
             string indexPath = $"{zipFolder}/index.html";
             MonetizrLogger.Print($"{zipFolder}");
@@ -454,7 +452,7 @@ namespace Monetizr.SDK.Campaigns
 
         internal async Task PreloadVideoPlayer(Asset asset)
         {
-            string videoPlayerURL = VideoPlayerUtils.GetVideoPlayerURL(this);
+            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
             string campPath = Application.persistentDataPath + "/" + id;
             string zipFolder = campPath + "/" + asset.fpath;
             string indexPath = $"{zipFolder}/index.html";
@@ -534,15 +532,6 @@ namespace Monetizr.SDK.Campaigns
             Directory.Delete(target_dir, false);
         }
         
-        internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
-        {
-            string res = JsonUtility.ToJson(vastSettings); 
-            var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
-            res = res.Insert(res.Length - 1, campaignSettingsJson);      
-            MonetizrLogger.Print($"VAST Settings: {res}");
-            return res;
-        }
-
         internal string DumpCampaignSettings(TagsReplacer tagsReplacer)
         {
             string result = string.Join(",", serverSettings.Select(kvp =>
@@ -552,6 +541,15 @@ namespace Monetizr.SDK.Campaigns
             }));
 
             return $"{{{result}}}";
+        }
+        
+        internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
+        {
+            string res = JsonUtility.ToJson(vastSettings); 
+            var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
+            res = res.Insert(res.Length - 1, campaignSettingsJson);      
+            MonetizrLogger.Print($"VAST Settings: {res}");
+            return res;
         }
 
         internal bool IsCampaignActivate()
@@ -583,19 +581,6 @@ namespace Monetizr.SDK.Campaigns
             var cd = MonetizrUtils.ParseContentString(content);
             serverSettings = new SettingsDictionary<string, string>(cd);
             MonetizrLogger.Print("CampaignID: " + id + "\n" + "Final PostCampaignLoad Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
-        }
-
-        public void ParseContentToSettingsDictionary ()
-        {
-            if (string.IsNullOrEmpty(content))
-            {
-                MonetizrLogger.PrintError("CampaignID: " + id + " content is empty. SettingsDictionary is empty.");
-                return;
-            }
-
-            Dictionary<string, string> settingsDictionary = MonetizrUtils.ParseContentString(content);
-            serverSettings = new SettingsDictionary<string, string>(settingsDictionary);
-            MonetizrLogger.Print("CampaignID: " + id + " parsed SettingsDictionary: \n" + MonetizrUtils.PrintDictionaryValuesInOneLine(settingsDictionary));
         }
 
         private bool HasTeaserAsset ()
