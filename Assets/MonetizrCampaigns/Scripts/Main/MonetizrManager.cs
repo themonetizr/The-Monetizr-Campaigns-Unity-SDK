@@ -78,23 +78,23 @@ namespace Monetizr.SDK.Core
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
         private Action _gameOnInitSuccess;
 
-        internal bool coppa = false;
-        internal bool gdpr = false;
-        internal bool us_privacy = false;
-        internal bool uoo = true;
-        internal string consent = "";
+        internal static bool s_coppa = false;
+        internal static bool s_gdpr = false;
+        internal static bool s_us_privacy = false;
+        internal static bool s_uoo = true;
+        internal static string s_consent = "";
 
         #endregion
 
         #region Public Static Methods
 
-        public void SetUserConsentParameters (bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
+        public static void SetUserConsentParameters (bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
         {
-            this.coppa = coppa;
-            this.gdpr = gdpr;
-            this.us_privacy = us_privacy;
-            this.uoo = uoo;
-            this.consent = consent;
+            s_coppa = coppa;
+            s_gdpr = gdpr;
+            s_us_privacy = us_privacy;
+            s_uoo = uoo;
+            s_consent = consent;
         }
 
         public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)

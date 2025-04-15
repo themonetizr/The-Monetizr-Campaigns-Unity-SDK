@@ -65,11 +65,11 @@ namespace Monetizr.SDK.Networking
                     {"device-name",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceName)},
                     {"internet-connection",NetworkingUtils.GetInternetConnectionType()},
                     {"local-time-stamp",((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString()},
-                    {"coppa", MonetizrManager.Instance.coppa.ToString()},
-                    {"gdpr", MonetizrManager.Instance.gdpr.ToString()},
-                    {"us_privacy", MonetizrManager.Instance.us_privacy.ToString()},
-                    {"uoo", MonetizrManager.Instance.uoo.ToString()},
-                    {"consent", MonetizrManager.Instance.consent}
+                    {"coppa", MonetizrManager.s_coppa.ToString()},
+                    {"gdpr", MonetizrManager.s_gdpr.ToString()},
+                    {"us_privacy", MonetizrManager.s_us_privacy.ToString()},
+                    {"uoo", MonetizrManager.s_uoo.ToString()},
+                    {"consent", MonetizrManager.s_consent}
                 }
             };
 
