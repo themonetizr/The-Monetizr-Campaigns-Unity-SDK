@@ -64,7 +64,12 @@ namespace Monetizr.SDK.Networking
                     {"device-model",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceModel)},
                     {"device-name",MonetizrUtils.EncodeStringIntoAscii(SystemInfo.deviceName)},
                     {"internet-connection",NetworkingUtils.GetInternetConnectionType()},
-                    {"local-time-stamp",((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString()}
+                    {"local-time-stamp",((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds().ToString()},
+                    {"coppa", MonetizrManager.s_coppa.ToString()},
+                    {"gdpr", MonetizrManager.s_gdpr.ToString()},
+                    {"us_privacy", MonetizrManager.s_us_privacy.ToString()},
+                    {"uoo", MonetizrManager.s_uoo.ToString()},
+                    {"consent", MonetizrManager.s_consent}
                 }
             };
 

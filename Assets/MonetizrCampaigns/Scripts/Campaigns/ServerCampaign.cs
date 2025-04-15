@@ -68,6 +68,8 @@ namespace Monetizr.SDK.Campaigns
         public string verifications_vast_node;
 
         public bool hasMadeEarlyBidRequest = false;
+        public CampaignType campaignType = CampaignType.None;
+        public float campaignTimeoutStart;
 
         public ServerCampaign () { }
 
@@ -76,6 +78,12 @@ namespace Monetizr.SDK.Campaigns
             this.id = id;
             dar_tag = darTag;
             serverSettings = defaultServerSettings;
+        }
+
+        public bool HasTimeoutPassed ()
+        {
+            if (Time.time >= campaignTimeoutStart + 120f) return true;
+            return false;
         }
 
         internal bool TryGetAssetInList(List<string> types, out Asset asset)
@@ -411,6 +419,11 @@ namespace Monetizr.SDK.Campaigns
                         break;
                 }
             }
+
+            if (!HasTeaserAsset())
+            {
+                await SetDefaultTeaser();
+            }
         }
 
         internal async Task PreloadVideoPlayerForProgrammatic(Asset asset)
@@ -526,6 +539,15 @@ namespace Monetizr.SDK.Campaigns
             Directory.Delete(target_dir, false);
         }
         
+        internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
+        {
+            string res = JsonUtility.ToJson(vastSettings); 
+            var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
+            res = res.Insert(res.Length - 1, campaignSettingsJson);      
+            MonetizrLogger.Print($"VAST Settings: {res}");
+            return res;
+        }
+
         internal string DumpCampaignSettings(TagsReplacer tagsReplacer)
         {
             string result = string.Join(",", serverSettings.Select(kvp =>
@@ -535,15 +557,6 @@ namespace Monetizr.SDK.Campaigns
             }));
 
             return $"{{{result}}}";
-        }
-        
-        internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
-        {
-            string res = JsonUtility.ToJson(vastSettings); 
-            var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
-            res = res.Insert(res.Length - 1, campaignSettingsJson);      
-            MonetizrLogger.Print($"VAST Settings: {res}");
-            return res;
         }
 
         internal bool IsCampaignActivate()
@@ -570,11 +583,35 @@ namespace Monetizr.SDK.Campaigns
 
         internal void PostCampaignLoad()
         {
-            MonetizrLogger.Print("Initial PostCampaign Data: \n" + "Content: " + content + "\n" + "ADM: " + adm);
-            if (string.IsNullOrEmpty(content)) return;
-            var cd = MonetizrUtils.ParseContentString(content);
+            if (string.IsNullOrEmpty(content))
+            {
+                MonetizrLogger.PrintError("CampaignID: " + id + " content is empty.");
+                return;
+            }
+
+            Dictionary<string, string> cd = MonetizrUtils.ParseContentString(content);
             serverSettings = new SettingsDictionary<string, string>(cd);
-            MonetizrLogger.Print("Final PostCampaign Data: \n" + "Campaign ID: " + id + "\n" + "Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
+            MonetizrLogger.Print("CampaignID: " + id + "\n" + "Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
+        }
+
+        private bool HasTeaserAsset ()
+        {
+            if (!HasAsset(AssetsType.TinyTeaserSprite) && !HasAsset(AssetsType.TeaserGifPathString) && !HasAsset(AssetsType.BrandRewardLogoSprite))
+            {
+                MonetizrLogger.Print("CampaignID: " + id + " has no teaser texture. Loading default.");
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> SetDefaultTeaser ()
+        {
+            Asset defaultTeaser = new Asset();
+            defaultTeaser.type = "tiny_teaser_gif";
+            defaultTeaser.url = "https://cdn.monetizr.com/px_track/d957e956-319e-46f6-971d-b6c10d16e449.gif";
+            await PreloadAssetToCache(defaultTeaser, AssetsType.TeaserGifPathString, true);
+            return true;
         }
         
     }

@@ -1,4 +1,5 @@
-﻿using Monetizr.SDK.Analytics;
+﻿using mixpanel;
+using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
@@ -77,9 +78,24 @@ namespace Monetizr.SDK.Core
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
         private Action _gameOnInitSuccess;
 
+        internal static bool s_coppa = false;
+        internal static bool s_gdpr = false;
+        internal static bool s_us_privacy = false;
+        internal static bool s_uoo = true;
+        internal static string s_consent = "";
+
         #endregion
 
         #region Public Static Methods
+
+        public static void SetUserConsentParameters (bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
+        {
+            s_coppa = coppa;
+            s_gdpr = gdpr;
+            s_us_privacy = us_privacy;
+            s_uoo = uoo;
+            s_consent = consent;
+        }
 
         public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
         {
@@ -446,11 +462,9 @@ namespace Monetizr.SDK.Core
                 return;
             }
 
-            if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) &&
-                !campaign.HasAsset(AssetsType.TeaserGifPathString) &&
-                !campaign.HasAsset(AssetsType.BrandRewardLogoSprite))
+            if (!campaign.HasAsset(AssetsType.TinyTeaserSprite) && !campaign.HasAsset(AssetsType.TeaserGifPathString) && !campaign.HasAsset(AssetsType.BrandRewardLogoSprite))
             {
-                MonetizrLogger.Print("No texture for tiny teaser!");
+                MonetizrLogger.Print("No texture for teaser. ");
                 return;
             }
 
@@ -528,20 +542,6 @@ namespace Monetizr.SDK.Core
             return Instance;
         }
 
-        private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
-        {
-            var monetizrObject = new GameObject("MonetizrManager");
-            var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
-            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
-            var datadogManager = monetizrObject.AddComponent<GCPManager>();
-            DontDestroyOnLoad(monetizrObject);
-            Instance = monetizrManager;
-            Instance.sponsoredMissions = null;
-            Instance.userDefinedEvent = userEvent;
-            Instance.onUIVisible = onUIVisible;
-            return monetizrManager;
-        }
-
         private static bool IsInitializationSetupComplete()
         {
             MonetizrSettingsMenu.LoadSettings();
@@ -564,6 +564,15 @@ namespace Monetizr.SDK.Core
                 return false;
             }
 
+            foreach (KeyValuePair<RewardType, GameReward> gameReward in gameRewards)
+            {
+                if (!gameReward.Value.IsSetupValid())
+                {
+                    MonetizrLogger.PrintLocalMessage(MessageEnum.M606);
+                    return false;
+                }
+            }
+
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
                 MonetizrLogger.PrintLocalMessage(MessageEnum.M604);
@@ -571,6 +580,20 @@ namespace Monetizr.SDK.Core
             }
 
             return true;
+        }
+
+        private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
+        {
+            var monetizrObject = new GameObject("MonetizrManager");
+            var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
+            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
+            var datadogManager = monetizrObject.AddComponent<GCPManager>();
+            DontDestroyOnLoad(monetizrObject);
+            Instance = monetizrManager;
+            Instance.sponsoredMissions = null;
+            Instance.userDefinedEvent = userEvent;
+            Instance.onUIVisible = onUIVisible;
+            return monetizrManager;
         }
 
         internal static void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
@@ -777,9 +800,10 @@ namespace Monetizr.SDK.Core
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
             await ConnectionsClient.GetGlobalSettings();
+            CheckMixpanelProxy();
             CheckCGPLogging();
-            campaigns = new List<ServerCampaign>();
 
+            campaigns = new List<ServerCampaign>();
             try
             {
                 campaigns = await ConnectionsClient.GetList();
@@ -818,7 +842,7 @@ namespace Monetizr.SDK.Core
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
 
-            foreach (var campaign in campaigns)
+            foreach (ServerCampaign campaign in campaigns)
             {
                 await campaign.LoadCampaignAssets();
 
@@ -845,14 +869,18 @@ namespace Monetizr.SDK.Core
             MonetizrLogger.Print($"RequestCampaigns completed with {campaigns.Count} campaigns.");
             if (campaigns.Count > 0) ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
 
-            foreach (var i in gameRewards)
-            {
-                if (!i.Value.IsSetupValid()) return;
-            }
-
             MonetizrLogger.Print("MonetizrManager initialization okay!");
             _isActive = true;
             onRequestComplete?.Invoke(true);
+        }
+
+        private void CheckMixpanelProxy ()
+        {
+            string mixpanelProxy = "";
+            if (ConnectionsClient.GlobalSettings.TryGetValue("mixpanel_proxy_endpoint", out mixpanelProxy))
+            {
+                if (!String.IsNullOrEmpty(mixpanelProxy)) MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
+            }
         }
 
         private void CheckCGPLogging()

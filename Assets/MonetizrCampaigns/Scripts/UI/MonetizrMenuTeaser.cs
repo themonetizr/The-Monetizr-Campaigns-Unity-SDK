@@ -79,42 +79,29 @@ namespace Monetizr.SDK.UI
             }
 
             var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(m.campaign, true);
-
             var numText = currentMission.campaignServerSettings.GetParam("teaser.num_text", "%total_missions%");
-
             numText = numText.Replace("%total_missions%", $"{missions.Count}");
             UpdateMissionAmountText();
 
             var hasGif = m.campaign.HasAsset(AssetsType.TeaserGifPathString);
-
             var showButton = currentMission.campaignServerSettings.GetBoolParam("teaser.show_button", true);
-
             buttonObject.SetActive(showButton);
-
             var showNumber = currentMission.campaignServerSettings.GetBoolParam("teaser.show_number", true);
-
             numberObject.SetActive(showNumber);
 
             if (hasGif)
             {
                 string url = m.campaign.GetAsset<string>(AssetsType.TeaserGifPathString);
-
                 gifImage.gameObject.SetActive(true);
                 gifImage.SetGifFromUrl(url);
-
-
                 animatableBannerRoot?.SetActive(false);
             }
             else
             {
                 gifImage.gameObject.SetActive(false);
-
                 animatableBannerRoot.SetActive(true);
-
                 bannerRewardImage.sprite = MissionsManager.GetMissionRewardImage(m);
-
                 rectangeBannerImage.sprite = m.campaign.GetAsset<Sprite>(AssetsType.BrandRewardLogoSprite);
-
             }
 
             earnText.gameObject.SetActive(true);
@@ -139,7 +126,8 @@ namespace Monetizr.SDK.UI
                 }
             }
 
-            missionsNum.text = (totalMissionCount - claimed).ToString();
+            int currentMissionCount = Mathf.Max(1, (totalMissionCount - claimed));
+            missionsNum.text = currentMissionCount.ToString();
         }
 
         internal void UpdateTransform(Mission m)

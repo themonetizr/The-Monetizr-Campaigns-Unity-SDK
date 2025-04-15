@@ -1,14 +1,16 @@
+using Monetizr.SDK.Debug;
 using UnityEngine;
 
 namespace Monetizr.SDK.UI {
     public class PinToSafeArea : MonoBehaviour
     {
+        private RectTransform rectTransform;
         private Rect lastSafeArea;
-        private RectTransform parentRectTransform;
 
-        private void Start()
+        void Start()
         {
-            parentRectTransform = this.GetComponentInParent<RectTransform>();
+            rectTransform = GetComponent<RectTransform>();
+            ApplySafeArea();
         }
 
         private void Update()
@@ -21,20 +23,13 @@ namespace Monetizr.SDK.UI {
 
         private void ApplySafeArea()
         {
-            Rect safeAreaRect = Screen.safeArea;
-
-            float scaleRatio = parentRectTransform.rect.width / Screen.width;
-
-            var left = safeAreaRect.xMin * scaleRatio;
-            var right = -(Screen.width - safeAreaRect.xMax) * scaleRatio;
-            var top = -safeAreaRect.yMin * scaleRatio;
-            var bottom = (Screen.height - safeAreaRect.yMax) * scaleRatio;
-
-            RectTransform rectTransform = GetComponent<RectTransform>();
-            rectTransform.offsetMin = new Vector2(left, bottom);
-            rectTransform.offsetMax = new Vector2(right, top);
-
             lastSafeArea = Screen.safeArea;
+
+            Vector2 anchorMin = lastSafeArea.position / new Vector2(Screen.width, Screen.height);
+            Vector2 anchorMax = (lastSafeArea.position + lastSafeArea.size) / new Vector2(Screen.width, Screen.height);
+
+            rectTransform.anchorMin = anchorMin;
+            rectTransform.anchorMax = anchorMax;
         }
 
     }

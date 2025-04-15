@@ -173,22 +173,17 @@ namespace Monetizr.SDK.Analytics
 
             if (!string.IsNullOrEmpty(mixPanelApiKey))
             {
-                if (mixPanelApiKey.IndexOf("\n", StringComparison.Ordinal) >= 0)
-                    mixPanelApiKey = null;
-
+                if (mixPanelApiKey.IndexOf("\n", StringComparison.Ordinal) >= 0) mixPanelApiKey = null;
                 key = mixPanelApiKey;
             }
 
-            if (isMixpanelInitialized)
-                return;
-
+            if (isMixpanelInitialized) return;
             isMixpanelInitialized = true;
 
             Mixpanel.Init();
             Mixpanel.SetToken(key);
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.SetLogConnectionErrors(logConnectionErrors);
-
             MonetizrLogger.Print($"Mixpanel init called {key}");
         }
 
