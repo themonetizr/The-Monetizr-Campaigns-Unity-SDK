@@ -42,8 +42,6 @@ namespace Monetizr.SDK.Debug
 
             yield return request.SendWebRequest();
 
-            MonetizrLogger.Print("GCP - Result: " + request.result + " / Text: " + request.downloadHandler.text);
-
             if (request.result != UnityWebRequest.Result.Success)
             {
                 MonetizrLogger.Print("GCP - Error sending log: " + request.error);

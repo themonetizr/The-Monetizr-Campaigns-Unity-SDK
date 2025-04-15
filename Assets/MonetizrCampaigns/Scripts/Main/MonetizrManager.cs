@@ -1,4 +1,5 @@
-﻿using Monetizr.SDK.Analytics;
+﻿using mixpanel;
+using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
@@ -77,13 +78,23 @@ namespace Monetizr.SDK.Core
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
         private Action _gameOnInitSuccess;
 
+        internal bool coppa = false;
+        internal bool gdpr = false;
+        internal bool us_privacy = false;
+        internal bool uoo = true;
+        internal string consent = "";
+
         #endregion
 
         #region Public Static Methods
 
         public void SetUserConsentParameters (bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
         {
-
+            this.coppa = coppa;
+            this.gdpr = gdpr;
+            this.us_privacy = us_privacy;
+            this.uoo = uoo;
+            this.consent = consent;
         }
 
         public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
@@ -789,9 +800,10 @@ namespace Monetizr.SDK.Core
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
             await ConnectionsClient.GetGlobalSettings();
+            CheckMixpanelProxy();
             CheckCGPLogging();
-            campaigns = new List<ServerCampaign>();
 
+            campaigns = new List<ServerCampaign>();
             try
             {
                 campaigns = await ConnectionsClient.GetList();
@@ -830,7 +842,7 @@ namespace Monetizr.SDK.Core
             Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif
 
-            foreach (var campaign in campaigns)
+            foreach (ServerCampaign campaign in campaigns)
             {
                 await campaign.LoadCampaignAssets();
 
@@ -860,6 +872,15 @@ namespace Monetizr.SDK.Core
             MonetizrLogger.Print("MonetizrManager initialization okay!");
             _isActive = true;
             onRequestComplete?.Invoke(true);
+        }
+
+        private void CheckMixpanelProxy ()
+        {
+            string mixpanelProxy = "";
+            if (ConnectionsClient.GlobalSettings.TryGetValue("mixpanel_proxy_endpoint", out mixpanelProxy))
+            {
+                if (!String.IsNullOrEmpty(mixpanelProxy)) MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
+            }
         }
 
         private void CheckCGPLogging()

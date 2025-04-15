@@ -64,7 +64,7 @@ namespace Monetizr.SDK.Missions
         {
             bool hasSomething = campaign.HasAsset(AssetsType.Html5PathString) || campaign.HasAsset(AssetsType.VideoFilePathString);
 
-            if (!hasSomething && !campaign.serverSettings.GetBoolParam("programmatic",false))
+            if (!hasSomething && (campaign.campaignType == CampaignType.MonetizrBackend))
             {
                 MonetizrLogger.PrintError($"Campaign {campaign.id} has no video asset: hasPath = " + hasSomething + " / isProgrammatic: " + !campaign.serverSettings.GetBoolParam("programmatic", false));
                 return null;

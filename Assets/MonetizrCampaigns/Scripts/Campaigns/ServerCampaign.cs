@@ -69,6 +69,7 @@ namespace Monetizr.SDK.Campaigns
 
         public bool hasMadeEarlyBidRequest = false;
         public CampaignType campaignType = CampaignType.None;
+        public float campaignTimeoutStart;
 
         public ServerCampaign () { }
 
@@ -77,6 +78,12 @@ namespace Monetizr.SDK.Campaigns
             this.id = id;
             dar_tag = darTag;
             serverSettings = defaultServerSettings;
+        }
+
+        public bool HasTimeoutPassed ()
+        {
+            if (Time.time >= campaignTimeoutStart + 120f) return true;
+            return false;
         }
 
         internal bool TryGetAssetInList(List<string> types, out Asset asset)
@@ -532,6 +539,15 @@ namespace Monetizr.SDK.Campaigns
             Directory.Delete(target_dir, false);
         }
         
+        internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
+        {
+            string res = JsonUtility.ToJson(vastSettings); 
+            var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
+            res = res.Insert(res.Length - 1, campaignSettingsJson);      
+            MonetizrLogger.Print($"VAST Settings: {res}");
+            return res;
+        }
+
         internal string DumpCampaignSettings(TagsReplacer tagsReplacer)
         {
             string result = string.Join(",", serverSettings.Select(kvp =>
@@ -541,15 +557,6 @@ namespace Monetizr.SDK.Campaigns
             }));
 
             return $"{{{result}}}";
-        }
-        
-        internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
-        {
-            string res = JsonUtility.ToJson(vastSettings); 
-            var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
-            res = res.Insert(res.Length - 1, campaignSettingsJson);      
-            MonetizrLogger.Print($"VAST Settings: {res}");
-            return res;
         }
 
         internal bool IsCampaignActivate()
@@ -576,11 +583,15 @@ namespace Monetizr.SDK.Campaigns
 
         internal void PostCampaignLoad()
         {
-            MonetizrLogger.Print("CampaignID: " + id + "\n" + "Initial PostCampaignLoad Content: " + content);
-            if (string.IsNullOrEmpty(content)) return;
-            var cd = MonetizrUtils.ParseContentString(content);
+            if (string.IsNullOrEmpty(content))
+            {
+                MonetizrLogger.PrintError("CampaignID: " + id + " content is empty.");
+                return;
+            }
+
+            Dictionary<string, string> cd = MonetizrUtils.ParseContentString(content);
             serverSettings = new SettingsDictionary<string, string>(cd);
-            MonetizrLogger.Print("CampaignID: " + id + "\n" + "Final PostCampaignLoad Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
+            MonetizrLogger.Print("CampaignID: " + id + "\n" + "Parsed Content: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cd));
         }
 
         private bool HasTeaserAsset ()

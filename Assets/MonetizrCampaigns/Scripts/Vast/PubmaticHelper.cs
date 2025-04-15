@@ -134,120 +134,7 @@ namespace Monetizr.SDK.VAST
 
         internal PubmaticHelper(MonetizrClient httpClient, string userAgent) : base(httpClient, userAgent) { }
 
-        internal async Task<string> GetOpenRtbRequestByRemoteGenerator(string generatorUri)
-        {
-            if (string.IsNullOrEmpty(generatorUri)) return null;
-            
-            httpClient.SetUserAgent(userAgent);
-            string res = await httpClient.GetResponseStringFromUrl(generatorUri);
-            httpClient.SetUserAgent(null);
-
-            return res;
-        }
-        
-        internal async Task<bool> GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign, string currentMissionOpenRtbRequest, string openrtbEndpoint)
-        {
-            var settings = currentCampaign.serverSettings;
-            var openRtbUri = settings.GetParam("openrtb.endpoint");
-
-            MonetizrLogger.Print("PBR - Endpoint Param: " + openrtbEndpoint);
-
-            if (string.IsNullOrEmpty(openRtbUri))
-            {
-                openRtbUri = openrtbEndpoint;
-            }
-
-            if (string.IsNullOrEmpty(openRtbUri))
-            {
-                MonetizrLogger.Print("PBR - No endpoint defined.");
-                return false;
-            }
-
-            MonetizrLogger.Print("PBR - Endpoint found.");
-
-            var requestParameterName = string.IsNullOrEmpty(currentMissionOpenRtbRequest) ? "openrtb.request" : currentMissionOpenRtbRequest;
-            var timeParameterName = $"openrtb.last_request.{requestParameterName}";
-
-#if !UNITY_EDITOR
-            if (DateTime.TryParse(MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings[timeParameterName], out var lastTime))
-            {
-                var delay = (DateTime.Now - lastTime).TotalSeconds;
-                var targetDelay = 10;
-                if (delay < targetDelay)
-                {
-                    MonetizrLogger.Print($"Last programmatic request was earlier than {targetDelay} {delay}");
-                    return false;
-                }
-            }
-#endif
-
-            MonetizrManager.Instance.localSettings.GetSetting(currentCampaign.id).settings[timeParameterName] = DateTime.Now.ToString();
-            MonetizrManager.Instance.localSettings.SaveData();
-            var openRtbRequest = settings.GetParam(requestParameterName);
-            
-            if (string.IsNullOrEmpty(openRtbRequest) && settings.ContainsKey("openrtb.generator_url"))
-            {
-                string generatorUri = settings.GetParam("openrtb.generator_url");
-                openRtbRequest = await GetOpenRtbRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrMobileAnalytics.advertisingID}");
-            }
-
-            if (string.IsNullOrEmpty(openRtbRequest))
-            {
-                MonetizrLogger.PrintError("PBR - Can't create openRTB request for campaign {currentCampaign}!");
-                return false;
-            }
-
-            openRtbRequest = MonetizrUtils.UnescapeString(openRtbRequest);
-            openRtbRequest = NielsenDar.ReplaceMacros(openRtbRequest, currentCampaign, AdPlacement.Html5, userAgent);
-
-            MonetizrLogger.Print($"OpenRTB request: {openRtbRequest}");
-            MonetizrLogger.Print($"Requesting OpenRTB campaign with url: {openRtbUri}");
-
-            var requestMessage = NetworkingUtils.GenerateOpenRTBRequestMessage(openRtbUri, openRtbRequest, HttpMethod.Post);
-            var response = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
-            string res = response.content;
-
-            if (!response.isSuccess || res.Contains("Request failed!") || res.Length <= 0)
-            {
-                if (settings.ContainsKey("openrtb.sent_report_to_mixpanel")) httpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "error", "NoContent", currentCampaign);
-                MonetizrLogger.Print($"Response unsuccessful with content: {res}");
-                return false;
-            }
-
-            currentCampaign.openRtbRawResponse = res;
-            MonetizrLogger.Print($"Open RTB Raw Response: {res}");
-            var openRtbResponse = OpenRTBResponse.Load(res);
-            var adm = openRtbResponse.GetAdm();
-
-            if (string.IsNullOrEmpty(adm)) return false;
-
-            MonetizrLogger.Print($"Open RTB response loaded with adm: {adm}");
-
-            if (!adm.Contains("<VAST"))
-            {
-                MonetizrLogger.PrintError($"Open RTB response is not a VAST");
-                return false;
-            }
-            
-            var initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, adm);
-
-            if (!initializeResult)
-            {
-                MonetizrLogger.Print($"InitializeServerCampaignForProgrammatic failed.");
-                return false;
-            }
-
-            MonetizrLogger.Print($"GetOpenRTBResponseForCampaign {currentCampaign.id} successfully loaded.");
-
-            if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
-            {
-                httpClient.Analytics.SendOpenRtbReportToMixpanel(openRtbRequest, "ok", res, currentCampaign);
-            }
-
-            return true;
-        }
-
-        internal async Task<bool> TEST_GetOpenRtbResponseForCampaign(ServerCampaign currentCampaign)
+        internal async Task<bool> GetOpenRTBResponseForCampaign(ServerCampaign currentCampaign)
         {
             if (ShouldUseCachedRequestData(currentCampaign))
             {
@@ -265,6 +152,17 @@ namespace Monetizr.SDK.VAST
 
             string openRTBEndpoint = settings.GetParam("openrtb.endpoint");
             string openRTBRequest = settings.GetParam("openrtb.request");
+
+            if (string.IsNullOrEmpty(openRTBRequest) && settings.ContainsKey("openrtb.generator_url"))
+            {
+                string generatorUri = settings.GetParam("openrtb.generator_url");
+                openRTBRequest = await GetOpenRTBRequestByRemoteGenerator(generatorUri + $"&ad_id={MonetizrMobileAnalytics.advertisingID}");
+                if (string.IsNullOrEmpty(openRTBRequest))
+                {
+                    MonetizrLogger.Print("OpenRTB Request by Remote Generator failed.");
+                    return false;
+                }
+            }
 
             openRTBRequest = MonetizrUtils.UnescapeString(openRTBRequest);
             openRTBRequest = NielsenDar.ReplaceMacros(openRTBRequest, currentCampaign, AdPlacement.Html5, userAgent);
@@ -286,6 +184,11 @@ namespace Monetizr.SDK.VAST
 
             PlayerPrefs.SetString("Campaign_" + currentCampaign.id + "_lastSuccessfulRequestTime", DateTime.Now.ToString());
             PlayerPrefs.SetString("Campaign_" + currentCampaign.id + "_lastSuccessfulRequestData", adm);
+
+            if (settings.ContainsKey("openrtb.sent_report_to_mixpanel"))
+            {
+                httpClient.Analytics.SendOpenRtbReportToMixpanel(openRTBRequest, "ok", responseContent, currentCampaign);
+            }
 
             return true;
         }
@@ -318,14 +221,25 @@ namespace Monetizr.SDK.VAST
             }
 
             string openRTBRequest = settings.GetParam("openrtb.request");
-            if (string.IsNullOrEmpty(openRTBRequest))
+            if (string.IsNullOrEmpty(openRTBRequest) && !settings.ContainsKey("openrtb.generator_url"))
             {
-                MonetizrLogger.Print("PBR - No request defined.");
+                MonetizrLogger.Print("PBR - No request nor generator defined.");
                 return false;
             }
 
             MonetizrLogger.Print("PBR - Request Parameters found. Endpoint: " + openRtbUri + " / Request: " + openRTBRequest);
             return true;
+        }
+
+        internal async Task<string> GetOpenRTBRequestByRemoteGenerator(string generatorUri)
+        {
+            if (string.IsNullOrEmpty(generatorUri)) return null;
+
+            httpClient.SetUserAgent(userAgent);
+            string res = await httpClient.GetResponseStringFromUrl(generatorUri);
+            httpClient.SetUserAgent(null);
+
+            return res;
         }
 
         internal async Task<string> GetOpenRTBResponseAsync (string endpoint, string request)
@@ -355,21 +269,6 @@ namespace Monetizr.SDK.VAST
             }
 
             MonetizrLogger.Print("PBR - ADM is valid: " + adm);
-            return true;
-        }
-
-        public async Task<bool> TEST_InitializeProgrammaticCampaign (ServerCampaign currentCampaign)
-        {
-            MonetizrLogger.Print("PBR - Initializing.");
-            string adm = currentCampaign.adm;
-            bool initializeResult = await InitializeServerCampaignForProgrammatic(currentCampaign, adm);
-            if (!initializeResult)
-            {
-                MonetizrLogger.Print("PBR - InitializeServerCampaignForProgrammatic failed.");
-                return false;
-            }
-            MonetizrLogger.Print("PBR - Initialize successful.");
-            // if (settings.ContainsKey("openrtb.sent_report_to_mixpanel")) httpClient.Analytics.SendOpenRtbReportToMixpanel(openRTBRequest, "ok", responseContent, currentCampaign);
             return true;
         }
     }
