@@ -195,6 +195,7 @@ namespace Monetizr.SDK.UI
 
         internal void ShowClaimButton()
         {
+            MonetizrLogger.Print("CLAIM BUTTON SHOW");
             if (!claimButton.activeSelf)
             {
                 claimButton.SetActive(true);

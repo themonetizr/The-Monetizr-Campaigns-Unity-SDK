@@ -16,7 +16,7 @@ namespace Monetizr.SDK.Missions
         {
             List<MissionDescription> m = new List<MissionDescription>();
 
-            foreach (var _m in missions)
+            foreach (ServerDefinedMissions _m in missions)
             {
                 MissionType serverMissionType = _m.GetMissionType();
 
@@ -61,7 +61,8 @@ namespace Monetizr.SDK.Missions
                     autoStartAfter = _m.GetAutoStartId(),
                     rewardImage = _m.reward_image,
                     activateConditions = _m.activate_conditions,
-                    openRtbRequestForProgrammatic = _m.ortb_request
+                    openRtbRequestForProgrammatic = _m.ortb_request,
+                    hasCongrats = _m.HasCongrats(),
                 }); ;
 
             }
@@ -71,7 +72,7 @@ namespace Monetizr.SDK.Missions
 
         public static ServerMissionsHelper CreateFromJson(string json)
         {
-            var result = new ServerMissionsHelper();
+            ServerMissionsHelper result = new ServerMissionsHelper();
 
             if (!MonetizrUtils.ValidateJson(json)) return result;
 

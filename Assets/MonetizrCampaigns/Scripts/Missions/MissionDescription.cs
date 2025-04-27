@@ -19,6 +19,7 @@ namespace Monetizr.SDK.Missions
         internal string rewardImage;
         internal string activateConditions;
         internal string openRtbRequestForProgrammatic;
+        internal bool hasCongrats;
     }
 
 }

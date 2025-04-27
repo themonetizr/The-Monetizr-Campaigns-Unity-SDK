@@ -20,6 +20,7 @@ namespace Monetizr.SDK.Missions
         public string reward_image;
         public string activate_conditions;
         public string ortb_request;
+        public string has_congrats;
 
         public int GetAutoStartId()
         {
@@ -33,6 +34,13 @@ namespace Monetizr.SDK.Missions
         {
             bool res = false;
             if (bool.TryParse(hidden_in_rc, out res)) return res;
+            return res;
+        }
+
+        public bool HasCongrats()
+        {
+            bool res = true;
+            if (bool.TryParse(has_congrats, out res)) return res;
             return res;
         }
 

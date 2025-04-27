@@ -1048,11 +1048,10 @@ namespace Monetizr.SDK.Core
             MonetizrManager.Instance.missionsManager.ClaimAction(m, onComplete, null).Invoke();
         }
 
-        internal void OnClaimRewardComplete(Mission mission, bool isSkipped, Action<bool> onComplete,
-            Action updateUIDelegate)
+        internal void OnClaimRewardComplete (Mission mission, bool isSkipped, Action<bool> onComplete, Action updateUIDelegate)
         {
-            if (claimForSkippedCampaigns)
-                isSkipped = false;
+
+            if (claimForSkippedCampaigns) isSkipped = false;
 
             if (isSkipped)
             {
@@ -1063,40 +1062,52 @@ namespace Monetizr.SDK.Core
 
             MonetizrLogger.Print($"OnClaimRewardComplete for {mission.serverId}");
 
+            bool isSpecialCase = mission.type == MissionType.VideoReward && !mission.hasCongrats;
+
+            if (isSpecialCase)
+            {
+                OnCongratsShowed(mission, isSkipped, onComplete, updateUIDelegate);
+                return;
+            }
+
             ShowCongratsNotification((bool _) =>
             {
-                bool updateUI = false;
-
-                MonetizrLogger.Print($"OnClaimRewardComplete --> ShowCongratsNotification {mission.serverId}");
-
-                if (mission.campaignServerSettings.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
-                {
-                    mission.state = MissionUIState.ToBeHidden;
-                    mission.isClaimed = ClaimState.Claimed;
-                }
-
-                ClaimMissionData(mission);
-
-                if (missionsManager.UpdateMissionsActivity(mission))
-                {
-                    updateUI = true;
-                }
-
-                if (mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false))
-                {
-                    if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
-                    {
-                        ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); });
-                    }
-                }
-
-                MonetizrManager.HideTeaser(true);
-                onComplete?.Invoke(isSkipped);
-                if (!updateUI) return;
-                updateUIDelegate?.Invoke();
+                OnCongratsShowed(mission, isSkipped, onComplete, updateUIDelegate);
 
             }, mission);
+        }
 
+        private void OnCongratsShowed (Mission mission, bool isSkipped, Action<bool> onComplete, Action updateUIDelegate)
+        {
+            bool updateUI = false;
+
+            MonetizrLogger.Print($"OnClaimRewardComplete --> ShowCongratsNotification {mission.serverId}");
+
+            if (mission.campaignServerSettings.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
+            {
+                mission.state = MissionUIState.ToBeHidden;
+                mission.isClaimed = ClaimState.Claimed;
+            }
+
+            ClaimMissionData(mission);
+
+            if (missionsManager.UpdateMissionsActivity(mission))
+            {
+                updateUI = true;
+            }
+
+            if (mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false))
+            {
+                if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
+                {
+                    ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); });
+                }
+            }
+
+            MonetizrManager.HideTeaser(true);
+            onComplete?.Invoke(isSkipped);
+            if (!updateUI) return;
+            updateUIDelegate?.Invoke();
         }
 
         internal void InitializeBuiltinMissionsForAllCampaigns()
