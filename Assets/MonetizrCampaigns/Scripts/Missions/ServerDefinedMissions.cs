@@ -39,9 +39,8 @@ namespace Monetizr.SDK.Missions
 
         public bool HasCongrats()
         {
-            bool res = true;
-            if (bool.TryParse(has_congrats, out res)) return res;
-            return res;
+            if (bool.TryParse(has_congrats, out bool parsed)) return parsed;
+            return true;
         }
 
         public int getId()

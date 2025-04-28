@@ -1050,7 +1050,6 @@ namespace Monetizr.SDK.Core
 
         internal void OnClaimRewardComplete (Mission mission, bool isSkipped, Action<bool> onComplete, Action updateUIDelegate)
         {
-
             if (claimForSkippedCampaigns) isSkipped = false;
 
             if (isSkipped)
@@ -1063,9 +1062,11 @@ namespace Monetizr.SDK.Core
             MonetizrLogger.Print($"OnClaimRewardComplete for {mission.serverId}");
 
             bool isSpecialCase = mission.type == MissionType.VideoReward && !mission.hasCongrats;
+            MonetizrLogger.Print("IsSpecialCase: " + isSpecialCase + " / hasCongrats: " + mission.hasCongrats);
 
             if (isSpecialCase)
             {
+                MonetizrLogger.Print("Skipping Congrats");
                 OnCongratsShowed(mission, isSkipped, onComplete, updateUIDelegate);
                 return;
             }
