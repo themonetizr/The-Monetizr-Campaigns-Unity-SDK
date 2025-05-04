@@ -364,7 +364,7 @@ namespace Monetizr.SDK.UI
                 }, 0);
             
             StartCoroutine(ShowCloseButton(_closeButtonDelay));
-            background.color = id == PanelId.Html5WebView ? Color.black : Color.white;
+            background.color = Color.black;
             adType = getAdPlacement();
             eventsPrefix = adType.ToString();
 

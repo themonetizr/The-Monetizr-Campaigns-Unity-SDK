@@ -116,7 +116,7 @@ namespace Monetizr.SDK.Debug
 
         internal override void FinalizePanel(PanelId id)
         {
-            PlayerPrefs.SetString("api_key", DebugSettings.keys[apiKeysList.value]);
+            PlayerPrefs.SetString("MonetizrAPIKey", DebugSettings.keys[apiKeysList.value]);
             PlayerPrefs.Save();
             var bundleId = DebugSettings.keyNames[DebugSettings.keys[apiKeysList.value]];
 

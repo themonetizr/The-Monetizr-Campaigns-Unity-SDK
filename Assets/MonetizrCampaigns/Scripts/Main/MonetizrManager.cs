@@ -50,6 +50,7 @@ namespace Monetizr.SDK.Core
         private static Action<bool> s_soundSwitch = null;
         private static Action<bool> s_onUIVisible = null;
         private static UserDefinedEvent s_userEvent = null;
+        private static string manualDebugKey = "";
 
         #endregion
 
@@ -120,7 +121,12 @@ namespace Monetizr.SDK.Core
             gameRewards[rt] = gr;
         }
 
-        public static MonetizrManager Initialize(Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
+        public static void ManuallySetDebugKey (string debugKey)
+        {
+            manualDebugKey = debugKey;
+        }
+
+        public static MonetizrManager Initialize (Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
         {
             s_onRequestComplete = onRequestComplete;
             s_soundSwitch = soundSwitch;
@@ -545,6 +551,12 @@ namespace Monetizr.SDK.Core
         private static bool IsInitializationSetupComplete()
         {
             MonetizrSettingsMenu.LoadSettings();
+
+            string manualDebugKey = PlayerPrefs.GetString("MonetizrAPIKey");
+            if (!String.IsNullOrEmpty(manualDebugKey))
+            {
+                MonetizrSettings.apiKey = manualDebugKey;
+            }
 
             if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
             {
