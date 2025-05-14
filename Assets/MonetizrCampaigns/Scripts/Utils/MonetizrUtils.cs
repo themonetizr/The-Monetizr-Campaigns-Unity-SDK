@@ -1,5 +1,7 @@
 ﻿using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.UI;
 using SimpleJSON;
 using System;
 using System.Collections.Generic;
@@ -507,6 +509,16 @@ namespace Monetizr.SDK.Utils
                 return null;
 
             return ExtractValueFromJSON(parentValue, nestedKey);
+        }
+
+        public static bool IsNotificationHTML (Mission mission, PanelId panelId)
+        {
+            if (panelId != PanelId.StartNotification) return false;
+            if (mission.campaign.serverSettings.TryGetValue("is_notification_html", out string value) && bool.TryParse(value, out bool isHtml) && isHtml)
+            {
+                return true;
+            }
+            return false;
         }
 
     }

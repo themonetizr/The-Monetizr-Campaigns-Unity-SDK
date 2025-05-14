@@ -5,6 +5,7 @@ using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.UI;
+using Monetizr.SDK.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -646,7 +647,18 @@ namespace Monetizr.SDK.Core
         internal static void ShowNotification(Action<bool> onComplete, Mission m, PanelId panelId)
         {
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
-            Instance._uiController.ShowPanelFromPrefab("MonetizrNotifyPanel2", panelId, onComplete, true, m);
+
+            // TEST - TO BE -RETURNED-
+            // if (MonetizrUtils.IsNotificationHTML(m, panelId))
+
+            if (panelId == PanelId.StartNotification)
+            {
+                Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", PanelId.StartNotification, onComplete, true, m);
+            }
+            else
+            {
+                Instance._uiController.ShowPanelFromPrefab("MonetizrNotifyPanel2", panelId, onComplete, true, m);
+            }
         }
 
         internal static void ShowEnterEmailPanel(Action<bool> onComplete, Mission m, PanelId panelId)
