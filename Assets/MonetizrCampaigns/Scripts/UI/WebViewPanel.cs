@@ -103,7 +103,7 @@ namespace Monetizr.SDK.UI
             bool fullScreen = true;
             bool useSafeFrame = false;
 
-            if (id == PanelId.HtmlWebPageView || id == PanelId.ActionHtmlPanelView)
+            if (id == PanelId.HtmlWebPageView)
             {
                 fullScreen = false;
             }
@@ -307,21 +307,14 @@ namespace Monetizr.SDK.UI
 
         internal void PrepareActionPanel(Mission m)
         {
-            closeButton.gameObject.SetActive(true);
+            StopCoroutine(ShowCloseButton(_closeButtonDelay));
             GetActionMissionParameters(m);
 
-            if (string.IsNullOrEmpty(_webUrl))
-            {
-                MonetizrLogger.PrintError($"ActionReward.url is null");
-            }
+            closeButton.gameObject.SetActive(false);
+            claimButton.gameObject.SetActive(false);
 
+            if (string.IsNullOrEmpty(_webUrl)) MonetizrLogger.PrintError($"ActionReward.url is null");
             _webView.Load(_webUrl);
-            
-#if UNITY_EDITOR
-            _claimButtonDelay = 3;
-#endif
-
-            StartCoroutine(ShowClaimButtonCoroutine(_claimButtonDelay));
         }
 
         internal void GetActionMissionParameters(Mission m)
@@ -547,7 +540,9 @@ namespace Monetizr.SDK.UI
 
             if (panelId == PanelId.ActionHtmlPanelView)
             {
-                InjectActionCloseAndClaimButton();
+                int claimButtonDelay = currentMission.campaignServerSettings.GetIntParam("VideoReward.reward_time", 0);
+                InjectCloseButton();
+                Invoke(nameof(InjectClaimButton), claimButtonDelay);
             }
 
         }
@@ -564,32 +559,19 @@ namespace Monetizr.SDK.UI
         }
 #endif
 
-        private void InjectActionCloseAndClaimButton ()
+        private void InjectCloseButton()
         {
-            string html = $@"
-        <div id='injectable-widget' style='position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 9999; pointer-events: none;'>
-            <div style='position: absolute; top: 16px; right: 16px; z-index: 10000; pointer-events: auto;'>
-                <a href='uniwebview://action?key=skip' style='text-decoration: none; background: rgba(0,0,0,0.5); color: white; font-size: 18px; padding: 8px 12px; border-radius: 50%; font-weight: bold;'>×</a>
-            </div>
-            <div style='position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); z-index: 10000; pointer-events: auto;'>
-                <a href='uniwebview://action?key=close' style='text-decoration: none; background: #28a745; color: white; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: bold;'>Claim</a>
-            </div>
-        </div>
-    ";
-
-            string htmlBase64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(html));
-
-            string js = $@"
-        (function() {{
-            var html = atob('{htmlBase64}');
-            var container = document.createElement('div');
-            container.innerHTML = html;
-            var widget = container.firstElementChild;
-            if (widget) document.body.appendChild(widget);
-        }})();
-    ";
+            string js = "(function(){var e=document.createElement('a');e.href='uniwebview://action?key=skip';e.innerText='×';e.style='position:fixed;top:16px;right:16px;width:40px;height:40px;line-height:40px;text-align:center;text-decoration:none;background:rgba(0,0,0,0.5);color:white;font-size:24px;border-radius:50%;font-weight:bold;z-index:10000;pointer-events:auto;';document.body.appendChild(e);})();";
             _webView.EvaluateJavaScript(js, payload => {
-                MonetizrLogger.Print("Injected endcard widget: " + payload.resultCode);
+                MonetizrLogger.Print("Injected close button: " + payload.resultCode);
+            });
+        }
+
+        private void InjectClaimButton ()
+        {
+            string js = "(function(){var e=document.createElement('a');e.href='uniwebview://action?key=close';e.innerText='Claim';e.style='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:10000;text-decoration:none;background:#28a745;color:white;padding:12px 24px;border-radius:8px;font-size:16px;font-weight:bold;pointer-events:auto;';document.body.appendChild(e);})();";
+            _webView.EvaluateJavaScript(js, payload => {
+                MonetizrLogger.Print("Injected claim button: " + payload.resultCode);
             });
         }
 
@@ -601,6 +583,7 @@ namespace Monetizr.SDK.UI
 
         private void ClosePanel ()
         {
+            CancelInvoke(nameof(InjectClaimButton));
             claimButton.SetActive(false);
             closeButton.gameObject.SetActive(false);            
             additionalEventValues.Clear();
