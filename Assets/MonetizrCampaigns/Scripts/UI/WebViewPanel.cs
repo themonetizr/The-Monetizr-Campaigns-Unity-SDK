@@ -190,6 +190,9 @@ namespace Monetizr.SDK.UI
             UniWebView.SetAllowUniversalAccessFromFileURLs(true);
             MonetizrManager.Instance.SoundSwitch(false);
 
+            UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
+            UniWebView.SetForwardWebConsoleToNativeOutput(true);
+
             _webView = gameObject.AddComponent<UniWebView>();
             //_webView.ReferenceRectTransform = safeArea;
 
@@ -528,11 +531,8 @@ namespace Monetizr.SDK.UI
             if (statusCode >= 300)
             {
                 TrackErrorEvent($"{eventsPrefix} error", statusCode);
-
                 successReason = $"error {statusCode}";
-
                 _OnSkipPress();
-
                 return;
             }
 
@@ -550,11 +550,8 @@ namespace Monetizr.SDK.UI
         private void OnPageErrorReceived (UniWebView webView, int errorCode, string url)
         {
             MonetizrLogger.PrintError($"OnPageErrorReceived: {url} code: {errorCode}");
-
             TrackErrorEvent($"{eventsPrefix} error", errorCode);
-
             successReason = $"error {errorCode}";
-
             _OnSkipPress();
         }
 #endif
