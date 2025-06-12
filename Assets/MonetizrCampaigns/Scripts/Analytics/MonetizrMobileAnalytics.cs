@@ -477,6 +477,8 @@ namespace Monetizr.SDK.Analytics
             additionalValues.Add("placement", placementName);
             additionalValues.Add("placement_group", GetPlacementGroup(adPlacement));
 
+            TrackOMSDKEvents(eventType, adPlacement, GetPlacementGroup(adPlacement));
+
             var eventName = "";
             bool timed = false;
 
