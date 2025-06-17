@@ -824,42 +824,27 @@ namespace Monetizr.SDK.Core
         public async void RequestCampaigns(Action<bool> onRequestComplete)
         {
             await ConnectionsClient.GetGlobalSettings();
+            bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
             CheckMixpanelProxy();
             CheckCGPLogging();
 
             campaigns = new List<ServerCampaign>();
-            try
-            {
-                campaigns = await ConnectionsClient.GetList();
-            }
-            catch (Exception e)
-            {
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M401);
-                MonetizrLogger.PrintError($"Exception while getting list of campaigns\n{e}");
-                onRequestComplete?.Invoke(false);
-            }
+            campaigns = await ConnectionsClient.GetList();
 
-            if (campaigns == null)
+            if (campaigns == null || campaigns.Count <= 0)
             {
+                MonetizrLogger.PrintWarning($"No campaigns or error while getting them.");
                 MonetizrLogger.PrintRemoteMessage(MessageEnum.M401);
                 MonetizrLogger.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
-                onRequestComplete?.Invoke(false);
-            }
-
-            var logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
-
-            if (campaigns.Count > 0)
-            {
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M102);
-                ConnectionsClient.SetTestMode(campaigns[0].testmode);
-                ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
-                ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
-            }
-            else
-            {
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M103);
                 ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
+                onRequestComplete?.Invoke(false);
+                return;
             }
+
+            MonetizrLogger.PrintRemoteMessage(MessageEnum.M102);
+            ConnectionsClient.SetTestMode(campaigns[0].testmode);
+            ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
+            ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
 
 #if TEST_SLOW_LATENCY
             await Task.Delay(10000);

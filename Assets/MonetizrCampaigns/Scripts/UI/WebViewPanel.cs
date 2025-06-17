@@ -65,7 +65,7 @@ namespace Monetizr.SDK.UI
 
             if (_webView == null || !panelForCheckUrl || string.IsNullOrEmpty(_webUrl)) return;
 
-            var currentUrl = _webView.Url;
+            string currentUrl = _webView.Url;
 
             if (string.IsNullOrEmpty(currentUrl) || _webUrl.Equals(currentUrl)) return;
 
