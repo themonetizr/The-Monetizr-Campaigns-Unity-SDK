@@ -651,7 +651,11 @@ namespace Monetizr.SDK.Core
             // TEST - TO BE -RETURNED-
             // if (MonetizrUtils.IsNotificationHTML(m, panelId))
 
-            if (panelId == PanelId.StartNotification)
+            if (panelId == PanelId.CongratsNotification)
+            {
+                Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", PanelId.CongratsNotification, onComplete, true, m);
+            }
+            else if (panelId == PanelId.StartNotification)
             {
                 Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", PanelId.StartNotification, onComplete, true, m);
             }

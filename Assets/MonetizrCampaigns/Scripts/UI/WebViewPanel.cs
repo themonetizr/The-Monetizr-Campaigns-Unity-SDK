@@ -39,6 +39,15 @@ namespace Monetizr.SDK.UI
         [SerializeField] private Button confirmButton;
         [SerializeField] private Text confirmButtonText;
 
+        [Header("Congrats Notification Settings")]
+        [SerializeField] private GameObject congratsNotificationParent;
+        [SerializeField] private Image congratsLogo;
+        [SerializeField] private Text congratsRewardTitle;
+        [SerializeField] private Text congratsRewardText;
+        [SerializeField] private Image congratsRewardImage;
+        [SerializeField] private Button congratsConfirmButton;
+        [SerializeField] private Text congratsConfirmButtonText;
+
         private string _webUrl;
         private string _rewardWebUrl;
         private string eventsPrefix;
@@ -156,6 +165,12 @@ namespace Monetizr.SDK.UI
                 case PanelId.StartNotification:
                     MonetizrLogger.Print("Preparing StartNotification.");
                     PrepareStartNotificationPanel(m);
+                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    impressionStarts = true;
+                    break;
+                case PanelId.CongratsNotification:
+                    MonetizrLogger.Print("Preparing CongratsNotification.");
+                    PrepareCongratsNotificationPanel(m);
                     MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
@@ -290,16 +305,33 @@ namespace Monetizr.SDK.UI
             _webView.Load(_webUrl);
         }
 
+        internal void PrepareCongratsNotificationPanel (Mission mission)
+        {
+            claimButton.gameObject.SetActive(false);
+            closeButton.gameObject.SetActive(true);
+            congratsNotificationParent.gameObject.SetActive(true);
+            congratsConfirmButton.onClick.AddListener(OnCongratsNotificationConfirmButton);
+            closeButton.onClick.AddListener(_OnSkipPress);
+        }
+
+        internal void OnCongratsNotificationConfirmButton()
+        {
+            isSkipped = false;
+            closeButton.gameObject.SetActive(false);
+            additionalEventValues.Clear();
+            DestroyWebView();
+        }
+
         internal void PrepareStartNotificationPanel (Mission mission)
         {
             claimButton.gameObject.SetActive(false);
             closeButton.gameObject.SetActive(true);
             startNotificationParent.gameObject.SetActive(true);
-            confirmButton.onClick.AddListener(OnNotificationConfirmButton);
+            confirmButton.onClick.AddListener(OnStartNotificationConfirmButton);
             closeButton.onClick.AddListener(_OnSkipPress);
         }
 
-        internal void OnNotificationConfirmButton ()
+        internal void OnStartNotificationConfirmButton ()
         {
             MonetizrManager.OnEngagedUserActionComplete();
             isSkipped = false;
