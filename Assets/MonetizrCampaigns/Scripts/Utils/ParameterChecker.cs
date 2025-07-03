@@ -81,7 +81,10 @@ namespace Monetizr.SDK.Utils
             "EmailEnterCloseConfirmation.header_text",
             "EmailEnterCloseConfirmation.content_text",
             "GiveawayEmailEnterNotification.terms_text",
-            "RewardCenter.do_not_claim_and_hide_missions"
+            "RewardCenter.do_not_claim_and_hide_missions",
+            "is_notification_html",
+            "claim_button_html",
+            "close_button_html",
         };
 
         public static void CheckForMissingParameters (bool isGlobal, SettingsDictionary<string, string> settingsDictionary)
