@@ -114,6 +114,7 @@ namespace Monetizr.SDK.Networking
         internal override async Task GetGlobalSettings()
         {
             GlobalSettings = await DownloadGlobalSettings();
+            ParameterChecker.CheckForMissingParameters(true, GlobalSettings);
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint", "");
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
             MonetizrLogger.Print($"Api endpoint: {_baseApiUrl}");
@@ -121,7 +122,7 @@ namespace Monetizr.SDK.Networking
 
         private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
         {
-            var responseString = await GetResponseStringFromUrl(SettingsApiUrl);
+            string responseString = await GetResponseStringFromUrl(SettingsApiUrl);
 
             if (string.IsNullOrEmpty(responseString))
             {
@@ -191,6 +192,7 @@ namespace Monetizr.SDK.Networking
         private ServerCampaign ProcessBackendCampaign(ServerCampaign campaign)
         {
             campaign.PostCampaignLoad();
+            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
             return campaign;
         }
 
@@ -202,6 +204,7 @@ namespace Monetizr.SDK.Networking
             campaign.PostCampaignLoad();
             campaign.campaignTimeoutStart = Time.time;
             campaign.hasMadeEarlyBidRequest = true;
+            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
 
             return campaign;
         }
@@ -214,6 +217,7 @@ namespace Monetizr.SDK.Networking
 
             campaign.campaignTimeoutStart = Time.time;
             campaign = await RecreateCampaignFromADM(campaign);
+            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
 
             return campaign;
         }
