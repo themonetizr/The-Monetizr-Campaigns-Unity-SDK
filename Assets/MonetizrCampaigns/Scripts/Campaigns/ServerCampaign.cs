@@ -581,7 +581,7 @@ namespace Monetizr.SDK.Campaigns
             return mConditions.All(c => settings[c.Key] == c.Value);
         }
 
-        internal void PostCampaignLoad()
+        internal void ParseContentStringIntoSettingsDictionary ()
         {
             if (string.IsNullOrEmpty(content))
             {

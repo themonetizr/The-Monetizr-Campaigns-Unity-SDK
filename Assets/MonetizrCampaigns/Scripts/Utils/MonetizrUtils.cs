@@ -511,10 +511,10 @@ namespace Monetizr.SDK.Utils
             return ExtractValueFromJSON(parentValue, nestedKey);
         }
 
-        public static bool IsNotificationHTML (Mission mission, PanelId panelId)
+        public static bool IsCampaignHTML (Mission mission, PanelId panelId)
         {
             if (panelId != PanelId.StartNotification) return false;
-            if (mission.campaign.serverSettings.TryGetValue("is_notification_html", out string value) && bool.TryParse(value, out bool isHtml) && isHtml)
+            if (mission.campaign.serverSettings.TryGetValue("is_campaign_html", out string value) && bool.TryParse(value, out bool isHtml) && isHtml)
             {
                 return true;
             }

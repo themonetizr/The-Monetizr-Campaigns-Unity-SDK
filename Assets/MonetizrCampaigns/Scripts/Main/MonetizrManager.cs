@@ -597,10 +597,11 @@ namespace Monetizr.SDK.Core
 
         private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
         {
-            var monetizrObject = new GameObject("MonetizrManager");
-            var monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
-            var monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
-            var datadogManager = monetizrObject.AddComponent<GCPManager>();
+            GameObject monetizrObject = new GameObject("MonetizrManager");
+            MonetizrManager monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
+            MonetizrErrorLogger monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
+            GCPManager datadogManager = monetizrObject.AddComponent<GCPManager>();
+            CampaignManager campaignManager = monetizrObject.AddComponent<CampaignManager>();
             DontDestroyOnLoad(monetizrObject);
             Instance = monetizrManager;
             Instance.sponsoredMissions = null;
@@ -648,16 +649,9 @@ namespace Monetizr.SDK.Core
         {
             Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
 
-            // TEST - TO BE -RETURNED-
-            // if (MonetizrUtils.IsNotificationHTML(m, panelId))
-
-            if (panelId == PanelId.CongratsNotification)
+            if (MonetizrUtils.IsCampaignHTML(m, panelId))
             {
-                Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", PanelId.CongratsNotification, onComplete, true, m);
-            }
-            else if (panelId == PanelId.StartNotification)
-            {
-                Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", PanelId.StartNotification, onComplete, true, m);
+                Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", panelId, onComplete, true, m);
             }
             else
             {
@@ -825,7 +819,7 @@ namespace Monetizr.SDK.Core
 
         #region Public Methods
 
-        public async void RequestCampaigns(Action<bool> onRequestComplete)
+        public async void RequestCampaigns (Action<bool> onRequestComplete)
         {
             await ConnectionsClient.GetGlobalSettings();
             bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
@@ -834,12 +828,12 @@ namespace Monetizr.SDK.Core
 
             campaigns = new List<ServerCampaign>();
             campaigns = await ConnectionsClient.GetList();
+            campaigns = await CampaignManager.Instance.ProcessCampaigns(campaigns);
 
             if (campaigns == null || campaigns.Count <= 0)
             {
                 MonetizrLogger.PrintWarning($"No campaigns or error while getting them.");
                 MonetizrLogger.PrintRemoteMessage(MessageEnum.M401);
-                MonetizrLogger.Print($"{MonetizrErrors.msg[ErrorType.ConnectionError]}");
                 ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
                 onRequestComplete?.Invoke(false);
                 return;
@@ -848,41 +842,9 @@ namespace Monetizr.SDK.Core
             MonetizrLogger.PrintRemoteMessage(MessageEnum.M102);
             ConnectionsClient.SetTestMode(campaigns[0].testmode);
             ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
-            ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
-
-#if TEST_SLOW_LATENCY
-            await Task.Delay(10000);
-            Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-#endif
-
-            foreach (ServerCampaign campaign in campaigns)
-            {
-                await campaign.LoadCampaignAssets();
-
-                if (campaign.isLoaded)
-                {
-                    MonetizrLogger.PrintRemoteMessage(MessageEnum.M104);
-                    MonetizrLogger.Print($"Campaign {campaign.id} successfully loaded");
-                }
-                else
-                {
-                    MonetizrLogger.PrintRemoteMessage(MessageEnum.M402);
-                    MonetizrLogger.PrintError($"Campaign {campaign.id} loading failed with error {campaign.loadingError}!");
-                    ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
-                }
-            }
-
-            campaigns.RemoveAll(c => c.isLoaded == false);
-
-#if TEST_SLOW_LATENCY
-            Log.Print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-#endif
-
             localSettings.LoadOldAndUpdateNew(campaigns);
-            MonetizrLogger.Print($"RequestCampaigns completed with {campaigns.Count} campaigns.");
-            if (campaigns.Count > 0) ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
 
-            MonetizrLogger.Print("MonetizrManager initialization okay!");
+            MonetizrLogger.Print($"MonetizrManager initialized with {campaigns.Count} campaigns.");
             _isActive = true;
             onRequestComplete?.Invoke(true);
         }
