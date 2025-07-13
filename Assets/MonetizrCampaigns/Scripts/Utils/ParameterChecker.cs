@@ -82,7 +82,7 @@ namespace Monetizr.SDK.Utils
             "EmailEnterCloseConfirmation.content_text",
             "GiveawayEmailEnterNotification.terms_text",
             "RewardCenter.do_not_claim_and_hide_missions",
-            "is_notification_html",
+            "is_campaign_html",
             "claim_button_html",
             "close_button_html",
         };

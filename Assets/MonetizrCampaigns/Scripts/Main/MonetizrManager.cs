@@ -819,53 +819,7 @@ namespace Monetizr.SDK.Core
 
         #region Public Methods
 
-        public async void RequestCampaigns (Action<bool> onRequestComplete)
-        {
-            await ConnectionsClient.GetGlobalSettings();
-            bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
-            CheckMixpanelProxy();
-            CheckCGPLogging();
-
-            campaigns = new List<ServerCampaign>();
-            campaigns = await ConnectionsClient.GetList();
-            campaigns = await CampaignManager.Instance.ProcessCampaigns(campaigns);
-
-            if (campaigns == null || campaigns.Count <= 0)
-            {
-                MonetizrLogger.PrintWarning($"No campaigns or error while getting them.");
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M401);
-                ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
-                onRequestComplete?.Invoke(false);
-                return;
-            }
-
-            MonetizrLogger.PrintRemoteMessage(MessageEnum.M102);
-            ConnectionsClient.SetTestMode(campaigns[0].testmode);
-            ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
-            localSettings.LoadOldAndUpdateNew(campaigns);
-
-            MonetizrLogger.Print($"MonetizrManager initialized with {campaigns.Count} campaigns.");
-            _isActive = true;
-            onRequestComplete?.Invoke(true);
-        }
-
-        private void CheckMixpanelProxy ()
-        {
-            string mixpanelProxy = "";
-            if (ConnectionsClient.GlobalSettings.TryGetValue("mixpanel_proxy_endpoint", out mixpanelProxy))
-            {
-                if (!String.IsNullOrEmpty(mixpanelProxy)) MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
-            }
-        }
-
-        private void CheckCGPLogging()
-        {
-            string gcpLoggingKillswitch = "";
-            if (ConnectionsClient.GlobalSettings.TryGetValue("unity_logging", out gcpLoggingKillswitch))
-            {
-                if (gcpLoggingKillswitch == "0") GCPManager.Instance.EnableLogging();
-            }
-        }
+        
 
         public void SoundSwitch(bool on)
         {
@@ -908,7 +862,7 @@ namespace Monetizr.SDK.Core
             }
         }
 
-        private void Initialize(Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
+        private async Task Initialize(Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
         {
 
 #if USING_WEBVIEW
@@ -934,11 +888,75 @@ namespace Monetizr.SDK.Core
                 }
             };
 
+            if (MonetizrSettings.apiKey == "LOCAL_TESTING")
+            {
+                MonetizrLogger.Print("Initializing Local Testing Campaign.");
+                await SetupLocalTestingCampaign(_onRequestComplete);
+                return;
+            }
+
             RequestCampaigns(_onRequestComplete);
 
             if (MonetizrSettings.requestCampaignTime > 0)
             {
                 StartCoroutine(TryRequestCampaignsLater(MonetizrSettings.requestCampaignTime));
+            }
+        }
+
+        private async Task SetupLocalTestingCampaign (Action<bool> onRequestComplete)
+        {
+            ConnectionsClient.GlobalSettings = LocalTestCampaignManager.GetGlobalSettings();
+            campaigns = await LocalTestCampaignManager.GetCampaigns();
+            localSettings.LoadOldAndUpdateNew(campaigns);
+            _isActive = true;
+            onRequestComplete?.Invoke(true);
+        }
+
+        private async void RequestCampaigns(Action<bool> onRequestComplete)
+        {
+            await ConnectionsClient.GetGlobalSettings();
+            bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
+            CheckMixpanelProxy();
+            CheckCGPLogging();
+
+            campaigns = new List<ServerCampaign>();
+            campaigns = await ConnectionsClient.GetList();
+            campaigns = await CampaignManager.Instance.ProcessCampaigns(campaigns);
+
+            if (campaigns == null || campaigns.Count <= 0)
+            {
+                MonetizrLogger.PrintWarning($"No campaigns or error while getting them.");
+                MonetizrLogger.PrintRemoteMessage(MessageEnum.M401);
+                ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
+                onRequestComplete?.Invoke(false);
+                return;
+            }
+
+            MonetizrLogger.PrintRemoteMessage(MessageEnum.M102);
+            ConnectionsClient.SetTestMode(campaigns[0].testmode);
+            ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
+            localSettings.LoadOldAndUpdateNew(campaigns);
+
+            MonetizrLogger.Print($"MonetizrManager initialized with {campaigns.Count} campaigns.");
+            _isActive = true;
+            onRequestComplete?.Invoke(true);
+        }
+
+        private void CheckMixpanelProxy()
+        {
+            string mixpanelProxy = "";
+            if (ConnectionsClient.GlobalSettings.TryGetValue("mixpanel_proxy_endpoint", out mixpanelProxy))
+            {
+                if (!String.IsNullOrEmpty(mixpanelProxy)) MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
+            }
+        }
+
+        private void CheckCGPLogging()
+        {
+            string gcpLoggingKillswitch = "";
+            if (ConnectionsClient.GlobalSettings.TryGetValue("unity_logging", out gcpLoggingKillswitch))
+            {
+                if (gcpLoggingKillswitch == "0") GCPManager.Instance.EnableLogging();
             }
         }
 
