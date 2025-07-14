@@ -26,16 +26,19 @@ using Facebook.Unity;
 
 namespace Monetizr.SDK.Analytics
 {
-    internal class MonetizrMobileAnalytics : MonetizrAnalytics
+    internal class MonetizrMobileAnalytics
     {
         public static string osVersion;
         public static string advertisingID = "";
         public static bool limitAdvertising = false;
-        internal static DeviceSizeGroup deviceSizeGroup = DeviceSizeGroup.Unknown;
         public static bool isMixpanelInitialized = false;
 
-        HashSet<AdElement> adNewElements = new HashSet<AdElement>();
+        internal static DeviceSizeGroup deviceSizeGroup = DeviceSizeGroup.Unknown;
         internal static bool isAdvertisingIDDefined = false;
+        internal static string deviceIdentifier = "";
+
+        private HashSet<AdElement> adNewElements = new HashSet<AdElement>();
+        private HashSet<AdElement> visibleAdAsset = new HashSet<AdElement>();
 
         internal static string GetPlacementName(AdPlacement t)
         {
@@ -70,12 +73,6 @@ namespace Monetizr.SDK.Analytics
             { DeviceSizeGroup.Tablet, "tablet" },
             { DeviceSizeGroup.Unknown, "unknown" },
         };
-
-        private HashSet<AdElement> visibleAdAsset = new HashSet<AdElement>();
-
-        internal static string deviceIdentifier = "";
-
-        
 
         internal static DeviceSizeGroup GetDeviceGroup()
         {
@@ -121,13 +118,10 @@ namespace Monetizr.SDK.Analytics
 #endif
         }
 
-        internal MonetizrMobileAnalytics()
+        internal MonetizrMobileAnalytics ()
         {
             LoadUserId();
-
             MonetizrLogger.Print($"MonetizrMobileAnalytics initialized with user id: {GetUserId()}");
-
-
             osVersion = "0.0";
 
 #if !UNITY_EDITOR
@@ -162,7 +156,7 @@ namespace Monetizr.SDK.Analytics
 #endif
         }
 
-        internal override void Initialize(bool testEnvironment, string mixPanelApiKey, bool logConnectionErrors)
+        internal void Initialize(bool testEnvironment, string mixPanelApiKey, bool logConnectionErrors)
         {
             string key = "cda45517ed8266e804d4966a0e693d0d";
             
@@ -263,23 +257,6 @@ namespace Monetizr.SDK.Analytics
             props["device_name"] = SystemInfo.deviceName;
             props["internet_connection"] = NetworkingUtils.GetInternetConnectionType();
 
-            /*
-            if (String.IsNullOrEmpty(props["country_code"]))
-            {
-                props["country_code"] = "";
-            }
-
-            if (String.IsNullOrEmpty(props["region_code"]))
-            {
-                props["region_code"] = "";
-            }
-
-            if (String.IsNullOrEmpty(props["country_name"]))
-            {
-                props["country_name"] = "";
-            }
-            */
-
             if (campaign != null)
             {
                 foreach (var s in campaign.serverSettings)
@@ -337,7 +314,7 @@ namespace Monetizr.SDK.Analytics
             PlayerPrefs.Save();
         }
 
-        internal override void RandomizeUserId()
+        internal void RandomizeUserId()
         {
             var _deviceIdentifier = deviceIdentifier.ToCharArray();
 
@@ -359,12 +336,12 @@ namespace Monetizr.SDK.Analytics
             PlayerPrefs.Save();
         }
 
-        internal override string GetUserId()
+        internal string GetUserId()
         {
             return deviceIdentifier;
         }
 
-        internal override void TrackEvent(Mission currentMission, PanelController panel, EventType eventType, Dictionary<string, string> additionalValues = null)
+        internal void TrackEvent(Mission currentMission, PanelController panel, EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             if (panel.GetAdPlacement() == null)
                 return;
@@ -374,12 +351,12 @@ namespace Monetizr.SDK.Analytics
             TrackEvent(currentMission.campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
-        internal override void TrackEvent(Mission currentMission, AdPlacement adPlacement, EventType eventType, Dictionary<string, string> additionalValues = null)
+        internal void TrackEvent(Mission currentMission, AdPlacement adPlacement, EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             TrackEvent(currentMission.campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
-        internal override void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, EventType eventType, Dictionary<string, string> additionalValues = null)
+        internal void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             UnityEngine.Debug.Assert(currentCampaign != null);
 
@@ -467,12 +444,7 @@ namespace Monetizr.SDK.Analytics
             _TrackEvent(eventName, currentCampaign, false, additionalValues);
         }
 
-        internal void TrackNewEvents(ServerCampaign campaign,
-            Mission currentMission,
-            AdPlacement adPlacement,
-            string placementName,
-            EventType eventType,
-            Dictionary<string, string> additionalValues)
+        internal void TrackNewEvents(ServerCampaign campaign, Mission currentMission, AdPlacement adPlacement, string placementName, EventType eventType, Dictionary<string, string> additionalValues)
         {
             additionalValues.Add("placement", placementName);
             additionalValues.Add("placement_group", GetPlacementGroup(adPlacement));
@@ -617,10 +589,9 @@ namespace Monetizr.SDK.Analytics
                     return "Other";
 
             }
-
         }
 
-        internal override void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string, string> additionalValues = null, double duration = -1.0)
+        internal void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string, string> additionalValues = null, double duration = -1.0)
         {
             UnityEngine.Debug.Assert(isMixpanelInitialized);
 
@@ -669,7 +640,7 @@ namespace Monetizr.SDK.Analytics
             MixpanelTrack(campaign, eventName, props);
         }
 
-        internal override void OnApplicationQuit()
+        internal void OnApplicationQuit()
         {
             foreach (var ad in visibleAdAsset)
             {
@@ -702,7 +673,7 @@ namespace Monetizr.SDK.Analytics
             }
         }
 
-        internal override void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign)
+        internal void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign)
         {
             var props = new Value();
 
@@ -727,7 +698,7 @@ namespace Monetizr.SDK.Analytics
             Mixpanel.Track("Programmatic-request-client", props);
         }
 
-        internal override void SendErrorToMixpanel(string condition, string callstack, ServerCampaign campaign)
+        internal void SendErrorToMixpanel(string condition, string callstack, ServerCampaign campaign)
         {
             var props = new Value();
 

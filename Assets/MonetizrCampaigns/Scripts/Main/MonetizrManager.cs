@@ -35,7 +35,7 @@ namespace Monetizr.SDK.Core
         #region Private Static Variables
 
         internal static MonetizrManager Instance { get; private set; } = null;
-        internal static MonetizrAnalytics Analytics => Instance.ConnectionsClient.Analytics;
+        internal static MonetizrMobileAnalytics Analytics => Instance.ConnectionsClient.Analytics;
         internal static bool keepLocalClaimData;
         internal static bool serverClaimForCampaigns;
         internal static bool canTeaserBeVisible;

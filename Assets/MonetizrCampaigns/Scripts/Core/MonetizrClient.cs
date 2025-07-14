@@ -13,7 +13,7 @@ namespace Monetizr.SDK.Core
         internal string currentApiKey;
         public string userAgent;
 
-        internal MonetizrAnalytics Analytics { get; set; } = null;
+        internal MonetizrMobileAnalytics Analytics { get; set; } = null;
         internal SettingsDictionary<string, string> GlobalSettings { get; set; } = new SettingsDictionary<string, string>();
 
         internal void SetUserAgent(string _userAgent) { this.userAgent = _userAgent; }
