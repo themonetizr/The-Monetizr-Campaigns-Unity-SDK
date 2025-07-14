@@ -19,8 +19,14 @@ using System.Linq;
 
 namespace Monetizr.SDK.Networking
 {
-    internal class MonetizrHttpClient : MonetizrClient
+    internal class MonetizrHttpClient
     {
+        public string userAgent;
+
+        internal string currentApiKey;
+        internal MonetizrMobileAnalytics Analytics { get; set; } = null;
+        internal SettingsDictionary<string, string> GlobalSettings { get; set; } = new SettingsDictionary<string, string>();
+
         private string _baseApiUrl = "https://api.themonetizr.com";
         private string CampaignsApiUrl => _baseApiUrl + "/api/campaigns";
         private string SettingsApiUrl => _baseApiUrl + "/settings";
@@ -28,24 +34,29 @@ namespace Monetizr.SDK.Networking
         private static readonly HttpClient Client = new HttpClient();
         private CancellationTokenSource downloadCancellationTokenSource;
 
-        public MonetizrHttpClient(string apiKey, int timeout = 30)
+        public MonetizrHttpClient (string apiKey, int timeout = 30)
         {
             System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             currentApiKey = apiKey;
             Client.Timeout = TimeSpan.FromSeconds(timeout);
         }
 
-        internal override void Initialize()
+        internal void SetUserAgent (string _userAgent) 
+        { 
+            this.userAgent = _userAgent; 
+        }
+
+        internal void Initialize()
         {
             Analytics = new MonetizrMobileAnalytics();
         }
 
-        internal override void SetTestMode(bool testEnvironment)
+        internal void SetTestMode(bool testEnvironment)
         {
             if (testEnvironment) _baseApiUrl = _baseTestApiUrl;
         }
 
-        internal override void Close()
+        internal void Close()
         {
             Client.CancelPendingRequests();
         }
@@ -70,7 +81,7 @@ namespace Monetizr.SDK.Networking
             return (true, result);
         }
 
-        internal override async Task<string> GetResponseStringFromUrl(string url)
+        internal async Task<string> GetResponseStringFromUrl(string url)
         {
             var requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, url);
             MonetizrLogger.Print($"Sent request: {requestMessage}");
@@ -111,7 +122,7 @@ namespace Monetizr.SDK.Networking
             return uwr.downloadHandler.data;
         }
 
-        internal override async Task GetGlobalSettings()
+        internal async Task GetGlobalSettings()
         {
             GlobalSettings = await DownloadGlobalSettings();
             ParameterChecker.CheckForMissingParameters(true, GlobalSettings);
@@ -135,7 +146,7 @@ namespace Monetizr.SDK.Networking
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
 
-        internal override async Task<List<ServerCampaign>> GetList()
+        internal async Task<List<ServerCampaign>> GetList()
         {
             string responseString = await GetResponseStringFromUrl(CampaignsApiUrl);
             if (string.IsNullOrEmpty(responseString)) return new List<ServerCampaign>();
@@ -147,7 +158,7 @@ namespace Monetizr.SDK.Networking
             return campaigns.campaigns;
         }
 
-        internal override async Task ResetCampaign(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal async Task ResetCampaign(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
             HttpRequestMessage requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{campaignId}/reset");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
@@ -164,7 +175,7 @@ namespace Monetizr.SDK.Networking
             }
         }
 
-        internal override async Task ClaimReward(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal async Task ClaimReward(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
             HttpRequestMessage requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{challenge.id}/claim",true);
             string content = string.Empty;

@@ -67,7 +67,7 @@ namespace Monetizr.SDK.Core
 
         #region Private Variables
 
-        internal MonetizrClient ConnectionsClient { get; private set; }
+        internal MonetizrHttpClient ConnectionsClient { get; private set; }
         internal Action<bool> onUIVisible = null;
         internal MissionsManager missionsManager = null;
         internal LocalSettingsManager localSettings = null;
@@ -514,7 +514,7 @@ namespace Monetizr.SDK.Core
 
         #region Private Static Methods
 
-        private static MonetizrManager _Initialize(Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrClient connectionClient)
+        private static MonetizrManager _Initialize(Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrHttpClient connectionClient)
         {
             if (Instance != null) return Instance;
 
@@ -634,7 +634,7 @@ namespace Monetizr.SDK.Core
             return null;
         }
 
-        internal static MonetizrManager InitializeForTests(Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null, MonetizrClient connectionClient = null)
+        internal static MonetizrManager InitializeForTests(Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null, MonetizrHttpClient connectionClient = null)
         {
             return _Initialize(onRequestComplete, soundSwitch, onUIVisible, userEvent, connectionClient);
         }
@@ -862,7 +862,7 @@ namespace Monetizr.SDK.Core
             }
         }
 
-        private async Task Initialize(Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrClient connectionClient)
+        private async Task Initialize(Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrHttpClient connectionClient)
         {
 
 #if USING_WEBVIEW

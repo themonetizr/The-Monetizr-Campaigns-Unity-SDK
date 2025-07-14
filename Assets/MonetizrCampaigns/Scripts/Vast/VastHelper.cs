@@ -23,7 +23,7 @@ namespace Monetizr.SDK.VAST
 {
     internal class VastHelper
     {
-        internal static MonetizrClient httpClient;
+        internal static MonetizrHttpClient httpClient;
         internal static string userAgent;
         private string _omidJsServiceContent;
 
@@ -34,7 +34,7 @@ namespace Monetizr.SDK.VAST
             internal int pid;
         }
 
-        internal VastHelper(MonetizrClient httpClient, string _userAgent)
+        internal VastHelper(MonetizrHttpClient httpClient, string _userAgent)
         {
             VastHelper.httpClient = httpClient;
             userAgent = _userAgent;
