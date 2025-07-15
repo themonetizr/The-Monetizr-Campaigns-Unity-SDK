@@ -308,7 +308,7 @@ namespace Monetizr.SDK.Campaigns
         {
             MonetizrLogger.Print($"Campaign path: {Application.persistentDataPath}/{id}");
 
-            foreach (var asset in assets)
+            foreach (Asset asset in assets)
             {
                 MonetizrLogger.Print($"Loading asset type:{asset.type} title:{asset.title} url:{asset.url}");
 

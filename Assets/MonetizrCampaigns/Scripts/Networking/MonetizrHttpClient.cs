@@ -106,6 +106,12 @@ namespace Monetizr.SDK.Networking
 
         public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
         {
+            if (MonetizrUtils.IsLocalAsset(url))
+            {
+                MonetizrLogger.Print("LOCALTEST ASSET: " + url);
+                return MonetizrUtils.LoadLocalAsset(url);
+            }
+
             UnityWebRequest uwr = UnityWebRequest.Get(url);
             uwr.timeout = 10;
 

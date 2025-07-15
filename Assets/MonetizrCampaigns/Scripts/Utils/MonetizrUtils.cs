@@ -1,4 +1,5 @@
-﻿using Monetizr.SDK.Campaigns;
+﻿using mixpanel;
+using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.UI;
@@ -519,6 +520,18 @@ namespace Monetizr.SDK.Utils
                 return true;
             }
             return false;
+        }
+
+        public static bool IsLocalAsset (string assetURL)
+        {
+            if (string.IsNullOrEmpty(assetURL) || assetURL.Length < 10) return false;
+            return assetURL.StartsWith("localtest_", StringComparison.Ordinal);
+        }
+
+        public static byte[] LoadLocalAsset (string assetName)
+        {
+            TextAsset asset = Resources.Load<TextAsset>("LocalTestCampaign/" + assetName);
+            return asset ? asset.bytes : null;
         }
 
     }
