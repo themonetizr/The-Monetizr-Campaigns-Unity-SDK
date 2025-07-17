@@ -1,6 +1,7 @@
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,6 +26,18 @@ namespace Monetizr.SDK.Utils
             if (campaigns == null) return new List<ServerCampaign>();
             campaigns.campaigns = await CampaignManager.Instance.ProcessCampaigns(campaigns.campaigns);
             return campaigns.campaigns;
+        }
+
+        public static bool IsLocalAsset(string assetURL)
+        {
+            if (string.IsNullOrEmpty(assetURL) || assetURL.Length < 10) return false;
+            return assetURL.StartsWith("localtest_", StringComparison.Ordinal);
+        }
+
+        public static byte[] LoadLocalAsset(string assetName)
+        {
+            TextAsset asset = Resources.Load<TextAsset>("LocalTestCampaign/" + assetName);
+            return asset ? asset.bytes : null;
         }
     }
 }

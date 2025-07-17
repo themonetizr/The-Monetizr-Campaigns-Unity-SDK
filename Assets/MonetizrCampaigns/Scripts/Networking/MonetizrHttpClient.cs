@@ -106,10 +106,10 @@ namespace Monetizr.SDK.Networking
 
         public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
         {
-            if (MonetizrUtils.IsLocalAsset(url))
+            if (LocalTestCampaignManager.IsLocalAsset(url))
             {
                 MonetizrLogger.Print("LOCALTEST ASSET: " + url);
-                return MonetizrUtils.LoadLocalAsset(url);
+                return LocalTestCampaignManager.LoadLocalAsset(url);
             }
 
             UnityWebRequest uwr = UnityWebRequest.Get(url);
