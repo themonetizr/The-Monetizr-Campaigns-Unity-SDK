@@ -1,12 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <dependencies>
     <androidPackages>
-        <androidPackage spec="com.google.android.gms:play-services-ads-identifier:18.0.1"/>
-    </androidPackages>
-    <androidPackages>
-      <androidPackage spec="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.31"/>
-    </androidPackages>
-    <androidPackages>
-      <androidPackage spec="androidx.browser:browser:1.2.0"/>
+        <androidPackage spec="com.google.android.gms:play-services-ads-identifier:18.0.1" />
+        <androidPackage spec="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.31" />
+        <androidPackage spec="androidx.browser:browser:1.2.0" />
+
+        <androidPackage spec="org.prebid:prebid-mobile-sdk:2.0.3">
+            <excludeSpecs>
+                <excludeSpec>org.prebid:prebid-mobile-sdk-open-measurement</excludeSpec>
+            </excludeSpecs>
+        </androidPackage>
+
+        <androidPackage spec="androidx.recyclerview:recyclerview:1.2.1" />
     </androidPackages>
 </dependencies>
