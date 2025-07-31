@@ -549,7 +549,7 @@ namespace Monetizr.SDK.Core
             return Instance;
         }
 
-        private static bool IsInitializationSetupComplete()
+        private static bool IsInitializationSetupComplete ()
         {
             MonetizrSettingsMenu.LoadSettings();
 
@@ -912,7 +912,7 @@ namespace Monetizr.SDK.Core
             onRequestComplete?.Invoke(true);
         }
 
-        private async void RequestCampaigns(Action<bool> onRequestComplete)
+        private async void RequestCampaigns (Action<bool> onRequestComplete)
         {
             await ConnectionsClient.GetGlobalSettings();
             bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);

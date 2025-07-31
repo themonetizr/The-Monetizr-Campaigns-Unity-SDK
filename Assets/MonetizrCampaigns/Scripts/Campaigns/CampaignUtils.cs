@@ -5,6 +5,7 @@ using Monetizr.SDK.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 
 namespace Monetizr.SDK.Campaigns
 {
@@ -96,13 +97,19 @@ namespace Monetizr.SDK.Campaigns
 
         public static void SetupCampaignType (ServerCampaign campaign)
         {
-            if (IsProgrammatic(campaign))
+            if (GetBoolParameter(campaign, "is_fallback_campaign"))
+            {
+                campaign.campaignType = CampaignType.Fallback;
+                return;
+            }
+
+            if (GetBoolParameter(campaign, "programmatic"))
             {
                 campaign.campaignType = CampaignType.Programmatic;
                 return;
             }
 
-            if (IsADM(campaign))
+            if (GetBoolParameter(campaign, "campaign.use_adm"))
             {
                 campaign.campaignType = CampaignType.ADM;
                 return;
@@ -111,23 +118,27 @@ namespace Monetizr.SDK.Campaigns
             campaign.campaignType = CampaignType.MonetizrBackend;
         }
 
-        private static bool IsADM (ServerCampaign campaign)
+        public static bool GetBoolParameter (ServerCampaign campaign, string parameter)
         {
-            if (String.IsNullOrEmpty(campaign.adm)) return false;
-            string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, "campaign.use_adm");
-            bool useADM = bool.TryParse(extractedValue, out bool result) && result;
-            return useADM;
+            if (String.IsNullOrEmpty(campaign.content))
+            {
+                MonetizrLogger.Print("CampaignID " + campaign.id + " - Content is empty.");
+                return false;
+            }
+
+            string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, parameter);
+            if (String.IsNullOrEmpty(extractedValue))
+            {
+                MonetizrLogger.Print("CampaignID " + campaign.id + " - Parameter " + parameter + " was not parsed correctly.");
+                return false;
+            }
+
+            bool parameterValue = bool.TryParse(extractedValue, out bool result);
+            MonetizrLogger.Print("CampaignID " + campaign.id + " - Parameter " + parameter + " value is: " + parameterValue);
+            return parameterValue;
         }
 
-        private static bool IsProgrammatic (ServerCampaign campaign)
-        {
-            if (!String.IsNullOrEmpty(campaign.adm)) return false;
-            string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, "programmatic");
-            bool isProgrammatic = bool.TryParse(extractedValue, out bool result) && result;
-            return isProgrammatic;
-        }
-
-        public static string PrintAssetsTypeList(ServerCampaign serverCampaign)
+        public static string PrintAssetsTypeList (ServerCampaign serverCampaign)
         {
             StringBuilder result = new StringBuilder();
 

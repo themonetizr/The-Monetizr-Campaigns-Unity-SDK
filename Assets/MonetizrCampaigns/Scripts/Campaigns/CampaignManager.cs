@@ -1,6 +1,7 @@
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
 using System;
@@ -30,7 +31,7 @@ namespace Monetizr.SDK.Campaigns
             return campaigns;
         }
 
-        private async Task<List<ServerCampaign>> ProcessCampaignByType(List<ServerCampaign> campaigns)
+        private async Task<List<ServerCampaign>> ProcessCampaignByType (List<ServerCampaign> campaigns)
         {
             for (int i = 0; i < campaigns.Count; i++)
             {
@@ -53,6 +54,10 @@ namespace Monetizr.SDK.Campaigns
 
                         case CampaignType.Programmatic:
                             campaign = await ProcessProgrammaticCampaign(campaign);
+                            break;
+
+                        case CampaignType.Fallback:
+                            campaign = await ProcessFallbackCampaign(campaign);
                             break;
 
                         default:
@@ -101,6 +106,41 @@ namespace Monetizr.SDK.Campaigns
             campaign.campaignTimeoutStart = Time.time;
             campaign = await RecreateCampaignFromADM(campaign);
             ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
+
+            return campaign;
+        }
+
+        private async Task<ServerCampaign> ProcessFallbackCampaign (ServerCampaign campaign)
+        {
+            campaign.ParseContentStringIntoSettingsDictionary();
+            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
+
+            if (campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false))
+            {
+                string prebidJSON = campaign.serverSettings.GetParam("prebid_data", "");
+                if (string.IsNullOrEmpty(prebidJSON))
+                {
+                    MonetizrLogger.Print("Prebid Data not found in campaign.");
+                    return null;
+                }
+
+                PrebidManager.FetchDemand(prebidJSON, keywordsJson =>
+                {
+                    MonetizrLogger.Print($"Received Prebid keywords: {keywordsJson}");
+                    // TODO: Inject into WebView in Step 3
+                });
+
+                return null;
+            }
+            else if (campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false))
+            {
+                // To be implemented
+            }
+            else
+            {
+                MonetizrLogger.PrintError("CampaignID " + campaign.id + " - No fallback allowed.");
+                return null;
+            }
 
             return campaign;
         }
