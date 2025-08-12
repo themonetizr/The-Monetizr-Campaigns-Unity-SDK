@@ -1,6 +1,7 @@
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
@@ -117,20 +118,34 @@ namespace Monetizr.SDK.Campaigns
 
             if (campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false))
             {
-                string prebidJSON = campaign.serverSettings.GetParam("prebid_data", "");
+                //string prebidJSON = campaign.serverSettings.GetParam("prebid_data", "");
+                string prebidJSON = PrebidManager.testJson;
                 if (string.IsNullOrEmpty(prebidJSON))
                 {
-                    MonetizrLogger.Print("Prebid Data not found in campaign.");
+                    MonetizrLogger.Print("[CampaignManager] Prebid Data not found in campaign.");
                     return null;
                 }
 
-                PrebidManager.FetchDemand(prebidJSON, keywordsJson =>
-                {
-                    MonetizrLogger.Print($"Received Prebid keywords: {keywordsJson}");
-                    // TODO: Inject into WebView in Step 3
-                });
+                string keywordsJson = await FetchPrebidKeywordsAsync(prebidJSON);
 
-                return null;
+                if (string.IsNullOrEmpty(keywordsJson))
+                {
+                    MonetizrLogger.Print("[CampaignManager] Prebid Keywords not found in campaign.");
+                    return null;
+                }
+
+                MonetizrLogger.Print($"[CampaignManager] Received Prebid keywords: {keywordsJson}");
+                campaign.prebidKeywords = keywordsJson;
+                string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(keywordsJson);
+                MonetizrLogger.Print($"[CampaignManager] Received Prebid VAST: {receivedVAST}");
+
+                if (string.IsNullOrEmpty(receivedVAST))
+                {
+                    MonetizrLogger.Print("[CampaignManager] Prebid VAST not received.");
+                    return null;
+                }
+
+                campaign.adm = receivedVAST;
             }
             else if (campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false))
             {
@@ -138,9 +153,11 @@ namespace Monetizr.SDK.Campaigns
             }
             else
             {
-                MonetizrLogger.PrintError("CampaignID " + campaign.id + " - No fallback allowed.");
+                MonetizrLogger.PrintError("[CampaignManager] CampaignID " + campaign.id + " - No fallback allowed.");
                 return null;
             }
+
+            campaign = await ProcessADMCampaign(campaign);
 
             return campaign;
         }
@@ -175,6 +192,27 @@ namespace Monetizr.SDK.Campaigns
             MonetizrLogger.Print(isProgrammaticOK ? "EarlyBidRequest - COMPLETED" : "EarlyBidRequest - FAILED");
             campaign.hasMadeEarlyBidRequest = isProgrammaticOK;
             return campaign;
+        }
+
+        private async Task<string> FetchPrebidKeywordsAsync (string prebidJSON, int timeoutMs = 3000)
+        {
+            TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
+
+            PrebidManager.FetchDemand(prebidJSON, keywordsJson =>
+            {
+                tcs.TrySetResult(keywordsJson);
+            });
+
+            Task delayTask = Task.Delay(timeoutMs);
+            Task completedTask = await Task.WhenAny(tcs.Task, delayTask);
+
+            if (completedTask == delayTask)
+            {
+                MonetizrLogger.PrintWarning("[PrebidManager] Timeout waiting for keywords.");
+                return null;
+            }
+
+            return await tcs.Task;
         }
 
         private async Task<List<ServerCampaign>> ProcessAssets (List<ServerCampaign> campaigns)

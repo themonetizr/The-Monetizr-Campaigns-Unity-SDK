@@ -19,7 +19,6 @@ namespace Monetizr.SDK.Utils
 {
     public static class MonetizrUtils
     {
-        public static Vector2 Abs(Vector2 v) => new Vector2(Mathf.Abs(v.x), Mathf.Abs(v.y));
 
         public static int[] ConvertToIntArray(string s, char delimeter = '.')
         {
@@ -51,21 +50,6 @@ namespace Monetizr.SDK.Utils
             }
 
             return 0;
-        }
-
-        public static Dictionary<string, string> _ParseJson(string content)
-        {
-            content = content.Trim(new[] { '{', '}' }).Replace('\'', '\"');
-
-            var trimmedChars = new[] { ' ', '\"' };
-
-            Regex regxComma = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-            Regex regxColon = new Regex(":(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-            string[] commaSplit = regxComma.Split(content);
-
-            return regxComma.Split(content)
-                            .Select(v => regxColon.Split(v))
-                            .ToDictionary(v => v.First().Trim(trimmedChars), v => v.Last().Trim(trimmedChars));
         }
         
         public static StringBuilder UnescapeString(StringBuilder content)
@@ -170,17 +154,6 @@ namespace Monetizr.SDK.Utils
             }
 
             return res2;
-        }
-
-        public static void ShuffleList<T>(List<T> list)
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                var temp = list[i];
-                int randomIndex = UnityEngine.Random.Range(i, list.Count);
-                list[i] = list[randomIndex];
-                list[randomIndex] = temp;
-            }
         }
 
         public static List<TListType> CreateListFromArray<TArrayType, TListType>(TArrayType[] array, Func<TArrayType, TListType> convertToListType, TListType defaultElement)
@@ -500,16 +473,6 @@ namespace Monetizr.SDK.Utils
             value = value.Replace("\\/", "/").Replace("\\\"", "\"").Replace("\\\\", "\\");
 
             return value;
-        }
-
-        public static string ExtractNestedValue(string jsonString, string parentKey, string nestedKey)
-        {
-            string parentValue = ExtractValueFromJSON(jsonString, parentKey);
-
-            if (parentValue == null)
-                return null;
-
-            return ExtractValueFromJSON(parentValue, nestedKey);
         }
 
         public static bool IsCampaignHTML (Mission mission, PanelId panelId)

@@ -6,12 +6,16 @@ using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
+using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using EventType = Monetizr.SDK.Core.EventType;
 
@@ -168,6 +172,7 @@ namespace Monetizr.SDK.UI
                     MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
+
                 case PanelId.CongratsNotification:
                     MonetizrLogger.Print("Preparing CongratsNotification.");
                     PrepareCongratsNotificationPanel(m);
@@ -505,6 +510,92 @@ namespace Monetizr.SDK.UI
             }
 
             return showWebview;
+        }
+
+        private async void PrepareFallbackCampaign ()
+        {
+            MonetizrLogger.Print("[Fallback] Preparing Programmatic fallback (download player + inject VAST).");
+
+            ServerCampaign campaign = currentMission.campaign;
+
+            string playerDir = campaign.GetCampaignPath("programmatic_video");
+            string indexPath = Path.Combine(playerDir, "index.html");
+            bool playerReady = File.Exists(indexPath);
+
+            // 2) Download/unzip player if not present
+            if (!playerReady)
+            {
+                bool ok = false; // await DownloadAndUnzipAsync(MonetizrUtils.GetVideoPlayerURL(campaign), playerDir);
+                if (!ok)
+                {
+                    MonetizrLogger.PrintError("[Fallback] Could not prepare video player.");
+                    HandleProgrammaticFailure(campaign);
+                    return;
+                }
+                playerReady = File.Exists(indexPath);
+            }
+
+            if (!playerReady)
+            {
+                MonetizrLogger.PrintError("[Fallback] index.html not found after unzip.");
+                HandleProgrammaticFailure(campaign);
+                return;
+            }
+
+            // 3) Build VAST params (prefer adTagUrl, or inline VAST if provided)
+            // Supply one of these keys from your backend:
+            //  - programmatic.ad_tag_url     (VAST URL)
+            //  - programmatic.vast_xml_raw   (inline VAST XML)
+            string adTagUrl = campaign.serverSettings.GetParam("programmatic.ad_tag_url");
+            string inlineVast = campaign.prebidKeywords;
+
+            if (!string.IsNullOrEmpty(adTagUrl))
+            {
+                // IMA via ad tag URL
+                campaign.vastAdParameters = "{\"mode\":\"ima\",\"adTagUrl\":\"" + adTagUrl.Replace("\"", "\\\"") + "\"}";
+                campaign.openRtbRawResponse = null;
+                MonetizrLogger.Print("[Fallback] Using adTagUrl mode.");
+            }
+            else if (!string.IsNullOrEmpty(inlineVast))
+            {
+                // IMA via adsResponse (inline XML)
+                campaign.vastAdParameters = "{\"mode\":\"ima\",\"useAdsResponse\":true}";
+                campaign.openRtbRawResponse = inlineVast;
+                MonetizrLogger.Print("[Fallback] Using inline VAST mode.");
+            }
+            else
+            {
+                MonetizrLogger.PrintError("[Fallback] No VAST provided (programmatic.ad_tag_url or programmatic.vast_xml_raw).");
+                HandleProgrammaticFailure(campaign);
+                return;
+            }
+
+            // 4) Inject parameters into index.html
+            Asset asset = new Asset { fpath = "programmatic_video", mainAssetName = "index.html", url = "about:blank" };
+            campaign.EmbedVastParametersIntoVideoPlayer(asset);
+
+            string userAgent = _webView.GetUserAgent();
+            PubmaticHelper ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, userAgent);
+
+            bool hasDownloaded = await ph.DownloadOMSDKServiceContent();
+            if (hasDownloaded)
+            {
+                ph.InitializeOMSDK("{\"mode\":\"ima\",\"useAdsResponse\":true,\"omidPartner\":{\"name\":\"Monetizr\",\"version\":\"1.0\"}}");
+            }
+            else
+            {
+                MonetizrLogger.PrintWarning("[Fallback] OMID verification skipped (download failed).");
+            }
+
+            // 5) For MVP, skip OMSDK verification
+            programmaticStatus = "no_programmatic_or_success";
+            _webUrl = "file://" + indexPath.Replace("\\", "/");
+            MonetizrLogger.Print($"[Fallback] Loading player: {_webUrl}");
+
+            _webView.Load(_webUrl);
+            _webView.Show();
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+            impressionStarts = true;
         }
 
         private IEnumerator ShowCloseButton(float time)

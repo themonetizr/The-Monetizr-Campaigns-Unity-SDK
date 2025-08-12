@@ -70,6 +70,7 @@ namespace Monetizr.SDK.Campaigns
         public bool hasMadeEarlyBidRequest = false;
         public CampaignType campaignType = CampaignType.None;
         public float campaignTimeoutStart;
+        public string prebidKeywords;
 
         public ServerCampaign () { }
 
@@ -501,7 +502,7 @@ namespace Monetizr.SDK.Campaigns
             MonetizrLogger.Print("OpenRTBResponse: " + openRtbRawResponse);
             MonetizrLogger.Print("Vast Verification Node: " + verifications_vast_node);
 
-            var str = File.ReadAllText(indexPath);
+            string str = File.ReadAllText(indexPath);
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
             if (!string.IsNullOrEmpty(openRtbRawResponse))
@@ -519,24 +520,6 @@ namespace Monetizr.SDK.Campaigns
             MonetizrLogger.Print("Final HTML: " + str);
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
             File.WriteAllText(indexPath, str);
-        }
-
-        internal static void DeleteDirectory(string target_dir)
-        {
-            string[] files = Directory.GetFiles(target_dir);
-            string[] dirs = Directory.GetDirectories(target_dir);
-
-            foreach (string file in files)
-            {
-                File.Delete(file);
-            }
-
-            foreach (string dir in dirs)
-            {
-                DeleteDirectory(dir);
-            }
-
-            Directory.Delete(target_dir, false);
         }
         
         internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
