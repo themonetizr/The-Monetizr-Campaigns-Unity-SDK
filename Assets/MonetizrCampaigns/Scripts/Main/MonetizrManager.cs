@@ -874,7 +874,7 @@ namespace Monetizr.SDK.Core
             this._soundSwitch = soundSwitch;
             ConnectionsClient = connectionClient ?? new MonetizrHttpClient(MonetizrSettings.apiKey);
             ConnectionsClient.Initialize();
-            InitializeUI();
+            _uiController = new UIController();
             _gameOnInitSuccess = gameOnInitSuccess;
 
             _onRequestComplete = (bool isOk) =>
@@ -997,8 +997,17 @@ namespace Monetizr.SDK.Core
             return ConnectionsClient.currentApiKey;
         }
 
-        internal void RestartClient()
+        internal async Task RestartClientAsync()
         {
+            MonetizrLogger.Print("[MonetizrManager] Restarting Client.");
+
+            if (ConnectionsClient.currentApiKey == "LOCAL_TESTING")
+            {
+                MonetizrLogger.Print("[MonetizrManager] Initializing Local Testing Campaign.");
+                await SetupLocalTestingCampaign(_onRequestComplete);
+                return;
+            }
+
             ConnectionsClient.Close();
             ConnectionsClient = new MonetizrHttpClient(ConnectionsClient.currentApiKey);
             ConnectionsClient.Initialize();
@@ -1022,11 +1031,6 @@ namespace Monetizr.SDK.Core
             campaigns.Clear();
             _activeCampaignId = null;
             RequestCampaigns(callRequestComplete ? _onRequestComplete : null);
-        }
-
-        private void InitializeUI()
-        {
-            _uiController = new UIController();
         }
 
         internal void ClaimMissionData(Mission m)

@@ -98,6 +98,7 @@ namespace Monetizr.SDK.Debug
             MonetizrLogger.Print("Dropdown: " + apiKeysList.value);
 
         }
+
         public void ResetLocalClaimData()
         {
             MonetizrManager.Instance.CleanRewardsClaims();
@@ -153,7 +154,7 @@ namespace Monetizr.SDK.Debug
                 }
 
                 bool changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.campaignKeys[apiKeysList.value]);
-                MonetizrManager.Instance.RestartClient();
+                MonetizrManager.Instance.RestartClientAsync();
             }
             else
             {
@@ -171,7 +172,7 @@ namespace Monetizr.SDK.Debug
                 }
 
                 bool changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.devKeys[apiKeysList.value]);
-                MonetizrManager.Instance.RestartClient();
+                MonetizrManager.Instance.RestartClientAsync();
             }
         }
 
