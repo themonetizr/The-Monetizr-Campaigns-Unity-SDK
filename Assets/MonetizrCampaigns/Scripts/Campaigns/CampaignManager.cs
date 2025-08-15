@@ -118,8 +118,7 @@ namespace Monetizr.SDK.Campaigns
 
             if (campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false))
             {
-                //string prebidJSON = campaign.serverSettings.GetParam("prebid_data", "");
-                string prebidJSON = PrebidManager.testJson;
+                string prebidJSON = campaign.serverSettings.GetParam("prebid_data", PrebidManager.testJson);
                 if (string.IsNullOrEmpty(prebidJSON))
                 {
                     MonetizrLogger.Print("[CampaignManager] Prebid Data not found in campaign.");

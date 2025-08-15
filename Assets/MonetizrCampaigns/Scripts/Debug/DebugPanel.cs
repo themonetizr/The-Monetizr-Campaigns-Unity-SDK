@@ -154,7 +154,7 @@ namespace Monetizr.SDK.Debug
                 }
 
                 bool changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.campaignKeys[apiKeysList.value]);
-                MonetizrManager.Instance.RestartClientAsync();
+                MonetizrManager.Instance.RestartClient();
             }
             else
             {
@@ -172,7 +172,7 @@ namespace Monetizr.SDK.Debug
                 }
 
                 bool changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.devKeys[apiKeysList.value]);
-                MonetizrManager.Instance.RestartClientAsync();
+                MonetizrManager.Instance.RestartClient();
             }
         }
 

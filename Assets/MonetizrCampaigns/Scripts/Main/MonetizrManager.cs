@@ -992,21 +992,14 @@ namespace Monetizr.SDK.Core
             missionsManager.CleanRewardsClaims();
         }
 
-        internal string GetCurrentAPIkey()
+        internal string GetCurrentAPIkey ()
         {
             return ConnectionsClient.currentApiKey;
         }
 
-        internal async Task RestartClientAsync()
+        internal void RestartClient ()
         {
             MonetizrLogger.Print("[MonetizrManager] Restarting Client.");
-
-            if (ConnectionsClient.currentApiKey == "LOCAL_TESTING")
-            {
-                MonetizrLogger.Print("[MonetizrManager] Initializing Local Testing Campaign.");
-                await SetupLocalTestingCampaign(_onRequestComplete);
-                return;
-            }
 
             ConnectionsClient.Close();
             ConnectionsClient = new MonetizrHttpClient(ConnectionsClient.currentApiKey);
@@ -1014,7 +1007,7 @@ namespace Monetizr.SDK.Core
             RequestCampaigns();
         }
 
-        internal bool ChangeAPIKey(string apiKey)
+        internal bool ChangeAPIKey (string apiKey)
         {
             if (apiKey == ConnectionsClient.currentApiKey) return false;
             MonetizrLogger.Print($"Changing api key to {apiKey}");
@@ -1022,7 +1015,7 @@ namespace Monetizr.SDK.Core
             return true;
         }
 
-        internal void RequestCampaigns(bool callRequestComplete = true)
+        internal async void RequestCampaigns (bool callRequestComplete = true)
         {
             _isActive = false;
             _isMissionsIsOutdated = true;
@@ -1030,6 +1023,14 @@ namespace Monetizr.SDK.Core
             missionsManager.CleanUp();
             campaigns.Clear();
             _activeCampaignId = null;
+
+            if (ConnectionsClient.currentApiKey == "LOCAL_TESTING")
+            {
+                MonetizrLogger.Print("[MonetizrManager] Reinitializing Local Testing Campaign.");
+                await SetupLocalTestingCampaign(_onRequestComplete);
+                return;
+            }
+
             RequestCampaigns(callRequestComplete ? _onRequestComplete : null);
         }
 
