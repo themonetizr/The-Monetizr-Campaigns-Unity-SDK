@@ -157,6 +157,7 @@ namespace Monetizr.SDK.Campaigns
             }
 
             campaign = await ProcessADMCampaign(campaign);
+            campaign.campaignType = CampaignType.Fallback;
 
             return campaign;
         }

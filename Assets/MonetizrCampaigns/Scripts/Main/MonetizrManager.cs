@@ -1017,6 +1017,8 @@ namespace Monetizr.SDK.Core
 
         internal async void RequestCampaigns (bool callRequestComplete = true)
         {
+            MonetizrLogger.Print("[MonetizrManager] RE-RequestCampaigns.");
+
             _isActive = false;
             _isMissionsIsOutdated = true;
             _uiController.DestroyTeaser();
@@ -1093,9 +1095,15 @@ namespace Monetizr.SDK.Core
                 updateUI = true;
             }
 
-            if (mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false))
+            bool shouldRestart = mission.campaign.campaignType == CampaignType.Fallback || mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false);
+            if (shouldRestart && serverClaimForCampaigns && CheckFullCampaignClaim(mission))
             {
-                if (serverClaimForCampaigns && CheckFullCampaignClaim(mission))
+                MonetizrLogger.Print("[MonetizrManager] Restarting RequestCampaigns.");
+                if (mission.campaign.campaignType == CampaignType.Fallback)
+                {
+                    ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); }, () => { RequestCampaigns(false); });
+                }
+                else
                 {
                     ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); });
                 }
