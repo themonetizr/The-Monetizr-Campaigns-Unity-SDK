@@ -1,3 +1,4 @@
+using Monetizr.SDK.Utils;
 using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace Monetizr.SDK.Debug
         {
             if (!isEnabled) return;
 
-            string className = Path.GetFileNameWithoutExtension(filePath);
+            string className = MonetizrUtils.ExtractClassName(filePath);
             string formatted = $"Monetizr SDK: [{className}] {message}";
 
             switch (type)

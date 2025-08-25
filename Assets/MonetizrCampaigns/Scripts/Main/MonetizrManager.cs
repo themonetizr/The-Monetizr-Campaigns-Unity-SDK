@@ -998,7 +998,7 @@ namespace Monetizr.SDK.Core
 
         internal void RestartClient ()
         {
-            MonetizrLogger.Print("[MonetizrManager] Restarting Client.");
+            MonetizrLogger.Print("Restarting Client.");
 
             ConnectionsClient.Close();
             ConnectionsClient = new MonetizrHttpClient(ConnectionsClient.currentApiKey);
@@ -1016,7 +1016,7 @@ namespace Monetizr.SDK.Core
 
         internal async void RequestCampaigns (bool callRequestComplete = true)
         {
-            MonetizrLogger.Print("[MonetizrManager] RE-RequestCampaigns.");
+            MonetizrLogger.Print("Re-RequestCampaigns.");
 
             _isActive = false;
             _isMissionsIsOutdated = true;
@@ -1027,7 +1027,7 @@ namespace Monetizr.SDK.Core
 
             if (ConnectionsClient.currentApiKey == "LOCAL_TESTING")
             {
-                MonetizrLogger.Print("[MonetizrManager] Reinitializing Local Testing Campaign.");
+                MonetizrLogger.Print("Reinitializing Local Testing Campaign.");
                 await SetupLocalTestingCampaign(_onRequestComplete);
                 return;
             }
@@ -1104,7 +1104,7 @@ namespace Monetizr.SDK.Core
         {
             if (delayTime > 0) await Task.Delay(TimeSpan.FromSeconds(delayTime));
 
-            MonetizrLogger.Print("[MonetizrManager] Restarting RequestCampaigns.");
+            MonetizrLogger.Print("Restarting RequestCampaigns.");
             if (mission.campaign.campaignType == CampaignType.Fallback)
             {
                 _ = ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); }, () => { RequestCampaigns(false); });

@@ -485,5 +485,15 @@ namespace Monetizr.SDK.Utils
             return false;
         }
 
+        public static string ExtractClassName (string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath)) return "Unknown";
+
+            string normalized = filePath.Replace("\\", "/");
+            string fileName = normalized.Substring(normalized.LastIndexOf('/') + 1);
+
+            return Path.GetFileNameWithoutExtension(fileName);
+        }
+
     }
 }
