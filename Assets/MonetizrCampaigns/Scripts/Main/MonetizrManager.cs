@@ -9,6 +9,7 @@ using Monetizr.SDK.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1079,8 +1080,7 @@ namespace Monetizr.SDK.Core
         private void OnCongratsShowed (Mission mission, bool isSkipped, Action<bool> onComplete, Action updateUIDelegate)
         {
             bool updateUI = false;
-
-            MonetizrLogger.Print($"OnClaimRewardComplete --> ShowCongratsNotification {mission.serverId}");
+            MonetizrLogger.Print("OnCongratsShowed.");
 
             if (mission.campaignServerSettings.GetParam("RewardCenter.do_not_claim_and_hide_missions") != "true")
             {
@@ -1089,30 +1089,32 @@ namespace Monetizr.SDK.Core
             }
 
             ClaimMissionData(mission);
-
-            if (missionsManager.UpdateMissionsActivity(mission))
-            {
-                updateUI = true;
-            }
+            if (missionsManager.UpdateMissionsActivity(mission)) updateUI = true;
+            HideTeaser(true);
+            onComplete?.Invoke(isSkipped);
+            if (updateUI) updateUIDelegate?.Invoke();
 
             bool shouldRestart = mission.campaign.campaignType == CampaignType.Fallback || mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false);
             if (shouldRestart && serverClaimForCampaigns && CheckFullCampaignClaim(mission))
             {
-                MonetizrLogger.Print("[MonetizrManager] Restarting RequestCampaigns.");
-                if (mission.campaign.campaignType == CampaignType.Fallback)
-                {
-                    ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); }, () => { RequestCampaigns(false); });
-                }
-                else
-                {
-                    ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); });
-                }
+                int restartDelay = mission.campaignServerSettings.GetIntParam("restart_timer", 0);
+                RestartCampaignsFlow(mission, restartDelay);
             }
+        }
 
-            MonetizrManager.HideTeaser(true);
-            onComplete?.Invoke(isSkipped);
-            if (!updateUI) return;
-            updateUIDelegate?.Invoke();
+        private async void RestartCampaignsFlow (Mission mission, int delayTime)
+        {
+            if (delayTime > 0) await Task.Delay(TimeSpan.FromSeconds(delayTime));
+
+            MonetizrLogger.Print("[MonetizrManager] Restarting RequestCampaigns.");
+            if (mission.campaign.campaignType == CampaignType.Fallback)
+            {
+                _ = ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); }, () => { RequestCampaigns(false); });
+            }
+            else
+            {
+                _ = ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); });
+            }
         }
 
         internal void InitializeBuiltinMissionsForAllCampaigns()
