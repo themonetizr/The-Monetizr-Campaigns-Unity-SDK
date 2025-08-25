@@ -193,12 +193,10 @@ namespace Monetizr.SDK.Analytics
 
             if (visibleAdAsset.Contains(adElement))
             {
-                MonetizrLogger.Print(MonetizrErrors.msg[ErrorType.AdAssetStillShowing]);
+                MonetizrLogger.Print("Some ad asset are still showing.");
             }
 
-
             visibleAdAsset.Add(adElement);
-
             StartTimedEvent(eventName);
         }
 

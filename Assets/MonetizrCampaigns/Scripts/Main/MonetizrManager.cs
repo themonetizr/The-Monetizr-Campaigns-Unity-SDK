@@ -157,7 +157,7 @@ namespace Monetizr.SDK.Core
             if (reward != null)
             {
                 reward.maximumAmount = maxAmount;
-                Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+                Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
                 MonetizrManager.Instance.missionsManager.UpdateMissionsRewards(rt, reward);
             }
         }
@@ -178,7 +178,7 @@ namespace Monetizr.SDK.Core
 
         public static void ShowDebug()
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             debugAttempt++;
 
 #if !UNITY_EDITOR
@@ -286,7 +286,7 @@ namespace Monetizr.SDK.Core
 
         public static Canvas GetMainCanvas()
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             return Instance?._uiController?.GetMainCanvas();
         }
 
@@ -295,7 +295,7 @@ namespace Monetizr.SDK.Core
             isUsingEngagedUserAction = true;
             MonetizrLogger.Print("Started EngageUserAction");
 
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance?.GetActiveCampaign());
 
             if (Instance.GetActiveCampaign() == null)
@@ -336,7 +336,7 @@ namespace Monetizr.SDK.Core
 
         public static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             UpdateGameUI?.Invoke();
             var campaign = Instance?.FindBestCampaignToActivate();
 
@@ -539,7 +539,7 @@ namespace Monetizr.SDK.Core
 
             if (!IsInitializationSetupComplete())
             {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M600);
+                MonetizrLogger.Print("SDK Setup Incomplete - Please, verify and provide the missing parameters.");
                 return null;
             }
 
@@ -562,19 +562,19 @@ namespace Monetizr.SDK.Core
 
             if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
             {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M601);
+                MonetizrLogger.PrintError("Missing SDK Settings - API Key. Please, provide API Key through ProjectSettings -> Monetizr.");
                 return false;
             }
 
             if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
             {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M602);
+                MonetizrLogger.PrintError("Missing SDK Settings - Bundle ID. Please, provide Bundle ID through ProjectSettings -> Monetizr.");
                 return false;
             }
 
             if (gameRewards == null || gameRewards.Count <= 0)
             {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M603);
+                MonetizrLogger.PrintError("Missing SDK Settings - GameReward. Please, setup at least one Game Reward before SDK initialization.");
                 return false;
             }
 
@@ -582,14 +582,14 @@ namespace Monetizr.SDK.Core
             {
                 if (!gameReward.Value.IsSetupValid())
                 {
-                    MonetizrLogger.PrintLocalMessage(MessageEnum.M606);
+                    MonetizrLogger.PrintError("Invalid GameReward Setup - Please, make sure that the Game Rewards setup is valid.");
                     return false;
                 }
             }
 
             if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
             {
-                MonetizrLogger.PrintLocalMessage(MessageEnum.M604);
+                MonetizrLogger.PrintError("Missing SDK Settings - Advertising ID. Please, call MonetizrManager.SetAdvertisingIds before SDK initialization.");
                 return false;
             }
 
@@ -600,7 +600,6 @@ namespace Monetizr.SDK.Core
         {
             GameObject monetizrObject = new GameObject("MonetizrManager");
             MonetizrManager monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
-            MonetizrErrorLogger monetizrErrorLogger = monetizrObject.AddComponent<MonetizrErrorLogger>();
             GCPManager datadogManager = monetizrObject.AddComponent<GCPManager>();
             CampaignManager campaignManager = monetizrObject.AddComponent<CampaignManager>();
             DontDestroyOnLoad(monetizrObject);
@@ -642,13 +641,13 @@ namespace Monetizr.SDK.Core
 
         internal static void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             Instance._uiController.ShowPanelFromPrefab("MonetizrMessagePanel2", panelId, onComplete, true, m);
         }
 
         internal static void ShowNotification(Action<bool> onComplete, Mission m, PanelId panelId)
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
 
             if (MonetizrUtils.IsCampaignHTML(m, panelId))
             {
@@ -662,7 +661,7 @@ namespace Monetizr.SDK.Core
 
         internal static void ShowEnterEmailPanel(Action<bool> onComplete, Mission m, PanelId panelId)
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             Instance._uiController.ShowPanelFromPrefab("MonetizrEnterEmailPanel2", panelId, onComplete, true, m);
         }
 
@@ -757,14 +756,14 @@ namespace Monetizr.SDK.Core
 
         internal static void ShowCodeView(Action<bool> onComplete, Mission m = null)
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             if (!Instance._isActive) return;
             Instance._uiController.ShowPanelFromPrefab("MonetizrEnterCodePanel2", PanelId.CodePanelView, onComplete, false, m);
         }
 
         internal static void ShowMinigame(Action<bool> onComplete, Mission m)
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             if (!Instance._isActive) return;
 
             var panelNames = new Dictionary<MissionType, Tuple<PanelId, string>>()
@@ -784,14 +783,14 @@ namespace Monetizr.SDK.Core
 
         internal static void ShowUnitySurvey(Action<bool> onComplete, Mission m)
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             if (!Instance._isActive) return;
             Instance._uiController.ShowPanelFromPrefab("MonetizrUnitySurveyPanel", PanelId.SurveyUnityView, onComplete, false, m);
         }
 
         internal static void _ShowWebView(Action<bool> onComplete, PanelId id, Mission m = null)
         {
-            Assert.IsNotNull(Instance, MonetizrErrors.msg[ErrorType.NotinitializedSDK]);
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
             if (!Instance._isActive) return;
             Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", id, onComplete, false, m);
         }
@@ -838,7 +837,7 @@ namespace Monetizr.SDK.Core
 
         private void OnApplicationQuit()
         {
-            MonetizrLogger.PrintRemoteMessage(MessageEnum.M105);
+            MonetizrLogger.Print("SDK application ended.", true);
             Analytics?.OnApplicationQuit();
         }
 
@@ -926,14 +925,13 @@ namespace Monetizr.SDK.Core
 
             if (campaigns == null || campaigns.Count <= 0)
             {
-                MonetizrLogger.PrintWarning($"No campaigns or error while getting them.");
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M401);
+                MonetizrLogger.PrintWarning("No Campaigns available or error obtaining them.", true);
                 ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
                 onRequestComplete?.Invoke(false);
                 return;
             }
 
-            MonetizrLogger.PrintRemoteMessage(MessageEnum.M102);
+            MonetizrLogger.Print("Campaigns succesfully downloaded.", true);
             ConnectionsClient.SetTestMode(campaigns[0].testmode);
             ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
             localSettings.LoadOldAndUpdateNew(campaigns);
@@ -1097,7 +1095,7 @@ namespace Monetizr.SDK.Core
             bool shouldRestart = mission.campaign.campaignType == CampaignType.Fallback || mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false);
             if (shouldRestart && serverClaimForCampaigns && CheckFullCampaignClaim(mission))
             {
-                int restartDelay = mission.campaignServerSettings.GetIntParam("restart_timer", 0);
+                int restartDelay = mission.campaign.serverSettings.GetIntParam("restart_timer", 0);
                 RestartCampaignsFlow(mission, restartDelay);
             }
         }

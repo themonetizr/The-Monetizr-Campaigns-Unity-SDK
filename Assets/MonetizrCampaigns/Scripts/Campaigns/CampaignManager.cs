@@ -121,7 +121,7 @@ namespace Monetizr.SDK.Campaigns
                 string prebidJSON = campaign.serverSettings.GetParam("prebid_data", PrebidManager.testJson);
                 if (string.IsNullOrEmpty(prebidJSON))
                 {
-                    MonetizrLogger.Print("[CampaignManager] Prebid Data not found in campaign.");
+                    MonetizrLogger.Print("Prebid Data not found in campaign.");
                     return null;
                 }
 
@@ -129,18 +129,18 @@ namespace Monetizr.SDK.Campaigns
 
                 if (string.IsNullOrEmpty(keywordsJson))
                 {
-                    MonetizrLogger.Print("[CampaignManager] Prebid Keywords not found in campaign.");
+                    MonetizrLogger.Print("Prebid Keywords not found in campaign.");
                     return null;
                 }
 
-                MonetizrLogger.Print($"[CampaignManager] Received Prebid keywords: {keywordsJson}");
+                MonetizrLogger.Print($"Received Prebid keywords: {keywordsJson}");
                 campaign.prebidKeywords = keywordsJson;
                 string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(keywordsJson);
-                MonetizrLogger.Print($"[CampaignManager] Received Prebid VAST: {receivedVAST}");
+                MonetizrLogger.Print($"Received Prebid VAST: {receivedVAST}");
 
                 if (string.IsNullOrEmpty(receivedVAST))
                 {
-                    MonetizrLogger.Print("[CampaignManager] Prebid VAST not received.");
+                    MonetizrLogger.Print("Prebid VAST not received.");
                     return null;
                 }
 
@@ -152,7 +152,7 @@ namespace Monetizr.SDK.Campaigns
             }
             else
             {
-                MonetizrLogger.PrintError("[CampaignManager] CampaignID " + campaign.id + " - No fallback allowed.");
+                MonetizrLogger.PrintError("CampaignID " + campaign.id + " - No fallback allowed.");
                 return null;
             }
 
@@ -178,14 +178,9 @@ namespace Monetizr.SDK.Campaigns
             {
                 isProgrammaticOK = await pubmaticHelper.GetOpenRTBResponseForCampaign(campaign);
             }
-            catch (DownloadUrlAsStringException e)
-            {
-                MonetizrLogger.PrintError($"EarlyBidRequest - Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
-                isProgrammaticOK = false;
-            }
             catch (Exception e)
             {
-                MonetizrLogger.PrintError($"EarlyBidRequest - Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
+                MonetizrLogger.PrintError($"EarlyBidRequest - CampaignID: " + campaign.id + " / Exception " + e);
                 isProgrammaticOK = false;
             }
 
@@ -208,7 +203,7 @@ namespace Monetizr.SDK.Campaigns
 
             if (completedTask == delayTask)
             {
-                MonetizrLogger.PrintWarning("[PrebidManager] Timeout waiting for keywords.");
+                MonetizrLogger.PrintWarning("Prebid Timeout waiting for keywords.");
                 return null;
             }
 
@@ -226,19 +221,18 @@ namespace Monetizr.SDK.Campaigns
 
                     if (campaign.isLoaded)
                     {
-                        MonetizrLogger.PrintRemoteMessage(MessageEnum.M104);
-                        MonetizrLogger.Print($"Campaign {campaign.id} successfully loaded");
+                        MonetizrLogger.Print($"CampaignID: {campaign.id} successfully loaded", true);
                         MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
                     }
                     else
                     {
-                        throw new Exception($"Campaign {campaign.id} asset loading failed with error: {campaign.loadingError}");
+                        throw new Exception($"CampaignID: {campaign.id} asset loading failed with error: {campaign.loadingError}");
                     }
                 }
                 catch
                 {
                     campaign.isLoaded = false;
-                    MonetizrLogger.PrintRemoteMessage(MessageEnum.M402);
+                    MonetizrLogger.PrintError("CampaignID: " + campaign.id + " failed loading assets.", true);
                     MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
                 }
             }

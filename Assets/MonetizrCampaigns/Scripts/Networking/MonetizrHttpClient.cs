@@ -71,7 +71,7 @@ namespace Monetizr.SDK.Networking
             }
             catch (Exception e)
             {
-                throw new DownloadUrlAsStringException($"DownloadUrlAsString exception\nHttpRequestMessage: {requestMessage}\n{e}", e);
+                MonetizrLogger.PrintError("RequestMessage: " + requestMessage + " / Exception: " + e);
             }
 
             string result = await response.Content.ReadAsStringAsync();
@@ -119,8 +119,7 @@ namespace Monetizr.SDK.Networking
 
             if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.DataProcessingError)
             {
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M403);
-                MonetizrLogger.PrintError($"Network error {uwr.error} with {url}");
+                MonetizrLogger.PrintError("Asset failed downloading. Error: " + uwr.error + " / URL: " + url, true);
                 onDownloadFailed?.Invoke();
                 return null;
             }
@@ -143,12 +142,11 @@ namespace Monetizr.SDK.Networking
 
             if (string.IsNullOrEmpty(responseString))
             {
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M400);
+                MonetizrLogger.PrintError("Global Settings were not obtained", true);
                 return new SettingsDictionary<string, string>();
             }
 
-            MonetizrLogger.PrintRemoteMessage(MessageEnum.M101);
-            MonetizrLogger.Print("Global Settings: " + responseString);
+            MonetizrLogger.Print("Global Settings: " + responseString, true);
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
 

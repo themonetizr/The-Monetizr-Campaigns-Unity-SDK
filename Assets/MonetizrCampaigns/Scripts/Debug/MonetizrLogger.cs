@@ -1,49 +1,54 @@
-using Monetizr.SDK.Utils;
+using System.IO;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace Monetizr.SDK.Debug
 {
     public static class MonetizrLogger
     {
         public static bool isEnabled { set; get; } = false;
-        
-        public static void Print (object message)
+
+        public static void Print (object message, bool forwardToRemote = false, [CallerFilePath] string filePath = "")
+        {
+            LogInternal(LogType.Log, message, forwardToRemote, filePath);
+        }
+
+        public static void PrintWarning (object message, bool forwardToRemote = false, [CallerFilePath] string filePath = "")
+        {
+            LogInternal(LogType.Warning, message, forwardToRemote, filePath);
+        }
+
+        public static void PrintError (object message, bool forwardToRemote = false, [CallerFilePath] string filePath = "")
+        {
+            LogInternal(LogType.Error, message, forwardToRemote, filePath);
+        }
+
+        private static void LogInternal (LogType type, object message, bool forwardToRemote, string filePath)
         {
             if (!isEnabled) return;
-            PrintToConsole(message);
-        }
-        
-        private static void PrintToConsole (object message)
-        {
-            UnityEngine.Debug.Log($"Monetizr SDK: {message}");
-        }
 
-        public static void PrintError (object message)
-        {
-            UnityEngine.Debug.LogError ($"Monetizr SDK: {message}");
-        }
+            string className = Path.GetFileNameWithoutExtension(filePath);
+            string formatted = $"Monetizr SDK: [{className}] {message}";
 
-        public static void PrintWarning (object message)
-        {
-            UnityEngine.Debug.LogWarning($"Monetizr SDK: {message}");
-        }
-
-        public static void PrintLocalMessage (MessageEnum messageEnum)
-        {
-            string messageString = EnumUtils.GetEnumDescription(messageEnum);
-            if (EnumUtils.IsEnumError(messageEnum))
+            switch (type)
             {
-                PrintError(messageString);
+                case LogType.Warning:
+                    UnityEngine.Debug.LogWarning(formatted);
+                    break;
+                case LogType.Error:
+                    UnityEngine.Debug.LogError(formatted);
+                    break;
+                default:
+                    UnityEngine.Debug.Log(formatted);
+                    break;
             }
-            else
+
+            if (forwardToRemote && GCPManager.Instance)
             {
-                PrintToConsole(messageString);
+                bool isError = type == LogType.Error;
+                GCPManager.Instance.Log(formatted, isError);
             }
         }
 
-        public static void PrintRemoteMessage (MessageEnum messageEnum)
-        {
-            PrintLocalMessage(messageEnum);
-            GCPManager.Instance.Log(messageEnum);
-        }
     }
 }
