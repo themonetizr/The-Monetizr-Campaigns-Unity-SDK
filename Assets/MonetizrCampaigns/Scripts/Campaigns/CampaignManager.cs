@@ -121,7 +121,7 @@ namespace Monetizr.SDK.Campaigns
                 string prebidJSON = campaign.serverSettings.GetParam("prebid_data", PrebidManager.testJson);
                 if (string.IsNullOrEmpty(prebidJSON))
                 {
-                    MonetizrLogger.Print("Prebid Data not found in campaign.");
+                    MonetizrLogger.PrintError("Prebid Data not found in campaign.");
                     return null;
                 }
 
@@ -129,11 +129,11 @@ namespace Monetizr.SDK.Campaigns
 
                 if (string.IsNullOrEmpty(keywordsJson))
                 {
-                    MonetizrLogger.Print("Prebid Keywords not found in campaign.");
+                    MonetizrLogger.PrintError("Prebid fetch returned null.");
                     return null;
                 }
 
-                MonetizrLogger.Print($"Received Prebid keywords: {keywordsJson}");
+                MonetizrLogger.Print($"Received Prebid fetch: {keywordsJson}");
                 campaign.prebidKeywords = keywordsJson;
                 string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(keywordsJson);
                 MonetizrLogger.Print($"Received Prebid VAST: {receivedVAST}");

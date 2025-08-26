@@ -1,5 +1,4 @@
 using Monetizr.SDK.Core;
-using Monetizr.SDK.Utils;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;

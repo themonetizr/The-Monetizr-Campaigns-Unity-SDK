@@ -133,16 +133,22 @@ namespace Monetizr.SDK.Campaigns
                 return false;
             }
 
-            bool parameterValue = bool.TryParse(extractedValue, out bool result);
-            MonetizrLogger.Print("CampaignID " + campaign.id + " - Parameter " + parameter + " value is: " + parameterValue);
-            return parameterValue;
+            extractedValue = extractedValue.Trim().Trim('"');
+            if (bool.TryParse(extractedValue, out bool result))
+            {
+                MonetizrLogger.Print($"CampaignID {campaign.id} - Parameter {parameter} value is: {result}");
+                return result;
+            }
+
+            MonetizrLogger.Print($"CampaignID {campaign.id} - Parameter {parameter} could not be parsed as bool (value='{extractedValue}')");
+            return false;
         }
 
         public static string PrintAssetsTypeList (ServerCampaign serverCampaign)
         {
             StringBuilder result = new StringBuilder();
 
-            foreach (var asset in serverCampaign.assets)
+            foreach (Asset asset in serverCampaign.assets)
             {
                 result.AppendLine($"{serverCampaign.id}: {asset.type}");
             }

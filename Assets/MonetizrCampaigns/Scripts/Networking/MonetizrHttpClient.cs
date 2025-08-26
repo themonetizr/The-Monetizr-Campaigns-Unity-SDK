@@ -127,7 +127,7 @@ namespace Monetizr.SDK.Networking
             return uwr.downloadHandler.data;
         }
 
-        internal async Task GetGlobalSettings()
+        internal async Task GetGlobalSettings ()
         {
             GlobalSettings = await DownloadGlobalSettings();
             ParameterChecker.CheckForMissingParameters(true, GlobalSettings);
@@ -136,7 +136,7 @@ namespace Monetizr.SDK.Networking
             MonetizrLogger.Print($"Api endpoint: {_baseApiUrl}");
         }
 
-        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
+        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings ()
         {
             string responseString = await GetResponseStringFromUrl(SettingsApiUrl);
 
@@ -150,7 +150,7 @@ namespace Monetizr.SDK.Networking
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
 
-        internal async Task<List<ServerCampaign>> GetList()
+        internal async Task<List<ServerCampaign>> GetList ()
         {
             string responseString = await GetResponseStringFromUrl(CampaignsApiUrl);
             if (string.IsNullOrEmpty(responseString)) return new List<ServerCampaign>();
@@ -162,7 +162,7 @@ namespace Monetizr.SDK.Networking
             return campaigns.campaigns;
         }
 
-        internal async Task ResetCampaign(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal async Task ResetCampaign (string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
             HttpRequestMessage requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{campaignId}/reset");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
