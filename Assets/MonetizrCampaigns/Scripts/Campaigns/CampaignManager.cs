@@ -118,24 +118,33 @@ namespace Monetizr.SDK.Campaigns
 
             if (campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false))
             {
-                string prebidJSON = campaign.serverSettings.GetParam("prebid_data", PrebidManager.testJson);
+                string prebidHost = campaign.serverSettings.GetParam("prebid_host", PrebidManager.defaultHost);
+                if (string.IsNullOrEmpty(prebidHost))
+                {
+                    MonetizrLogger.PrintError("Prebid Host not found in campaign.");
+                    return null;
+                }
+
+                PrebidManager.InitializePrebid(prebidHost);
+
+                string prebidJSON = campaign.serverSettings.GetParam("prebid_data", PrebidManager.testData);
                 if (string.IsNullOrEmpty(prebidJSON))
                 {
                     MonetizrLogger.PrintError("Prebid Data not found in campaign.");
                     return null;
                 }
 
-                string keywordsJson = await FetchPrebidKeywordsAsync(prebidJSON);
+                string prebidResponse = await FetchPrebid(prebidJSON);
 
-                if (string.IsNullOrEmpty(keywordsJson))
+                if (string.IsNullOrEmpty(prebidResponse))
                 {
                     MonetizrLogger.PrintError("Prebid fetch returned null.");
                     return null;
                 }
 
-                MonetizrLogger.Print($"Received Prebid fetch: {keywordsJson}");
-                campaign.prebidKeywords = keywordsJson;
-                string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(keywordsJson);
+                MonetizrLogger.Print($"Received Prebid fetch: {prebidResponse}");
+                campaign.prebidKeywords = prebidResponse;
+                string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(prebidResponse);
                 MonetizrLogger.Print($"Received Prebid VAST: {receivedVAST}");
 
                 if (string.IsNullOrEmpty(receivedVAST))
@@ -189,11 +198,13 @@ namespace Monetizr.SDK.Campaigns
             return campaign;
         }
 
-        private async Task<string> FetchPrebidKeywordsAsync (string prebidJSON, int timeoutMs = 3000)
+        private async Task<string> FetchPrebid (string prebidData, int timeoutMs = 3000)
         {
+            MonetizrLogger.PrintWarning("Fetching Prebid with: " + prebidData);
+
             TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
 
-            PrebidManager.FetchDemand(prebidJSON, keywordsJson =>
+            PrebidManager.FetchDemand(prebidData, keywordsJson =>
             {
                 tcs.TrySetResult(keywordsJson);
             });
@@ -203,7 +214,7 @@ namespace Monetizr.SDK.Campaigns
 
             if (completedTask == delayTask)
             {
-                MonetizrLogger.PrintWarning("Prebid Timeout waiting for keywords.");
+                MonetizrLogger.PrintError("Prebid Timeout waiting for response.");
                 return null;
             }
 
