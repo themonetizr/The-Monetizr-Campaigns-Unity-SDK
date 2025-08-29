@@ -221,29 +221,29 @@ namespace Monetizr.SDK.Networking
         {
             if (string.IsNullOrEmpty(vastUrl))
             {
-                MonetizrLogger.Print("[VastDownloader] VAST URL is null or empty.");
+                MonetizrLogger.Print("VastDownloader - VAST URL is null or empty.");
                 return null;
             }
 
             try
             {
                 Client.Timeout = TimeSpan.FromMilliseconds(timeoutMs);
-                MonetizrLogger.Print($"[VastDownloader] Downloading VAST from: {vastUrl}");
+                MonetizrLogger.Print($"VastDownloader - Downloading VAST from: {vastUrl}");
                 var response = await Client.GetAsync(vastUrl);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MonetizrLogger.Print($"[VastDownloader] Failed to download VAST. HTTP {response.StatusCode}");
+                    MonetizrLogger.Print($"VastDownloader - Failed to download VAST. HTTP {response.StatusCode}");
                     return null;
                 }
 
                 string vastXml = await response.Content.ReadAsStringAsync();
-                MonetizrLogger.Print($"[VastDownloader] VAST XML length: {vastXml.Length} chars");
+                MonetizrLogger.Print($"VastDownloader - VAST XML length: {vastXml.Length} chars");
                 return vastXml;
             }
             catch (Exception ex)
             {
-                MonetizrLogger.Print($"[VastDownloader] Exception: {ex.Message}");
+                MonetizrLogger.Print($"VastDownloader - Exception: {ex.Message}");
                 return null;
             }
         }

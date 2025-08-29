@@ -157,7 +157,7 @@ namespace Monetizr.SDK.Core
             if (reward != null)
             {
                 reward.maximumAmount = maxAmount;
-                Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+                Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
                 MonetizrManager.Instance.missionsManager.UpdateMissionsRewards(rt, reward);
             }
         }
@@ -178,7 +178,7 @@ namespace Monetizr.SDK.Core
 
         public static void ShowDebug()
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             debugAttempt++;
 
 #if !UNITY_EDITOR
@@ -286,7 +286,7 @@ namespace Monetizr.SDK.Core
 
         public static Canvas GetMainCanvas()
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             return Instance?._uiController?.GetMainCanvas();
         }
 
@@ -295,7 +295,7 @@ namespace Monetizr.SDK.Core
             isUsingEngagedUserAction = true;
             MonetizrLogger.Print("Started EngageUserAction");
 
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance?.GetActiveCampaign());
 
             if (Instance.GetActiveCampaign() == null)
@@ -336,7 +336,7 @@ namespace Monetizr.SDK.Core
 
         public static void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             UpdateGameUI?.Invoke();
             var campaign = Instance?.FindBestCampaignToActivate();
 
@@ -641,15 +641,15 @@ namespace Monetizr.SDK.Core
 
         internal static void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             Instance._uiController.ShowPanelFromPrefab("MonetizrMessagePanel2", panelId, onComplete, true, m);
         }
 
         internal static void ShowNotification(Action<bool> onComplete, Mission m, PanelId panelId)
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
 
-            if (MonetizrUtils.IsCampaignHTML(m, panelId))
+            if (CampaignUtils.IsCampaignHTML(m, panelId))
             {
                 Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", panelId, onComplete, true, m);
             }
@@ -661,7 +661,7 @@ namespace Monetizr.SDK.Core
 
         internal static void ShowEnterEmailPanel(Action<bool> onComplete, Mission m, PanelId panelId)
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             Instance._uiController.ShowPanelFromPrefab("MonetizrEnterEmailPanel2", panelId, onComplete, true, m);
         }
 
@@ -756,14 +756,14 @@ namespace Monetizr.SDK.Core
 
         internal static void ShowCodeView(Action<bool> onComplete, Mission m = null)
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             if (!Instance._isActive) return;
             Instance._uiController.ShowPanelFromPrefab("MonetizrEnterCodePanel2", PanelId.CodePanelView, onComplete, false, m);
         }
 
         internal static void ShowMinigame(Action<bool> onComplete, Mission m)
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             if (!Instance._isActive) return;
 
             var panelNames = new Dictionary<MissionType, Tuple<PanelId, string>>()
@@ -783,14 +783,14 @@ namespace Monetizr.SDK.Core
 
         internal static void ShowUnitySurvey(Action<bool> onComplete, Mission m)
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             if (!Instance._isActive) return;
             Instance._uiController.ShowPanelFromPrefab("MonetizrUnitySurveyPanel", PanelId.SurveyUnityView, onComplete, false, m);
         }
 
         internal static void _ShowWebView(Action<bool> onComplete, PanelId id, Mission m = null)
         {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizerManager.Initalize first.");
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             if (!Instance._isActive) return;
             Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", id, onComplete, false, m);
         }

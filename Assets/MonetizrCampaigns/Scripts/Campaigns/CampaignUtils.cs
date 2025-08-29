@@ -1,10 +1,15 @@
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
+using Newtonsoft.Json.Linq;
+using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 
 namespace Monetizr.SDK.Campaigns
@@ -129,7 +134,7 @@ namespace Monetizr.SDK.Campaigns
             string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, parameter);
             if (String.IsNullOrEmpty(extractedValue))
             {
-                MonetizrLogger.Print("CampaignID " + campaign.id + " - Parameter " + parameter + " was not parsed correctly.");
+                MonetizrLogger.Print("CampaignID " + campaign.id + " - Parameter " + parameter + " is not present or was not parsed correctly.");
                 return false;
             }
 
@@ -155,5 +160,16 @@ namespace Monetizr.SDK.Campaigns
 
             return result.ToString();
         }
+
+        public static bool IsCampaignHTML(Mission mission, PanelId panelId)
+        {
+            if (panelId != PanelId.StartNotification) return false;
+            if (mission.campaign.serverSettings.TryGetValue("is_campaign_html", out string value) && bool.TryParse(value, out bool isHtml) && isHtml)
+            {
+                return true;
+            }
+            return false;
+        }
+
     }
 }

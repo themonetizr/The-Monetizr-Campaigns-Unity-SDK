@@ -1,11 +1,16 @@
 using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
+using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
 using Monetizr.SDK.Utils;
-using System.Globalization;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Text;
+using SimpleJSON;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using UnityEngine;
 
 namespace Monetizr.SDK.Networking
@@ -78,6 +83,95 @@ namespace Monetizr.SDK.Networking
             if (string.IsNullOrEmpty(userAgent)) return output;
             output.Headers.Add("User-Agent", userAgent);
             return output;
+        }
+
+        //
+
+        public static string BuildEndpointURL (ServerCampaign campaign)
+        {
+            SettingsDictionary<string, string> settings = campaign.serverSettings;
+
+            string baseUrl = settings.GetParam("endpoint_base", "");
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                MonetizrLogger.PrintError("Endpoint base URL missing.");
+                return null;
+            }
+
+            Dictionary<string, string> queryParams = new Dictionary<string, string>();
+            string rawParams = settings.GetParam("endpoint_params", "");
+            if (!string.IsNullOrEmpty(rawParams))
+            {
+                try
+                {
+                    JSONNode json = JSON.Parse(rawParams);
+                    if (json != null && json.IsObject)
+                    {
+                        foreach (KeyValuePair<string, JSONNode> kv in json.AsObject)
+                        {
+                            queryParams[kv.Key] = kv.Value.Value;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    MonetizrLogger.PrintError($"Failed to parse endpoint_params JSON: {e}");
+                }
+            }
+
+            string ResolveMacro(string key, string value)
+            {
+                if (string.IsNullOrEmpty(value)) return "";
+
+                switch (value)
+                {
+                    case "${APP_BUNDLE}": return MonetizrSettings.bundleID;
+                    case "${APP_NAME}": return Application.productName;
+                    case "${APP_STOREURL}": return campaign.serverSettings.GetParam("app.storeurl", "");
+                    case "${OS}": return Application.platform.ToString();
+                    case "${OS_VERSION}": return SystemInfo.operatingSystem;
+                    case "${DEVICE_MODEL}": return SystemInfo.deviceModel;
+                    case "${DEVICE_MAKE}": return SystemInfo.deviceName;
+                    case "${PLAYER_ID}": return MonetizrMobileAnalytics.advertisingID;
+                    case "${GDPR}": return MonetizrManager.s_gdpr.ToString();
+                    case "${GDPR_CONSENT}": return MonetizrManager.s_consent;
+                    case "${COPPA}": return MonetizrManager.s_coppa.ToString();
+                    case "${CCPA}": return MonetizrManager.s_us_privacy.ToString();
+                    case "${US_PRIVACY_CONSENT}": return MonetizrManager.s_us_privacy.ToString();
+                    case "${DNT}": return "0";
+                    case "${LMT}": return (String.IsNullOrEmpty(MonetizrMobileAnalytics.advertisingID) ? "1" : "0");
+                    default: return value;
+                }
+            }
+
+            Dictionary<string, string> resolvedParams = new Dictionary<string, string>();
+            foreach (KeyValuePair<string, string> kv in queryParams)
+            {
+                resolvedParams[kv.Key] = ResolveMacro(kv.Key, kv.Value);
+            }
+
+            if (!resolvedParams.ContainsKey("app.bundle")) resolvedParams["app.bundle"] = MonetizrSettings.bundleID;
+            if (!resolvedParams.ContainsKey("app.name")) resolvedParams["app.name"] = Application.productName;
+            if (!resolvedParams.ContainsKey("device.model")) resolvedParams["device.model"] = SystemInfo.deviceModel;
+            if (!resolvedParams.ContainsKey("device.make")) resolvedParams["device.make"] = SystemInfo.deviceName;
+            if (!resolvedParams.ContainsKey("device.os")) resolvedParams["device.os"] = Application.platform.ToString();
+            if (!resolvedParams.ContainsKey("device.osv")) resolvedParams["device.osv"] = SystemInfo.operatingSystem;
+            if (!resolvedParams.ContainsKey("device.ifa")) resolvedParams["device.ifa"] = MonetizrMobileAnalytics.advertisingID;
+            if (!resolvedParams.ContainsKey("regs.gdpr")) resolvedParams["regs.gdpr"] = MonetizrManager.s_gdpr.ToString();
+            if (!resolvedParams.ContainsKey("regs.coppa")) resolvedParams["regs.coppa"] = MonetizrManager.s_coppa.ToString();
+
+            StringBuilder builder = new StringBuilder();
+            foreach (KeyValuePair<string, string> kv in resolvedParams)
+            {
+                if (builder.Length > 0) builder.Append("&");
+                builder.Append(Uri.EscapeDataString(kv.Key));
+                builder.Append("=");
+                builder.Append(Uri.EscapeDataString(kv.Value ?? ""));
+            }
+
+            string finalUrl = baseUrl + "?" + builder.ToString();
+            MonetizrLogger.Print($"Endpoint - Built URL: {finalUrl}");
+            return finalUrl;
         }
     }
 }

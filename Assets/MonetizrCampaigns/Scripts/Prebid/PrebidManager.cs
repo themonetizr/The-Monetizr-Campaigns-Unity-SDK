@@ -6,9 +6,6 @@ namespace Monetizr.SDK.Prebid
 {
     public static class PrebidManager
     {
-        public static string testData = "prebid-demo-video-interstitial-320-480-original-api";
-        public static string defaultHost = "https://rtb.monetizr.com/openrtb2/auction";
-
         private class CallbackProxy : AndroidJavaProxy
         {
             private readonly Action<string> _onResult;
@@ -21,23 +18,23 @@ namespace Monetizr.SDK.Prebid
 
             public void onResult (string vastUrl)
             {
-                MonetizrLogger.Print($"[Prebid] onResult (len={vastUrl?.Length ?? 0})");
+                MonetizrLogger.Print($"Prebid - onResult: " + vastUrl);
                 _onResult?.Invoke(vastUrl ?? "");
             }
         }
 
-        public static void InitializePrebid (string hostUrl)
+        public static void InitializePrebid (string host = null)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
-            using var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-            AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-
             using var bridge = new AndroidJavaClass("com.monetizr.prebidbridge.PrebidBridge");
-            bridge.CallStatic("init", activity, hostUrl);
+            if (string.IsNullOrEmpty(host))
+                bridge.CallStatic("initPrebid"); // default host
+            else
+                bridge.CallStatic("initPrebid", host);
 #endif
         }
 
-        public static void FetchDemand (string storedRequestId, Action<string> onResult)
+        public static void FetchDemand (string prebidData, string prebidHost, Action<string> onResult)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             try
@@ -47,10 +44,11 @@ namespace Monetizr.SDK.Prebid
 
                 using var bridge = new AndroidJavaClass("com.monetizr.prebidbridge.PrebidBridge");
                 var proxy = new CallbackProxy(onResult);
-                bridge.CallStatic("fetchDemand", activity, storedRequestId, proxy);
+                bridge.CallStatic("fetchDemand", activity, prebidData, prebidHost, proxy);
             }
             catch (Exception ex)
             {
+                MonetizrLogger.Print($"[Prebid] FetchDemand exception: {ex.Message}");
                 onResult?.Invoke("");
             }
 #else
