@@ -1092,7 +1092,9 @@ namespace Monetizr.SDK.Core
             onComplete?.Invoke(isSkipped);
             if (updateUI) updateUIDelegate?.Invoke();
 
-            bool shouldRestart = mission.campaign.campaignType == CampaignType.Fallback || mission.campaignServerSettings.GetBoolParam("claim_for_new_after_campaign_is_done", false);
+            if (HasRemainingCampaigns()) return;
+
+            bool shouldRestart = mission.campaignServerSettings.GetBoolParam("should_restart", false);
             if (shouldRestart && serverClaimForCampaigns && CheckFullCampaignClaim(mission))
             {
                 int restartDelay = mission.campaign.serverSettings.GetIntParam("restart_timer", 0);
@@ -1164,7 +1166,7 @@ namespace Monetizr.SDK.Core
             if (camp != _activeCampaignId) _isMissionsIsOutdated = true;
             _activeCampaignId = camp;
             closeRewardCenterAfterEveryMission = camp.serverSettings.GetBoolParam("RewardCenter.close_after_mission_completion", closeRewardCenterAfterEveryMission);
-            MonetizrLogger.Print($"Active campaign: {_activeCampaignId}");
+            MonetizrLogger.Print($"Active campaign: {_activeCampaignId.id}");
         }
 
         internal bool HasCampaign(string campaignId)
@@ -1183,6 +1185,14 @@ namespace Monetizr.SDK.Core
                 MonetizrLogger.PrintError($"Exception in ConnectionsClient.Claim for {campaign.id}\n{e}");
                 onFailure.Invoke();
             }
+        }
+
+        private bool HasRemainingCampaigns ()
+        {
+            if (!HasCampaignsAndActive()) return false;
+            ServerCampaign campaign = FindBestCampaignToActivate();
+            if (campaign == null) return false;
+            return missionsManager.GetActiveMissionsNum(campaign) > 0;
         }
 
         #endregion

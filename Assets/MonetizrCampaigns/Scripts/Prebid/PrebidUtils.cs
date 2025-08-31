@@ -6,125 +6,94 @@ namespace Monetizr.SDK.Prebid
 {
     public static class PrebidUtils
     {
-        public enum PrebidHandleKind { Empty, Url, VastXml, CacheId, Unknown }
-
-        public static bool TryExtractHandle(string input, out PrebidHandleKind kind, out string handle)
+        public enum AdResponseType
         {
-            handle = string.Empty;
-            kind = PrebidHandleKind.Empty;
-
-            if (string.IsNullOrWhiteSpace(input)) return false;
-
-            // URL?
-            if (Uri.TryCreate(input, UriKind.Absolute, out var u) &&
-                (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps))
-            {
-                handle = input; kind = PrebidHandleKind.Url; return true;
-            }
-
-            // Inline XML?
-            var t = input.TrimStart();
-            if (t.StartsWith("<") || t.IndexOf("<VAST", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                handle = input; kind = PrebidHandleKind.VastXml; return true;
-            }
-
-            // JSON?
-            if (t.StartsWith("{") || t.StartsWith("["))
-            {
-                // Try PBS auction JSON first
-                var fromPbs = ExtractFromPbsJson(input);
-                if (!string.IsNullOrEmpty(fromPbs))
-                {
-                    ClassifyLeaf(fromPbs, out kind);
-                    handle = fromPbs;
-                    return true;
-                }
-
-                // Try SDK targeting JSON ({"resultCode":"...","targeting":{...}})
-                var fromTargeting = ExtractFromTargetingJson(input);
-                if (!string.IsNullOrEmpty(fromTargeting))
-                {
-                    ClassifyLeaf(fromTargeting, out kind);
-                    handle = fromTargeting;
-                    return true;
-                }
-
-                kind = PrebidHandleKind.Unknown; // JSON but no handle found
-                return false;
-            }
-
-            // Fallback: treat as opaque text (often a cache id)
-            handle = input.Trim();
-            kind = PrebidHandleKind.CacheId;
-            return true;
+            VastXml,
+            VastUrl,
+            CacheId,
+            Empty,
+            Unknown,
+            Error
         }
 
-        static void ClassifyLeaf(string s, out PrebidHandleKind kind)
+        public static string ExtractAd (string jsonResponse, out AdResponseType responseType)
         {
-            kind = PrebidHandleKind.CacheId;
-            if (Uri.TryCreate(s, UriKind.Absolute, out var u) &&
-                (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps))
-            { kind = PrebidHandleKind.Url; return; }
+            responseType = AdResponseType.Unknown;
 
-            var t = s?.TrimStart();
-            if (!string.IsNullOrEmpty(t) && (t.StartsWith("<") || t.IndexOf("<VAST", StringComparison.OrdinalIgnoreCase) >= 0))
-            { kind = PrebidHandleKind.VastXml; return; }
-        }
+            if (string.IsNullOrEmpty(jsonResponse))
+            {
+                MonetizrLogger.Print("[PrebidParser] Empty response");
+                responseType = AdResponseType.Empty;
+                return null;
+            }
 
-        // Prefer URL -> cacheId -> hb_cache_id -> adm
-        static string ExtractFromPbsJson(string json)
-        {
             try
             {
-                var root = JObject.Parse(json);
+                var root = JObject.Parse(jsonResponse);
+
                 var seatbid = root["seatbid"] as JArray;
-                if (seatbid == null) return string.Empty;
-
-                foreach (var sb in seatbid)
+                if (seatbid == null || seatbid.Count == 0)
                 {
-                    var bids = sb?["bid"] as JArray;
-                    if (bids == null) continue;
-
-                    foreach (var bid in bids)
-                    {
-                        var prebid = bid?["ext"]?["prebid"] as JObject;
-
-                        var vastXml = prebid?["cache"]?["vastXml"] as JObject;
-                        var url = vastXml?["url"]?.ToString();
-                        if (!string.IsNullOrEmpty(url)) return url;
-
-                        var cacheId = vastXml?["cacheId"]?.ToString() ?? vastXml?["key"]?.ToString();
-                        if (!string.IsNullOrEmpty(cacheId)) return cacheId;
-
-                        var hbCacheId = prebid?["targeting"]?["hb_cache_id"]?.ToString();
-                        if (!string.IsNullOrEmpty(hbCacheId)) return hbCacheId;
-
-                        var adm = bid?["adm"]?.ToString();
-                        if (!string.IsNullOrEmpty(adm)) return adm;
-                    }
+                    MonetizrLogger.Print("[PrebidParser] No seatbid found.");
+                    responseType = AdResponseType.Empty;
+                    return null;
                 }
-            }
-            catch (Exception e) { MonetizrLogger.Print($"Prebid - PBS parse: {e.Message}"); }
-            return string.Empty;
-        }
 
-        // Prefer adm -> hb_cache_id
-        static string ExtractFromTargetingJson(string json)
-        {
-            try
+                var bids = seatbid[0]["bid"] as JArray;
+                if (bids == null || bids.Count == 0)
+                {
+                    MonetizrLogger.Print("[PrebidParser] No bid found.");
+                    responseType = AdResponseType.Empty;
+                    return null;
+                }
+
+                var bid = bids[0];
+
+                // 1. Try VAST (adm)
+                if (bid["adm"] != null && bid["adm"].Type == JTokenType.String)
+                {
+                    string vast = bid["adm"].ToString();
+                    MonetizrLogger.Print("[PrebidParser] Extracted VAST XML");
+                    responseType = AdResponseType.VastXml;
+                    return vast;
+                }
+
+                // 2. Try VAST URL (nurl)
+                if (bid["nurl"] != null && bid["nurl"].Type == JTokenType.String)
+                {
+                    string url = bid["nurl"].ToString();
+                    MonetizrLogger.Print("[PrebidParser] Extracted VAST URL");
+                    responseType = AdResponseType.VastUrl;
+                    return url;
+                }
+
+                // 3. Cache ID
+                if (bid["cacheId"] != null)
+                {
+                    MonetizrLogger.Print("[PrebidParser] Found CacheID: " + bid["cacheId"]);
+                    responseType = AdResponseType.CacheId;
+                    return null;
+                }
+
+                // 4. Empty object
+                if (bid.ToString().Trim() == "{}")
+                {
+                    MonetizrLogger.Print("[PrebidParser] Empty bid response.");
+                    responseType = AdResponseType.Empty;
+                    return null;
+                }
+
+                // 5. Unknown
+                MonetizrLogger.Print("[PrebidParser] Unknown bid response structure.");
+                responseType = AdResponseType.Unknown;
+                return null;
+            }
+            catch (Exception ex)
             {
-                var root = JObject.Parse(json);
-                var targeting = (root["targeting"] as JObject) ?? root;
-
-                var adm = targeting["adm"]?.ToString();
-                if (!string.IsNullOrEmpty(adm)) return adm;
-
-                var cacheId = targeting["hb_cache_id"]?.ToString();
-                if (!string.IsNullOrEmpty(cacheId)) return cacheId;
+                MonetizrLogger.Print("[PrebidParser] Failed to parse response: " + ex.Message);
+                responseType = AdResponseType.Error;
+                return null;
             }
-            catch (Exception e) { MonetizrLogger.Print($"Prebid - Targeting parse: {e.Message}"); }
-            return string.Empty;
         }
 
 

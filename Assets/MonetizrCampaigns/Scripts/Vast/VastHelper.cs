@@ -508,7 +508,7 @@ namespace Monetizr.SDK.VAST
 
                 if (it.MediaFiles?.MediaFile == null || it.MediaFiles.MediaFile.Length == 0)
                 {
-                    MonetizrLogger.Print($"MediaFile is null in Linear creative");
+                    MonetizrLogger.PrintError($"MediaFile is null in Linear creative");
                     return;
                 }
 
@@ -552,8 +552,14 @@ namespace Monetizr.SDK.VAST
                     mediaFile = Array.Find(it.MediaFiles.MediaFile,
                         (Linear_Inline_typeMediaFilesMediaFile a) =>
                         {
-                            return a.type.Equals("video/mp4");
+                            return !string.IsNullOrEmpty(a?.type) && a.type.Trim().ToLower().Contains("video/mp4");
                         });
+                }
+
+                if (mediaFile == null)
+                {
+                    MonetizrLogger.PrintError("MediaFile was not parsed correctly.");
+                    return;
                 }
 
                 MonetizrLogger.Print($"Chosen video file - type:{mediaFile.type} br:{mediaFile.bitrate} w:{mediaFile.width} h:{mediaFile.height} ");
@@ -712,7 +718,14 @@ namespace Monetizr.SDK.VAST
                 return false;
             }
 
-            adItem.AssignCreativesIntoAssets();
+            try
+            {
+                adItem.AssignCreativesIntoAssets();
+            }
+            catch (Exception ex)
+            {
+                MonetizrLogger.PrintWarning($"AssignCreativesIntoAssets skipped (possibly pure wrapper): {ex.Message}");
+            }
 
             if (!string.IsNullOrEmpty(adItem.WrapperAdTagUri))
             {

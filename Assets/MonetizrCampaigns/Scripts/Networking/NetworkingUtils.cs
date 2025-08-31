@@ -85,8 +85,6 @@ namespace Monetizr.SDK.Networking
             return output;
         }
 
-        //
-
         public static string BuildEndpointURL (ServerCampaign campaign)
         {
             SettingsDictionary<string, string> settings = campaign.serverSettings;

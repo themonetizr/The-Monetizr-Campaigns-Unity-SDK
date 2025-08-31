@@ -116,6 +116,7 @@ namespace Monetizr.SDK.Campaigns
             campaign.ParseContentStringIntoSettingsDictionary();
             ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
 
+            // TEST -> Revert to param check
             if (true)
             {
                 string prebidJSON = campaign.serverSettings.GetParam("prebid_data", "");
@@ -135,45 +136,42 @@ namespace Monetizr.SDK.Campaigns
                     return null;
                 }
 
-                if (PrebidUtils.TryExtractHandle(prebidResponse, out var kind, out var handle))
+                string parsedResponse = PrebidUtils.ExtractAd(prebidResponse, out PrebidUtils.AdResponseType responseType);
+                MonetizrLogger.Print($"Prebid - ParsedResponse: {parsedResponse}");
+
+                switch (responseType)
                 {
-                    switch (kind)
-                    {
-                        case PrebidUtils.PrebidHandleKind.Url:
-                            MonetizrLogger.Print($"Prebid - URL: {handle}");
-                            string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(handle);
-                            if (string.IsNullOrEmpty(receivedVAST))
-                            {
-                                MonetizrLogger.PrintError("Prebid - VAST not downloaded.");
-                                return null;
-                            }
-                            campaign.adm = receivedVAST;
-                            break;
-
-                        case PrebidUtils.PrebidHandleKind.VastXml:
-                            MonetizrLogger.Print($"Prebid - Inline VAST length = {handle.Length}");
-                            campaign.adm = handle;
-                            break;
-
-                        case PrebidUtils.PrebidHandleKind.CacheId:
-                            MonetizrLogger.Print($"Prebid - Cache ID received: {handle}");
+                    case PrebidUtils.AdResponseType.VastUrl:
+                        MonetizrLogger.Print($"Prebid - URL: {parsedResponse}");
+                        string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(parsedResponse);
+                        if (string.IsNullOrEmpty(receivedVAST))
+                        {
+                            MonetizrLogger.PrintError("Prebid - VAST not downloaded.");
                             return null;
+                        }
+                        campaign.adm = parsedResponse;
+                        break;
 
-                        case PrebidUtils.PrebidHandleKind.Empty:
-                            MonetizrLogger.Print("Prebid - Response was empty.");
-                            return null;
+                    case PrebidUtils.AdResponseType.VastXml:
+                        MonetizrLogger.Print($"Prebid - Inline VAST length = {parsedResponse.Length}");
+                        campaign.adm = parsedResponse;
+                        break;
 
-                        case PrebidUtils.PrebidHandleKind.Unknown:
-                            MonetizrLogger.Print("Prebid - Could not classify handle (unknown type).");
-                            return null;
-                    }
-                }
-                else
-                {
-                    MonetizrLogger.Print("Prebid - TryExtractHandle failed — no usable handle extracted.");
-                    return null;
+                    case PrebidUtils.AdResponseType.CacheId:
+                        MonetizrLogger.Print($"Prebid - Cache ID received: {parsedResponse}");
+                        return null;
+
+                    case PrebidUtils.AdResponseType.Empty:
+                        MonetizrLogger.Print("Prebid - Response was empty.");
+                        return null;
+
+                    case PrebidUtils.AdResponseType.Unknown:
+                        MonetizrLogger.Print("Prebid - Could not classify handle (unknown type).");
+                        return null;
                 }
             }
+            // TEST -> Re-enable flow
+
             /*
             else if (campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false))
             {
