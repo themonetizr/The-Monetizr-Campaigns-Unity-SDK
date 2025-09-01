@@ -8,6 +8,7 @@ using Monetizr.SDK.VAST;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
 using EventType = Monetizr.SDK.Core.EventType;
@@ -116,89 +117,122 @@ namespace Monetizr.SDK.Campaigns
             campaign.ParseContentStringIntoSettingsDictionary();
             ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
 
-            // TEST -> Revert to param check
-            if (true)
+            if (campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false))
             {
-                string prebidJSON = campaign.serverSettings.GetParam("prebid_data", "");
-                if (string.IsNullOrEmpty(prebidJSON))
-                {
-                    MonetizrLogger.PrintError("Prebid Data not found in campaign.");
-                    return null;
-                }
-
-                string prebidHost = campaign.serverSettings.GetParam("prebid_host", "");
-                PrebidManager.InitializePrebid(prebidHost);
-
-                string prebidResponse = await FetchPrebid(prebidJSON, prebidHost);
-                if (string.IsNullOrEmpty(prebidResponse))
-                {
-                    MonetizrLogger.PrintError("Prebid fetch returned null.");
-                    return null;
-                }
-
-                string parsedResponse = PrebidUtils.ExtractAd(prebidResponse, out PrebidUtils.AdResponseType responseType);
-                MonetizrLogger.Print($"Prebid - ParsedResponse: {parsedResponse}");
-
-                switch (responseType)
-                {
-                    case PrebidUtils.AdResponseType.VastUrl:
-                        MonetizrLogger.Print($"Prebid - URL: {parsedResponse}");
-                        string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(parsedResponse);
-                        if (string.IsNullOrEmpty(receivedVAST))
-                        {
-                            MonetizrLogger.PrintError("Prebid - VAST not downloaded.");
-                            return null;
-                        }
-                        campaign.adm = parsedResponse;
-                        break;
-
-                    case PrebidUtils.AdResponseType.VastXml:
-                        MonetizrLogger.Print($"Prebid - Inline VAST length = {parsedResponse.Length}");
-                        campaign.adm = parsedResponse;
-                        break;
-
-                    case PrebidUtils.AdResponseType.CacheId:
-                        MonetizrLogger.Print($"Prebid - Cache ID received: {parsedResponse}");
-                        return null;
-
-                    case PrebidUtils.AdResponseType.Empty:
-                        MonetizrLogger.Print("Prebid - Response was empty.");
-                        return null;
-
-                    case PrebidUtils.AdResponseType.Unknown:
-                        MonetizrLogger.Print("Prebid - Could not classify handle (unknown type).");
-                        return null;
-                }
+                campaign = await HandlePrebidFallback(campaign);
             }
-            // TEST -> Re-enable flow
-
-            /*
             else if (campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false))
             {
-                string vastUrl = CampaignUtils.BuildEndpointURL(campaign);
-                if (string.IsNullOrEmpty(vastUrl))
-                {
-                    MonetizrLogger.PrintError("Endpoint base URL missing.");
-                    return null;
-                }
-
-                string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(vastUrl);
-                if (string.IsNullOrEmpty(receivedVAST))
-                {
-                    MonetizrLogger.Print("Endpoint VAST not received.");
-                    return null;
-                }
-
-                campaign.adm = receivedVAST;
-            }*/
+                campaign = await HandleEndpointFallback(campaign);
+            }
             else
             {
                 MonetizrLogger.PrintError("CampaignID " + campaign.id + " - No fallback allowed.");
                 return null;
             }
 
+            if (campaign == null) return null;
+
             campaign = await ProcessADMCampaign(campaign);
             campaign.campaignType = CampaignType.Fallback;
+            return campaign;
+        }
+
+        private async Task<ServerCampaign> HandlePrebidFallback (ServerCampaign campaign)
+        {
+            string prebidJSON = campaign.serverSettings.GetParam("prebid_data", "");
+            if (string.IsNullOrEmpty(prebidJSON))
+            {
+                MonetizrLogger.PrintError("Prebid Data not found in campaign.");
+                return null;
+            }
+
+            string prebidHost = campaign.serverSettings.GetParam("prebid_host", "");
+            PrebidManager.InitializePrebid(prebidHost);
+
+            string prebidResponse = await FetchPrebid(prebidJSON, prebidHost);
+            if (string.IsNullOrEmpty(prebidResponse))
+            {
+                MonetizrLogger.PrintError("Prebid fetch returned null.");
+                return null;
+            }
+
+            string extractedResponse = PrebidUtils.ExtractPrebidResponse(prebidResponse, out PrebidUtils.PrebidResponseType responseType);
+            MonetizrLogger.Print("PrebidResponseType: " + responseType + " / ExtractedResponse: " + extractedResponse);
+
+            switch (responseType)
+            {
+                case PrebidUtils.PrebidResponseType.VastUrl:
+                    MonetizrLogger.Print($"Prebid - VAST URL");
+                    string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(extractedResponse);
+                    if (string.IsNullOrEmpty(receivedVAST))
+                    {
+                        MonetizrLogger.PrintError("Prebid - VAST not downloaded.");
+                        return null;
+                    }
+                    campaign.adm = receivedVAST;
+                    break;
+
+                case PrebidUtils.PrebidResponseType.VastXml:
+                    MonetizrLogger.Print($"Prebid - VAST XML");
+                    campaign.adm = extractedResponse;
+                    break;
+
+                case PrebidUtils.PrebidResponseType.CacheId:
+                    MonetizrLogger.PrintWarning($"Prebid - Cache ID (Not Implemented)");
+                    return null;
+
+                default:
+                    MonetizrLogger.PrintError("Prebid - Response not usable (empty/unknown).");
+                    return null;
+            }
+
+            return campaign;
+        }
+
+        private async Task<ServerCampaign> HandleEndpointFallback (ServerCampaign campaign)
+        {
+            string endpointURL = NetworkingUtils.BuildEndpointURL(campaign);
+            if (string.IsNullOrEmpty(endpointURL))
+            {
+                MonetizrLogger.PrintError("Endpoint - Base URL missing.");
+                return null;
+            }
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, endpointURL);
+            (bool isSuccess, string content) = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
+
+            if (!isSuccess)
+            {
+                MonetizrLogger.PrintError("Endpoint - HTTP request failed.");
+                return null;
+            }
+
+            string extracted = PrebidUtils.ExtractEndpointResponse(content, out PrebidUtils.EndpointResponseType responseType);
+            MonetizrLogger.Print("EndpointResponseType: " + responseType + " / ExtractedResponse: " + extracted);
+
+            switch (responseType)
+            {
+                case PrebidUtils.EndpointResponseType.VastXml:
+                    MonetizrLogger.Print($"Endpoint - VAST XML");
+                    campaign.adm = extracted;
+                    break;
+
+                case PrebidUtils.EndpointResponseType.Playlist:
+                    MonetizrLogger.Print($"Endpoint - Playlist URL");
+                    string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(extracted);
+                    if (string.IsNullOrEmpty(receivedVAST))
+                    {
+                        MonetizrLogger.PrintError("Endpoint - Failed to download VAST from Playlist URL.");
+                        return null;
+                    }
+                    campaign.adm = receivedVAST;
+                    break;
+
+                default:
+                    MonetizrLogger.Print("Endpoint - Response not usable (empty/error/unknown).");
+                    return null;
+            }
 
             return campaign;
         }
@@ -232,13 +266,13 @@ namespace Monetizr.SDK.Campaigns
 
         private async Task<string> FetchPrebid (string prebidData, string prebidHost, int timeoutMs = 3000)
         {
-            MonetizrLogger.PrintWarning("Fetching Prebid with: " + prebidData);
+            MonetizrLogger.PrintWarning("Prebid - Fetching with: " + prebidData);
 
             TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
 
             PrebidManager.FetchDemand(prebidData, prebidHost, keywordsJson =>
             {
-                MonetizrLogger.Print($"[Prebid Test] Result length = {keywordsJson?.Length ?? 0}");
+                MonetizrLogger.Print($"Prebid - Result length = {keywordsJson?.Length ?? 0}");
                 tcs.TrySetResult(keywordsJson);
             });
 
@@ -247,7 +281,7 @@ namespace Monetizr.SDK.Campaigns
 
             if (completedTask == delayTask)
             {
-                MonetizrLogger.PrintError("Prebid Timeout waiting for response.");
+                MonetizrLogger.PrintError("Prebid - Timeout waiting for response.");
                 return null;
             }
 

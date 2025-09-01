@@ -61,7 +61,7 @@ namespace Monetizr.SDK.Networking
             Client.CancelPendingRequests();
         }
 
-        public static async Task<(bool isSuccess,string content)> DownloadUrlAsString(HttpRequestMessage requestMessage)
+        public static async Task<(bool isSuccess,string content)> DownloadUrlAsString (HttpRequestMessage requestMessage)
         {
             HttpResponseMessage response = null;
             
@@ -81,7 +81,7 @@ namespace Monetizr.SDK.Networking
             return (true, result);
         }
 
-        internal async Task<string> GetResponseStringFromUrl(string url)
+        internal async Task<string> GetResponseStringFromUrl (string url)
         {
             var requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, url);
             MonetizrLogger.Print($"Sent request: {requestMessage}");
@@ -104,7 +104,7 @@ namespace Monetizr.SDK.Networking
             return responseString;
         }
 
-        public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
+        public static async Task<byte[]> DownloadAssetData (string url, Action onDownloadFailed = null)
         {
             if (LocalTestCampaignManager.IsLocalAsset(url))
             {

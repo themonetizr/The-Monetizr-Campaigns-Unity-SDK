@@ -1094,10 +1094,12 @@ namespace Monetizr.SDK.Core
 
             if (HasRemainingCampaigns()) return;
 
-            bool shouldRestart = mission.campaignServerSettings.GetBoolParam("should_restart", false);
+            // TODO: LEAVE PARAMETER ONLY
+            bool shouldRestart = mission.campaign.campaignType == CampaignType.Fallback || mission.campaignServerSettings.GetBoolParam("should_restart", false);
             if (shouldRestart && serverClaimForCampaigns && CheckFullCampaignClaim(mission))
             {
                 int restartDelay = mission.campaign.serverSettings.GetIntParam("restart_timer", 0);
+                MonetizrLogger.Print("Will restart RequestCampaigns in " + restartDelay + " seconds.");
                 RestartCampaignsFlow(mission, restartDelay);
             }
         }
