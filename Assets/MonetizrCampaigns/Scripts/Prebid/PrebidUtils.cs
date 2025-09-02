@@ -1,6 +1,9 @@
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
 using Newtonsoft.Json.Linq;
+using SimpleJSON;
 using System;
+using System.Collections.Generic;
 
 namespace Monetizr.SDK.Prebid
 {
@@ -168,6 +171,72 @@ namespace Monetizr.SDK.Prebid
                 responseType = EndpointResponseType.Error;
                 return null;
             }
+        }
+
+        public static List<string> ParseEndpoints (string raw)
+        {
+            List<string> results = new List<string>();
+            if (string.IsNullOrEmpty(raw)) return results;
+
+            raw = raw.Trim();
+
+            if (raw.Length >= 2 && ((raw[0] == '"' && raw[^1] == '"') || (raw[0] == '\'' && raw[^1] == '\'')))
+            {
+                raw = raw.Substring(1, raw.Length - 2).Trim();
+            }
+
+            try
+            {
+                if (raw.StartsWith("["))
+                {
+                    JSONNode node = JSON.Parse(raw);
+                    JSONArray arr = node?.AsArray;
+                    if (arr != null)
+                    {
+                        foreach (JSONNode n in arr)
+                        {
+                            string v = (n?.Value ?? "").Trim();
+                            if (IsHttpUrl(v)) results.Add(v);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MonetizrLogger.PrintWarning("ParseEndpoints: JSON array parse failed: " + e.Message);
+            }
+
+            if (results.Count == 0)
+            {
+                string[] parts = raw.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length > 1)
+                {
+                    foreach (string p in parts)
+                    {
+                        string v = p.Trim();
+                        if (IsHttpUrl(v)) results.Add(v);
+                    }
+                }
+                else if (IsHttpUrl(raw))
+                {
+                    results.Add(raw);
+                }
+            }
+
+            HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<string> deduped = new List<string>();
+            foreach (var e in results)
+            {
+                if (seen.Add(e)) deduped.Add(e);
+            }
+
+            return deduped;
+        }
+
+        private static bool IsHttpUrl (string s)
+        {
+            if (string.IsNullOrEmpty(s)) return false;
+            return Uri.TryCreate(s, UriKind.Absolute, out Uri u) && (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps);
         }
 
     }

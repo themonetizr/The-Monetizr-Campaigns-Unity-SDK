@@ -201,29 +201,10 @@ namespace Monetizr.SDK.Campaigns
 
         private async Task<ServerCampaign> HandleEndpointFallback (ServerCampaign campaign)
         {
-            List<string> endpoints = new List<string>();
-
             string rawEndpoints = campaign.serverSettings.GetParam("endpoints", "");
-            if (!string.IsNullOrEmpty(rawEndpoints))
-            {
-                try
-                {
-                    JSONArray array = JSON.Parse(rawEndpoints).AsArray;
-                    foreach (JSONNode node in array)
-                    {
-                        if (!string.IsNullOrEmpty(node.Value))
-                        {
-                            endpoints.Add(node.Value);
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    MonetizrLogger.PrintError("Failed to parse endpoints: " + e.Message);
-                }
-            }
+            List<string> endpoints = PrebidUtils.ParseEndpoints(rawEndpoints);
 
-            if (endpoints.Count == 0)
+            if (endpoints.Count <= 0)
             {
                 MonetizrLogger.PrintError("Endpoint - No base URLs provided or correctly parsed.");
                 return null;
