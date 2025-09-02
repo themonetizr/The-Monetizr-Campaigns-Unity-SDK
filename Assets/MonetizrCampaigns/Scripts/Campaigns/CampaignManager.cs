@@ -5,6 +5,7 @@ using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
+using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -120,6 +121,11 @@ namespace Monetizr.SDK.Campaigns
             if (campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false))
             {
                 campaign = await HandlePrebidFallback(campaign);
+                if (campaign == null && campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false))
+                {
+                    MonetizrLogger.Print("CampaignID " + campaign.id + " - Prebid flow failed, will attempt Endpoint flow.");
+                    campaign = await HandleEndpointFallback(campaign);
+                }
             }
             else if (campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false))
             {
@@ -143,7 +149,7 @@ namespace Monetizr.SDK.Campaigns
             string prebidJSON = campaign.serverSettings.GetParam("prebid_data", "");
             if (string.IsNullOrEmpty(prebidJSON))
             {
-                MonetizrLogger.PrintError("Prebid Data not found in campaign.");
+                MonetizrLogger.PrintError("Prebid - Data not found in campaign.");
                 return null;
             }
 
@@ -153,7 +159,7 @@ namespace Monetizr.SDK.Campaigns
             string prebidResponse = await FetchPrebid(prebidJSON, prebidHost);
             if (string.IsNullOrEmpty(prebidResponse))
             {
-                MonetizrLogger.PrintError("Prebid fetch returned null.");
+                MonetizrLogger.PrintError("Prebid - Fetch returned null.");
                 return null;
             }
 
@@ -192,49 +198,76 @@ namespace Monetizr.SDK.Campaigns
 
         private async Task<ServerCampaign> HandleEndpointFallback (ServerCampaign campaign)
         {
-            string endpointURL = NetworkingUtils.BuildEndpointURL(campaign);
-            if (string.IsNullOrEmpty(endpointURL))
+            List<string> endpoints = new List<string>();
+
+            string rawEndpoints = campaign.serverSettings.GetParam("endpoints", "");
+            if (!string.IsNullOrEmpty(rawEndpoints))
             {
-                MonetizrLogger.PrintError("Endpoint - Base URL missing.");
-                return null;
-            }
-
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, endpointURL);
-            (bool isSuccess, string content) = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
-
-            if (!isSuccess)
-            {
-                MonetizrLogger.PrintError("Endpoint - HTTP request failed.");
-                return null;
-            }
-
-            string extracted = PrebidUtils.ExtractEndpointResponse(content, out PrebidUtils.EndpointResponseType responseType);
-            MonetizrLogger.Print("EndpointResponseType: " + responseType + " / ExtractedResponse: " + extracted);
-
-            switch (responseType)
-            {
-                case PrebidUtils.EndpointResponseType.VastXml:
-                    MonetizrLogger.Print($"Endpoint - VAST XML");
-                    campaign.adm = extracted;
-                    break;
-
-                case PrebidUtils.EndpointResponseType.Playlist:
-                    MonetizrLogger.Print($"Endpoint - Playlist URL");
-                    string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(extracted);
-                    if (string.IsNullOrEmpty(receivedVAST))
+                try
+                {
+                    JSONArray array = JSON.Parse(rawEndpoints).AsArray;
+                    foreach (JSONNode node in array)
                     {
-                        MonetizrLogger.PrintError("Endpoint - Failed to download VAST from Playlist URL.");
-                        return null;
+                        if (!string.IsNullOrEmpty(node.Value))
+                        {
+                            endpoints.Add(node.Value);
+                        }
                     }
-                    campaign.adm = receivedVAST;
-                    break;
-
-                default:
-                    MonetizrLogger.Print("Endpoint - Response not usable (empty/error/unknown).");
-                    return null;
+                }
+                catch (Exception e)
+                {
+                    MonetizrLogger.PrintError("Failed to parse endpoints: " + e.Message);
+                }
             }
 
-            return campaign;
+            if (endpoints.Count == 0)
+            {
+                MonetizrLogger.PrintError("Endpoint - No base URLs provided or correctly parsed.");
+                return null;
+            }
+
+            foreach (string baseUrl in endpoints)
+            {
+                string endpointURL = NetworkingUtils.BuildEndpointURL(campaign, baseUrl);
+                if (string.IsNullOrEmpty(endpointURL)) continue;
+
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, endpointURL);
+                (bool isSuccess, string content) = await MonetizrHttpClient.DownloadUrlAsString(requestMessage);
+
+                if (!isSuccess || string.IsNullOrEmpty(content))
+                {
+                    MonetizrLogger.PrintWarning("Endpoint failed: " + baseUrl);
+                    continue;
+                }
+
+                string extracted = PrebidUtils.ExtractEndpointResponse(content, out PrebidUtils.EndpointResponseType responseType);
+                MonetizrLogger.Print("EndpointResponseType: " + responseType + " / ExtractedResponse: " + extracted);
+
+                switch (responseType)
+                {
+                    case PrebidUtils.EndpointResponseType.VastXml:
+                        campaign.adm = extracted;
+                        return campaign;
+
+                    case PrebidUtils.EndpointResponseType.Playlist:
+                        string receivedVAST = await MonetizrHttpClient.DownloadVastXmlAsync(extracted);
+                        if (string.IsNullOrEmpty(receivedVAST))
+                        {
+                            MonetizrLogger.PrintError("Endpoint - Failed to download VAST from Playlist URL.");
+                            break;
+                        }
+
+                        campaign.adm = receivedVAST;
+                        return campaign;
+
+                    default:
+                        MonetizrLogger.Print("Endpoint - Response not usable (empty/error/unknown) at: " + baseUrl);
+                        break;
+                }
+            }
+
+            MonetizrLogger.PrintError("All endpoint fallbacks failed.");
+            return null;
         }
 
         private async Task<ServerCampaign> RecreateCampaignFromADM (ServerCampaign campaign)

@@ -85,11 +85,11 @@ namespace Monetizr.SDK.Networking
             return output;
         }
 
-        public static string BuildEndpointURL (ServerCampaign campaign)
+        public static string BuildEndpointURL (ServerCampaign campaign, string baseUrlOverride = "")
         {
             SettingsDictionary<string, string> settings = campaign.serverSettings;
 
-            string baseUrl = settings.GetParam("endpoint_base", "");
+            string baseUrl = !string.IsNullOrEmpty(baseUrlOverride) ? baseUrlOverride : settings.GetParam("endpoint_base", "");
             if (string.IsNullOrEmpty(baseUrl))
             {
                 MonetizrLogger.PrintError("Endpoint base URL missing.");
