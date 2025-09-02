@@ -46,6 +46,7 @@ namespace Monetizr.SDK.VAST
         private bool adTypeFieldSpecified;
         
         [System.Xml.Serialization.XmlElementAttribute("InLine", typeof(Inline_type))]
+        [System.Xml.Serialization.XmlElementAttribute("Inline", typeof(Inline_type))] // add this line
         [System.Xml.Serialization.XmlElementAttribute("Wrapper", typeof(Wrapper_type))]
         public AdDefinitionBase_type Item {
             get {

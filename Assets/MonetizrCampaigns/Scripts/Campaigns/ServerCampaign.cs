@@ -568,7 +568,7 @@ namespace Monetizr.SDK.Campaigns
         {
             if (string.IsNullOrEmpty(content))
             {
-                MonetizrLogger.PrintError("CampaignID: " + id + " content is empty.");
+                MonetizrLogger.PrintWarning("CampaignID: " + id + " content is empty.");
                 return;
             }
 

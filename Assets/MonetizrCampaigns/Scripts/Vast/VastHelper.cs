@@ -390,22 +390,27 @@ namespace Monetizr.SDK.VAST
                 }
             }
 
-            private void LoadExtentions(AdDefinitionBase_typeExtension[] extensions)
+            private void LoadExtentions (AdDefinitionBase_typeExtension[] extensions)
             {
-                MonetizrLogger.Print("VAST Extensions Count: " + extensions.Length);
-                if (extensions.IsNullOrEmpty()) return;
-
-                foreach (var ad in extensions)
+                if (extensions == null || extensions.Length == 0)
                 {
-                    foreach (var av in ad.Any)
+                    MonetizrLogger.Print("VAST Extensions Count: 0");
+                    return;
+                }
+
+                MonetizrLogger.Print("VAST Extensions Count: " + extensions.Length);
+
+                foreach (AdDefinitionBase_typeExtension ad in extensions)
+                {
+                    foreach (XmlElement av in ad.Any)
                     {
                         if (av.Name == "MonetizrCampaignSettings")
                         {
                             string campaignSettings = av.InnerText.Trim();
                             MonetizrLogger.Print("VAST Extensions Settings: " + campaignSettings);
-                            var cs = MonetizrUtils.ParseContentString(campaignSettings);
+                            Dictionary<string, string> cs = MonetizrUtils.ParseContentString(campaignSettings);
                             MonetizrLogger.Print("VAST Parsed Settings: " + MonetizrUtils.PrintDictionaryValuesInOneLine(cs));
-                            if (cs.TryGetValue("content", out var c))
+                            if (cs.TryGetValue("content", out string c))
                             {
                                 MonetizrLogger.Print("VAST Final Content: " + c);
                                 _serverCampaign.content = c;
@@ -574,12 +579,13 @@ namespace Monetizr.SDK.VAST
                     fpath = MonetizrUtils.ConvertCreativeToFname(value),
                     fname = "video",
                     fext = MonetizrUtils.ConvertCreativeToExt(type, value),
-                    type = "programmatic_video",
+                    type = _type == Type.Wrapper ? "programmatic_video" : "video",
                     mainAssetName = $"index.html",
                     mediaType = type,
                 };
 
                 _serverCampaign.assets.Add(_videoAsset);
+                MonetizrLogger.Print($"[VAST] Added programmatic_video asset: url={value}, fpath={_videoAsset.fpath}");
 
                 var videoUrl = value;
                 var skipOffset = it.skipoffset;
@@ -687,6 +693,7 @@ namespace Monetizr.SDK.VAST
             MonetizrLogger.Print("Vast Wrapper Iteration " + iteration + ": " + vastContent);
             iteration++;
 
+            vastContent = vastContent.Replace("<Inline", "<InLine").Replace("</Inline", "</InLine");
             VAST vastData = CreateVastFromXml(vastContent);
 
             if (vastData == null)
@@ -726,6 +733,8 @@ namespace Monetizr.SDK.VAST
             {
                 MonetizrLogger.PrintWarning($"AssignCreativesIntoAssets skipped (possibly pure wrapper): {ex.Message}");
             }
+
+            MonetizrLogger.Print($"[VAST] Assets so far: {serverCampaign.assets.Count}");
 
             if (!string.IsNullOrEmpty(adItem.WrapperAdTagUri))
             {

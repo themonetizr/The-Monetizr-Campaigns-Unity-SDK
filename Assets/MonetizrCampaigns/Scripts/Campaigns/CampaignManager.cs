@@ -118,16 +118,19 @@ namespace Monetizr.SDK.Campaigns
             campaign.ParseContentStringIntoSettingsDictionary();
             ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
 
-            if (campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false))
+            bool allowPrebid = campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false);
+            bool allowEndpoint = campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false);
+
+            if (allowPrebid)
             {
                 campaign = await HandlePrebidFallback(campaign);
-                if (campaign == null && campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false))
+                if (campaign == null && allowEndpoint)
                 {
                     MonetizrLogger.Print("CampaignID " + campaign.id + " - Prebid flow failed, will attempt Endpoint flow.");
                     campaign = await HandleEndpointFallback(campaign);
                 }
             }
-            else if (campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false))
+            else if (allowEndpoint)
             {
                 campaign = await HandleEndpointFallback(campaign);
             }
@@ -272,8 +275,16 @@ namespace Monetizr.SDK.Campaigns
 
         private async Task<ServerCampaign> RecreateCampaignFromADM (ServerCampaign campaign)
         {
+            string originalContent = campaign.content;
             PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
             campaign = await pubmaticHelper.PrepareServerCampaign(campaign.id, campaign.adm, false);
+
+            if (string.IsNullOrEmpty(campaign.content))
+            {
+                MonetizrLogger.Print("VAST did not provide content. Restoring the original string.");
+                campaign.content = originalContent;
+            }
+
             return campaign;
         }
 
