@@ -579,7 +579,7 @@ namespace Monetizr.SDK.VAST
                     fpath = MonetizrUtils.ConvertCreativeToFname(value),
                     fname = "video",
                     fext = MonetizrUtils.ConvertCreativeToExt(type, value),
-                    type = _type == Type.Wrapper ? "programmatic_video" : "video",
+                    type = "programmatic_video",
                     mainAssetName = $"index.html",
                     mediaType = type,
                 };
@@ -652,8 +652,8 @@ namespace Monetizr.SDK.VAST
             string vastJsonSettings = serverCampaign.DumpsVastSettings(null);
             serverCampaign.vastAdParameters = vastJsonSettings;
 
-            bool hasProgrammaticVideo = serverCampaign.TryGetAssetInList(new List<string>() { "programmatic_video" }, out var programmaticVideoAsset);
-            bool hasVideo = serverCampaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
+            bool hasProgrammaticVideo = serverCampaign.TryGetAssetInList(new List<string>() { "programmatic_video" }, out Asset programmaticVideoAsset);
+            bool hasVideo = serverCampaign.TryGetAssetInList(new List<string>() { "video", "html" }, out Asset videoAsset);
             MonetizrLogger.Print("CampaignID: " + serverCampaign.id + " / hasVideo: " + hasVideo + " / hasProgrammaticVideo: " + hasProgrammaticVideo);
 
             if (hasProgrammaticVideo)
@@ -681,7 +681,7 @@ namespace Monetizr.SDK.VAST
             {
                 MonetizrLogger.Print("Started loading wrapper for CampaignID: " + serverCampaign.id);
                 iteration = 0;
-                serverCampaign.openRtbRawResponse = vastContent;
+                serverCampaign.rawVAST = vastContent;
             }
 
             if (String.IsNullOrEmpty(vastContent))

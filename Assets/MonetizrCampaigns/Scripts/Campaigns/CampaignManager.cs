@@ -319,13 +319,13 @@ namespace Monetizr.SDK.Campaigns
             {
                 try
                 {
-                    MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
+                    MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
                     await campaign.LoadCampaignAssets();
 
                     if (campaign.isLoaded)
                     {
                         MonetizrLogger.Print($"CampaignID: {campaign.id} successfully loaded", true);
-                        MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaigns[0], null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
+                        MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
                     }
                     else
                     {

@@ -388,7 +388,7 @@ namespace Monetizr.SDK.UI
             }
         }
 
-        private async void PrepareHtml5Panel()
+        private async void PrepareHtml5Panel ()
         {
             MonetizrLogger.Print("Preparing HTML/VIDEO.");
 
@@ -441,7 +441,7 @@ namespace Monetizr.SDK.UI
             {
                 MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will embed VAST into VideoPlayer.");
 
-                var replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
+                VastTagsReplacer replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
                 campaign.vastSettings.ReplaceVastTags(replacer);
                 campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);

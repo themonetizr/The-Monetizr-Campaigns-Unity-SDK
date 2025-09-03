@@ -48,7 +48,7 @@ namespace Monetizr.SDK.Campaigns
         [System.NonSerialized] public bool isLoaded = true;
         [System.NonSerialized] public string loadingError = "";
         [System.NonSerialized] public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
-        [System.NonSerialized] public string openRtbRawResponse = "";
+        [System.NonSerialized] public string rawVAST = "";
 
         public string id;
         public string brand_id;
@@ -70,7 +70,6 @@ namespace Monetizr.SDK.Campaigns
         public bool hasMadeEarlyBidRequest = false;
         public CampaignType campaignType = CampaignType.None;
         public float campaignTimeoutStart;
-        public string prebidKeywords;
 
         public ServerCampaign () { }
 
@@ -499,16 +498,16 @@ namespace Monetizr.SDK.Campaigns
             string indexPath = $"{fpath}/{asset.mainAssetName}";
 
             MonetizrLogger.Print("VastAdParameters: " + vastAdParameters);
-            MonetizrLogger.Print("OpenRTBResponse: " + openRtbRawResponse);
+            MonetizrLogger.Print("OpenRTBResponse: " + rawVAST);
             MonetizrLogger.Print("Vast Verification Node: " + verifications_vast_node);
 
             string str = File.ReadAllText(indexPath);
             str = str.Replace("\"${MON_VAST_COMPONENT}\"", $"{vastAdParameters}");
 
-            if (!string.IsNullOrEmpty(openRtbRawResponse))
+            if (!string.IsNullOrEmpty(rawVAST))
             {
-                openRtbRawResponse = "`" + openRtbRawResponse + "`";
-                str = str.Replace("\"${VAST_RESPONSE}\"", openRtbRawResponse);
+                rawVAST = "`" + rawVAST + "`";
+                str = str.Replace("\"${VAST_RESPONSE}\"", rawVAST);
             }
 
             if (!string.IsNullOrEmpty(verifications_vast_node))

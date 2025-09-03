@@ -175,7 +175,7 @@ namespace Monetizr.SDK.VAST
                 return false;
             }
 
-            currentCampaign.openRtbRawResponse = responseContent;
+            currentCampaign.rawVAST = responseContent;
             OpenRTBResponse openRtbResponse = OpenRTBResponse.Load(responseContent);
 
             string adm = openRtbResponse.GetAdm();
