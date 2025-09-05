@@ -60,6 +60,7 @@ namespace Monetizr.SDK.UI
         private int _claimButtonDelay;
         private bool impressionStarts = false;
         private int _closeButtonDelay;
+        private bool isOMSDKactive = false;
 
 #if UNI_WEB_VIEW
         private UniWebView _webView = null;
@@ -401,8 +402,8 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            bool hasProgrammaticVideo = campaign.TryGetAssetInList(new List<string>() {"programmatic_video" }, out var programmaticVideoAsset);
-            bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out var videoAsset);
+            bool hasProgrammaticVideo = campaign.TryGetAssetInList(new List<string>() {"programmatic_video" }, out Asset programmaticVideoAsset);
+            bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out Asset videoAsset);
             MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo + " / hasProgrammaticVideo: " + hasProgrammaticVideo);
 
             if (!hasVideo && !hasProgrammaticVideo)
@@ -449,7 +450,11 @@ namespace Monetizr.SDK.UI
                 if (verifyWithOMSDK)
                 {
                     hasDownloaded = await ph.DownloadOMSDKServiceContent();
-                    if (hasDownloaded) ph.InitializeOMSDK(campaign.vastAdParameters);
+                    if (hasDownloaded)
+                    {
+                        ph.InitializeOMSDK(campaign.vastAdParameters);
+                        isOMSDKactive = true;
+                    }
                 }
             }
             else
@@ -645,10 +650,14 @@ namespace Monetizr.SDK.UI
             additionalEventValues.Add("url", _webUrl);
             additionalEventValues.Add("programmatic_status", programmaticStatus);
 
-            MonetizrLogger.Print($"Stopping OMID ad session at time: {Time.time}");
-
             bool verifyWithOMSDK = currentMission.campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
-            if(verifyWithOMSDK) _webView.StopOMIDAdSession();
+            if (verifyWithOMSDK && isOMSDKactive)
+            {
+                MonetizrLogger.Print($"Stopping OMID ad session at time: {Time.time}");
+                _webView.StopOMIDAdSession();
+                isOMSDKactive = false;
+            }
+
             float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay", 1.0f);
             if (panelId != PanelId.Html5WebView || !verifyWithOMSDK) time = 0;
             Invoke("DestroyWebView", time);
