@@ -395,6 +395,12 @@ namespace Monetizr.SDK.UI
 
             ServerCampaign campaign = currentMission.campaign;
 
+            if (campaign.campaignType == CampaignType.Fallback && campaign.isDirectVASTinjection)
+            {
+                await HandleFallbackCampaign(campaign);
+                return;
+            }
+
             if (campaign.campaignType != CampaignType.MonetizrBackend && campaign.HasTimeoutPassed())
             {
                 MonetizrLogger.Print("CampaignID: " + campaign.id + " video has timed out.");
@@ -522,6 +528,33 @@ namespace Monetizr.SDK.UI
             yield return new WaitForSeconds(time);
 
             crossButtonAnimator.enabled = true;
+        }
+
+        private async Task HandleFallbackCampaign (ServerCampaign campaign)
+        {
+            MonetizrLogger.Print("CampaignID: " + campaign.id + " / Preparing fallback raw VAST.");
+            string indexPath = campaign.GetCampaignPath("index.html");
+            campaign.DirectVASTInjectionIntoVideoPlayer();
+            bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
+
+            if (verifyWithOMSDK)
+            {
+                MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will verify with OMSDK.");
+                VastHelper vastHelper = new VastHelper(MonetizrManager.Instance.ConnectionsClient, _webView.GetUserAgent());
+                bool hasDownloaded = await vastHelper.DownloadOMSDKServiceContent();
+                if (hasDownloaded)
+                {
+                    string omidJson = MonetizrUtils.BuildFromRaw(campaign);
+                    vastHelper.InitializeOMSDK(omidJson);
+                    isOMSDKactive = true;
+                }
+            }
+
+            _webUrl = "file://" + indexPath;
+            _webView.Load(_webUrl);
+            _webView.Show();
+            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+            impressionStarts = true;
         }
 
 #if UNI_WEB_VIEW

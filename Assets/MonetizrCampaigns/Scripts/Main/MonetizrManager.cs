@@ -862,11 +862,11 @@ namespace Monetizr.SDK.Core
             }
         }
 
-        private async Task Initialize(Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrHttpClient connectionClient)
+        private async Task Initialize (Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrHttpClient connectionClient)
         {
 
 #if USING_WEBVIEW
-            if (!UniWebView.IsWebViewSupported) Log.Print("WebView isn't supported on current platform!");
+            if (!UniWebView.IsWebViewSupported) MonetizrLogger.Print("WebView isn't supported on current platform!");
 #endif
 
             localSettings = new LocalSettingsManager();
@@ -1107,16 +1107,8 @@ namespace Monetizr.SDK.Core
         private async void RestartCampaignsFlow (Mission mission, int delayTime)
         {
             if (delayTime > 0) await Task.Delay(TimeSpan.FromSeconds(delayTime));
-
             MonetizrLogger.Print("Restarting RequestCampaigns.");
-            if (mission.campaign.campaignType == CampaignType.Fallback)
-            {
-                _ = ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); }, () => { RequestCampaigns(false); });
-            }
-            else
-            {
-                _ = ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(false); });
-            }
+            _ = ClaimReward(mission.campaign, CancellationToken.None, () => { RequestCampaigns(true); }, () => { RequestCampaigns(true); });
         }
 
         internal void InitializeBuiltinMissionsForAllCampaigns()

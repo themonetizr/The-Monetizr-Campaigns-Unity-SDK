@@ -49,6 +49,7 @@ namespace Monetizr.SDK.Campaigns
         [System.NonSerialized] public string loadingError = "";
         [System.NonSerialized] public SettingsDictionary<string, string> serverSettings = new SettingsDictionary<string, string>();
         [System.NonSerialized] public string rawVAST = "";
+        [System.NonSerialized] public bool isDirectVASTinjection = false;
 
         public string id;
         public string brand_id;
@@ -491,7 +492,7 @@ namespace Monetizr.SDK.Campaigns
             }
         }
 
-        internal void EmbedVastParametersIntoVideoPlayer(Asset asset)
+        internal void EmbedVastParametersIntoVideoPlayer (Asset asset)
         {
             string fpath = GetCampaignPath(asset.fpath);
             string videoPath = $"{fpath}/video.mp4";
@@ -520,17 +521,87 @@ namespace Monetizr.SDK.Campaigns
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
             File.WriteAllText(indexPath, str);
         }
-        
-        internal string DumpsVastSettings(TagsReplacer vastTagsReplacer)
+
+        internal async Task PreloadVideoPlayerForFallback ()
         {
-            string res = JsonUtility.ToJson(vastSettings); 
-            var campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
+            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
+            string campPath = Application.persistentDataPath + "/" + id;
+            string zipFolder = campPath; // fallback: put player directly under campaign folder
+            string indexPath = $"{zipFolder}/index.html";
+
+            MonetizrLogger.Print($"[Fallback] Preparing VideoPlayer at {zipFolder}");
+
+            if (!Directory.Exists(zipFolder))
+            {
+                Directory.CreateDirectory(zipFolder);
+            }
+
+            byte[] data = await MonetizrHttpClient.DownloadAssetData(videoPlayerURL);
+
+            if (data == null)
+            {
+                isLoaded = false;
+                loadingError = $"Can't download video player for fallback campaign {id}";
+                return;
+            }
+
+            // Unpack HTML5 player
+            string zipPath = $"{zipFolder}/html.zip";
+            File.WriteAllBytes(zipPath, data);
+            MonetizrUtils.ExtractAllToDirectory(zipPath, zipFolder);
+            File.Delete(zipPath);
+
+            if (!File.Exists(indexPath))
+            {
+                isLoaded = false;
+                loadingError = $"[Fallback] index.html not found for {id}";
+                MonetizrLogger.PrintError(loadingError);
+                return;
+            }
+
+            MonetizrLogger.Print($"[Fallback] VideoPlayer ready for campaign {id}");
+        }
+
+        internal void DirectVASTInjectionIntoVideoPlayer ()
+        {
+            string campPath = Application.persistentDataPath + "/" + id;
+            string indexPath = $"{campPath}/index.html";
+
+            if (!File.Exists(indexPath))
+            {
+                MonetizrLogger.PrintError("RawVastInjection: index.html not found for campaign " + id);
+                return;
+            }
+
+            MonetizrLogger.Print("RawVastInjection: embedding raw VAST for campaign " + id);
+
+            string str = File.ReadAllText(indexPath);
+            if (!string.IsNullOrEmpty(adm))
+            {
+                string wrapped = "`" + adm + "`";
+                str = str.Replace("\"${MON_VAST_COMPONENT}\"", wrapped);
+            }
+
+            if (!string.IsNullOrEmpty(verifications_vast_node))
+            {
+                string wrappedVerif = "`" + verifications_vast_node + "`";
+                str = str.Replace("\"${VAST_VERIFICATIONS}\"", wrappedVerif);
+            }
+
+            str = str.Replace("\"${VAST_RESPONSE}\"", "\"\"");
+            File.WriteAllText(indexPath, str);
+        }
+
+        internal string DumpsVastSettings (TagsReplacer vastTagsReplacer)
+        {
+            string res = JsonUtility.ToJson(vastSettings);
+            string campaignSettingsJson = $",\"campaignSettings\":{DumpCampaignSettings(vastTagsReplacer)}";
             res = res.Insert(res.Length - 1, campaignSettingsJson);      
             MonetizrLogger.Print($"VAST Settings: {res}");
             return res;
         }
 
-        internal string DumpCampaignSettings(TagsReplacer tagsReplacer)
+        internal string DumpCampaignSettings (TagsReplacer tagsReplacer)
         {
             string result = string.Join(",", serverSettings.Select(kvp =>
             {

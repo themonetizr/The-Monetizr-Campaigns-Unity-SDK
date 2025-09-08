@@ -142,7 +142,9 @@ namespace Monetizr.SDK.Campaigns
 
             if (campaign == null) return null;
 
-            campaign = await ProcessADMCampaign(campaign);
+            campaign.isDirectVASTinjection = true;
+            await campaign.PreloadVideoPlayerForFallback();
+            MonetizrLogger.Print("CampaignID " + campaign.id + " - Marked for direct VAST injection.");
             campaign.campaignType = CampaignType.Fallback;
             return campaign;
         }
