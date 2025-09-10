@@ -55,5 +55,17 @@ namespace Monetizr.SDK.Prebid
             onResult?.Invoke("");
 #endif
         }
+
+        public static string GetIabConsentString ()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try {
+                using var bridge = new AndroidJavaClass("com.monetizr.prebidbridge.PrebidBridge");
+                return bridge.CallStatic<string>("getIabTcfConsent") ?? "";
+            } catch { return ""; }
+#else
+            return "";
+#endif
+        }
     }
 }

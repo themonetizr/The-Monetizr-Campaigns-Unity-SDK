@@ -4,6 +4,7 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
+using Monetizr.SDK.Prebid;
 using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
 using System;
@@ -649,14 +650,8 @@ namespace Monetizr.SDK.Core
         {
             Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
 
-            if (CampaignUtils.IsCampaignHTML(m, panelId))
-            {
-                Instance._uiController.ShowPanelFromPrefab("MonetizrWebViewPanel2", panelId, onComplete, true, m);
-            }
-            else
-            {
-                Instance._uiController.ShowPanelFromPrefab("MonetizrNotifyPanel2", panelId, onComplete, true, m);
-            }
+            // TODO: add IsCampaignHTML check next
+            Instance._uiController.ShowPanelFromPrefab("MonetizrNotifyPanel2", panelId, onComplete, true, m);
         }
 
         internal static void ShowEnterEmailPanel(Action<bool> onComplete, Mission m, PanelId panelId)
@@ -868,6 +863,13 @@ namespace Monetizr.SDK.Core
 #if USING_WEBVIEW
             if (!UniWebView.IsWebViewSupported) MonetizrLogger.Print("WebView isn't supported on current platform!");
 #endif
+
+            string consent = PrebidManager.GetIabConsentString();
+            if (!string.IsNullOrEmpty(consent))
+            {
+                MonetizrManager.s_consent = consent;
+                MonetizrLogger.Print($"Loaded GDPR_CONSENT: {consent}");
+            }
 
             localSettings = new LocalSettingsManager();
             missionsManager = new MissionsManager();

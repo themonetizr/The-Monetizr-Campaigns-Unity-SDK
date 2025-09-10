@@ -157,6 +157,8 @@ namespace Monetizr.SDK.Networking
             if (!resolvedParams.ContainsKey("device.ifa")) resolvedParams["device.ifa"] = MonetizrMobileAnalytics.advertisingID;
             if (!resolvedParams.ContainsKey("regs.gdpr")) resolvedParams["regs.gdpr"] = MonetizrManager.s_gdpr.ToString();
             if (!resolvedParams.ContainsKey("regs.coppa")) resolvedParams["regs.coppa"] = MonetizrManager.s_coppa.ToString();
+            if (!resolvedParams.ContainsKey("gdpr_consent")) resolvedParams["gdpr_consent"] = MonetizrManager.s_consent ?? "";
+
 
             StringBuilder builder = new StringBuilder();
             foreach (KeyValuePair<string, string> kv in resolvedParams)

@@ -171,6 +171,18 @@ public class PrebidBridge {
     }
 
     // ---------- Helpers ----------
+
+    public static String getIabTcfConsent() {
+        try {
+            Context ctx = UnityPlayer.currentActivity.getApplicationContext();
+            SharedPreferences prefs = ctx.getSharedPreferences("IABTCF_Preferences", Context.MODE_PRIVATE);
+            return prefs.getString("IABTCF_TCString", "");
+        } catch (Throwable t) {
+            Log.w(TAG, "Failed to get IABTCF_TCString: " + t.getMessage());
+            return "";
+        }
+    }
+
     private static String ensureValidJson(String s) {
         if (s == null) return "";
         String t = s.trim();
