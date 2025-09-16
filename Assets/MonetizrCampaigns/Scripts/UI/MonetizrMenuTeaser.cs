@@ -114,11 +114,11 @@ namespace Monetizr.SDK.UI
 
         private void UpdateMissionAmountText()
         {
-            var missions = MonetizrManager.Instance.missionsManager.GetAllMissions();
+            List<Mission> missions = MonetizrManager.Instance.missionsManager.GetAllMissions();
             int totalMissionCount = missions.Count;
             int claimed = 0;
 
-            foreach (var m in missions)
+            foreach (Mission m in missions)
             {
                 if (m.isClaimed == ClaimState.Claimed)
                 {

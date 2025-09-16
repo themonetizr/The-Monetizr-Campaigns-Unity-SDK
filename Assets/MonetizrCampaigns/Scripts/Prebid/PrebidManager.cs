@@ -27,12 +27,18 @@ namespace Monetizr.SDK.Prebid
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             using var bridge = new AndroidJavaClass("com.monetizr.prebidbridge.PrebidBridge");
-            if (string.IsNullOrEmpty(host))
-                bridge.CallStatic("initPrebid"); // default host
-            else
+
+            if (!string.IsNullOrEmpty(host))
+            {
                 bridge.CallStatic("initPrebid", host);
+            }
+            else
+            {
+                MonetizrLogger.PrintWarning("[Prebid] No host provided. Skipping Prebid init.");
+            }
 #endif
         }
+
 
         public static void FetchDemand (string prebidData, string prebidHost, Action<string> onResult)
         {

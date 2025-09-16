@@ -121,13 +121,23 @@ namespace Monetizr.SDK.Campaigns
             bool allowPrebid = campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false);
             bool allowEndpoint = campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false);
 
+            if (allowPrebid && string.IsNullOrEmpty(campaign.serverSettings.GetParam("prebid_host", "")))
+            {
+                MonetizrLogger.PrintWarning("Prebid flow skipped: no prebid_host set.");
+                allowPrebid = false;
+            }
+
             if (allowPrebid)
             {
-                campaign = await HandlePrebidFallback(campaign);
-                if (campaign == null && allowEndpoint)
+                ServerCampaign prebidCampaign = await HandlePrebidFallback(campaign);
+                if (prebidCampaign == null && allowEndpoint)
                 {
                     MonetizrLogger.Print("CampaignID " + campaign.id + " - Prebid flow failed, will attempt Endpoint flow.");
                     campaign = await HandleEndpointFallback(campaign);
+                }
+                else
+                {
+                    campaign = prebidCampaign;
                 }
             }
             else if (allowEndpoint)
@@ -157,6 +167,8 @@ namespace Monetizr.SDK.Campaigns
                 MonetizrLogger.PrintError("Prebid - Data not found in campaign.");
                 return null;
             }
+
+            prebidJSON = MacroUtils.ExpandMacrosInText(prebidJSON, campaign);
 
             string prebidHost = campaign.serverSettings.GetParam("prebid_host", "");
             PrebidManager.InitializePrebid(prebidHost);

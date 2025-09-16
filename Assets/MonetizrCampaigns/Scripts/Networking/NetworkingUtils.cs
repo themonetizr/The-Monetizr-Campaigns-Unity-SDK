@@ -3,6 +3,7 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using SimpleJSON;
 using System;
@@ -88,8 +89,8 @@ namespace Monetizr.SDK.Networking
         public static string BuildEndpointURL (ServerCampaign campaign, string baseUrlOverride = "")
         {
             SettingsDictionary<string, string> settings = campaign.serverSettings;
-
             string baseUrl = !string.IsNullOrEmpty(baseUrlOverride) ? baseUrlOverride : settings.GetParam("endpoint_base", "");
+
             if (string.IsNullOrEmpty(baseUrl))
             {
                 MonetizrLogger.PrintError("Endpoint base URL missing.");
@@ -117,48 +118,33 @@ namespace Monetizr.SDK.Networking
                 }
             }
 
-            string ResolveMacro(string key, string value)
-            {
-                if (string.IsNullOrEmpty(value)) return "";
-
-                switch (value)
-                {
-                    case "${APP_BUNDLE}": return MonetizrSettings.bundleID;
-                    case "${APP_NAME}": return Application.productName;
-                    case "${APP_STOREURL}": return campaign.serverSettings.GetParam("app.storeurl", "");
-                    case "${OS}": return Application.platform.ToString();
-                    case "${OS_VERSION}": return SystemInfo.operatingSystem;
-                    case "${DEVICE_MODEL}": return SystemInfo.deviceModel;
-                    case "${DEVICE_MAKE}": return SystemInfo.deviceName;
-                    case "${PLAYER_ID}": return MonetizrMobileAnalytics.advertisingID;
-                    case "${GDPR}": return MonetizrManager.s_gdpr.ToString();
-                    case "${GDPR_CONSENT}": return MonetizrManager.s_consent;
-                    case "${COPPA}": return MonetizrManager.s_coppa.ToString();
-                    case "${CCPA}": return MonetizrManager.s_us_privacy.ToString();
-                    case "${US_PRIVACY_CONSENT}": return MonetizrManager.s_us_privacy.ToString();
-                    case "${DNT}": return "0";
-                    case "${LMT}": return (String.IsNullOrEmpty(MonetizrMobileAnalytics.advertisingID) ? "1" : "0");
-                    default: return value;
-                }
-            }
-
             Dictionary<string, string> resolvedParams = new Dictionary<string, string>();
             foreach (KeyValuePair<string, string> kv in queryParams)
             {
-                resolvedParams[kv.Key] = ResolveMacro(kv.Key, kv.Value);
+                resolvedParams[kv.Key] = MacroUtils.ResolveValue(kv.Value, campaign);
             }
 
-            if (!resolvedParams.ContainsKey("app.bundle")) resolvedParams["app.bundle"] = MonetizrSettings.bundleID;
-            if (!resolvedParams.ContainsKey("app.name")) resolvedParams["app.name"] = Application.productName;
-            if (!resolvedParams.ContainsKey("device.model")) resolvedParams["device.model"] = SystemInfo.deviceModel;
-            if (!resolvedParams.ContainsKey("device.make")) resolvedParams["device.make"] = SystemInfo.deviceName;
-            if (!resolvedParams.ContainsKey("device.os")) resolvedParams["device.os"] = Application.platform.ToString();
-            if (!resolvedParams.ContainsKey("device.osv")) resolvedParams["device.osv"] = SystemInfo.operatingSystem;
-            if (!resolvedParams.ContainsKey("device.ifa")) resolvedParams["device.ifa"] = MonetizrMobileAnalytics.advertisingID;
-            if (!resolvedParams.ContainsKey("regs.gdpr")) resolvedParams["regs.gdpr"] = MonetizrManager.s_gdpr.ToString();
-            if (!resolvedParams.ContainsKey("regs.coppa")) resolvedParams["regs.coppa"] = MonetizrManager.s_coppa.ToString();
-            if (!resolvedParams.ContainsKey("gdpr_consent")) resolvedParams["gdpr_consent"] = MonetizrManager.s_consent ?? "";
+            void Ensure(string key, string value)
+            {
+                if (!resolvedParams.ContainsKey(key) || string.IsNullOrEmpty(resolvedParams[key]))
+                    resolvedParams[key] = value;
+            }
 
+            Ensure("app.bundle", MonetizrSettings.bundleID);
+            Ensure("app.name", Application.productName);
+            Ensure("device.model", SystemInfo.deviceModel);
+            Ensure("device.make", SystemInfo.deviceName);
+            Ensure("device.os", Application.platform.ToString());
+            Ensure("device.osv", SystemInfo.operatingSystem);
+            Ensure("device.ifa", MonetizrMobileAnalytics.advertisingID);
+            Ensure("device.ua", MonetizrManager.Instance.ConnectionsClient.userAgent);
+            Ensure("site.domain", Application.identifier);
+            Ensure("site.page", $"https://{Application.identifier}");
+            Ensure("regs.gdpr", MonetizrManager.s_gdpr ? "1" : "0");
+            Ensure("regs.coppa", MonetizrManager.s_coppa ? "1" : "0");
+            Ensure("regs.us_privacy", settings.GetParam("us_privacy", PrebidConsentBridge.GetIabUsPrivacySafe()));
+            string consent = MonetizrManager.s_consent ?? PrebidManager.GetIabConsentString() ?? "";
+            Ensure("gdpr_consent", consent);
 
             StringBuilder builder = new StringBuilder();
             foreach (KeyValuePair<string, string> kv in resolvedParams)
@@ -173,5 +159,7 @@ namespace Monetizr.SDK.Networking
             MonetizrLogger.Print($"Endpoint - Built URL: {finalUrl}");
             return finalUrl;
         }
+
+
     }
 }

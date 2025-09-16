@@ -2,13 +2,13 @@ package com.monetizr.prebidbridge;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.unity3d.player.UnityPlayer;
 
 import org.prebid.mobile.Host;
 import org.prebid.mobile.PrebidMobile;
-import org.prebid.mobile.ResultCode;
 import org.prebid.mobile.VideoAdUnit;
 import org.prebid.mobile.VideoParameters;
 
@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import okhttp3.MediaType;
@@ -30,7 +29,7 @@ import okhttp3.Response;
 public class PrebidBridge {
 
     private static final String TAG = "PrebidBridge";
-    private static final String DEFAULT_OPENRTB_URL = "https://rtb.monetizr.com/openrtb2/auction";
+    private static final String DEFAULT_OPENRTB_URL = "";
     private static final String DEFAULT_SITE_PAGE   = "https://example.com";
 
     private static final OkHttpClient HTTP = new OkHttpClient();
@@ -38,7 +37,7 @@ public class PrebidBridge {
 
     public interface UnityCallback { void onResult(String s); }
 
-    // ---------- Init (robust across 2.2.1 shapes) ----------
+    // ---------- Init ----------
     public static void initPrebid() {
         Context ctx = UnityPlayer.currentActivity.getApplicationContext();
         setDefaultHost();
@@ -121,16 +120,19 @@ public class PrebidBridge {
             cb.onResult(""); return;
         }
 
-        // Mode A: Raw OpenRTB JSON → return PBS response **as-is** (string)
+        // Mode A: Raw OpenRTB JSON
         if (prebidData.trim().startsWith("{")) {
             new Thread(() -> {
                 try {
-                    String finalHost = (hostUrl != null && !hostUrl.isEmpty()) ? hostUrl : DEFAULT_OPENRTB_URL;
+                    if (hostUrl == null || hostUrl.isEmpty()) {
+                        Log.e(TAG, "[Prebid] No Prebid host specified – aborting request.");
+                        cb.onResult("");
+                        return;
+                    }
                     String json = ensureValidJson(prebidData);
                     json = normalizeOpenRtbJson(json);
 
-                    String response = httpPostJson(finalHost, json);
-                    // return body as-is (Unity will parse/decide)
+                    String response = httpPostJson(hostUrl, json);
                     cb.onResult(response != null ? response : "");
                 } catch (Throwable t) {
                     Log.e(TAG, "[Prebid] JSON flow error: " + t.getMessage());
@@ -140,7 +142,7 @@ public class PrebidBridge {
             return;
         }
 
-        // Mode B: Stored Config ID via SDK → return raw targeting map as JSON
+        // Mode B: Stored Config ID
         activity.runOnUiThread(() -> {
             try {
                 VideoAdUnit adUnit = new VideoAdUnit(prebidData, 640, 480);
@@ -149,18 +151,15 @@ public class PrebidBridge {
 
                 HashMap<String, String> targeting = new HashMap<>();
                 adUnit.fetchDemand(targeting, resultCode -> {
-                    // Build a JSON wrapper Unity can inspect
                     JSONObject out = new JSONObject();
                     try {
                         out.put("resultCode", (resultCode != null ? resultCode.name() : "UNKNOWN"));
-
                         JSONObject tJson = new JSONObject();
                         for (Map.Entry<String, String> e : targeting.entrySet()) {
                             tJson.put(e.getKey(), e.getValue());
                         }
                         out.put("targeting", tJson);
                     } catch (Throwable ignore) {}
-
                     cb.onResult(out.toString());
                 });
             } catch (Throwable e) {
@@ -171,7 +170,6 @@ public class PrebidBridge {
     }
 
     // ---------- Helpers ----------
-
     public static String getIabTcfConsent() {
         try {
             Context ctx = UnityPlayer.currentActivity.getApplicationContext();
@@ -183,13 +181,23 @@ public class PrebidBridge {
         }
     }
 
+    // NEW: US Privacy
+    public static String getIabUsPrivacy() {
+        try {
+            Context ctx = UnityPlayer.currentActivity.getApplicationContext();
+            SharedPreferences prefs = ctx.getSharedPreferences("IABUSPrivacy_Preferences", Context.MODE_PRIVATE);
+            return prefs.getString("IABUSPrivacy_String", "");
+        } catch (Throwable t) {
+            Log.w(TAG, "Failed to get IABUSPrivacy_String: " + t.getMessage());
+            return "";
+        }
+    }
+
     private static String ensureValidJson(String s) {
         if (s == null) return "";
         String t = s.trim();
-        if (t.startsWith("{")) {
-            if (t.indexOf('"') == -1 && t.indexOf('\'') != -1) {
-                return t.replace('\'', '"');
-            }
+        if (t.startsWith("{") && t.indexOf('"') == -1 && t.indexOf('\'') != -1) {
+            return t.replace('\'', '"');
         }
         return s;
     }
@@ -198,25 +206,38 @@ public class PrebidBridge {
         try {
             JSONObject root = new JSONObject(s);
 
+            // ---- SITE ----
             JSONObject site = root.optJSONObject("site");
-            if (site == null) {
-                site = new JSONObject();
-                site.put("page", DEFAULT_SITE_PAGE);
-                root.put("site", site);
-            } else if (!site.has("id") && !site.has("page")) {
-                site.put("page", DEFAULT_SITE_PAGE);
-            }
+            if (site == null) { site = new JSONObject(); root.put("site", site); }
 
+            Context ctx = UnityPlayer.currentActivity.getApplicationContext();
+            String bundle = ctx.getPackageName();
+
+            if (!site.has("domain")) site.put("domain", bundle != null ? bundle : "unknown");
+            if (!site.has("page")) site.put("page", "app://" + (bundle != null ? bundle : "unknown"));
+
+            // ---- DEVICE ----
             JSONObject device = root.optJSONObject("device");
-            if (device == null) {
-                device = new JSONObject();
-                device.put("ua", "UnityPlayer");
-                device.put("ip", "127.0.0.1");
-                root.put("device", device);
-            } else {
-                if (!device.has("ua")) device.put("ua", "UnityPlayer");
-                if (!device.has("ip")) device.put("ip", "127.0.0.1");
-            }
+            if (device == null) { device = new JSONObject(); root.put("device", device); }
+
+            if (!device.has("ua")) device.put("ua", System.getProperty("http.agent", "UnityPlayer"));
+            if (!device.has("ip")) device.put("ip", "0.0.0.0");
+            if (!device.has("make")) device.put("make", android.os.Build.MANUFACTURER);
+            if (!device.has("model")) device.put("model", android.os.Build.MODEL);
+            if (!device.has("os")) device.put("os", "Android");
+            if (!device.has("osv")) device.put("osv", android.os.Build.VERSION.RELEASE);
+
+            // ---- GDPR CONSENT ----
+            String consent = getIabTcfConsent();
+            JSONObject regs = root.optJSONObject("regs");
+            if (regs == null) { regs = new JSONObject(); root.put("regs", regs); }
+            regs.put("gdpr", consent.isEmpty() ? 0 : 1);
+
+            JSONObject user = root.optJSONObject("user");
+            if (user == null) { user = new JSONObject(); root.put("user", user); }
+            JSONObject ext = user.optJSONObject("ext");
+            if (ext == null) { ext = new JSONObject(); user.put("ext", ext); }
+            ext.put("consent", consent);
 
             return root.toString();
         } catch (Exception e) {
@@ -233,12 +254,13 @@ public class PrebidBridge {
                     .post(body)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json; charset=utf-8")
+                    .header("x-openrtb-version", "2.5")   // ✅ added
                     .build();
 
             try (Response resp = HTTP.newCall(request).execute()) {
                 String respBody = (resp.body() != null) ? resp.body().string() : "";
                 if (!resp.isSuccessful()) {
-                    Log.e(TAG, "[Prebid] HTTP " + resp.code() + " body=" + (respBody != null ? respBody : ""));
+                    Log.e(TAG, "[Prebid] HTTP " + resp.code() + " body=" + respBody);
                 }
                 return respBody;
             }

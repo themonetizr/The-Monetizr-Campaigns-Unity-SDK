@@ -1,9 +1,12 @@
+using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Newtonsoft.Json.Linq;
 using SimpleJSON;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Monetizr.SDK.Prebid
 {

@@ -179,7 +179,7 @@ namespace Monetizr.SDK.Networking
             }
         }
 
-        internal async Task ClaimReward(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal async Task ClaimReward (ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
             HttpRequestMessage requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{challenge.id}/claim",true);
             string content = string.Empty;

@@ -918,7 +918,7 @@ namespace Monetizr.SDK.Core
         {
             await ConnectionsClient.GetGlobalSettings();
             bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
-            CheckMixpanelProxy();
+            //CheckMixpanelProxy();
             CheckCGPLogging();
 
             campaigns = new List<ServerCampaign>();
@@ -948,7 +948,11 @@ namespace Monetizr.SDK.Core
             string mixpanelProxy = "";
             if (ConnectionsClient.GlobalSettings.TryGetValue("mixpanel_proxy_endpoint", out mixpanelProxy))
             {
-                if (!String.IsNullOrEmpty(mixpanelProxy)) MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
+                if (!String.IsNullOrEmpty(mixpanelProxy))
+                {
+                    MonetizrLogger.Print("Mixpanel Proxy set to: " + mixpanelProxy);
+                    MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
+                }
             }
         }
 
