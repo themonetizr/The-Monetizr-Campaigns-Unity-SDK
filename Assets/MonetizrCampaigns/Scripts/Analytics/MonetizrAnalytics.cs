@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using Newtonsoft.Json;
 
 namespace Monetizr.SDK.Analytics
 {
@@ -46,7 +47,7 @@ namespace Monetizr.SDK.Analytics
                 { "properties", props }
             };
 
-            string json = JsonUtility.ToJson(new SerializableWrapper(payload));
+            string json = JsonConvert.SerializeObject(payload);
             MonetizrManager.Instance.StartCoroutine(Send(json));
         }
 
@@ -113,15 +114,8 @@ namespace Monetizr.SDK.Analytics
                 { "properties", props }
             };
 
-            string json = JsonUtility.ToJson(new SerializableWrapper(payload));
+            string json = JsonConvert.SerializeObject(payload);
             MonetizrManager.Instance.StartCoroutine(Send(json));
-        }
-
-        [Serializable]
-        private class SerializableWrapper
-        {
-            public Dictionary<string, object> dict;
-            public SerializableWrapper(Dictionary<string, object> d) { dict = d; }
         }
     }
 }
