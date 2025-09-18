@@ -39,7 +39,6 @@ namespace Monetizr.SDK.Prebid
 #endif
         }
 
-
         public static void FetchDemand (string prebidData, string prebidHost, Action<string> onResult)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR

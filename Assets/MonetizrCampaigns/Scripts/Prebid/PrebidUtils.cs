@@ -1,12 +1,9 @@
-using Monetizr.SDK.Analytics;
-using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
-using Monetizr.SDK.Missions;
 using Newtonsoft.Json.Linq;
 using SimpleJSON;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Text.RegularExpressions;
 
 namespace Monetizr.SDK.Prebid
 {
@@ -16,6 +13,7 @@ namespace Monetizr.SDK.Prebid
         {
             VastXml,
             VastUrl,
+            HtmlCreative,
             CacheId,
             Empty,
             Unknown,
@@ -35,9 +33,9 @@ namespace Monetizr.SDK.Prebid
 
             try
             {
-                var root = JObject.Parse(jsonResponse);
+                JObject root = JObject.Parse(jsonResponse);
 
-                var seatbid = root["seatbid"] as JArray;
+                JArray seatbid = root["seatbid"] as JArray;
                 if (seatbid == null || seatbid.Count == 0)
                 {
                     MonetizrLogger.Print("[PrebidParser] No seatbid found.");
@@ -45,7 +43,7 @@ namespace Monetizr.SDK.Prebid
                     return null;
                 }
 
-                var bids = seatbid[0]["bid"] as JArray;
+                JArray bids = seatbid[0]["bid"] as JArray;
                 if (bids == null || bids.Count == 0)
                 {
                     MonetizrLogger.Print("[PrebidParser] No bid found.");
@@ -53,32 +51,43 @@ namespace Monetizr.SDK.Prebid
                     return null;
                 }
 
-                var bid = bids[0];
+                JToken bid = bids[0];
 
-                // 1. Try VAST (adm)
+                // 1. Inline creative (adm)
                 if (bid["adm"] != null && bid["adm"].Type == JTokenType.String)
                 {
-                    string vast = bid["adm"].ToString();
-                    MonetizrLogger.Print("[PrebidParser] Extracted VAST XML");
-                    responseType = PrebidResponseType.VastXml;
-                    return vast;
+                    string adm = bid["adm"].ToString().Trim();
+
+                    // Detect inline VAST XML (allow XML declaration or whitespace before <VAST>)
+                    if (Regex.IsMatch(adm, @"<\s*VAST", RegexOptions.IgnoreCase))
+                    {
+                        MonetizrLogger.Print("[PrebidParser] Extracted inline VAST XML");
+                        responseType = PrebidResponseType.VastXml;
+                        return adm;
+                    }
+                    else if (adm.IndexOf("<html", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        MonetizrLogger.Print("[PrebidParser] Extracted HTML creative");
+                        responseType = PrebidResponseType.HtmlCreative;
+                        return adm;
+                    }
                 }
 
-                // 2. Try VAST URL (nurl)
-                if (bid["nurl"] != null && bid["nurl"].Type == JTokenType.String)
+                // 2. Cached VAST URL in ext.prebid.cache.vastXml.url
+                JToken cacheUrl = bid.SelectToken("ext.prebid.cache.vastXml.url");
+                if (cacheUrl != null && Uri.IsWellFormedUriString(cacheUrl.ToString(), UriKind.Absolute))
                 {
-                    string url = bid["nurl"].ToString();
-                    MonetizrLogger.Print("[PrebidParser] Extracted VAST URL");
+                    MonetizrLogger.Print("[PrebidParser] Extracted cached VAST URL");
                     responseType = PrebidResponseType.VastUrl;
-                    return url;
+                    return cacheUrl.ToString();
                 }
 
-                // 3. Cache ID
+                // 3. Cache ID (not implemented in HandlePrebidFallback yet)
                 if (bid["cacheId"] != null)
                 {
                     MonetizrLogger.Print("[PrebidParser] Found CacheID: " + bid["cacheId"]);
                     responseType = PrebidResponseType.CacheId;
-                    return null;
+                    return bid["cacheId"].ToString();
                 }
 
                 // 4. Empty object
@@ -98,6 +107,38 @@ namespace Monetizr.SDK.Prebid
             {
                 MonetizrLogger.Print("[PrebidParser] Failed to parse response: " + ex.Message);
                 responseType = PrebidResponseType.Error;
+                return null;
+            }
+        }
+
+        public static string ExtractNURL (string jsonResponse)
+        {
+            if (string.IsNullOrEmpty(jsonResponse)) return null;
+
+            try
+            {
+                JObject root = JObject.Parse(jsonResponse);
+
+                JArray seatbid = root["seatbid"] as JArray;
+                if (seatbid == null || seatbid.Count == 0) return null;
+
+                JArray bids = seatbid[0]["bid"] as JArray;
+                if (bids == null || bids.Count == 0) return null;
+
+                JToken bid = bids[0];
+
+                if (bid["nurl"] != null && bid["nurl"].Type == JTokenType.String)
+                {
+                    string nurl = bid["nurl"].ToString();
+                    MonetizrLogger.Print("[PrebidParser] Extracted nurl tracker: " + nurl);
+                    return nurl;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                MonetizrLogger.Print("[PrebidParser] Failed to extract nurl: " + ex.Message);
                 return null;
             }
         }

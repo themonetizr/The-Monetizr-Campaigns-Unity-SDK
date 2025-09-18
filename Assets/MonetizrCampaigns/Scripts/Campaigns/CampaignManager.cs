@@ -5,7 +5,6 @@ using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
-using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -200,6 +199,10 @@ namespace Monetizr.SDK.Campaigns
                     MonetizrLogger.Print($"Prebid - VAST XML");
                     campaign.adm = extractedResponse;
                     break;
+
+                case PrebidUtils.PrebidResponseType.HtmlCreative:
+                    MonetizrLogger.PrintWarning($"Prebid - HTML/MRAID Creative (Not Implemented)");
+                    return null;
 
                 case PrebidUtils.PrebidResponseType.CacheId:
                     MonetizrLogger.PrintWarning($"Prebid - Cache ID (Not Implemented)");

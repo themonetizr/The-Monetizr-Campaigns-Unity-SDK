@@ -238,7 +238,7 @@ namespace Monetizr.SDK.Networking
                 }
 
                 string vastXml = await response.Content.ReadAsStringAsync();
-                MonetizrLogger.Print($"VastDownloader - VAST XML length: {vastXml.Length} chars");
+                MonetizrLogger.Print($"VastDownloader - VAST XML: " + vastXml);
                 return vastXml;
             }
             catch (Exception ex)

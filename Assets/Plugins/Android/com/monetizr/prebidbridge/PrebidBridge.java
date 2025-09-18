@@ -227,6 +227,28 @@ public class PrebidBridge {
             if (!device.has("os")) device.put("os", "Android");
             if (!device.has("osv")) device.put("osv", android.os.Build.VERSION.RELEASE);
 
+            try {
+                android.location.LocationManager lm = (android.location.LocationManager)
+                        UnityPlayer.currentActivity.getSystemService(Context.LOCATION_SERVICE);
+                if (lm != null) {
+                    android.location.Location loc = lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
+                    if (loc == null) {
+                        loc = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
+                    }
+                    if (loc != null) {
+                        JSONObject geo = device.optJSONObject("geo");
+                        if (geo == null) {
+                            geo = new JSONObject();
+                            device.put("geo", geo);
+                        }
+                        geo.put("lat", loc.getLatitude());
+                        geo.put("lon", loc.getLongitude());
+                    }
+                }
+            } catch (Throwable t) {
+                Log.w(TAG, "[Prebid] geo injection failed: " + t.getMessage());
+            }
+
             // ---- GDPR CONSENT ----
             String consent = getIabTcfConsent();
             JSONObject regs = root.optJSONObject("regs");

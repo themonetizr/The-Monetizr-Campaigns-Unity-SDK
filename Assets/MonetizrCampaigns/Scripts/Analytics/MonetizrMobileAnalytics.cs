@@ -20,10 +20,6 @@ using UnityEngine.iOS;
 using UnityEngine.Android;
 #endif
 
-#if USING_FACEBOOK
-using Facebook.Unity;   
-#endif
-
 namespace Monetizr.SDK.Analytics
 {
     internal class MonetizrMobileAnalytics
@@ -39,6 +35,8 @@ namespace Monetizr.SDK.Analytics
 
         private HashSet<AdElement> adNewElements = new HashSet<AdElement>();
         private HashSet<AdElement> visibleAdAsset = new HashSet<AdElement>();
+
+        public static bool useBackendAnalytics = true;
 
         internal static string GetPlacementName(AdPlacement t)
         {
@@ -134,32 +132,20 @@ namespace Monetizr.SDK.Analytics
 #endif
 #endif
             deviceSizeGroup = GetDeviceGroup();
-
             MonetizrLogger.Print($"OS Version {osVersion} Ad id: {advertisingID} Limit ads: {limitAdvertising} Device group: {deviceSizeGroup}");
-
             isMixpanelInitialized = false;
-
-#if USING_FACEBOOK
-            if (FB.Isd)
-            {
-                FB.ActivateApp();
-            }
-            else
-            {
-                FB.Init(() =>
-                {
-                    FB.ActivateApp();
-
-                    Log.Print("[FB] Activated!");
-                });
-            }
-#endif
         }
 
-        internal void Initialize(bool testEnvironment, string mixPanelApiKey, bool logConnectionErrors)
+        internal void Initialize (bool testEnvironment, string mixPanelApiKey, bool logConnectionErrors)
         {
+            if (useBackendAnalytics)
+            {
+                MonetizrLogger.Print("BackendAnalytics: Skipping Mixpanel init.");
+                return;
+            }
+
             string key = "cda45517ed8266e804d4966a0e693d0d";
-            
+
             if (testEnvironment)
             {
                 key = "d4de97058730720b3b8080881c6ba2e0";
@@ -181,11 +167,11 @@ namespace Monetizr.SDK.Analytics
             MonetizrLogger.Print($"Mixpanel init called {key}");
         }
 
-        private void BeginShowAdAsset(string eventName, AdPlacement placement, ServerCampaign campaign)
+        private void BeginShowAdAsset (string eventName, AdPlacement placement, ServerCampaign campaign)
         {
             if (campaign == null)
             {
-                MonetizrLogger.PrintWarning($"MonetizrMobileAnalytics BeginShowAdAsset: MissionUIDescription shouldn't be null");
+                MonetizrLogger.PrintWarning($"BeginShowAdAsset: MissionUIDescription shouldn't be null");
                 return;
             }
 
@@ -200,24 +186,25 @@ namespace Monetizr.SDK.Analytics
             StartTimedEvent(eventName);
         }
 
-        private void StartTimedEvent(string eventName)
+        private void StartTimedEvent (string eventName)
         {
-            Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {eventName}");
+            if (useBackendAnalytics)
+            {
+                MonetizrAnalytics.TrackEvent(eventName, null, null, timed: true);
+            }
+            else
+            {
+                Mixpanel.StartTimedEvent($"[UNITY_SDK] [TIMED] {eventName}");
+            }
         }
 
-        private void EndShowAdAsset(AdPlacement placement, ServerCampaign campaign, bool removeElement = true)
+        private void EndShowAdAsset (AdPlacement placement, ServerCampaign campaign, bool removeElement = true)
         {
             visibleAdAsset.RemoveWhere((AdElement a) =>
             {
                 ServerCampaign c = campaign == null ? null : a.campaign;
-
                 bool remove = a.placement == placement && c == campaign;
-
-                if (remove)
-                {
-                    _EndShowAdAsset(a);
-                }
-
+                if (remove) _EndShowAdAsset(a);
                 return remove;
             });
         }
@@ -255,24 +242,30 @@ namespace Monetizr.SDK.Analytics
             props["device_name"] = SystemInfo.deviceName;
             props["internet_connection"] = NetworkingUtils.GetInternetConnectionType();
 
-            if (campaign != null)
-            {
-                foreach (var s in campaign.serverSettings)
-                {
-                    string key = s.Key;
+            if (campaign == null) return;
 
-                    if (!key.EndsWith("_text") && key != "custom_missions")
-                    {
-                        props[$"cs_{s.Key}"] = s.Value;
-                    }
-                }
+            foreach (KeyValuePair<string, string> s in campaign.serverSettings)
+            {
+                string key = s.Key;
+                if (!key.EndsWith("_text") && key != "custom_missions") props[$"cs_{s.Key}"] = s.Value;
             }
         }
 
         private void MixpanelTrack(ServerCampaign camp, string eventName, Value props, bool darTag = false)
         {
-            props["dar_tag_sent"] = darTag.ToString();
+            if (useBackendAnalytics)
+            {
+                Dictionary<string, string> dictProps = new Dictionary<string, string>();
+                foreach (var v in props.GetFieldValue<Dictionary<string, Value>>("_container"))
+                {
+                    string value = v.Value.GetFieldValue<string>("_string");
+                    dictProps[v.Key] = value;
+                }
+                MonetizrAnalytics.TrackEvent(eventName, camp, dictProps);
+                return;
+            }
 
+            props["dar_tag_sent"] = darTag.ToString();
             Mixpanel.Identify(deviceIdentifier);
             Mixpanel.Track(eventName, props);
 
@@ -281,56 +274,52 @@ namespace Monetizr.SDK.Analytics
             if (MonetizrManager.ExternalAnalytics != null)
             {
                 Dictionary<string, string> eventProps = new Dictionary<string, string>();
-
-                foreach (var v in props.GetFieldValue<Dictionary<string, Value>>("_container"))
+                foreach (KeyValuePair<string, Value> v in props.GetFieldValue<Dictionary<string, Value>>("_container"))
                 {
-                    var value = v.Value.GetFieldValue<string>("_string");
-
+                    string value = v.Value.GetFieldValue<string>("_string");
                     eventProps.Add(v.Key, value);
                 }
-
                 MonetizrManager.ExternalAnalytics(eventName, eventProps);
             }
         }
 
+
         private void _EndShowAdAsset(AdElement adAsset)
         {
             string placementName = adAsset.placement.ToString();
-
             _TrackEvent(adAsset.eventName, adAsset.campaign, true, new Dictionary<string, string>() { { "type", placementName } });
         }
 
         internal void LoadUserId()
         {
             if (PlayerPrefs.HasKey("Monetizr.user_id"))
+            {
                 deviceIdentifier = PlayerPrefs.GetString("Monetizr.user_id");
+            }
             else
+            {
                 deviceIdentifier = SystemInfo.deviceUniqueIdentifier;
+            }
 
             PlayerPrefs.SetString("Monetizr.user_id", deviceIdentifier);
-
             PlayerPrefs.Save();
         }
 
         internal void RandomizeUserId()
         {
-            var _deviceIdentifier = deviceIdentifier.ToCharArray();
+            char[] _deviceIdentifier = deviceIdentifier.ToCharArray();
 
             for (int i = 0; i < _deviceIdentifier.Length; i++)
             {
-                var temp = _deviceIdentifier[i];
-                var randomIndex = UnityEngine.Random.Range(i, deviceIdentifier.Length);
-
-                if (temp == randomIndex && randomIndex == '-')
-                    continue;
-
+                char temp = _deviceIdentifier[i];
+                int randomIndex = UnityEngine.Random.Range(i, deviceIdentifier.Length);
+                if (temp == randomIndex && randomIndex == '-') continue;
                 _deviceIdentifier[i] = _deviceIdentifier[randomIndex];
                 _deviceIdentifier[randomIndex] = temp;
             }
 
             deviceIdentifier = new string(_deviceIdentifier);
             PlayerPrefs.SetString("Monetizr.user_id", deviceIdentifier);
-
             PlayerPrefs.Save();
         }
 
@@ -341,11 +330,8 @@ namespace Monetizr.SDK.Analytics
 
         internal void TrackEvent(Mission currentMission, PanelController panel, EventType eventType, Dictionary<string, string> additionalValues = null)
         {
-            if (panel.GetAdPlacement() == null)
-                return;
-
-            var adPlacement = panel.GetAdPlacement().Value;
-
+            if (panel.GetAdPlacement() == null) return;
+            AdPlacement adPlacement = panel.GetAdPlacement().Value;
             TrackEvent(currentMission.campaign, currentMission, adPlacement, eventType, additionalValues);
         }
 
@@ -357,18 +343,13 @@ namespace Monetizr.SDK.Analytics
         internal void TrackEvent(ServerCampaign currentCampaign, Mission currentMission, AdPlacement adPlacement, EventType eventType, Dictionary<string, string> additionalValues = null)
         {
             UnityEngine.Debug.Assert(currentCampaign != null);
-
             string placementName = GetPlacementName(adPlacement);
-
             MonetizrManager._CallUserDefinedEvent(currentCampaign.id, placementName, eventType);
 
-            if (additionalValues == null)
-                additionalValues = new Dictionary<string, string>();
+            if (additionalValues == null) additionalValues = new Dictionary<string, string>();
+            if (currentMission != null) additionalValues["mission_id"] = currentMission.serverId.ToString();
 
-            if (currentMission != null)
-                additionalValues["mission_id"] = currentMission.serverId.ToString();
-
-            var eventNames = new Dictionary<AdPlacement, string>()
+            Dictionary<AdPlacement, string> eventNames = new Dictionary<AdPlacement, string>()
             {
                 { AdPlacement.TinyTeaser,"Tiny teaser" },
                 { AdPlacement.Minigame, "Minigame" },
@@ -411,7 +392,7 @@ namespace Monetizr.SDK.Analytics
                 return "pressed";
             };
 
-            var eventTypes = new Dictionary<EventType, string>()
+            Dictionary<EventType, string> eventTypes = new Dictionary<EventType, string>()
             {
                 { EventType.ButtonPressOk, completedOrPressed(adPlacement) },
                 { EventType.ButtonPressSkip, "skipped" },
@@ -422,8 +403,7 @@ namespace Monetizr.SDK.Analytics
 
             TrackNewEvents(currentCampaign, currentMission, adPlacement, placementName, eventType, additionalValues);
 
-            if (!currentCampaign.serverSettings.GetBoolParam("send_old_events", false))
-                return;
+            if (!currentCampaign.serverSettings.GetBoolParam("send_old_events", false)) return;
 
             if (eventType == EventType.Impression)
             {
@@ -438,7 +418,6 @@ namespace Monetizr.SDK.Analytics
             }
 
             string eventName = $"{eventNames[adPlacement]} {eventTypes[eventType]}";
-            
             _TrackEvent(eventName, currentCampaign, false, additionalValues);
         }
 
@@ -449,7 +428,7 @@ namespace Monetizr.SDK.Analytics
 
             TrackOMSDKEvents(eventType, adPlacement, GetPlacementGroup(adPlacement));
 
-            var eventName = "";
+            string eventName = "";
             bool timed = false;
 
             switch (adPlacement)
@@ -498,7 +477,6 @@ namespace Monetizr.SDK.Analytics
                         if (adPlacement == a.placement && campaign == a.campaign)
                         {
                             duration = (DateTime.Now - a.activateTime).TotalSeconds;
-
                             return true;
                         }
 
@@ -558,7 +536,6 @@ namespace Monetizr.SDK.Analytics
 
         internal string GetPlacementGroup(AdPlacement adPlacement)
         {
-
             switch (adPlacement)
             {
                 case AdPlacement.TinyTeaser:
@@ -589,12 +566,15 @@ namespace Monetizr.SDK.Analytics
             }
         }
 
-        internal void _TrackEvent(string name, ServerCampaign campaign, bool timed = false, Dictionary<string, string> additionalValues = null, double duration = -1.0)
+        internal void _TrackEvent (string name, ServerCampaign campaign, bool timed = false, Dictionary<string, string> additionalValues = null, double duration = -1.0)
         {
-            UnityEngine.Debug.Assert(isMixpanelInitialized);
+            if (campaign == null)
+            {
+                MonetizrLogger.PrintWarning($"TrackEvent: ServerCampaign shouldn't be null");
+                return;
+            }
 
-            string logString = $"--->SendEvent: {name}";
-
+            string logString = $"SendEvent: {name}";
             if (additionalValues != null)
             {
                 if (additionalValues.ContainsKey("placement")) logString += " placement:" + additionalValues["placement"];
@@ -604,66 +584,53 @@ namespace Monetizr.SDK.Analytics
             }
 
             logString += $" id:{campaign.id}";
-
             MonetizrLogger.Print(logString);
+            string eventName = timed ? $"[UNITY_SDK] [TIMED] {name}" : $"[UNITY_SDK] {name}";
 
-            var eventName = $"[UNITY_SDK] {name}";
-
-            if (timed)
+            if (useBackendAnalytics)
             {
-                eventName = $"[UNITY_SDK] [TIMED] {name}";
-            }
-            
-            if (campaign == null)
-            {
-                MonetizrLogger.PrintWarning($"MonetizrMobileAnalytics TrackEvent: ServerCampaign shouldn't be null");
+                MonetizrAnalytics.TrackEvent(eventName, campaign, additionalValues, timed, duration);
                 return;
             }
 
-            var props = new Value();
-
+            UnityEngine.Debug.Assert(isMixpanelInitialized);
+            Value props = new Value();
             AddDefaultMixpanelValues(props, campaign);
 
             if (additionalValues != null)
             {
-                foreach (var s in additionalValues)
-                    props[$"{s.Key}"] = s.Value;
+                foreach (KeyValuePair<string, string> s in additionalValues)
+                {
+                    props[s.Key] = s.Value;
+                }
             }
 
-            if (duration > 0.0)
-            {
-                props["$duration"] = duration;
-            }
-
+            if (duration > 0.0) props["$duration"] = duration;
             MixpanelTrack(campaign, eventName, props);
         }
 
         internal void OnApplicationQuit()
         {
-            foreach (var ad in visibleAdAsset)
+            foreach (AdElement ad in visibleAdAsset)
             {
                 _EndShowAdAsset(ad);
             }
 
-            Mixpanel.Flush();
+            if (!useBackendAnalytics) Mixpanel.Flush();
         }
 
         private void NestedDictIteration(string rootName, SimpleJSON.JSONNode p, Value props)
         {
-            foreach (var key in p)
+            foreach (KeyValuePair<string, SimpleJSON.JSONNode> key in p)
             {
-                var value = key.Value;
-                var k = key.Key;
-
-                var name = string.IsNullOrEmpty(k) ? rootName : $"{rootName}/{key.Key}";
+                SimpleJSON.JSONNode value = key.Value;
+                string k = key.Key;
+                string name = string.IsNullOrEmpty(k) ? rootName : $"{rootName}/{key.Key}";
 
                 if (value.IsString || value.IsNumber)
                 {
                     string v = key.Value.ToString();
-
-                    if (value.IsString)
-                        v = v.Trim('"');
-
+                    if (value.IsString) v = v.Trim('"');
                     props[name] = v;
                 }
 
@@ -673,12 +640,15 @@ namespace Monetizr.SDK.Analytics
 
         internal void SendOpenRtbReportToMixpanel(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign)
         {
-            var props = new Value();
+            if (useBackendAnalytics)
+            {
+                MonetizrAnalytics.SendOpenRtbReport(openRtbRequest, status, openRtbResponse, campaign);
+                return;
+            }
 
+            Value props = new Value();
             AddDefaultMixpanelValues(props, campaign);
-
-            var parameters = SimpleJSON.JSON.Parse(openRtbRequest);
-
+            SimpleJSON.JSONNode parameters = SimpleJSON.JSON.Parse(openRtbRequest);
             NestedDictIteration("", parameters, props);
 
 #if UNITY_EDITOR
@@ -696,19 +666,6 @@ namespace Monetizr.SDK.Analytics
             Mixpanel.Track("Programmatic-request-client", props);
         }
 
-        internal void SendErrorToMixpanel(string condition, string callstack, ServerCampaign campaign)
-        {
-            var props = new Value();
-
-            AddDefaultMixpanelValues(props, campaign);
-
-            props["condition"] = condition;
-            props["callstack"] = callstack;
-
-            MonetizrLogger.Print($"SendError: {props}");
-            Mixpanel.Identify(deviceIdentifier);
-            Mixpanel.Track("[UNITY_SDK] Error", props);
-        }
 
     }
 
