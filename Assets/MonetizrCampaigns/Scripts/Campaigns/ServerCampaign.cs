@@ -71,6 +71,7 @@ namespace Monetizr.SDK.Campaigns
         public bool hasMadeEarlyBidRequest = false;
         public CampaignType campaignType = CampaignType.None;
         public float campaignTimeoutStart;
+        public List<string> trackingURLs = new List<string>();
 
         public ServerCampaign () { }
 

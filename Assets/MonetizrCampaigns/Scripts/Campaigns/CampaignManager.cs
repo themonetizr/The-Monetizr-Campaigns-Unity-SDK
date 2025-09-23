@@ -179,6 +179,8 @@ namespace Monetizr.SDK.Campaigns
                 return null;
             }
 
+            campaign.trackingURLs = TrackingUtils.ExtractAllTrackingStrings(prebidResponse);
+
             string extractedResponse = PrebidUtils.ExtractPrebidResponse(prebidResponse, out PrebidUtils.PrebidResponseType responseType);
             MonetizrLogger.Print("PrebidResponseType: " + responseType + " / ExtractedResponse: " + extractedResponse);
 

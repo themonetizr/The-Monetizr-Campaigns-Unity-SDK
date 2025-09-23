@@ -57,7 +57,7 @@ namespace Monetizr.SDK.Analytics
             props["camp_id"] = campaign.id;
             props["brand_id"] = campaign.brand_id;
             props["camp_title"] = campaign.title ?? "none";
-            props["bundle_id"] = MonetizrManager.bundleId;
+            props["bundle_id"] = MonetizrManager.bundleId ?? Application.identifier;
             props["player_id"] = MonetizrMobileAnalytics.deviceIdentifier;
             props["application_name"] = Application.productName;
             props["application_version"] = Application.version;

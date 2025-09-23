@@ -6,6 +6,7 @@ using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
+using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
 using System;
@@ -554,6 +555,7 @@ namespace Monetizr.SDK.UI
             _webView.Load(_webUrl);
             _webView.Show();
             MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+            TrackingUtils.FireTrackers(campaign.trackingURLs);
             impressionStarts = true;
         }
 

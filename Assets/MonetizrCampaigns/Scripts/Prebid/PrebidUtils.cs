@@ -26,7 +26,7 @@ namespace Monetizr.SDK.Prebid
 
             if (string.IsNullOrEmpty(jsonResponse))
             {
-                MonetizrLogger.Print("[PrebidParser] Empty response");
+                MonetizrLogger.Print("Empty response");
                 responseType = PrebidResponseType.Empty;
                 return null;
             }
@@ -38,7 +38,7 @@ namespace Monetizr.SDK.Prebid
                 JArray seatbid = root["seatbid"] as JArray;
                 if (seatbid == null || seatbid.Count == 0)
                 {
-                    MonetizrLogger.Print("[PrebidParser] No seatbid found.");
+                    MonetizrLogger.Print("No seatbid found.");
                     responseType = PrebidResponseType.Empty;
                     return null;
                 }
@@ -46,7 +46,7 @@ namespace Monetizr.SDK.Prebid
                 JArray bids = seatbid[0]["bid"] as JArray;
                 if (bids == null || bids.Count == 0)
                 {
-                    MonetizrLogger.Print("[PrebidParser] No bid found.");
+                    MonetizrLogger.Print("No bid found.");
                     responseType = PrebidResponseType.Empty;
                     return null;
                 }
@@ -61,13 +61,13 @@ namespace Monetizr.SDK.Prebid
                     // Detect inline VAST XML (allow XML declaration or whitespace before <VAST>)
                     if (Regex.IsMatch(adm, @"<\s*VAST", RegexOptions.IgnoreCase))
                     {
-                        MonetizrLogger.Print("[PrebidParser] Extracted inline VAST XML");
+                        MonetizrLogger.Print("Extracted inline VAST XML");
                         responseType = PrebidResponseType.VastXml;
                         return adm;
                     }
                     else if (adm.IndexOf("<html", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        MonetizrLogger.Print("[PrebidParser] Extracted HTML creative");
+                        MonetizrLogger.Print("Extracted HTML creative");
                         responseType = PrebidResponseType.HtmlCreative;
                         return adm;
                     }
@@ -77,7 +77,7 @@ namespace Monetizr.SDK.Prebid
                 JToken cacheUrl = bid.SelectToken("ext.prebid.cache.vastXml.url");
                 if (cacheUrl != null && Uri.IsWellFormedUriString(cacheUrl.ToString(), UriKind.Absolute))
                 {
-                    MonetizrLogger.Print("[PrebidParser] Extracted cached VAST URL");
+                    MonetizrLogger.Print("Extracted cached VAST URL");
                     responseType = PrebidResponseType.VastUrl;
                     return cacheUrl.ToString();
                 }
@@ -85,7 +85,7 @@ namespace Monetizr.SDK.Prebid
                 // 3. Cache ID (not implemented in HandlePrebidFallback yet)
                 if (bid["cacheId"] != null)
                 {
-                    MonetizrLogger.Print("[PrebidParser] Found CacheID: " + bid["cacheId"]);
+                    MonetizrLogger.Print("Found CacheID: " + bid["cacheId"]);
                     responseType = PrebidResponseType.CacheId;
                     return bid["cacheId"].ToString();
                 }
@@ -93,52 +93,20 @@ namespace Monetizr.SDK.Prebid
                 // 4. Empty object
                 if (bid.ToString().Trim() == "{}")
                 {
-                    MonetizrLogger.Print("[PrebidParser] Empty bid response.");
+                    MonetizrLogger.Print("Empty bid response.");
                     responseType = PrebidResponseType.Empty;
                     return null;
                 }
 
                 // 5. Unknown
-                MonetizrLogger.Print("[PrebidParser] Unknown bid response structure.");
+                MonetizrLogger.Print("Unknown bid response structure.");
                 responseType = PrebidResponseType.Unknown;
                 return null;
             }
             catch (Exception ex)
             {
-                MonetizrLogger.Print("[PrebidParser] Failed to parse response: " + ex.Message);
+                MonetizrLogger.Print("Failed to parse response: " + ex.Message);
                 responseType = PrebidResponseType.Error;
-                return null;
-            }
-        }
-
-        public static string ExtractNURL (string jsonResponse)
-        {
-            if (string.IsNullOrEmpty(jsonResponse)) return null;
-
-            try
-            {
-                JObject root = JObject.Parse(jsonResponse);
-
-                JArray seatbid = root["seatbid"] as JArray;
-                if (seatbid == null || seatbid.Count == 0) return null;
-
-                JArray bids = seatbid[0]["bid"] as JArray;
-                if (bids == null || bids.Count == 0) return null;
-
-                JToken bid = bids[0];
-
-                if (bid["nurl"] != null && bid["nurl"].Type == JTokenType.String)
-                {
-                    string nurl = bid["nurl"].ToString();
-                    MonetizrLogger.Print("[PrebidParser] Extracted nurl tracker: " + nurl);
-                    return nurl;
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                MonetizrLogger.Print("[PrebidParser] Failed to extract nurl: " + ex.Message);
                 return null;
             }
         }
@@ -158,7 +126,7 @@ namespace Monetizr.SDK.Prebid
 
             if (string.IsNullOrEmpty(xmlResponse))
             {
-                MonetizrLogger.Print("[EndpointParser] Empty response.");
+                MonetizrLogger.Print("Empty response.");
                 responseType = EndpointResponseType.Empty;
                 return null;
             }
@@ -173,7 +141,7 @@ namespace Monetizr.SDK.Prebid
                 // 1. Standard VAST
                 if (rootName == "vast")
                 {
-                    MonetizrLogger.Print("[EndpointParser] Found standard VAST XML.");
+                    MonetizrLogger.Print("Found standard VAST XML.");
                     responseType = EndpointResponseType.VastXml;
                     return xmlResponse; // return full VAST XML string
                 }
@@ -185,12 +153,12 @@ namespace Monetizr.SDK.Prebid
                     if (adNode != null && !string.IsNullOrEmpty(adNode.InnerText))
                     {
                         string vastUrl = adNode.InnerText.Trim();
-                        MonetizrLogger.Print("[EndpointParser] Found Playlist. Extracted first VAST URL: " + vastUrl);
+                        MonetizrLogger.Print("Found Playlist. Extracted first VAST URL: " + vastUrl);
                         responseType = EndpointResponseType.Playlist;
                         return vastUrl; // return the first VAST URL to fetch
                     }
 
-                    MonetizrLogger.Print("[EndpointParser] Playlist found but no <Ad> entry.");
+                    MonetizrLogger.Print("Playlist found but no <Ad> entry.");
                     responseType = EndpointResponseType.Empty;
                     return null;
                 }
@@ -199,19 +167,19 @@ namespace Monetizr.SDK.Prebid
                 var errorNode = xml.SelectSingleNode("//VAST//Error");
                 if (errorNode != null)
                 {
-                    MonetizrLogger.Print("[EndpointParser] VAST with <Error> node.");
+                    MonetizrLogger.Print("VAST with <Error> node.");
                     responseType = EndpointResponseType.Empty;
                     return null;
                 }
 
                 // 4. Unknown root
-                MonetizrLogger.Print("[EndpointParser] Unknown XML root: " + rootName);
+                MonetizrLogger.Print("Unknown XML root: " + rootName);
                 responseType = EndpointResponseType.Unknown;
                 return null;
             }
             catch (Exception ex)
             {
-                MonetizrLogger.Print("[EndpointParser] Failed to parse XML: " + ex.Message);
+                MonetizrLogger.Print("Failed to parse XML: " + ex.Message);
                 responseType = EndpointResponseType.Error;
                 return null;
             }
