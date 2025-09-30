@@ -1,6 +1,6 @@
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
-using Newtonsoft.Json.Linq;
+using SimpleJSON;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace Monetizr.SDK.Prebid
 {
     public static class TrackingUtils
     {
-        public static List<string> ExtractAllTrackingStrings (string jsonResponse)
+        public static List<string> ExtractAllTrackingStrings(string jsonResponse)
         {
             List<string> nurls = ExtractNurls(jsonResponse);
             List<string> burls = ExtractBurls(jsonResponse);
@@ -25,7 +25,7 @@ namespace Monetizr.SDK.Prebid
             return allTrackers;
         }
 
-        public static void FireTrackers (IEnumerable<string> urls)
+        public static void FireTrackers(IEnumerable<string> urls)
         {
             if (urls == null) return;
 
@@ -38,7 +38,7 @@ namespace Monetizr.SDK.Prebid
             }
         }
 
-        private static IEnumerator Fire (string url)
+        private static IEnumerator Fire(string url)
         {
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
@@ -59,19 +59,20 @@ namespace Monetizr.SDK.Prebid
 
             try
             {
-                JObject root = JObject.Parse(jsonResponse);
+                JSONNode root = JSON.Parse(jsonResponse);
+                if (root == null) return urls;
 
-                JArray seatbid = root["seatbid"] as JArray;
+                JSONArray seatbid = root["seatbid"].AsArray;
                 if (seatbid == null || seatbid.Count == 0) return urls;
 
-                JArray bids = seatbid[0]["bid"] as JArray;
+                JSONArray bids = seatbid[0]?["bid"]?.AsArray;
                 if (bids == null || bids.Count == 0) return urls;
 
-                JToken bid = bids[0];
+                JSONNode bid = bids[0];
 
-                if (bid["nurl"] != null && bid["nurl"].Type == JTokenType.String)
+                if (bid["nurl"] != null && bid["nurl"].IsString)
                 {
-                    string nurl = bid["nurl"].ToString();
+                    string nurl = bid["nurl"].Value;
                     MonetizrLogger.Print("[PrebidParser] Extracted nurl tracker: " + nurl);
                     urls.Add(nurl);
                 }
@@ -91,40 +92,42 @@ namespace Monetizr.SDK.Prebid
 
             try
             {
-                JObject root = JObject.Parse(jsonResponse);
+                JSONNode root = JSON.Parse(jsonResponse);
+                if (root == null) return urls;
 
-                JArray seatbid = root["seatbid"] as JArray;
+                JSONArray seatbid = root["seatbid"].AsArray;
                 if (seatbid == null || seatbid.Count == 0) return urls;
 
-                JArray bids = seatbid[0]["bid"] as JArray;
+                JSONArray bids = seatbid[0]?["bid"]?.AsArray;
                 if (bids == null || bids.Count == 0) return urls;
 
-                JToken bid = bids[0];
+                JSONNode bid = bids[0];
 
-                // imptrackers usually appear inside adm (if it's JSON instead of raw XML)
-                if (bid["adm"] != null && bid["adm"].Type == JTokenType.String)
+                // adm can either be inline VAST (XML string) or JSON containing imptrackers
+                if (bid["adm"] != null && bid["adm"].IsString)
                 {
-                    string adm = bid["adm"].ToString();
+                    string adm = bid["adm"].Value;
 
                     try
                     {
-                        JObject admJson = JObject.Parse(adm);
-                        JArray imptrackers = admJson["imptrackers"] as JArray;
-                        if (imptrackers != null)
+                        JSONNode admJson = JSON.Parse(adm);
+                        if (admJson != null && admJson["imptrackers"] != null)
                         {
-                            foreach (var tracker in imptrackers)
+                            JSONArray imptrackers = admJson["imptrackers"].AsArray;
+                            foreach (JSONNode tracker in imptrackers)
                             {
-                                if (tracker.Type == JTokenType.String)
+                                if (tracker != null && tracker.IsString)
                                 {
-                                    urls.Add(tracker.ToString());
-                                    MonetizrLogger.Print("[PrebidParser] Extracted imptracker: " + tracker);
+                                    string url = tracker.Value;
+                                    urls.Add(url);
+                                    MonetizrLogger.Print("[PrebidParser] Extracted imptracker: " + url);
                                 }
                             }
                         }
                     }
                     catch
                     {
-                        // adm is not JSON (it might be inline VAST XML), so ignore
+                        // adm was not JSON → ignore (it's probably inline VAST XML)
                     }
                 }
             }
@@ -143,19 +146,20 @@ namespace Monetizr.SDK.Prebid
 
             try
             {
-                JObject root = JObject.Parse(jsonResponse);
+                JSONNode root = JSON.Parse(jsonResponse);
+                if (root == null) return urls;
 
-                JArray seatbid = root["seatbid"] as JArray;
+                JSONArray seatbid = root["seatbid"].AsArray;
                 if (seatbid == null || seatbid.Count == 0) return urls;
 
-                JArray bids = seatbid[0]["bid"] as JArray;
+                JSONArray bids = seatbid[0]?["bid"]?.AsArray;
                 if (bids == null || bids.Count == 0) return urls;
 
-                JToken bid = bids[0];
+                JSONNode bid = bids[0];
 
-                if (bid["burl"] != null && bid["burl"].Type == JTokenType.String)
+                if (bid["burl"] != null && bid["burl"].IsString)
                 {
-                    string burl = bid["burl"].ToString();
+                    string burl = bid["burl"].Value;
                     MonetizrLogger.Print("[PrebidParser] Extracted burl tracker: " + burl);
                     urls.Add(burl);
                 }

@@ -4,7 +4,6 @@ using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
-using Newtonsoft.Json.Linq;
 using SimpleJSON;
 using System;
 using System.Collections.Generic;

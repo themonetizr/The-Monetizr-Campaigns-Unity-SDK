@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using Newtonsoft.Json;
+using SimpleJSON;
 
 namespace Monetizr.SDK.Analytics
 {
@@ -39,15 +39,16 @@ namespace Monetizr.SDK.Analytics
             string finalEventName = timed ? $"[UNITY_SDK] [TIMED] {eventName}" : $"[UNITY_SDK] {eventName}";
             MonetizrLogger.Print($"SendEvent: {finalEventName}");
 
-            Dictionary<string, object> payload = new Dictionary<string, object>
-            {
-                { "event", finalEventName },
-                { "user_id", MonetizrMobileAnalytics.deviceIdentifier },
-                { "timestamp", DateTime.UtcNow.ToString("o") },
-                { "properties", props }
-            };
+            // ✅ Build JSON with SimpleJSON
+            JSONObject payload = new JSONObject();
+            payload["event"] = finalEventName;
+            payload["user_id"] = MonetizrMobileAnalytics.deviceIdentifier;
+            payload["timestamp"] = DateTime.UtcNow.ToString("o");
 
-            string json = JsonConvert.SerializeObject(payload);
+            JSONObject propsJson = MonetizrUtils.DictionaryToJson(props);
+            payload["properties"] = propsJson;
+
+            string json = payload.ToString();
             MonetizrManager.Instance.StartCoroutine(Send(json));
         }
 
@@ -82,7 +83,7 @@ namespace Monetizr.SDK.Analytics
             }
         }
 
-        public static void SendOpenRtbReport (string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign)
+        public static void SendOpenRtbReport(string openRtbRequest, string status, string openRtbResponse, ServerCampaign campaign)
         {
             if (campaign == null)
             {
@@ -99,23 +100,23 @@ namespace Monetizr.SDK.Analytics
             props["request_pieces"] = MonetizrUtils.SplitStringIntoPieces(openRtbRequest, 255);
             props["response_pieces"] = MonetizrUtils.SplitStringIntoPieces(openRtbResponse, 255);
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
             props["editor_test"] = true;
-#endif
+        #endif
 
             string eventName = "Programmatic-request-client";
             MonetizrLogger.Print($"SendOpenRtbReport: {status}, campaign {campaign.id}");
 
-            Dictionary<string, object> payload = new Dictionary<string, object>
-            {
-                { "event", eventName },
-                { "user_id", MonetizrMobileAnalytics.deviceIdentifier },
-                { "timestamp", DateTime.UtcNow.ToString("o") },
-                { "properties", props }
-            };
+            // ✅ Build JSON with SimpleJSON
+            JSONObject payload = new JSONObject();
+            payload["event"] = eventName;
+            payload["user_id"] = MonetizrMobileAnalytics.deviceIdentifier;
+            payload["timestamp"] = DateTime.UtcNow.ToString("o");
+            payload["properties"] = MonetizrUtils.DictionaryToJson(props);
 
-            string json = JsonConvert.SerializeObject(payload);
+            string json = payload.ToString();
             MonetizrManager.Instance.StartCoroutine(Send(json));
         }
+
     }
 }

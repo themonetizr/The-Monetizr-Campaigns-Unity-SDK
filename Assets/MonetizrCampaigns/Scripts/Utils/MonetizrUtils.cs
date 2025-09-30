@@ -559,5 +559,34 @@ namespace Monetizr.SDK.Utils
             return list;
         }
 
+        public static JSONObject DictionaryToJson(Dictionary<string, object> dict)
+        {
+            JSONObject json = new JSONObject();
+            foreach (var kv in dict)
+            {
+                if (kv.Value is string)
+                    json[kv.Key] = (string)kv.Value;
+                else if (kv.Value is int)
+                    json[kv.Key] = (int)kv.Value;
+                else if (kv.Value is float)
+                    json[kv.Key] = (float)kv.Value;
+                else if (kv.Value is double)
+                    json[kv.Key] = (double)kv.Value;
+                else if (kv.Value is bool)
+                    json[kv.Key] = (bool)kv.Value;
+                else if (kv.Value is IEnumerable<string> list) // for request_pieces/response_pieces
+                {
+                    JSONArray arr = new JSONArray();
+                    foreach (var item in list) arr.Add(item);
+                    json[kv.Key] = arr;
+                }
+                else if (kv.Value != null)
+                    json[kv.Key] = kv.Value.ToString();
+                else
+                    json[kv.Key] = JSONNull.CreateOrGet();
+            }
+            return json;
+        }
+
     }
 }

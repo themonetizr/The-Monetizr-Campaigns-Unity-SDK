@@ -1,5 +1,4 @@
 using Monetizr.SDK.Debug;
-using Newtonsoft.Json.Linq;
 using SimpleJSON;
 using System;
 using System.Collections.Generic;
@@ -20,7 +19,7 @@ namespace Monetizr.SDK.Prebid
             Error
         }
 
-        public static string ExtractPrebidResponse (string jsonResponse, out PrebidResponseType responseType)
+        public static string ExtractPrebidResponse(string jsonResponse, out PrebidResponseType responseType)
         {
             responseType = PrebidResponseType.Unknown;
 
@@ -33,9 +32,15 @@ namespace Monetizr.SDK.Prebid
 
             try
             {
-                JObject root = JObject.Parse(jsonResponse);
+                JSONNode root = JSON.Parse(jsonResponse);
+                if (root == null)
+                {
+                    MonetizrLogger.Print("Failed to parse JSON root.");
+                    responseType = PrebidResponseType.Error;
+                    return null;
+                }
 
-                JArray seatbid = root["seatbid"] as JArray;
+                JSONArray seatbid = root["seatbid"].AsArray;
                 if (seatbid == null || seatbid.Count == 0)
                 {
                     MonetizrLogger.Print("No seatbid found.");
@@ -43,7 +48,7 @@ namespace Monetizr.SDK.Prebid
                     return null;
                 }
 
-                JArray bids = seatbid[0]["bid"] as JArray;
+                JSONArray bids = seatbid[0]?["bid"]?.AsArray;
                 if (bids == null || bids.Count == 0)
                 {
                     MonetizrLogger.Print("No bid found.");
@@ -51,14 +56,13 @@ namespace Monetizr.SDK.Prebid
                     return null;
                 }
 
-                JToken bid = bids[0];
+                JSONNode bid = bids[0];
 
                 // 1. Inline creative (adm)
-                if (bid["adm"] != null && bid["adm"].Type == JTokenType.String)
+                if (bid["adm"] != null && bid["adm"].IsString)
                 {
-                    string adm = bid["adm"].ToString().Trim();
+                    string adm = bid["adm"].Value.Trim();
 
-                    // Detect inline VAST XML (allow XML declaration or whitespace before <VAST>)
                     if (Regex.IsMatch(adm, @"<\s*VAST", RegexOptions.IgnoreCase))
                     {
                         MonetizrLogger.Print("Extracted inline VAST XML");
@@ -74,20 +78,20 @@ namespace Monetizr.SDK.Prebid
                 }
 
                 // 2. Cached VAST URL in ext.prebid.cache.vastXml.url
-                JToken cacheUrl = bid.SelectToken("ext.prebid.cache.vastXml.url");
-                if (cacheUrl != null && Uri.IsWellFormedUriString(cacheUrl.ToString(), UriKind.Absolute))
+                JSONNode cacheUrl = root["seatbid"]?[0]?["bid"]?[0]?["ext"]?["prebid"]?["cache"]?["vastXml"]?["url"];
+                if (cacheUrl != null && Uri.IsWellFormedUriString(cacheUrl.Value, UriKind.Absolute))
                 {
                     MonetizrLogger.Print("Extracted cached VAST URL");
                     responseType = PrebidResponseType.VastUrl;
-                    return cacheUrl.ToString();
+                    return cacheUrl.Value;
                 }
 
-                // 3. Cache ID (not implemented in HandlePrebidFallback yet)
+                // 3. Cache ID
                 if (bid["cacheId"] != null)
                 {
-                    MonetizrLogger.Print("Found CacheID: " + bid["cacheId"]);
+                    MonetizrLogger.Print("Found CacheID: " + bid["cacheId"].Value);
                     responseType = PrebidResponseType.CacheId;
-                    return bid["cacheId"].ToString();
+                    return bid["cacheId"].Value;
                 }
 
                 // 4. Empty object
@@ -113,14 +117,14 @@ namespace Monetizr.SDK.Prebid
 
         public enum EndpointResponseType
         {
-            VastXml,       // Proper <VAST> document
-            Playlist,      // <Playlist> wrapper (AuthX style)
-            Empty,         // Empty or no ads
-            Error,         // Malformed XML or HTTP error
-            Unknown        // Something else
+            VastXml,
+            Playlist,
+            Empty,
+            Error,
+            Unknown
         }
 
-        public static string ExtractEndpointResponse (string xmlResponse, out EndpointResponseType responseType)
+        public static string ExtractEndpointResponse(string xmlResponse, out EndpointResponseType responseType)
         {
             responseType = EndpointResponseType.Unknown;
 
@@ -138,15 +142,13 @@ namespace Monetizr.SDK.Prebid
 
                 var rootName = xml.DocumentElement?.Name?.ToLowerInvariant();
 
-                // 1. Standard VAST
                 if (rootName == "vast")
                 {
                     MonetizrLogger.Print("Found standard VAST XML.");
                     responseType = EndpointResponseType.VastXml;
-                    return xmlResponse; // return full VAST XML string
+                    return xmlResponse;
                 }
 
-                // 2. Playlist (AuthX)
                 if (rootName == "playlist")
                 {
                     var adNode = xml.SelectSingleNode("//Playlist/Preroll/Ad");
@@ -155,7 +157,7 @@ namespace Monetizr.SDK.Prebid
                         string vastUrl = adNode.InnerText.Trim();
                         MonetizrLogger.Print("Found Playlist. Extracted first VAST URL: " + vastUrl);
                         responseType = EndpointResponseType.Playlist;
-                        return vastUrl; // return the first VAST URL to fetch
+                        return vastUrl;
                     }
 
                     MonetizrLogger.Print("Playlist found but no <Ad> entry.");
@@ -163,7 +165,6 @@ namespace Monetizr.SDK.Prebid
                     return null;
                 }
 
-                // 3. Empty <VAST> with <Error> or no Ads
                 var errorNode = xml.SelectSingleNode("//VAST//Error");
                 if (errorNode != null)
                 {
@@ -172,7 +173,6 @@ namespace Monetizr.SDK.Prebid
                     return null;
                 }
 
-                // 4. Unknown root
                 MonetizrLogger.Print("Unknown XML root: " + rootName);
                 responseType = EndpointResponseType.Unknown;
                 return null;
@@ -185,7 +185,7 @@ namespace Monetizr.SDK.Prebid
             }
         }
 
-        public static List<string> ParseEndpoints (string raw)
+        public static List<string> ParseEndpoints(string raw)
         {
             List<string> results = new List<string>();
             if (string.IsNullOrEmpty(raw)) return results;
@@ -245,11 +245,11 @@ namespace Monetizr.SDK.Prebid
             return deduped;
         }
 
-        private static bool IsHttpUrl (string s)
+        private static bool IsHttpUrl(string s)
         {
             if (string.IsNullOrEmpty(s)) return false;
-            return Uri.TryCreate(s, UriKind.Absolute, out Uri u) && (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps);
+            return Uri.TryCreate(s, UriKind.Absolute, out Uri u) && 
+                   (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps);
         }
-
     }
 }
