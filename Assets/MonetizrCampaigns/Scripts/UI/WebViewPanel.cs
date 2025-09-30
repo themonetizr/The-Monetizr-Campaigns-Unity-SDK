@@ -349,8 +349,8 @@ namespace Monetizr.SDK.UI
 
         internal void PrepareActionPanel(Mission m)
         {
-            StopCoroutine(ShowCloseButton(_closeButtonDelay));
             GetActionMissionParameters(m);
+            StopCoroutine(ShowCloseButton(_closeButtonDelay));
 
             closeButton.gameObject.SetActive(false);
             claimButton.gameObject.SetActive(false);
@@ -365,6 +365,8 @@ namespace Monetizr.SDK.UI
             _rewardWebUrl = m.campaignServerSettings.GetParam("ActionReward.reward_url");
             _claimButtonDelay = m.campaignServerSettings.GetIntParam("ActionReward.reward_time", 0);
             _pagesSwitchesAmount = m.campaignServerSettings.GetIntParam("ActionReward.reward_pages", 0);
+
+            MonetizrLogger.Print("GetActionMissionParameters: " + _claimButtonDelay);
 
             if (string.IsNullOrEmpty(_webUrl))
             {
@@ -596,6 +598,8 @@ namespace Monetizr.SDK.UI
                 int claimButtonDelay = currentMission.campaignServerSettings.GetIntParam("VideoReward.reward_time", 0);
                 _rewardWebUrl = currentMission.campaignServerSettings.GetParam("VideoReward.reward_url");
                 
+                MonetizrLogger.Print("WILL SHOW CLOSE BUTTON IN: " + claimButtonDelay);
+
                 StartCoroutine(ShowClaimButtonCoroutine(claimButtonDelay));
                 StartCoroutine(ShowCloseButton(_closeButtonDelay));
                 
@@ -617,9 +621,9 @@ namespace Monetizr.SDK.UI
 
             if (panelId == PanelId.ActionHtmlPanelView)
             {
-                int claimButtonDelay = currentMission.campaignServerSettings.GetIntParam("VideoReward.reward_time", 0);
+                MonetizrLogger.Print("WILL INJECT CLAIM BUTTON IN: " + _claimButtonDelay);
                 InjectCloseButton();
-                Invoke(nameof(InjectClaimButton), claimButtonDelay);
+                Invoke(nameof(InjectClaimButton), _claimButtonDelay);
             }
 
         }
