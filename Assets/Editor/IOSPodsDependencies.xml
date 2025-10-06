@@ -1,5 +1,0 @@
-<dependencies>
-  <iosPods>
-    <pod name="PrebidMobile" version="== 2.2.1" minTargetSdk="12.0" addUseFrameworks="true" />
-  </iosPods>
-</dependencies>
