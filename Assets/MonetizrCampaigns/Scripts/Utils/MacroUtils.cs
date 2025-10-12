@@ -10,7 +10,7 @@ namespace Monetizr.SDK.Utils
 {
     internal static class MacroUtils
     {
-        private static readonly Regex MacroRx = new Regex(@"\$\{([A-Z0-9_\.]+)\}", RegexOptions.Compiled);
+        private static readonly Regex MacroRx = new Regex(@"(?:\$\{([A-Z0-9_\.]+)\}|\{([A-Z0-9_\.]+)\}|%%([A-Z0-9_\.]+)%%)", RegexOptions.Compiled);
 
         internal static string ResolveToken (string token, ServerCampaign campaign)
         {
@@ -69,7 +69,7 @@ namespace Monetizr.SDK.Utils
                 case "iOS_DEVICE_ID": return MonetizrMobileAnalytics.advertisingID ?? "";
                 case "LMT":
                 case "LAT": return MonetizrMobileAnalytics.limitAdvertising ? "1" : "0";
-                case "DNT": return "0"; // If you track your own DNT flag, map it here
+                case "DNT": return "0";
                 case "COPPA": return MonetizrManager.s_coppa ? "1" : "0";
                 case "GDPR": return MonetizrManager.s_gdpr ? "1" : "0";
                 case "GDPR_CONSENT": return gdprConsent ?? "";
@@ -81,24 +81,22 @@ namespace Monetizr.SDK.Utils
                 case "GEO_LON": return geoLon;
 
                 default:
-                    // allow custom server-provided app.* overrides (e.g., app.someparam)
                     string v = campaign.serverSettings.GetParam($"app.{token}", "");
                     return v;
             }
         }
 
-        internal static string ResolveValue (string value, ServerCampaign campaign)
-        {
-            if (string.IsNullOrEmpty(value)) return value;
-            if (!value.StartsWith("${")) return value;
-            var m = MacroRx.Match(value);
-            return m.Success ? ResolveToken(m.Groups[1].Value, campaign) : value;
-        }
-
-        internal static string ExpandMacrosInText (string text, ServerCampaign campaign)
+        internal static string ExpandMacrosInText (string text, ServerCampaign campaign, bool urlEncode = false)
         {
             if (string.IsNullOrEmpty(text)) return text;
-            return MacroRx.Replace(text, m => ResolveToken(m.Groups[1].Value, campaign) ?? "");
+
+            return MacroRx.Replace(text, m =>
+            {
+                string token = m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Success ? m.Groups[2].Value : m.Groups[3].Success ? m.Groups[3].Value : null;
+                if (string.IsNullOrEmpty(token)) return m.Value;
+                string resolved = ResolveToken(token, campaign) ?? "";
+                return urlEncode ? Uri.EscapeDataString(resolved) : resolved;
+            });
         }
 
         private static string GetDeviceMake ()

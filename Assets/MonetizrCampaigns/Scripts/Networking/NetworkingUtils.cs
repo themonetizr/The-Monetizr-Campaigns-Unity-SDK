@@ -107,9 +107,7 @@ namespace Monetizr.SDK.Networking
                     if (json != null && json.IsObject)
                     {
                         foreach (KeyValuePair<string, JSONNode> kv in json.AsObject)
-                        {
                             queryParams[kv.Key] = kv.Value.Value;
-                        }
                     }
                 }
                 catch (Exception e)
@@ -121,7 +119,7 @@ namespace Monetizr.SDK.Networking
             Dictionary<string, string> resolvedParams = new Dictionary<string, string>();
             foreach (KeyValuePair<string, string> kv in queryParams)
             {
-                resolvedParams[kv.Key] = MacroUtils.ResolveValue(kv.Value, campaign);
+                resolvedParams[kv.Key] = MacroUtils.ExpandMacrosInText(kv.Value, campaign);
             }
 
             void Ensure(string key, string value)
@@ -143,6 +141,7 @@ namespace Monetizr.SDK.Networking
             Ensure("regs.gdpr", MonetizrManager.s_gdpr ? "1" : "0");
             Ensure("regs.coppa", MonetizrManager.s_coppa ? "1" : "0");
             Ensure("regs.us_privacy", settings.GetParam("us_privacy", PrebidConsentBridge.GetIabUsPrivacySafe()));
+
             string consent = MonetizrManager.s_consent ?? PrebidManager.GetIabConsentString() ?? "";
             Ensure("gdpr_consent", consent);
 
@@ -159,7 +158,6 @@ namespace Monetizr.SDK.Networking
             MonetizrLogger.Print($"Endpoint - Built URL: {finalUrl}");
             return finalUrl;
         }
-
 
     }
 }

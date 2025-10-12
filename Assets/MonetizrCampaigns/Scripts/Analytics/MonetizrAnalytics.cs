@@ -39,7 +39,6 @@ namespace Monetizr.SDK.Analytics
             string finalEventName = timed ? $"[UNITY_SDK] [TIMED] {eventName}" : $"[UNITY_SDK] {eventName}";
             MonetizrLogger.Print($"SendEvent: {finalEventName}");
 
-            // ✅ Build JSON with SimpleJSON
             JSONObject payload = new JSONObject();
             payload["event"] = finalEventName;
             payload["user_id"] = MonetizrMobileAnalytics.deviceIdentifier;
@@ -107,7 +106,6 @@ namespace Monetizr.SDK.Analytics
             string eventName = "Programmatic-request-client";
             MonetizrLogger.Print($"SendOpenRtbReport: {status}, campaign {campaign.id}");
 
-            // ✅ Build JSON with SimpleJSON
             JSONObject payload = new JSONObject();
             payload["event"] = eventName;
             payload["user_id"] = MonetizrMobileAnalytics.deviceIdentifier;
