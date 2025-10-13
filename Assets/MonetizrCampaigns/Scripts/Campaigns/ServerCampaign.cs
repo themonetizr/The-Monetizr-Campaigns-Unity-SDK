@@ -563,7 +563,7 @@ namespace Monetizr.SDK.Campaigns
             MonetizrLogger.Print($"[Fallback] VideoPlayer ready for campaign {id}");
         }
 
-        internal void DirectVASTInjectionIntoVideoPlayer ()
+        internal void DirectVASTInjectionIntoVideoPlayer()
         {
             string campPath = Application.persistentDataPath + "/" + id;
             string indexPath = $"{campPath}/index.html";
@@ -576,22 +576,76 @@ namespace Monetizr.SDK.Campaigns
 
             MonetizrLogger.Print("RawVastInjection: embedding raw VAST for campaign " + id);
 
-            string str = File.ReadAllText(indexPath);
+            string html = File.ReadAllText(indexPath);
+
             if (!string.IsNullOrEmpty(adm))
             {
-                string wrapped = "`" + adm + "`";
-                str = str.Replace("\"${MON_VAST_COMPONENT}\"", wrapped);
+                string jsLiteral;
+                if (IsLikelyXml(adm))
+                {
+                    jsLiteral = $"`{JsEscapeForTemplateLiteral(adm)}`";
+                }
+                else
+                {
+                    jsLiteral = $"\"{JsEscapeForQuotedString(adm)}\"";
+                }
+
+                html = ReplaceMonVastPlaceholder(html, jsLiteral);
             }
 
             if (!string.IsNullOrEmpty(verifications_vast_node))
             {
-                string wrappedVerif = "`" + verifications_vast_node + "`";
-                str = str.Replace("\"${VAST_VERIFICATIONS}\"", wrappedVerif);
+                string verifLiteral = IsLikelyXml(verifications_vast_node)
+                    ? $"`{JsEscapeForTemplateLiteral(verifications_vast_node)}`"
+                    : $"\"{JsEscapeForQuotedString(verifications_vast_node)}\"";
+
+                html = ReplaceVerificationsPlaceholder(html, verifLiteral);
             }
 
-            str = str.Replace("\"${VAST_RESPONSE}\"", "\"\"");
-            File.WriteAllText(indexPath, str);
+            html = html.Replace("\"${VAST_RESPONSE}\"", "\"\"").Replace("${VAST_RESPONSE}", "\"\"");
+
+            File.WriteAllText(indexPath, html);
         }
+
+        private static bool IsLikelyXml(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return false;
+            string t = s.TrimStart();
+            return t.StartsWith("<VAST", StringComparison.OrdinalIgnoreCase) || t.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string JsEscapeForTemplateLiteral(string s)
+        {
+            if (s == null) return "";
+            return s.Replace("\\", "\\\\").Replace("`", "\\`").Replace("${", "\\${");
+        }
+
+        private static string JsEscapeForQuotedString(string s)
+        {
+            if (s == null) return "";
+            return s.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
+
+        private static string ReplaceMonVastPlaceholder(string html, string jsLiteral)
+        {
+            string replaced = html.Replace("\"${MON_VAST_COMPONENT}\"", jsLiteral);
+            if (ReferenceEquals(replaced, html))
+            {
+                replaced = html.Replace("${MON_VAST_COMPONENT}", jsLiteral);
+            }
+            return replaced;
+        }
+
+        private static string ReplaceVerificationsPlaceholder(string html, string jsLiteral)
+        {
+            string replaced = html.Replace("\"${VAST_VERIFICATIONS}\"", jsLiteral);
+            if (ReferenceEquals(replaced, html))
+            {
+                replaced = html.Replace("${VAST_VERIFICATIONS}", jsLiteral);
+            }
+            return replaced;
+        }
+
 
         internal string DumpsVastSettings (TagsReplacer vastTagsReplacer)
         {
