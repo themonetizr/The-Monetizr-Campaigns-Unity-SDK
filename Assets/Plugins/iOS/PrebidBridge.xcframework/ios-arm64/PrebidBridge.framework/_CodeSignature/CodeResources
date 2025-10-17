@@ -6,11 +6,11 @@
 	<dict>
 		<key>Headers/PrebidBridge.h</key>
 		<data>
-		ajYE6C1ZEtSYK9AlLxW3XO39UI4=
+		jKs+MpFg6oxFiL2wE7SV9DWdUY8=
 		</data>
 		<key>Info.plist</key>
 		<data>
-		gs/mTBKnhZkcJtzX/9LsYgBKdmU=
+		8pJsnzhVywzEB9bBq3/D1e2NPJc=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -21,21 +21,13 @@
 	<dict>
 		<key>Headers/PrebidBridge.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			ajYE6C1ZEtSYK9AlLxW3XO39UI4=
-			</data>
 			<key>hash2</key>
 			<data>
-			x7eowTtYHm6hNHUL/74qAVw4zq27wW1hC/sZYu/Puaw=
+			rFr9STB4RSMt3T8fG0PMj6pSv9tYzFI5xbwvQFwI2LU=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			YrWdzha6CofPVR0EInmQOuCGkx8=
-			</data>
 			<key>hash2</key>
 			<data>
 			c40xXuRGf7Q+KvlRi+zMU2VGC7ZGRcaOsDuXuT9/ohY=
