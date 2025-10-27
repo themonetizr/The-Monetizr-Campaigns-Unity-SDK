@@ -62,6 +62,7 @@ namespace Monetizr.SDK.UI
         private bool impressionStarts = false;
         private int _closeButtonDelay;
         private bool isOMSDKactive = false;
+        private bool shouldUnityCloseButtonGiveReward = false;
 
 #if UNI_WEB_VIEW
         private UniWebView _webView = null;
@@ -74,9 +75,7 @@ namespace Monetizr.SDK.UI
 
         private void Update ()
         {
-            bool panelForCheckUrl = (panelId == PanelId.SurveyWebView) ||
-                                    (panelId == PanelId.ActionHtmlPanelView) ||
-                                    (panelId == PanelId.Html5WebView);
+            bool panelForCheckUrl = (panelId == PanelId.SurveyWebView) || (panelId == PanelId.ActionHtmlPanelView) || (panelId == PanelId.Html5WebView);
 
             if (_webView == null || !panelForCheckUrl || string.IsNullOrEmpty(_webUrl)) return;
 
@@ -586,6 +585,12 @@ namespace Monetizr.SDK.UI
         private void OnPageStarted (UniWebView webView, string url)
         {
             MonetizrLogger.Print($"OnPageStarted: { url} ");
+
+            if (!url.Contains("monetizr") && !url.Contains("mntzr"))
+            {
+                MonetizrLogger.Print("URL outside MonetizrSDK - Will not set it to fullscreen.");
+                SetWebviewFrame(false, false);
+            }
         }
 
         private void OnPageFinished (UniWebView webView, int statusCode, string url)
@@ -624,8 +629,21 @@ namespace Monetizr.SDK.UI
                 MonetizrLogger.Print("WILL INJECT CLAIM BUTTON IN: " + _claimButtonDelay);
                 InjectCloseButton();
                 Invoke(nameof(InjectClaimButton), _claimButtonDelay);
+                return;
             }
 
+            if (!url.Contains("monetizr") && !url.Contains("mntzr"))
+            {
+                MonetizrLogger.Print("URL outside MonetizrSDK - Will enable native button.");
+                Invoke(nameof(EnableUnityCloseButton), 0.5f);
+            }
+        }
+
+        private void EnableUnityCloseButton ()
+        {
+            shouldUnityCloseButtonGiveReward = true;
+            closeButton.gameObject.SetActive(true);
+            crossButtonAnimator.enabled = true;
         }
 
         private void OnPageErrorReceived (UniWebView webView, int errorCode, string url)
@@ -644,7 +662,8 @@ namespace Monetizr.SDK.UI
 
             if (currentMission.campaign.serverSettings.ContainsKey("close_button_html"))
             {
-                js = currentMission.campaign.serverSettings.GetParam("close_button_html");
+                string paramHTML = currentMission.campaign.serverSettings.GetParam("close_button_html");
+                if (!string.IsNullOrEmpty(paramHTML)) js = paramHTML;
             }
             
             _webView.EvaluateJavaScript(js, payload => {
@@ -659,7 +678,8 @@ namespace Monetizr.SDK.UI
 
             if (currentMission.campaign.serverSettings.ContainsKey("claim_button_html"))
             {
-                js = currentMission.campaign.serverSettings.GetParam("claim_button_html");
+                string paramHTML = currentMission.campaign.serverSettings.GetParam("claim_button_html");
+                if (!string.IsNullOrEmpty(paramHTML)) js = paramHTML;
             }
 
             _webView.EvaluateJavaScript(js, payload => {
@@ -667,10 +687,23 @@ namespace Monetizr.SDK.UI
             });
         }
 
-        private void OnCompleteEvent ()
+        public void OnCompleteEvent ()
         {
             isSkipped = false;
             ClosePanel();
+        }
+
+        public void OnUnityCloseButtonClick ()
+        {
+            if (shouldUnityCloseButtonGiveReward)
+            {
+                shouldUnityCloseButtonGiveReward = false;
+                OnCompleteEvent();
+            }
+            else
+            {
+                OnSkipPress();
+            }
         }
 
         private void ClosePanel ()
