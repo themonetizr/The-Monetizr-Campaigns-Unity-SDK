@@ -625,8 +625,6 @@ namespace Monetizr.SDK.Core
 
         internal static GameReward GetGameReward(RewardType rt)
         {
-            LogGameRewards();
-
             if (gameRewards.ContainsKey(rt))
             {
                 return gameRewards[rt];

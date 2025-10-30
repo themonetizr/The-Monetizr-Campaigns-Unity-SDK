@@ -426,13 +426,9 @@ namespace Monetizr.SDK.Analytics
             additionalValues.Add("placement", placementName);
             additionalValues.Add("placement_group", GetPlacementGroup(adPlacement));
 
-            if (campaign.campaignType == CampaignType.Fallback && campaign.isDirectVASTinjection)
+            if (campaign.campaignType != CampaignType.MonetizrBackend)
             {
-                TrackOMSDKEvents(eventType, adPlacement, GetPlacementGroup(adPlacement));
-            }
-            else
-            {
-                bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", false);
+                bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
                 if (verifyWithOMSDK) TrackOMSDKEvents(eventType, adPlacement, GetPlacementGroup(adPlacement));
             }
 

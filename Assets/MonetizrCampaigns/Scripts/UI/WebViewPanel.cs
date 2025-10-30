@@ -444,35 +444,38 @@ namespace Monetizr.SDK.UI
                 campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
-            bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", false);
-            bool hasDownloaded = false;
-
-            if (!campaign.vastSettings.IsEmpty() && showWebview)
+            if (campaign.campaignType != CampaignType.MonetizrBackend)
             {
-                MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will embed VAST into VideoPlayer.");
+                bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", false);
+                bool hasDownloaded = false;
 
-                VastTagsReplacer replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
-                campaign.vastSettings.ReplaceVastTags(replacer);
-                campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
-                campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
-                
-                if (verifyWithOMSDK)
+                if (!campaign.vastSettings.IsEmpty() && showWebview)
                 {
-                    hasDownloaded = await ph.DownloadOMSDKServiceContent();
-                    if (hasDownloaded)
+                    MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will embed VAST into VideoPlayer.");
+
+                    VastTagsReplacer replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
+                    campaign.vastSettings.ReplaceVastTags(replacer);
+                    campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
+                    campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
+
+                    if (verifyWithOMSDK)
                     {
-                        ph.InitializeOMSDK(campaign.vastAdParameters);
-                        isOMSDKactive = true;
+                        hasDownloaded = await ph.DownloadOMSDKServiceContent();
+                        if (hasDownloaded)
+                        {
+                            ph.InitializeOMSDK(campaign.vastAdParameters);
+                            isOMSDKactive = true;
+                        }
                     }
                 }
-            }
-            else
-            {
-                MonetizrLogger.PrintError("CampaignID: " + campaign.id + " / VastSettings not empty: " + !campaign.vastSettings.IsEmpty() + " / showWebView: " + showWebview);
-            }
+                else
+                {
+                    MonetizrLogger.PrintError("CampaignID: " + campaign.id + " / VastSettings not empty: " + !campaign.vastSettings.IsEmpty() + " / showWebView: " + showWebview);
+                }
 
-            campaign.vastSettings = oldVastSettings;
-            if (!hasDownloaded) showWebview = false;
+                campaign.vastSettings = oldVastSettings;
+                if (!hasDownloaded) showWebview = false;
+            }
 
 #if UNITY_EDITOR_WIN
             showWebview = false;
