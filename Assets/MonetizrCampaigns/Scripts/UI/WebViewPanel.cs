@@ -62,7 +62,8 @@ namespace Monetizr.SDK.UI
         private bool impressionStarts = false;
         private int _closeButtonDelay;
         private bool isOMSDKactive = false;
-        private bool shouldUnityCloseButtonGiveReward = false;
+        private bool isInExternalWebpage = false;
+
 
 #if UNI_WEB_VIEW
         private UniWebView _webView = null;
@@ -443,7 +444,7 @@ namespace Monetizr.SDK.UI
                 campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
-            bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
+            bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", false);
             bool hasDownloaded = false;
 
             if (!campaign.vastSettings.IsEmpty() && showWebview)
@@ -454,7 +455,7 @@ namespace Monetizr.SDK.UI
                 campaign.vastSettings.ReplaceVastTags(replacer);
                 campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
-
+                
                 if (verifyWithOMSDK)
                 {
                     hasDownloaded = await ph.DownloadOMSDKServiceContent();
@@ -568,17 +569,27 @@ namespace Monetizr.SDK.UI
             if (message.RawMessage.Contains("close"))
             {
                 OnCompleteEvent();
+                return;
             }
 
             if (message.RawMessage.Contains("skip"))
             {
-                _OnSkipPress();
+                if (isInExternalWebpage)
+                {
+                    OnCompleteEvent();
+                }
+                else
+                {
+                    _OnSkipPress();
+                }
+                return;
             }
 
             if (message.RawMessage.Contains("load"))
             {
                 _webUrl = _rewardWebUrl;
                 _webView.Load(_webUrl);
+                return;
             }
         }
 
@@ -586,9 +597,11 @@ namespace Monetizr.SDK.UI
         {
             MonetizrLogger.Print($"OnPageStarted: { url} ");
 
+            isInExternalWebpage = false;
             if (!url.Contains("monetizr") && !url.Contains("mntzr"))
             {
                 MonetizrLogger.Print("URL outside MonetizrSDK - Will not set it to fullscreen.");
+                isInExternalWebpage = true;
                 SetWebviewFrame(false, false);
             }
         }
@@ -628,20 +641,21 @@ namespace Monetizr.SDK.UI
             {
                 MonetizrLogger.Print("WILL INJECT CLAIM BUTTON IN: " + _claimButtonDelay);
                 InjectCloseButton();
+                CancelInvoke(nameof(InjectClaimButton));
                 Invoke(nameof(InjectClaimButton), _claimButtonDelay);
                 return;
             }
 
-            if (!url.Contains("monetizr") && !url.Contains("mntzr"))
+            if (isInExternalWebpage)
             {
                 MonetizrLogger.Print("URL outside MonetizrSDK - Will enable native button.");
+                CancelInvoke(nameof(EnableUnityCloseButton));
                 Invoke(nameof(EnableUnityCloseButton), 0.5f);
             }
         }
 
         private void EnableUnityCloseButton ()
         {
-            shouldUnityCloseButtonGiveReward = true;
             closeButton.gameObject.SetActive(true);
             crossButtonAnimator.enabled = true;
         }
@@ -693,11 +707,11 @@ namespace Monetizr.SDK.UI
             ClosePanel();
         }
 
+        // Do not remove - linked with native Unity button;
         public void OnUnityCloseButtonClick ()
         {
-            if (shouldUnityCloseButtonGiveReward)
+            if (isInExternalWebpage)
             {
-                shouldUnityCloseButtonGiveReward = false;
                 OnCompleteEvent();
             }
             else
@@ -709,6 +723,8 @@ namespace Monetizr.SDK.UI
         private void ClosePanel ()
         {
             CancelInvoke(nameof(InjectClaimButton));
+            CancelInvoke(nameof(EnableUnityCloseButton));
+
             claimButton.SetActive(false);
             closeButton.gameObject.SetActive(false);            
             additionalEventValues.Clear();
@@ -722,7 +738,7 @@ namespace Monetizr.SDK.UI
             additionalEventValues.Add("url", _webUrl);
             additionalEventValues.Add("programmatic_status", programmaticStatus);
 
-            bool verifyWithOMSDK = currentMission.campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
+            bool verifyWithOMSDK = currentMission.campaign.serverSettings.GetBoolParam("omsdk.verify_videos", false);
             if (verifyWithOMSDK && isOMSDKactive)
             {
                 MonetizrLogger.Print($"Stopping OMID ad session at time: {Time.time}");

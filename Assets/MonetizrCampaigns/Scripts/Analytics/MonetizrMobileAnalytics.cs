@@ -421,12 +421,20 @@ namespace Monetizr.SDK.Analytics
             _TrackEvent(eventName, currentCampaign, false, additionalValues);
         }
 
-        internal void TrackNewEvents(ServerCampaign campaign, Mission currentMission, AdPlacement adPlacement, string placementName, EventType eventType, Dictionary<string, string> additionalValues)
+        internal void TrackNewEvents (ServerCampaign campaign, Mission currentMission, AdPlacement adPlacement, string placementName, EventType eventType, Dictionary<string, string> additionalValues)
         {
             additionalValues.Add("placement", placementName);
             additionalValues.Add("placement_group", GetPlacementGroup(adPlacement));
 
-            TrackOMSDKEvents(eventType, adPlacement, GetPlacementGroup(adPlacement));
+            if (campaign.campaignType == CampaignType.Fallback && campaign.isDirectVASTinjection)
+            {
+                TrackOMSDKEvents(eventType, adPlacement, GetPlacementGroup(adPlacement));
+            }
+            else
+            {
+                bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", false);
+                if (verifyWithOMSDK) TrackOMSDKEvents(eventType, adPlacement, GetPlacementGroup(adPlacement));
+            }
 
             string eventName = "";
             bool timed = false;
