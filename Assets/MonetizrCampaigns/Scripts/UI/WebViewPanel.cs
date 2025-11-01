@@ -5,18 +5,14 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
-using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 using EventType = Monetizr.SDK.Core.EventType;
 
@@ -476,6 +472,15 @@ namespace Monetizr.SDK.UI
                 campaign.vastSettings = oldVastSettings;
                 if (!hasDownloaded) showWebview = false;
             }
+            else
+            {
+                bool hasDownloaded = await ph.DownloadOMSDKServiceContent();
+                if (hasDownloaded)
+                {
+                    string fakeOmidJson = "{\"vendorName\":\"Themonetizr\",\"sdkVersion\":\"0.0.0\",\"adVerifications\":[]}";
+                    ph.InitializeOMSDK(fakeOmidJson);
+                }
+            }
 
 #if UNITY_EDITOR_WIN
             showWebview = false;
@@ -741,8 +746,7 @@ namespace Monetizr.SDK.UI
             additionalEventValues.Add("url", _webUrl);
             additionalEventValues.Add("programmatic_status", programmaticStatus);
 
-            bool verifyWithOMSDK = currentMission.campaign.serverSettings.GetBoolParam("omsdk.verify_videos", false);
-            if (verifyWithOMSDK && isOMSDKactive)
+            if (isOMSDKactive)
             {
                 MonetizrLogger.Print($"Stopping OMID ad session at time: {Time.time}");
                 _webView.StopOMIDAdSession();
@@ -750,7 +754,7 @@ namespace Monetizr.SDK.UI
             }
 
             float time = currentMission.campaignServerSettings.GetFloatParam("omid_destroy_delay", 1.0f);
-            if (panelId != PanelId.Html5WebView || !verifyWithOMSDK) time = 0;
+            if (panelId != PanelId.Html5WebView || !isOMSDKactive) time = 0;
             Invoke("DestroyWebView", time);
             triggersButtonEventsOnDeactivate = false;
 

@@ -520,7 +520,7 @@ namespace Monetizr.SDK.Analytics
             return false;
         }
 
-        private void TrackOMSDKEvents(EventType eventType, AdPlacement adPlacement, string placementGroup)
+        private void TrackOMSDKEvents (EventType eventType, AdPlacement adPlacement, string placementGroup)
         {
             if (!CanTrackInOMSDK(adPlacement)) return;
 
