@@ -60,7 +60,6 @@ namespace Monetizr.SDK.UI
         private bool isOMSDKactive = false;
         private bool isInExternalWebpage = false;
 
-
 #if UNI_WEB_VIEW
         private UniWebView _webView = null;
 #endif
@@ -129,14 +128,10 @@ namespace Monetizr.SDK.UI
             PrepareWebViewComponent(fullScreen, useSafeFrame);
             closeButton.gameObject.SetActive(!fullScreen);
 
-            _closeButtonDelay = m.campaignServerSettings.GetIntParam(
-                new List<string>()
-                {
-                    "email_enter_close_button_delay",
-                    "VideoReward.close_button_delay"
-                }, 0);
+            _closeButtonDelay = m.campaignServerSettings.GetIntParam(new List<string>(){"email_enter_close_button_delay","VideoReward.close_button_delay"}, 0);
+            bool isMonetizrBackendHtml5 = (id == PanelId.Html5WebView) && (m.campaign.campaignType == CampaignType.MonetizrBackend);
+            if (!isMonetizrBackendHtml5) StartCoroutine(ShowCloseButton(_closeButtonDelay));
 
-            StartCoroutine(ShowCloseButton(_closeButtonDelay));
             background.color = Color.black;
             adType = getAdPlacement();
             eventsPrefix = adType.ToString();
@@ -606,10 +601,10 @@ namespace Monetizr.SDK.UI
             MonetizrLogger.Print($"OnPageStarted: { url} ");
 
             isInExternalWebpage = false;
-            if (!url.Contains("monetizr") && !url.Contains("mntzr"))
+            if (IsExternalURL(url))
             {
-                MonetizrLogger.Print("URL outside MonetizrSDK - Will not set it to fullscreen.");
                 isInExternalWebpage = true;
+                MonetizrLogger.Print("URL outside MonetizrSDK - Will not set it to fullscreen.");
                 SetWebviewFrame(false, false);
             }
         }
@@ -654,8 +649,9 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            if (isInExternalWebpage)
+            if (IsExternalURL(url))
             {
+                isInExternalWebpage = true;
                 MonetizrLogger.Print("URL outside MonetizrSDK - Will enable native button.");
                 CancelInvoke(nameof(EnableUnityCloseButton));
                 Invoke(nameof(EnableUnityCloseButton), 0.5f);
@@ -830,6 +826,19 @@ namespace Monetizr.SDK.UI
         internal override void FinalizePanel (PanelId id)
         {
             MonetizrManager.Instance.SoundSwitch(true);
+        }
+
+        private bool IsExternalURL (string url)
+        {
+            if (string.IsNullOrEmpty(url)) return false;
+
+            if (url.StartsWith("file://", StringComparison.OrdinalIgnoreCase)) return false;
+            if (url.StartsWith("about:", StringComparison.OrdinalIgnoreCase)) return false;
+            if (url.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return false;
+            if (url.StartsWith("uniwebview://", StringComparison.OrdinalIgnoreCase)) return false;
+            if (url.Contains("monetizr") || url.Contains("mntzr")) return false;
+
+            return true;
         }
 
     }
