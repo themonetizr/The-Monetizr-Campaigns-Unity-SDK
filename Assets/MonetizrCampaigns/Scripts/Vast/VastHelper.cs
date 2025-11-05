@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -16,8 +15,6 @@ using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
-using Monetizr.SDK.Analytics;
-using Monetizr.SDK.UI;
 
 namespace Monetizr.SDK.VAST
 {

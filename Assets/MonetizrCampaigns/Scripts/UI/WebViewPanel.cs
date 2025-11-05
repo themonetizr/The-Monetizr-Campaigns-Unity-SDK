@@ -26,9 +26,6 @@ namespace Monetizr.SDK.UI
         public Image background;
         public GameObject claimButton;
         public Animator crossButtonAnimator;
-        public string successReason;
-        public bool claimPageReached = false;
-        public string programmaticStatus;
         public RectTransform safeArea;
 
         [Header("Start Notification Settings")]
@@ -49,14 +46,17 @@ namespace Monetizr.SDK.UI
         [SerializeField] private Button congratsConfirmButton;
         [SerializeField] private Text congratsConfirmButtonText;
 
+        private AdPlacement adType;
+        private string successReason;
+        private string programmaticStatus;
         private string _webUrl;
         private string _rewardWebUrl;
         private string eventsPrefix;
-        private AdPlacement adType;
         private int _pagesSwitchesAmount = -1;
         private int _claimButtonDelay;
-        private bool impressionStarts = false;
         private int _closeButtonDelay;
+        private bool claimPageReached = false;
+        private bool impressionStarts = false;
         private bool isOMSDKactive = false;
         private bool isInExternalWebpage = false;
 
@@ -241,7 +241,7 @@ namespace Monetizr.SDK.UI
             return AdPlacement.Html5;
         }
 
-        internal void SetWebviewFrame(bool fullScreen, bool useSafeFrame)
+        internal void SetWebviewFrame (bool fullScreen, bool useSafeFrame)
         {
             Rect frame = new Rect(0, 0, 0, 0);
 
@@ -435,47 +435,35 @@ namespace Monetizr.SDK.UI
                 campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
             }
 
-            if (campaign.campaignType != CampaignType.MonetizrBackend)
+            bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
+            bool hasDownloaded = false;
+
+            if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
-                bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", false);
-                bool hasDownloaded = false;
+                MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will embed VAST into VideoPlayer.");
 
-                if (!campaign.vastSettings.IsEmpty() && showWebview)
+                VastTagsReplacer replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
+                campaign.vastSettings.ReplaceVastTags(replacer);
+                campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
+                campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
+
+                if (verifyWithOMSDK)
                 {
-                    MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will embed VAST into VideoPlayer.");
-
-                    VastTagsReplacer replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
-                    campaign.vastSettings.ReplaceVastTags(replacer);
-                    campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
-                    campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
-
-                    if (verifyWithOMSDK)
+                    hasDownloaded = await ph.DownloadOMSDKServiceContent();
+                    if (hasDownloaded)
                     {
-                        hasDownloaded = await ph.DownloadOMSDKServiceContent();
-                        if (hasDownloaded)
-                        {
-                            ph.InitializeOMSDK(campaign.vastAdParameters);
-                            isOMSDKactive = true;
-                        }
+                        ph.InitializeOMSDK(campaign.vastAdParameters);
+                        isOMSDKactive = true;
                     }
                 }
-                else
-                {
-                    MonetizrLogger.PrintError("CampaignID: " + campaign.id + " / VastSettings not empty: " + !campaign.vastSettings.IsEmpty() + " / showWebView: " + showWebview);
-                }
-
-                campaign.vastSettings = oldVastSettings;
-                if (!hasDownloaded) showWebview = false;
             }
             else
             {
-                bool hasDownloaded = await ph.DownloadOMSDKServiceContent();
-                if (hasDownloaded)
-                {
-                    string fakeOmidJson = "{\"vendorName\":\"Themonetizr\",\"sdkVersion\":\"0.0.0\",\"adVerifications\":[]}";
-                    ph.InitializeOMSDK(fakeOmidJson);
-                }
+                MonetizrLogger.PrintError("CampaignID: " + campaign.id + " / VastSettings not empty: " + !campaign.vastSettings.IsEmpty() + " / showWebView: " + showWebview);
             }
+
+            campaign.vastSettings = oldVastSettings;
+            if (!hasDownloaded) showWebview = false;
 
 #if UNITY_EDITOR_WIN
             showWebview = false;
