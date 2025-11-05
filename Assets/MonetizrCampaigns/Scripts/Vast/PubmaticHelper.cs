@@ -132,7 +132,7 @@ namespace Monetizr.SDK.VAST
             public string vasttag;
         }
 
-        internal PubmaticHelper(MonetizrClient httpClient, string userAgent) : base(httpClient, userAgent) { }
+        internal PubmaticHelper(MonetizrHttpClient httpClient, string userAgent) : base(httpClient, userAgent) { }
 
         internal async Task<bool> GetOpenRTBResponseForCampaign(ServerCampaign currentCampaign)
         {
@@ -175,7 +175,7 @@ namespace Monetizr.SDK.VAST
                 return false;
             }
 
-            currentCampaign.openRtbRawResponse = responseContent;
+            currentCampaign.rawVAST = responseContent;
             OpenRTBResponse openRtbResponse = OpenRTBResponse.Load(responseContent);
 
             string adm = openRtbResponse.GetAdm();

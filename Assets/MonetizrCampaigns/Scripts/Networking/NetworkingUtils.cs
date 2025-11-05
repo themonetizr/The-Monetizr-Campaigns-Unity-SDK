@@ -1,11 +1,17 @@
 using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
+using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
-using System.Globalization;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Text;
+using SimpleJSON;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using UnityEngine;
 
 namespace Monetizr.SDK.Networking
@@ -79,5 +85,79 @@ namespace Monetizr.SDK.Networking
             output.Headers.Add("User-Agent", userAgent);
             return output;
         }
+
+        public static string BuildEndpointURL (ServerCampaign campaign, string baseUrlOverride = "")
+        {
+            SettingsDictionary<string, string> settings = campaign.serverSettings;
+            string baseUrl = !string.IsNullOrEmpty(baseUrlOverride) ? baseUrlOverride : settings.GetParam("endpoint_base", "");
+
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                MonetizrLogger.PrintError("Endpoint base URL missing.");
+                return null;
+            }
+
+            Dictionary<string, string> queryParams = new Dictionary<string, string>();
+            string rawParams = settings.GetParam("endpoint_params", "");
+            if (!string.IsNullOrEmpty(rawParams))
+            {
+                try
+                {
+                    JSONNode json = JSON.Parse(rawParams);
+                    if (json != null && json.IsObject)
+                    {
+                        foreach (KeyValuePair<string, JSONNode> kv in json.AsObject)
+                            queryParams[kv.Key] = kv.Value.Value;
+                    }
+                }
+                catch (Exception e)
+                {
+                    MonetizrLogger.PrintError($"Failed to parse endpoint_params JSON: {e}");
+                }
+            }
+
+            Dictionary<string, string> resolvedParams = new Dictionary<string, string>();
+            foreach (KeyValuePair<string, string> kv in queryParams)
+            {
+                resolvedParams[kv.Key] = MacroUtils.ExpandMacrosInText(kv.Value, campaign);
+            }
+
+            void Ensure(string key, string value)
+            {
+                if (!resolvedParams.ContainsKey(key) || string.IsNullOrEmpty(resolvedParams[key]))
+                    resolvedParams[key] = value;
+            }
+
+            Ensure("app.bundle", MonetizrSettings.bundleID);
+            Ensure("app.name", Application.productName);
+            Ensure("device.model", SystemInfo.deviceModel);
+            Ensure("device.make", SystemInfo.deviceName);
+            Ensure("device.os", Application.platform.ToString());
+            Ensure("device.osv", SystemInfo.operatingSystem);
+            Ensure("device.ifa", MonetizrMobileAnalytics.advertisingID);
+            Ensure("device.ua", MonetizrManager.Instance.ConnectionsClient.userAgent);
+            Ensure("site.domain", Application.identifier);
+            Ensure("site.page", $"https://{Application.identifier}");
+            Ensure("regs.gdpr", MonetizrManager.s_gdpr ? "1" : "0");
+            Ensure("regs.coppa", MonetizrManager.s_coppa ? "1" : "0");
+            Ensure("regs.us_privacy", settings.GetParam("us_privacy", PrebidConsentBridge.GetIabUsPrivacySafe()));
+
+            string consent = MonetizrManager.s_consent ?? PrebidManager.GetIabConsentString() ?? "";
+            Ensure("gdpr_consent", consent);
+
+            StringBuilder builder = new StringBuilder();
+            foreach (KeyValuePair<string, string> kv in resolvedParams)
+            {
+                if (builder.Length > 0) builder.Append("&");
+                builder.Append(Uri.EscapeDataString(kv.Key));
+                builder.Append("=");
+                builder.Append(Uri.EscapeDataString(kv.Value ?? ""));
+            }
+
+            string finalUrl = baseUrl + "?" + builder.ToString();
+            MonetizrLogger.Print($"Endpoint - Built URL: {finalUrl}");
+            return finalUrl;
+        }
+
     }
 }

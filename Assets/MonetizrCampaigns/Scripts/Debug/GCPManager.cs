@@ -1,5 +1,4 @@
 using Monetizr.SDK.Core;
-using Monetizr.SDK.Utils;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -25,11 +24,25 @@ namespace Monetizr.SDK.Debug
             isEnabled = true;
         }
 
-        public void Log (MessageEnum messageEnum)
+        public void Log (string messageString, bool isError = false)
         {
             if (!isEnabled) return;
-            string jsonContent = BuildJSONContent(messageEnum);
+            string jsonContent = BuildJSONContent(messageString, isError);
             StartCoroutine(GCPLog(jsonContent));
+        }
+
+        private string BuildJSONContent (string messageString, bool isError)
+        {
+            string message = messageString;
+            string code = "";
+            string sdkVersion = MonetizrSettings.SDKVersion;
+            string appVersion = Application.version;
+            string bundleID = MonetizrSettings.bundleID;
+            string campaignID = "";
+            string missionID = "";
+            string level = isError ? "error" : "info";
+            string jsonContent = $"{{\"msg\": \"{message}\", \"code\": \"{code}\", \"sdk_version\": \"{sdkVersion}\", \"app_version\": \"{appVersion}\", \"bundle\": \"{bundleID}\", \"camp_id\": \"{campaignID}\", \"mission_id\": \"{missionID}\", \"level\": \"{level}\"}}";
+            return jsonContent;
         }
 
         private IEnumerator GCPLog (string jsonContent)
@@ -44,23 +57,10 @@ namespace Monetizr.SDK.Debug
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                MonetizrLogger.Print("GCP - Error sending log: " + request.error);
+                MonetizrLogger.Print("Error sending log: " + request.error);
             }
         }
 
-        private string BuildJSONContent (MessageEnum messageEnum)
-        {
-            string message = EnumUtils.GetEnumDescription(messageEnum);
-            string code = ((int) messageEnum).ToString();
-            string sdkVersion = MonetizrSettings.SDKVersion;
-            string appVersion = Application.version;
-            string bundleID = MonetizrSettings.bundleID;
-            string campaignID = "";
-            string missionID = "";
-            string level = EnumUtils.IsEnumError(messageEnum) ? "error" : "info";
-            string jsonContent = $"{{\"msg\": \"{message}\", \"code\": \"{code}\", \"sdk_version\": \"{sdkVersion}\", \"app_version\": \"{appVersion}\", \"bundle\": \"{bundleID}\", \"camp_id\": \"{campaignID}\", \"mission_id\": \"{missionID}\", \"level\": \"{level}\"}}";
-            return jsonContent;
-        }
     }
 
 }

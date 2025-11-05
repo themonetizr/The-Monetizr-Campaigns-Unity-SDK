@@ -66,6 +66,7 @@ namespace Monetizr.SDK.Missions
         [NonSerialized] internal ServerCampaign campaign;
         [NonSerialized] public string rewardAssetName;
         [NonSerialized] public string openRtbRequestForProgrammatic;
+        [SerializeField] internal bool hasCongrats;
     }
 
 }

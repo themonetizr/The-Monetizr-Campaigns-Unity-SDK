@@ -1,5 +1,10 @@
-﻿using Monetizr.SDK.Campaigns;
+﻿using mixpanel;
+using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.UI;
+using Monetizr.SDK.VAST;
 using SimpleJSON;
 using System;
 using System.Collections.Generic;
@@ -16,7 +21,6 @@ namespace Monetizr.SDK.Utils
 {
     public static class MonetizrUtils
     {
-        public static Vector2 Abs(Vector2 v) => new Vector2(Mathf.Abs(v.x), Mathf.Abs(v.y));
 
         public static int[] ConvertToIntArray(string s, char delimeter = '.')
         {
@@ -48,21 +52,6 @@ namespace Monetizr.SDK.Utils
             }
 
             return 0;
-        }
-
-        public static Dictionary<string, string> _ParseJson(string content)
-        {
-            content = content.Trim(new[] { '{', '}' }).Replace('\'', '\"');
-
-            var trimmedChars = new[] { ' ', '\"' };
-
-            Regex regxComma = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-            Regex regxColon = new Regex(":(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-            string[] commaSplit = regxComma.Split(content);
-
-            return regxComma.Split(content)
-                            .Select(v => regxColon.Split(v))
-                            .ToDictionary(v => v.First().Trim(trimmedChars), v => v.Last().Trim(trimmedChars));
         }
         
         public static StringBuilder UnescapeString(StringBuilder content)
@@ -167,17 +156,6 @@ namespace Monetizr.SDK.Utils
             }
 
             return res2;
-        }
-
-        public static void ShuffleList<T>(List<T> list)
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                var temp = list[i];
-                int randomIndex = UnityEngine.Random.Range(i, list.Count);
-                list[i] = list[randomIndex];
-                list[randomIndex] = temp;
-            }
         }
 
         public static List<TListType> CreateListFromArray<TArrayType, TListType>(TArrayType[] array, Func<TArrayType, TListType> convertToListType, TListType defaultElement)
@@ -499,14 +477,115 @@ namespace Monetizr.SDK.Utils
             return value;
         }
 
-        public static string ExtractNestedValue(string jsonString, string parentKey, string nestedKey)
+        public static string ExtractClassName (string filePath)
         {
-            string parentValue = ExtractValueFromJSON(jsonString, parentKey);
+            if (string.IsNullOrEmpty(filePath)) return "Unknown";
 
-            if (parentValue == null)
-                return null;
+            string normalized = filePath.Replace("\\", "/");
+            string fileName = normalized.Substring(normalized.LastIndexOf('/') + 1);
 
-            return ExtractValueFromJSON(parentValue, nestedKey);
+            return Path.GetFileNameWithoutExtension(fileName);
+        }
+
+        public static string BuildFromRaw (ServerCampaign campaign)
+        {
+            // Minimal VastSettings
+            var vastSettings = new VastHelper.VastSettings()
+            {
+                vendorName = "Themonetizr",
+                sdkVersion = MonetizrSettings.SDKVersion,
+                videoSettings = new VastHelper.VideoSettings()
+                {
+                    isSkippable = true,
+                    skipOffset = "",
+                    isAutoPlay = true,
+                    position = "preroll",
+                    videoUrl = "" // we don’t care for playback
+                },
+                adVerifications = ExtractAdVerifications(campaign.verifications_vast_node),
+                videoTrackingEvents = new List<VastHelper.TrackingEvent>() // skip tracking
+            };
+
+            // Convert to JSON (like DumpsVastSettings)
+            string res = JsonUtility.ToJson(vastSettings);
+
+            string campaignSettingsJson = $",\"campaignSettings\":{campaign.DumpCampaignSettings(null)}";
+            res = res.Insert(res.Length - 1, campaignSettingsJson);
+
+            MonetizrLogger.Print($"[OMSDKJsonBuilder] Built OMSDK JSON: {res}");
+            return res;
+        }
+
+        private static List<VastHelper.AdVerification> ExtractAdVerifications(string verifXml)
+        {
+            var list = new List<VastHelper.AdVerification>();
+            if (string.IsNullOrEmpty(verifXml))
+                return list;
+
+            try
+            {
+                var xml = new System.Xml.XmlDocument();
+                xml.LoadXml(verifXml);
+                var verificationNodes = xml.SelectNodes("//Verification");
+
+                foreach (System.Xml.XmlNode node in verificationNodes)
+                {
+                    var vendor = node.Attributes?["vendor"]?.Value ?? "";
+                    var jsNode = node.SelectSingleNode("JavaScriptResource");
+                    string jsValue = jsNode?.InnerText.Trim() ?? "";
+                    string apiFramework = jsNode?.Attributes?["apiFramework"]?.Value ?? "";
+                    bool browserOptional = false;
+                    bool.TryParse(jsNode?.Attributes?["browserOptional"]?.Value, out browserOptional);
+
+                    var verificationParamsNode = node.SelectSingleNode("VerificationParameters");
+                    var verificationParams = verificationParamsNode?.InnerText.Trim() ?? "";
+
+                    list.Add(new VastHelper.AdVerification()
+                    {
+                        javaScriptResource = new List<VastHelper.VerificationJavaScriptResource>()
+                    {
+                        new VastHelper.VerificationJavaScriptResource(apiFramework, browserOptional, false, jsValue)
+                    },
+                        vendorField = vendor,
+                        verificationParameters = verificationParams
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                MonetizrLogger.PrintWarning($"[OMSDKJsonBuilder] Failed to parse verifications XML: {e.Message}");
+            }
+
+            return list;
+        }
+
+        public static JSONObject DictionaryToJson(Dictionary<string, object> dict)
+        {
+            JSONObject json = new JSONObject();
+            foreach (var kv in dict)
+            {
+                if (kv.Value is string)
+                    json[kv.Key] = (string)kv.Value;
+                else if (kv.Value is int)
+                    json[kv.Key] = (int)kv.Value;
+                else if (kv.Value is float)
+                    json[kv.Key] = (float)kv.Value;
+                else if (kv.Value is double)
+                    json[kv.Key] = (double)kv.Value;
+                else if (kv.Value is bool)
+                    json[kv.Key] = (bool)kv.Value;
+                else if (kv.Value is IEnumerable<string> list) // for request_pieces/response_pieces
+                {
+                    JSONArray arr = new JSONArray();
+                    foreach (var item in list) arr.Add(item);
+                    json[kv.Key] = arr;
+                }
+                else if (kv.Value != null)
+                    json[kv.Key] = kv.Value.ToString();
+                else
+                    json[kv.Key] = JSONNull.CreateOrGet();
+            }
+            return json;
         }
 
     }

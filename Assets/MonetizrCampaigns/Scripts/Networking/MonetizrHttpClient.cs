@@ -19,8 +19,14 @@ using System.Linq;
 
 namespace Monetizr.SDK.Networking
 {
-    internal class MonetizrHttpClient : MonetizrClient
+    internal class MonetizrHttpClient
     {
+        public string userAgent;
+
+        internal string currentApiKey;
+        internal MonetizrMobileAnalytics Analytics { get; set; } = null;
+        internal SettingsDictionary<string, string> GlobalSettings { get; set; } = new SettingsDictionary<string, string>();
+
         private string _baseApiUrl = "https://api.themonetizr.com";
         private string CampaignsApiUrl => _baseApiUrl + "/api/campaigns";
         private string SettingsApiUrl => _baseApiUrl + "/settings";
@@ -28,29 +34,34 @@ namespace Monetizr.SDK.Networking
         private static readonly HttpClient Client = new HttpClient();
         private CancellationTokenSource downloadCancellationTokenSource;
 
-        public MonetizrHttpClient(string apiKey, int timeout = 30)
+        public MonetizrHttpClient (string apiKey, int timeout = 30)
         {
             System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             currentApiKey = apiKey;
             Client.Timeout = TimeSpan.FromSeconds(timeout);
         }
 
-        internal override void Initialize()
+        internal void SetUserAgent (string _userAgent) 
+        { 
+            this.userAgent = _userAgent; 
+        }
+
+        internal void Initialize()
         {
             Analytics = new MonetizrMobileAnalytics();
         }
 
-        internal override void SetTestMode(bool testEnvironment)
+        internal void SetTestMode(bool testEnvironment)
         {
             if (testEnvironment) _baseApiUrl = _baseTestApiUrl;
         }
 
-        internal override void Close()
+        internal void Close()
         {
             Client.CancelPendingRequests();
         }
 
-        public static async Task<(bool isSuccess,string content)> DownloadUrlAsString(HttpRequestMessage requestMessage)
+        public static async Task<(bool isSuccess,string content)> DownloadUrlAsString (HttpRequestMessage requestMessage)
         {
             HttpResponseMessage response = null;
             
@@ -60,7 +71,7 @@ namespace Monetizr.SDK.Networking
             }
             catch (Exception e)
             {
-                throw new DownloadUrlAsStringException($"DownloadUrlAsString exception\nHttpRequestMessage: {requestMessage}\n{e}", e);
+                MonetizrLogger.PrintError("RequestMessage: " + requestMessage + " / Exception: " + e);
             }
 
             string result = await response.Content.ReadAsStringAsync();
@@ -70,7 +81,7 @@ namespace Monetizr.SDK.Networking
             return (true, result);
         }
 
-        internal override async Task<string> GetResponseStringFromUrl(string url)
+        internal async Task<string> GetResponseStringFromUrl (string url)
         {
             var requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, url);
             MonetizrLogger.Print($"Sent request: {requestMessage}");
@@ -93,8 +104,14 @@ namespace Monetizr.SDK.Networking
             return responseString;
         }
 
-        public static async Task<byte[]> DownloadAssetData(string url, Action onDownloadFailed = null)
+        public static async Task<byte[]> DownloadAssetData (string url, Action onDownloadFailed = null)
         {
+            if (LocalTestCampaignManager.IsLocalAsset(url))
+            {
+                MonetizrLogger.Print("LOCALTEST ASSET: " + url);
+                return LocalTestCampaignManager.LoadLocalAsset(url);
+            }
+
             UnityWebRequest uwr = UnityWebRequest.Get(url);
             uwr.timeout = 10;
 
@@ -102,8 +119,7 @@ namespace Monetizr.SDK.Networking
 
             if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.DataProcessingError)
             {
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M403);
-                MonetizrLogger.PrintError($"Network error {uwr.error} with {url}");
+                MonetizrLogger.PrintError("Asset failed downloading. Error: " + uwr.error + " / URL: " + url, true);
                 onDownloadFailed?.Invoke();
                 return null;
             }
@@ -111,42 +127,30 @@ namespace Monetizr.SDK.Networking
             return uwr.downloadHandler.data;
         }
 
-        internal override async Task GetGlobalSettings()
+        internal async Task GetGlobalSettings ()
         {
             GlobalSettings = await DownloadGlobalSettings();
+            ParameterChecker.CheckForMissingParameters(true, GlobalSettings);
             RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint", "");
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
             MonetizrLogger.Print($"Api endpoint: {_baseApiUrl}");
         }
 
-        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings()
+        private async Task<SettingsDictionary<string, string>> DownloadGlobalSettings ()
         {
-            var responseString = await GetResponseStringFromUrl(SettingsApiUrl);
+            string responseString = await GetResponseStringFromUrl(SettingsApiUrl);
 
             if (string.IsNullOrEmpty(responseString))
             {
-                MonetizrLogger.PrintRemoteMessage(MessageEnum.M400);
+                MonetizrLogger.PrintError("Global Settings were not obtained", true);
                 return new SettingsDictionary<string, string>();
             }
 
-            MonetizrLogger.PrintRemoteMessage(MessageEnum.M101);
-            MonetizrLogger.Print("Global Settings: " + responseString);
+            MonetizrLogger.Print("Global Settings: " + responseString, true);
             return new SettingsDictionary<string, string>(MonetizrUtils.ParseContentString(responseString));
         }
 
-        internal override async Task<List<ServerCampaign>> GetList()
-        {
-            List<ServerCampaign> campaigns = await GetServerCampaignsFromMonetizr();
-            campaigns = await ProcessCampaigns(campaigns);
-            campaigns = CampaignUtils.FilterInvalidCampaigns(campaigns);
-            foreach (ServerCampaign campaign in campaigns)
-            {
-                MonetizrLogger.Print($"Campaign passed filters: {campaign.id}");
-            }
-            return campaigns;
-        }
-
-        private async Task<List<ServerCampaign>> GetServerCampaignsFromMonetizr()
+        internal async Task<List<ServerCampaign>> GetList ()
         {
             string responseString = await GetResponseStringFromUrl(CampaignsApiUrl);
             if (string.IsNullOrEmpty(responseString)) return new List<ServerCampaign>();
@@ -155,102 +159,10 @@ namespace Monetizr.SDK.Networking
             if (campaigns == null) return new List<ServerCampaign>();
 
             MonetizrLogger.Print("Received Campaigns Count: " + campaigns.campaigns.Count);
-
             return campaigns.campaigns;
         }
 
-        private async Task<List<ServerCampaign>> ProcessCampaigns(List<ServerCampaign> campaigns)
-        {
-            for (int i = 0; i < campaigns.Count; i++)
-            {
-                CampaignUtils.SetupCampaignType(campaigns[i]);
-                MonetizrLogger.Print(campaigns[i].id + " / Type: " + campaigns[i].campaignType + "\n" + CampaignUtils.PrintAssetsTypeList(campaigns[i]));
-
-                switch (campaigns[i].campaignType)
-                {
-                    case CampaignType.MonetizrBackend:
-                        campaigns[i] = ProcessBackendCampaign(campaigns[i]);
-                        break;
-                    case CampaignType.ADM:
-                        campaigns[i] = await ProcessADMCampaign(campaigns[i]);
-                        break;
-                    case CampaignType.Programmatic:
-                        campaigns[i] = await ProcessProgrammaticCampaign(campaigns[i]);
-                        break;
-                    default:
-                        MonetizrLogger.PrintError("CampaignID: " + campaigns[i].id + " - No CampaignType was assigned.");
-                        break;
-                }
-            }
-
-            campaigns = campaigns.Where(c => c != null).ToList();
-
-            return campaigns;
-        }
-
-        private ServerCampaign ProcessBackendCampaign(ServerCampaign campaign)
-        {
-            campaign.PostCampaignLoad();
-            return campaign;
-        }
-
-        private async Task<ServerCampaign> ProcessADMCampaign (ServerCampaign campaign)
-        {
-            campaign = await RecreateCampaignFromADM(campaign);
-            if (campaign == null) return null;
-
-            campaign.PostCampaignLoad();
-            campaign.campaignTimeoutStart = Time.time;
-            campaign.hasMadeEarlyBidRequest = true;
-
-            return campaign;
-        }
-
-        private async Task<ServerCampaign> ProcessProgrammaticCampaign (ServerCampaign campaign)
-        {
-            campaign.PostCampaignLoad();
-            campaign = await MakeEarlyProgrammaticBidRequest(campaign);
-            if (campaign == null || !campaign.hasMadeEarlyBidRequest) return null;
-
-            campaign.campaignTimeoutStart = Time.time;
-            campaign = await RecreateCampaignFromADM(campaign);
-
-            return campaign;
-        }
-
-        internal async Task<ServerCampaign> RecreateCampaignFromADM (ServerCampaign campaign)
-        {
-            PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
-            campaign = await pubmaticHelper.PrepareServerCampaign(campaign.id, campaign.adm, false);
-            return campaign;
-        }
-
-        internal async Task<ServerCampaign> MakeEarlyProgrammaticBidRequest(ServerCampaign campaign)
-        {
-            PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
-            bool isProgrammaticOK = false;
-
-            try
-            {
-                isProgrammaticOK = await pubmaticHelper.GetOpenRTBResponseForCampaign(campaign);
-            }
-            catch (DownloadUrlAsStringException e)
-            {
-                MonetizrLogger.PrintError($"PBR - Exception DownloadUrlAsStringException in campaign {campaign.id}\n{e}");
-                isProgrammaticOK = false;
-            }
-            catch (Exception e)
-            {
-                MonetizrLogger.PrintError($"PBR - Exception in GetOpenRtbResponseForCampaign in campaign {campaign.id}\n{e}");
-                isProgrammaticOK = false;
-            }
-
-            MonetizrLogger.Print(isProgrammaticOK ? "PBR - COMPLETED" : "PBR - FAILED");
-            campaign.hasMadeEarlyBidRequest = isProgrammaticOK;
-            return campaign;
-        }
-
-        internal override async Task ResetCampaign(string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal async Task ResetCampaign (string campaignId, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
             HttpRequestMessage requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{campaignId}/reset");
             HttpResponseMessage response = await Client.SendAsync(requestMessage, ct);
@@ -267,7 +179,7 @@ namespace Monetizr.SDK.Networking
             }
         }
 
-        internal override async Task ClaimReward(ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
+        internal async Task ClaimReward (ServerCampaign challenge, CancellationToken ct, Action onSuccess = null, Action onFailure = null)
         {
             HttpRequestMessage requestMessage = NetworkingUtils.GenerateHttpRequestMessage(userAgent, $"{CampaignsApiUrl}/{challenge.id}/claim",true);
             string content = string.Empty;
@@ -302,6 +214,37 @@ namespace Monetizr.SDK.Networking
             else
             {
                 onFailure?.Invoke();
+            }
+        }
+
+        public static async Task<string> DownloadVastXmlAsync (string vastUrl, int timeoutMs = 5000)
+        {
+            if (string.IsNullOrEmpty(vastUrl))
+            {
+                MonetizrLogger.Print("VastDownloader - VAST URL is null or empty.");
+                return null;
+            }
+
+            try
+            {
+                Client.Timeout = TimeSpan.FromMilliseconds(timeoutMs);
+                MonetizrLogger.Print($"VastDownloader - Downloading VAST from: {vastUrl}");
+                var response = await Client.GetAsync(vastUrl);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    MonetizrLogger.Print($"VastDownloader - Failed to download VAST. HTTP {response.StatusCode}");
+                    return null;
+                }
+
+                string vastXml = await response.Content.ReadAsStringAsync();
+                MonetizrLogger.Print($"VastDownloader - VAST XML: " + vastXml);
+                return vastXml;
+            }
+            catch (Exception ex)
+            {
+                MonetizrLogger.Print($"VastDownloader - Exception: {ex.Message}");
+                return null;
             }
         }
 

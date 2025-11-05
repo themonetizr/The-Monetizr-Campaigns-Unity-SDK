@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowDebug: 0
   ManualInitialization: 0
-  APIHostAddress: https://api.mixpanel.com/
+  APIHostAddress: https://mixpanel-retirement-func-1074977689117.us-central1.run.app/
   RuntimeToken: 
   DebugToken: 
   FlushInterval: 60

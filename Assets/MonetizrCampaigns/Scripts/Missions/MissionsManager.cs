@@ -191,6 +191,7 @@ namespace Monetizr.SDK.Missions
             m.autoStartAfter = md.autoStartAfter;
             m.alwaysHiddenInRC = md.alwaysHiddenInRC;
             m.openRtbRequestForProgrammatic = md.openRtbRequestForProgrammatic;
+            m.hasCongrats = md.hasCongrats;
             return m;
         }
 

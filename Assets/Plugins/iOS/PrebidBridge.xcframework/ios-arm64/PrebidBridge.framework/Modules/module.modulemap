@@ -1,0 +1,6 @@
+framework module PrebidBridge {
+  umbrella header "PrebidBridge.h"
+  export *
+
+  module * { export * }
+}

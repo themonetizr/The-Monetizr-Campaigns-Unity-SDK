@@ -18,7 +18,7 @@ namespace Monetizr.SDK.Debug
         public Toggle claimIfSkipped;
         public Text versionText;
 
-        private bool isIDChanged;
+        private bool isCampaignsList = true;
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
@@ -33,21 +33,46 @@ namespace Monetizr.SDK.Debug
             serverClaims.onValueChanged.AddListener(OnToggleChanged);
             claimIfSkipped.onValueChanged.AddListener(OnToggleChanged);
 
+            UpdateAPIKeyList();
+            UpdateVersionText();
+        }
+
+        public void OnAPIKeyButtonClick (bool isCampaignsList)
+        {
+            this.isCampaignsList = isCampaignsList;
+            UpdateAPIKeyList();
+        }
+
+        public void UpdateAPIKeyList ()
+        {
             apiKeysList.ClearOptions();
 
-            apiKeysList.AddOptions(new List<string>(DebugSettings.keyNames.Values));
+            if (isCampaignsList)
+            {
+                apiKeysList.AddOptions(new List<string>(DebugSettings.campaignKeyNames.Values));
 
-            UpdateVersionText();
-
-            var k = new List<string>(DebugSettings.keyNames.Values);
-
-            apiKeysList.value = k.FindIndex(0, (string v) =>
+                List<string> k = new List<string>(DebugSettings.campaignKeyNames.Values);
+                apiKeysList.value = k.FindIndex(0, (string v) =>
                 {
-                    if (!DebugSettings.keyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
+                    if (!DebugSettings.campaignKeyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
                         return false;
 
-                    return v == DebugSettings.keyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
+                    return v == DebugSettings.campaignKeyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
                 });
+            }
+            else
+            {
+                apiKeysList.AddOptions(new List<string>(DebugSettings.devKeyNames.Values));
+
+                List<string> k = new List<string>(DebugSettings.devKeyNames.Values);
+                apiKeysList.value = k.FindIndex(0, (string v) =>
+                {
+                    if (!DebugSettings.devKeyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
+                        return false;
+
+                    return v == DebugSettings.devKeyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
+                });
+            }
         }
 
         public void UpdateVersionText()
@@ -73,6 +98,7 @@ namespace Monetizr.SDK.Debug
             MonetizrLogger.Print("Dropdown: " + apiKeysList.value);
 
         }
+
         public void ResetLocalClaimData()
         {
             MonetizrManager.Instance.CleanRewardsClaims();
@@ -86,16 +112,12 @@ namespace Monetizr.SDK.Debug
         public void ResetId()
         {
             MonetizrManager.Instance.ConnectionsClient.Analytics.RandomizeUserId();
-
             UpdateVersionText();
-
-            isIDChanged = true;
         }
 
         public void TurnOnOffColorBg()
         {
             GameObject obj = GameObject.Find("KeyBackgroundCanvas");
-
             obj.GetComponent<Canvas>().enabled = !obj.GetComponent<Canvas>().enabled;
         }
         
@@ -116,22 +138,42 @@ namespace Monetizr.SDK.Debug
 
         internal override void FinalizePanel(PanelId id)
         {
-            PlayerPrefs.SetString("api_key", DebugSettings.keys[apiKeysList.value]);
-            PlayerPrefs.Save();
-            var bundleId = DebugSettings.keyNames[DebugSettings.keys[apiKeysList.value]];
-
-            if (bundleId.Contains("."))
+            if (isCampaignsList)
             {
-                MonetizrManager.bundleId = bundleId;
+                PlayerPrefs.SetString("MonetizrAPIKey", DebugSettings.campaignKeys[apiKeysList.value]);
+                PlayerPrefs.Save();
+                string bundleId = DebugSettings.keyNames[DebugSettings.campaignKeys[apiKeysList.value]];
+
+                if (bundleId.Contains("."))
+                {
+                    MonetizrManager.bundleId = bundleId;
+                }
+                else
+                {
+                    MonetizrManager.bundleId = "com.monetizr.landslice";
+                }
+
+                bool changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.campaignKeys[apiKeysList.value]);
+                MonetizrManager.Instance.RestartClient();
             }
             else
             {
-                MonetizrManager.bundleId = "com.monetizr.landslice";
+                PlayerPrefs.SetString("MonetizrAPIKey", DebugSettings.devKeys[apiKeysList.value]);
+                PlayerPrefs.Save();
+                string bundleId = DebugSettings.keyNames[DebugSettings.devKeys[apiKeysList.value]];
+
+                if (bundleId.Contains("."))
+                {
+                    MonetizrManager.bundleId = bundleId;
+                }
+                else
+                {
+                    MonetizrManager.bundleId = "com.monetizr.landslice";
+                }
+
+                bool changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.devKeys[apiKeysList.value]);
+                MonetizrManager.Instance.RestartClient();
             }
-
-            var changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.keys[apiKeysList.value]);
-
-            MonetizrManager.Instance.RestartClient();
         }
 
     }

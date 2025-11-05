@@ -1,10 +1,15 @@
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Missions;
+using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
+using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
+using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 
 namespace Monetizr.SDK.Campaigns
 {
@@ -96,13 +101,19 @@ namespace Monetizr.SDK.Campaigns
 
         public static void SetupCampaignType (ServerCampaign campaign)
         {
-            if (IsProgrammatic(campaign))
+            if (GetBoolParameter(campaign, "is_fallback_campaign"))
+            {
+                campaign.campaignType = CampaignType.Fallback;
+                return;
+            }
+
+            if (GetBoolParameter(campaign, "programmatic"))
             {
                 campaign.campaignType = CampaignType.Programmatic;
                 return;
             }
 
-            if (IsADM(campaign))
+            if (GetBoolParameter(campaign, "campaign.use_adm"))
             {
                 campaign.campaignType = CampaignType.ADM;
                 return;
@@ -111,32 +122,53 @@ namespace Monetizr.SDK.Campaigns
             campaign.campaignType = CampaignType.MonetizrBackend;
         }
 
-        private static bool IsADM (ServerCampaign campaign)
+        public static bool GetBoolParameter (ServerCampaign campaign, string parameter)
         {
-            if (String.IsNullOrEmpty(campaign.adm)) return false;
-            string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, "campaign.use_adm");
-            bool useADM = bool.TryParse(extractedValue, out bool result) && result;
-            return useADM;
+            if (String.IsNullOrEmpty(campaign.content))
+            {
+                MonetizrLogger.Print("CampaignID " + campaign.id + " - Content is empty.");
+                return false;
+            }
+
+            string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, parameter);
+            if (String.IsNullOrEmpty(extractedValue))
+            {
+                MonetizrLogger.Print("CampaignID " + campaign.id + " - Parameter " + parameter + " is not present or was not parsed correctly.");
+                return false;
+            }
+
+            extractedValue = extractedValue.Trim().Trim('"');
+            if (bool.TryParse(extractedValue, out bool result))
+            {
+                MonetizrLogger.Print($"CampaignID {campaign.id} - Parameter {parameter} value is: {result}");
+                return result;
+            }
+
+            MonetizrLogger.Print($"CampaignID {campaign.id} - Parameter {parameter} could not be parsed as bool (value='{extractedValue}')");
+            return false;
         }
 
-        private static bool IsProgrammatic (ServerCampaign campaign)
-        {
-            if (!String.IsNullOrEmpty(campaign.adm)) return false;
-            string extractedValue = MonetizrUtils.ExtractValueFromJSON(campaign.content, "programmatic");
-            bool isProgrammatic = bool.TryParse(extractedValue, out bool result) && result;
-            return isProgrammatic;
-        }
-
-        public static string PrintAssetsTypeList(ServerCampaign serverCampaign)
+        public static string PrintAssetsTypeList (ServerCampaign serverCampaign)
         {
             StringBuilder result = new StringBuilder();
 
-            foreach (var asset in serverCampaign.assets)
+            foreach (Asset asset in serverCampaign.assets)
             {
                 result.AppendLine($"{serverCampaign.id}: {asset.type}");
             }
 
             return result.ToString();
         }
+
+        public static bool IsCampaignHTML(Mission mission, PanelId panelId)
+        {
+            if (panelId != PanelId.StartNotification) return false;
+            if (mission.campaign.serverSettings.TryGetValue("is_campaign_html", out string value) && bool.TryParse(value, out bool isHtml) && isHtml)
+            {
+                return true;
+            }
+            return false;
+        }
+
     }
 }

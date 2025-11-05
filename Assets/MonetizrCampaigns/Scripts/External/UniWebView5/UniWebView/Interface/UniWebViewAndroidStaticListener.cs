@@ -5,8 +5,14 @@ using System.Reflection;
 using UnityEngine;
 
 public class UniWebViewAndroidStaticListener: MonoBehaviour {
-    void Awake() {
+
+    private void Awake () {
         DontDestroyOnLoad(gameObject);
+    }
+
+    public void OnKotlinMessage (string message)
+    {
+        Debug.Log("[KOTLIN]: " + message);
     }
 
     void OnJavaMessage(string message) {
