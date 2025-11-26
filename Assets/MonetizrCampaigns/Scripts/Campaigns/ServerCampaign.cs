@@ -68,7 +68,6 @@ namespace Monetizr.SDK.Campaigns
         public string adm;
         public string verifications_vast_node;
 
-        public bool hasMadeEarlyBidRequest = false;
         public CampaignType campaignType = CampaignType.None;
         public float campaignTimeoutStart;
         public List<string> trackingURLs = new List<string>();
@@ -428,37 +427,6 @@ namespace Monetizr.SDK.Campaigns
             }
         }
 
-        internal async Task PreloadVideoPlayerForProgrammatic(Asset asset)
-        {
-            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
-            string zipFolder = GetCampaignPath($"{asset.fpath}");
-            string indexPath = $"{zipFolder}/index.html";
-            MonetizrLogger.Print($"{zipFolder}");
-            
-            if (!Directory.Exists(zipFolder))
-            {
-                Directory.CreateDirectory(zipFolder);
-            }
-
-            string playerUrl = serverSettings.GetParam("openrtb.player_url", videoPlayerURL);
-            byte[] data = await MonetizrHttpClient.DownloadAssetData(playerUrl);
-
-            if (data == null)
-            {
-                MonetizrLogger.PrintError("Can't download video player for programmatic");
-                return;
-            }
-
-            File.WriteAllBytes(zipFolder + "/html.zip", data);
-            MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-            File.Delete(zipFolder + "/html.zip");
-
-            if (!File.Exists(indexPath))
-            {
-                MonetizrLogger.PrintError($"Main html for video player {indexPath} doesn't exist");
-            }
-        }
-
         internal async Task PreloadVideoPlayer(Asset asset)
         {
             string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
@@ -645,7 +613,6 @@ namespace Monetizr.SDK.Campaigns
             }
             return replaced;
         }
-
 
         internal string DumpsVastSettings (TagsReplacer vastTagsReplacer)
         {

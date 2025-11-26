@@ -50,14 +50,6 @@ namespace Monetizr.SDK.Campaigns
                             campaign = ProcessBackendCampaign(campaign);
                             break;
 
-                        case CampaignType.ADM:
-                            campaign = await ProcessADMCampaign(campaign);
-                            break;
-
-                        case CampaignType.Programmatic:
-                            campaign = await ProcessProgrammaticCampaign(campaign);
-                            break;
-
                         case CampaignType.Fallback:
                             campaign = await ProcessFallbackCampaign(campaign);
                             break;
@@ -83,32 +75,6 @@ namespace Monetizr.SDK.Campaigns
         {
             campaign.ParseContentStringIntoSettingsDictionary();
             ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
-            return campaign;
-        }
-
-        private async Task<ServerCampaign> ProcessADMCampaign (ServerCampaign campaign)
-        {
-            campaign = await RecreateCampaignFromADM(campaign);
-            if (campaign == null) return null;
-
-            campaign.ParseContentStringIntoSettingsDictionary();
-            campaign.campaignTimeoutStart = Time.time;
-            campaign.hasMadeEarlyBidRequest = true;
-            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
-
-            return campaign;
-        }
-
-        private async Task<ServerCampaign> ProcessProgrammaticCampaign (ServerCampaign campaign)
-        {
-            campaign.ParseContentStringIntoSettingsDictionary();
-            campaign = await MakeEarlyProgrammaticBidRequest(campaign);
-            if (campaign == null || !campaign.hasMadeEarlyBidRequest) return null;
-
-            campaign.campaignTimeoutStart = Time.time;
-            campaign = await RecreateCampaignFromADM(campaign);
-            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
-
             return campaign;
         }
 
@@ -271,41 +237,6 @@ namespace Monetizr.SDK.Campaigns
 
             MonetizrLogger.PrintError("All endpoint fallbacks failed.");
             return null;
-        }
-
-        private async Task<ServerCampaign> RecreateCampaignFromADM (ServerCampaign campaign)
-        {
-            string originalContent = campaign.content;
-            PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
-            campaign = await pubmaticHelper.PrepareServerCampaign(campaign.id, campaign.adm, false);
-
-            if (string.IsNullOrEmpty(campaign.content))
-            {
-                MonetizrLogger.Print("VAST did not provide content. Restoring the original string.");
-                campaign.content = originalContent;
-            }
-
-            return campaign;
-        }
-
-        private async Task<ServerCampaign> MakeEarlyProgrammaticBidRequest (ServerCampaign campaign)
-        {
-            PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
-            bool isProgrammaticOK = false;
-
-            try
-            {
-                isProgrammaticOK = await pubmaticHelper.GetOpenRTBResponseForCampaign(campaign);
-            }
-            catch (Exception e)
-            {
-                MonetizrLogger.PrintError($"EarlyBidRequest - CampaignID: " + campaign.id + " / Exception " + e);
-                isProgrammaticOK = false;
-            }
-
-            MonetizrLogger.Print(isProgrammaticOK ? "EarlyBidRequest - COMPLETED" : "EarlyBidRequest - FAILED");
-            campaign.hasMadeEarlyBidRequest = isProgrammaticOK;
-            return campaign;
         }
 
         private async Task<string> FetchPrebid (string prebidData, string prebidHost, int timeoutMs = 3000)

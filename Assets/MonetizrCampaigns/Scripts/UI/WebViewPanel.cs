@@ -406,6 +406,7 @@ namespace Monetizr.SDK.UI
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out Asset videoAsset);
             MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo + " / hasProgrammaticVideo: " + hasProgrammaticVideo);
 
+            /*
             if (!hasVideo && !hasProgrammaticVideo)
             {
                 MonetizrLogger.PrintError("No video asset loaded for CampaignID: " + campaign.id);
@@ -419,11 +420,11 @@ namespace Monetizr.SDK.UI
                 }
                 return;
             }
+            */
 
             bool showWebview = true;
             VastHelper.VastSettings oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
             string userAgent = _webView.GetUserAgent();
-            PubmaticHelper ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, userAgent);
 
             if (hasProgrammaticVideo)
             {
@@ -449,10 +450,10 @@ namespace Monetizr.SDK.UI
 
                 if (verifyWithOMSDK)
                 {
-                    hasDownloaded = await ph.DownloadOMSDKServiceContent();
+                    hasDownloaded = await OMSDKHelper.DownloadOMSDKServiceContent();
                     if (hasDownloaded)
                     {
-                        ph.InitializeOMSDK(campaign.vastAdParameters);
+                        OMSDKHelper.InitializeOMSDK(campaign.vastAdParameters);
                         isOMSDKactive = true;
                     }
                 }
@@ -534,12 +535,11 @@ namespace Monetizr.SDK.UI
             if (verifyWithOMSDK)
             {
                 MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will verify with OMSDK.");
-                VastHelper vastHelper = new VastHelper(MonetizrManager.Instance.ConnectionsClient, _webView.GetUserAgent());
-                bool hasDownloaded = await vastHelper.DownloadOMSDKServiceContent();
+                bool hasDownloaded = await OMSDKHelper.DownloadOMSDKServiceContent();
                 if (hasDownloaded)
                 {
                     string omidJson = MonetizrUtils.BuildFromRaw(campaign);
-                    vastHelper.InitializeOMSDK(omidJson);
+                    OMSDKHelper.InitializeOMSDK(omidJson);
                     isOMSDKactive = true;
                 }
             }
