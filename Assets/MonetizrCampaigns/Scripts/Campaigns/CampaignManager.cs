@@ -4,7 +4,6 @@ using Monetizr.SDK.Debug;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
-using Monetizr.SDK.VAST;
 using System;
 using System.Collections.Generic;
 using System.Linq;

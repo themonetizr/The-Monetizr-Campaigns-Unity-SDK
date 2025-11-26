@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using Monetizr.SDK.Utils;
-using Monetizr.SDK.Debug;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Core;
 
@@ -12,13 +9,6 @@ namespace Monetizr.SDK.VAST
     {
         internal static MonetizrHttpClient httpClient;
         internal static string userAgent;
-        private string _omidJsServiceContent;
-
-        internal VastHelper(MonetizrHttpClient httpClient, string _userAgent)
-        {
-            VastHelper.httpClient = httpClient;
-            userAgent = _userAgent;
-        }
 
         [System.Serializable]
         internal class VideoSettings
@@ -141,13 +131,6 @@ namespace Monetizr.SDK.VAST
                 type = original.type;
                 value = original.value;
             }
-
-            public VerificationExecutableResource(Verification_typeExecutableResource er)
-            {
-                apiFramework = er.apiFramework;
-                type = er.type;
-                value = er.Value;
-            }
         }
 
         [System.Serializable]
@@ -175,14 +158,6 @@ namespace Monetizr.SDK.VAST
                 this.browserOptionalSpecified = browserOptionalSpecified;
                 this.value = value;
             }
-
-            public VerificationJavaScriptResource(Verification_typeJavaScriptResource jsr)
-            {
-                apiFramework = jsr.apiFramework;
-                browserOptional = jsr.browserOptional;
-                browserOptionalSpecified = jsr.browserOptionalSpecified;
-                value = jsr.Value;
-            }
         }
 
         [System.Serializable]
@@ -197,12 +172,6 @@ namespace Monetizr.SDK.VAST
             {
                 @event = trackingEventToCopy.@event;
                 value = trackingEventToCopy.value;
-            }
-
-            public TrackingEvent(TrackingEvents_Verification_typeTracking te)
-            {
-                @event = te.@event;
-                value = te.Value;
             }
         }
 

@@ -386,7 +386,6 @@ namespace Monetizr.SDK.UI
         private async void PrepareHtml5Panel ()
         {
             MonetizrLogger.Print("Preparing HTML/VIDEO.");
-
             ServerCampaign campaign = currentMission.campaign;
 
             if (campaign.campaignType == CampaignType.Fallback && campaign.isDirectVASTinjection)
@@ -402,51 +401,32 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            bool hasProgrammaticVideo = campaign.TryGetAssetInList(new List<string>() {"programmatic_video" }, out Asset programmaticVideoAsset);
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out Asset videoAsset);
-            MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo + " / hasProgrammaticVideo: " + hasProgrammaticVideo);
-
-            /*
-            if (!hasVideo && !hasProgrammaticVideo)
+            MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo);
+            
+            if (!hasVideo)
             {
                 MonetizrLogger.PrintError("No video asset loaded for CampaignID: " + campaign.id);
-                if (campaign.campaignType == CampaignType.Programmatic)
-                {
-                    HandleProgrammaticFailure(campaign);
-                }
-                else
-                {
-                    OnSkipPress();
-                }
+                OnSkipPress();
                 return;
             }
-            */
 
             bool showWebview = true;
-            VastHelper.VastSettings oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
-            string userAgent = _webView.GetUserAgent();
-
-            if (hasProgrammaticVideo)
-            {
-                showWebview = AssignProgrammaticVideoAssetPath(campaign, programmaticVideoAsset);
-            }
-            else
-            {
-                _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
-                campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
-            }
-
-            bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
             bool hasDownloaded = false;
+            VastHelper.VastSettings oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
+            _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
+            campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
 
             if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
                 MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will embed VAST into VideoPlayer.");
+                string userAgent = _webView.GetUserAgent();
 
                 VastTagsReplacer replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
                 campaign.vastSettings.ReplaceVastTags(replacer);
                 campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
+                bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
 
                 if (verifyWithOMSDK)
                 {
@@ -496,26 +476,6 @@ namespace Monetizr.SDK.UI
             {
                 _OnSkipPress();
             }
-        }
-
-        private bool AssignProgrammaticVideoAssetPath (ServerCampaign campaign, Asset videoAsset)
-        {
-            Asset programmaticVideoAsset = null;
-            bool showWebview = false;
-            campaign.vastSettings = new VastHelper.VastSettings();
-
-            if (campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
-            {
-                _webUrl = $"file://{campaign.GetCampaignPath($"{programmaticVideoAsset.fpath}/index.html")}";
-                videoAsset = programmaticVideoAsset;
-                showWebview = true;
-            }
-            else
-            {
-                MonetizrLogger.PrintError("No video asset in campaign.");
-            }
-
-            return showWebview;
         }
 
         private IEnumerator ShowCloseButton(float time)

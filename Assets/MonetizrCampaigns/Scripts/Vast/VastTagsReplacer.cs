@@ -4,8 +4,9 @@ using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
+using Monetizr.SDK.Analytics;
 
-namespace Monetizr.SDK.Analytics
+namespace Monetizr.SDK.VAST
 {
     internal class VastTagsReplacer : TagsReplacer
     {
@@ -14,9 +15,9 @@ namespace Monetizr.SDK.Analytics
         internal VastTagsReplacer(ServerCampaign serverCampaign, Asset asset, string clientUA)
         {
             _serverCampaign = serverCampaign;
-            var clientUa = clientUA;
+            string clientUa = clientUA;
 
-            var urlModifiers = new Dictionary<string, Func<string>>()
+            Dictionary<string, Func<string>> urlModifiers = new Dictionary<string, Func<string>>()
             {
                 {"APPBUNDLE", () => _serverCampaign.serverSettings.GetParam("app.bundleid",MonetizrManager.bundleId) },
                 {"STOREID", () => _serverCampaign.serverSettings.GetParam("app.storeid","-1") },
@@ -48,13 +49,10 @@ namespace Monetizr.SDK.Analytics
             SetModifiers(urlModifiers);
         }
 
-        protected override string UnknownModifier(string tag)
+        protected override string UnknownModifier (string tag)
         {
-            var value = _serverCampaign.serverSettings.GetParam($"app.{tag}");
-
-            if (!string.IsNullOrEmpty(value))
-                return value;
-
+            string value = _serverCampaign.serverSettings.GetParam($"app.{tag}");
+            if (!string.IsNullOrEmpty(value)) return value;
             MonetizrLogger.PrintError($"Unknown VAST tag {tag}");
             return "-1";
         }

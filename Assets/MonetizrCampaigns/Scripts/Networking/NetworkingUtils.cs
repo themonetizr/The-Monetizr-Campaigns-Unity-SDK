@@ -38,15 +38,6 @@ namespace Monetizr.SDK.Networking
             return Application.internetReachability != NetworkReachability.NotReachable;
         }
 
-        public static HttpRequestMessage GenerateOpenRTBRequestMessage(string url, string content, HttpMethod method)
-        {
-            HttpRequestMessage httpRequest = new HttpRequestMessage(method, url);
-            httpRequest.Headers.Add("x-openrtb-version", "2.5");
-            httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            httpRequest.Content = new StringContent(content, Encoding.UTF8, "application/json");
-            return httpRequest;
-        }
-
         public static HttpRequestMessage GenerateHttpRequestMessage(string userAgent, string uri, bool isPost = false)
         {
             var httpMethod = isPost ? HttpMethod.Post : HttpMethod.Get;
