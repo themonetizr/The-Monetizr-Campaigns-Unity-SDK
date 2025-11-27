@@ -101,7 +101,7 @@ namespace Monetizr.SDK.Core
             s_consent = consent;
         }
 
-        public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
+        public static void SetAdvertisingIds (string advertisingID, bool limitAdvertising)
         {
             MonetizrMobileAnalytics.isAdvertisingIDDefined = true;
             MonetizrMobileAnalytics.advertisingID = advertisingID;
