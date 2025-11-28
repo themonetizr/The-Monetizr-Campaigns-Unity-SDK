@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using static Monetizr.SDK.NEW_MonetizrManager;
 
 namespace Monetizr.SDK
 {
@@ -21,11 +22,37 @@ namespace Monetizr.SDK
         private bool _isActive = false;
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
         private ServerCampaign _activeCampaignId = null;
+        private Action s_onRequestComplete = null;
+        private Action<bool> s_soundSwitch = null;
+        private Action<bool> s_onUIVisible = null;
+        private UserDefinedEvent s_userEvent = null;
+        private List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
 
         private void Awake ()
         {
             Instance = this;
             DontDestroyOnLoad(Instance);
+        }
+
+        public void Setup (Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
+        {
+            s_onRequestComplete = onRequestComplete;
+            s_soundSwitch = soundSwitch;
+            s_onUIVisible = onUIVisible;
+            s_userEvent = userEvent;
+        }
+
+        public void HoldResource (object o)
+        {
+            if (o is UnityEngine.Object)
+            {
+                UnityEngine.Object uo = (UnityEngine.Object)o;
+
+                if (!Instance.holdResources.Contains(uo))
+                {
+                    Instance.holdResources.Add(uo);
+                }
+            }
         }
 
         public ServerCampaign GetActiveCampaign ()

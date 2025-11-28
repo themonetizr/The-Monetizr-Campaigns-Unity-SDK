@@ -32,7 +32,6 @@ namespace Monetizr.SDK.Networking
         private string SettingsApiUrl => _baseApiUrl + "/settings";
         private readonly string _baseTestApiUrl = "https://api-test.themonetizr.com";
         private static readonly HttpClient Client = new HttpClient();
-        private CancellationTokenSource downloadCancellationTokenSource;
 
         public MonetizrHttpClient (string apiKey, int timeout = 30)
         {

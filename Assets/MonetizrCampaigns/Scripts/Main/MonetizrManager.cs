@@ -21,7 +21,6 @@ namespace Monetizr.SDK.Core
 {
     public class MonetizrManager : MonoBehaviour
     {
-
         #region Public Static Variables
 
         public static Action<string, Dictionary<string, string>> ExternalAnalytics { internal get; set; } = null;
@@ -53,7 +52,6 @@ namespace Monetizr.SDK.Core
         private static Action<bool> s_soundSwitch = null;
         private static Action<bool> s_onUIVisible = null;
         private static UserDefinedEvent s_userEvent = null;
-        private static string manualDebugKey = "";
 
         #endregion
 
@@ -73,6 +71,7 @@ namespace Monetizr.SDK.Core
         internal Action<bool> onUIVisible = null;
         internal MissionsManager missionsManager = null;
         internal LocalSettingsManager localSettings = null;
+
         private UIController _uiController = null;
         private ServerCampaign _activeCampaignId = null;
         private Action<bool> _soundSwitch = null;
@@ -80,7 +79,6 @@ namespace Monetizr.SDK.Core
         private bool _isActive = false;
         private bool _isMissionsIsOutdated = true;
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
-        private Action _gameOnInitSuccess;
 
         internal static bool s_coppa = false;
         internal static bool s_gdpr = false;
@@ -92,92 +90,7 @@ namespace Monetizr.SDK.Core
 
         #region Public Static Methods
 
-        public static void SetUserConsentParameters (bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
-        {
-            s_coppa = coppa;
-            s_gdpr = gdpr;
-            s_us_privacy = us_privacy;
-            s_uoo = uoo;
-            s_consent = consent;
-        }
-
-        public static void SetAdvertisingIds (string advertisingID, bool limitAdvertising)
-        {
-            MonetizrMobileAnalytics.isAdvertisingIDDefined = true;
-            MonetizrMobileAnalytics.advertisingID = advertisingID;
-            MonetizrMobileAnalytics.limitAdvertising = limitAdvertising;
-            MonetizrLogger.Print($"MonetizrManager SetAdvertisingIds: {MonetizrMobileAnalytics.advertisingID} {MonetizrMobileAnalytics.limitAdvertising}");
-        }
-
-        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title,
-            Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
-        {
-            GameReward gr = new GameReward()
-            {
-                icon = defaultRewardIcon,
-                title = title,
-                _GetCurrencyFunc = GetCurrencyFunc,
-                _AddCurrencyAction = AddCurrencyAction,
-                maximumAmount = maxAmount,
-            };
-
-            gameRewards[rt] = gr;
-        }
-
-        public static void ManuallySetDebugKey (string debugKey)
-        {
-            manualDebugKey = debugKey;
-        }
-
-        public static MonetizrManager Initialize (Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
-        {
-            s_onRequestComplete = onRequestComplete;
-            s_soundSwitch = soundSwitch;
-            s_onUIVisible = onUIVisible;
-            s_userEvent = userEvent;
-            return _Initialize(onRequestComplete, soundSwitch, onUIVisible, userEvent, null);
-        }
-
-        public static void HoldResource(object o)
-        {
-            if (o is UnityEngine.Object)
-            {
-                UnityEngine.Object uo = (UnityEngine.Object)o;
-
-                if (!Instance.holdResources.Contains(uo))
-                {
-                    Instance.holdResources.Add(uo);
-                }
-            }
-        }
-
-        public static void SetGameCoinMaximumReward(RewardType rt, ulong maxAmount)
-        {
-            GameReward reward = GetGameReward(rt);
-
-            if (reward != null)
-            {
-                reward.maximumAmount = maxAmount;
-                Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
-                MonetizrManager.Instance.missionsManager.UpdateMissionsRewards(rt, reward);
-            }
-        }
-
-        public static void LogGameRewards()
-        {
-            if (gameRewards == null || gameRewards.Count == 0)
-            {
-                MonetizrLogger.Print("gameRewards dictionary is null or empty.");
-                return;
-            }
-
-            foreach (KeyValuePair<RewardType, GameReward> entry in gameRewards)
-            {
-                MonetizrLogger.Print($"Key: {entry.Key}, Value: {entry.Value}");
-            }
-        }
-
-        public static void ShowDebug()
+        public static void ShowDebug ()
         {
             Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             debugAttempt++;
@@ -285,50 +198,6 @@ namespace Monetizr.SDK.Core
             ShowNotification(onComplete, mission, PanelId.StartNotification);
         }
 
-        public static Canvas GetMainCanvas()
-        {
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
-            return Instance?._uiController?.GetMainCanvas();
-        }
-
-        public static void EngagedUserAction(OnComplete onComplete)
-        {
-            isUsingEngagedUserAction = true;
-            MonetizrLogger.Print("Started EngageUserAction");
-
-            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
-            var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance?.GetActiveCampaign());
-
-            if (Instance.GetActiveCampaign() == null)
-            {
-                MonetizrLogger.Print("SKIPPED - NO CAMPAIGN");
-            }
-
-            if (missions == null || missions.Count == 0)
-            {
-                MonetizrLogger.Print("SKIPPED - NO MISSIONS");
-                onComplete(OnCompleteStatus.Skipped);
-                return;
-            }
-
-            if (missions[0].amountOfRVOffersShown == 0)
-            {
-                MonetizrLogger.Print("SKIPPED - NO RV");
-                onComplete(OnCompleteStatus.Skipped);
-                return;
-            }
-
-            missions[0].amountOfRVOffersShown--;
-
-            MonetizrManager.ShowRewardCenter(null, (Action<bool>)((bool p) =>
-            {
-                MonetizrLogger.Print((object)"ShowRewardCenter OnComplete!");
-
-                onComplete(hasCompletedEngagedUserAction ? OnCompleteStatus.Completed : OnCompleteStatus.Skipped);
-                hasCompletedEngagedUserAction = false;
-            }));
-        }
-
         public static void OnEngagedUserActionComplete()
         {
             if (!isUsingEngagedUserAction) return;
@@ -371,16 +240,6 @@ namespace Monetizr.SDK.Core
             MonetizrLogger.Print($"ShowRewardCenter from campaign: {m?.campaignId}");
             string uiItemPrefab = "MonetizrRewardCenterPanel2";
             Instance._uiController.ShowPanelFromPrefab(uiItemPrefab, PanelId.RewardCenter, onComplete, true, m);
-        }
-
-        public static void SetTeaserPosition(Vector2 pos)
-        {
-            teaserPosition = pos;
-        }
-
-        public static void SetTeaserRoot(Transform root)
-        {
-            teaserRoot = root;
         }
 
         public static void OnMainMenuShow(bool showNotifications = true)
@@ -551,66 +410,6 @@ namespace Monetizr.SDK.Core
             return Instance;
         }
 
-        private static bool IsInitializationSetupComplete ()
-        {
-            MonetizrSettingsMenu.LoadSettings();
-
-            string manualDebugKey = PlayerPrefs.GetString("MonetizrAPIKey");
-            if (!String.IsNullOrEmpty(manualDebugKey))
-            {
-                MonetizrSettings.apiKey = manualDebugKey;
-            }
-
-            if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
-            {
-                MonetizrLogger.PrintError("Missing SDK Settings - API Key. Please, provide API Key through ProjectSettings -> Monetizr.");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
-            {
-                MonetizrLogger.PrintError("Missing SDK Settings - Bundle ID. Please, provide Bundle ID through ProjectSettings -> Monetizr.");
-                return false;
-            }
-
-            if (gameRewards == null || gameRewards.Count <= 0)
-            {
-                MonetizrLogger.PrintError("Missing SDK Settings - GameReward. Please, setup at least one Game Reward before SDK initialization.");
-                return false;
-            }
-
-            foreach (KeyValuePair<RewardType, GameReward> gameReward in gameRewards)
-            {
-                if (!gameReward.Value.IsSetupValid())
-                {
-                    MonetizrLogger.PrintError("Invalid GameReward Setup - Please, make sure that the Game Rewards setup is valid.");
-                    return false;
-                }
-            }
-
-            if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
-            {
-                MonetizrLogger.PrintError("Missing SDK Settings - Advertising ID. Please, call MonetizrManager.SetAdvertisingIds before SDK initialization.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
-        {
-            GameObject monetizrObject = new GameObject("MonetizrManager");
-            MonetizrManager monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
-            GCPManager datadogManager = monetizrObject.AddComponent<GCPManager>();
-            CampaignManager campaignManager = monetizrObject.AddComponent<CampaignManager>();
-            DontDestroyOnLoad(monetizrObject);
-            Instance = monetizrManager;
-            Instance.sponsoredMissions = null;
-            Instance.userDefinedEvent = userEvent;
-            Instance.onUIVisible = onUIVisible;
-            return monetizrManager;
-        }
-
         internal static void _CallUserDefinedEvent(string campaignId, string placement, EventType eventType)
         {
             try
@@ -623,15 +422,6 @@ namespace Monetizr.SDK.Core
             }
         }
 
-        internal static GameReward GetGameReward(RewardType rt)
-        {
-            if (gameRewards.ContainsKey(rt))
-            {
-                return gameRewards[rt];
-            }
-
-            return null;
-        }
 
         internal static MonetizrManager InitializeForTests(Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null, MonetizrHttpClient connectionClient = null)
         {
@@ -812,8 +602,6 @@ namespace Monetizr.SDK.Core
 
         #region Public Methods
 
-        
-
         public void SoundSwitch(bool on)
         {
             _soundSwitch?.Invoke(on);
@@ -875,7 +663,6 @@ namespace Monetizr.SDK.Core
             ConnectionsClient = connectionClient ?? new MonetizrHttpClient(MonetizrSettings.apiKey);
             ConnectionsClient.Initialize();
             _uiController = new UIController();
-            _gameOnInitSuccess = gameOnInitSuccess;
 
             _onRequestComplete = (bool isOk) =>
             {
@@ -1194,6 +981,197 @@ namespace Monetizr.SDK.Core
         }
 
         #endregion
+
+        // *** MIGRATED FUNCTIONS ***
+
+        public static void SetUserConsentParameters(bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
+        {
+            s_coppa = coppa;
+            s_gdpr = gdpr;
+            s_us_privacy = us_privacy;
+            s_uoo = uoo;
+            s_consent = consent;
+        }
+
+        public static void SetAdvertisingIds(string advertisingID, bool limitAdvertising)
+        {
+            MonetizrMobileAnalytics.isAdvertisingIDDefined = true;
+            MonetizrMobileAnalytics.advertisingID = advertisingID;
+            MonetizrMobileAnalytics.limitAdvertising = limitAdvertising;
+            MonetizrLogger.Print($"MonetizrManager SetAdvertisingIds: {MonetizrMobileAnalytics.advertisingID} {MonetizrMobileAnalytics.limitAdvertising}");
+        }
+
+        public static void SetGameCoinAsset(RewardType rt, Sprite defaultRewardIcon, string title, Func<ulong> GetCurrencyFunc, Action<ulong> AddCurrencyAction, ulong maxAmount)
+        {
+            GameReward gr = new GameReward()
+            {
+                icon = defaultRewardIcon,
+                title = title,
+                _GetCurrencyFunc = GetCurrencyFunc,
+                _AddCurrencyAction = AddCurrencyAction,
+                maximumAmount = maxAmount,
+            };
+
+            gameRewards[rt] = gr;
+        }
+
+        public static void SetGameCoinMaximumReward(RewardType rt, ulong maxAmount)
+        {
+            GameReward reward = GetGameReward(rt);
+
+            if (reward != null)
+            {
+                reward.maximumAmount = maxAmount;
+                Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
+                MonetizrManager.Instance.missionsManager.UpdateMissionsRewards(rt, reward);
+            }
+        }
+
+        private static bool IsInitializationSetupComplete()
+        {
+            MonetizrSettingsMenu.LoadSettings();
+
+            string manualDebugKey = PlayerPrefs.GetString("MonetizrAPIKey");
+            if (!String.IsNullOrEmpty(manualDebugKey))
+            {
+                MonetizrSettings.apiKey = manualDebugKey;
+            }
+
+            if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
+            {
+                MonetizrLogger.PrintError("Missing SDK Settings - API Key. Please, provide API Key through ProjectSettings -> Monetizr.");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(MonetizrSettings.bundleID))
+            {
+                MonetizrLogger.PrintError("Missing SDK Settings - Bundle ID. Please, provide Bundle ID through ProjectSettings -> Monetizr.");
+                return false;
+            }
+
+            if (gameRewards == null || gameRewards.Count <= 0)
+            {
+                MonetizrLogger.PrintError("Missing SDK Settings - GameReward. Please, setup at least one Game Reward before SDK initialization.");
+                return false;
+            }
+
+            foreach (KeyValuePair<RewardType, GameReward> gameReward in gameRewards)
+            {
+                if (!gameReward.Value.IsSetupValid())
+                {
+                    MonetizrLogger.PrintError("Invalid GameReward Setup - Please, make sure that the Game Rewards setup is valid.");
+                    return false;
+                }
+            }
+
+            if (!MonetizrMobileAnalytics.isAdvertisingIDDefined)
+            {
+                MonetizrLogger.PrintError("Missing SDK Settings - Advertising ID. Please, call MonetizrManager.SetAdvertisingIds before SDK initialization.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private static MonetizrManager CreateMonetizrManagerInstance(Action<bool> onUIVisible, UserDefinedEvent userEvent)
+        {
+            GameObject monetizrObject = new GameObject("MonetizrManager");
+            MonetizrManager monetizrManager = monetizrObject.AddComponent<MonetizrManager>();
+            GCPManager datadogManager = monetizrObject.AddComponent<GCPManager>();
+            CampaignManager campaignManager = monetizrObject.AddComponent<CampaignManager>();
+            DontDestroyOnLoad(monetizrObject);
+            Instance = monetizrManager;
+            Instance.sponsoredMissions = null;
+            Instance.userDefinedEvent = userEvent;
+            Instance.onUIVisible = onUIVisible;
+            return monetizrManager;
+        }
+
+        public static Canvas GetMainCanvas()
+        {
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
+            return Instance?._uiController?.GetMainCanvas();
+        }
+
+        internal static GameReward GetGameReward(RewardType rt)
+        {
+            if (gameRewards.ContainsKey(rt))
+            {
+                return gameRewards[rt];
+            }
+
+            return null;
+        }
+
+        public static void SetTeaserPosition(Vector2 pos)
+        {
+            teaserPosition = pos;
+        }
+
+        public static void SetTeaserRoot(Transform root)
+        {
+            teaserRoot = root;
+        }
+
+        public static MonetizrManager Initialize(Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null)
+        {
+            s_onRequestComplete = onRequestComplete;
+            s_soundSwitch = soundSwitch;
+            s_onUIVisible = onUIVisible;
+            s_userEvent = userEvent;
+            return _Initialize(onRequestComplete, soundSwitch, onUIVisible, userEvent, null);
+        }
+
+        public static void HoldResource(object o)
+        {
+            if (o is UnityEngine.Object)
+            {
+                UnityEngine.Object uo = (UnityEngine.Object)o;
+
+                if (!Instance.holdResources.Contains(uo))
+                {
+                    Instance.holdResources.Add(uo);
+                }
+            }
+        }
+
+        public static void EngagedUserAction(OnComplete onComplete)
+        {
+            isUsingEngagedUserAction = true;
+            MonetizrLogger.Print("Started EngageUserAction");
+
+            Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
+            var missions = Instance.missionsManager.GetMissionsForRewardCenter(Instance?.GetActiveCampaign());
+
+            if (Instance.GetActiveCampaign() == null)
+            {
+                MonetizrLogger.Print("SKIPPED - NO CAMPAIGN");
+            }
+
+            if (missions == null || missions.Count == 0)
+            {
+                MonetizrLogger.Print("SKIPPED - NO MISSIONS");
+                onComplete(OnCompleteStatus.Skipped);
+                return;
+            }
+
+            if (missions[0].amountOfRVOffersShown == 0)
+            {
+                MonetizrLogger.Print("SKIPPED - NO RV");
+                onComplete(OnCompleteStatus.Skipped);
+                return;
+            }
+
+            missions[0].amountOfRVOffersShown--;
+
+            MonetizrManager.ShowRewardCenter(null, (Action<bool>)((bool p) =>
+            {
+                MonetizrLogger.Print((object)"ShowRewardCenter OnComplete!");
+
+                onComplete(hasCompletedEngagedUserAction ? OnCompleteStatus.Completed : OnCompleteStatus.Skipped);
+                hasCompletedEngagedUserAction = false;
+            }));
+        }
 
     }
 
