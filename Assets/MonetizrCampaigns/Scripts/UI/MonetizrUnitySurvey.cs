@@ -157,7 +157,7 @@ namespace Monetizr.SDK.UI
             float width = 0;
             float height = -620;
             int id = -1;
-            var campaignSettings = MonetizrManager.Instance.localSettings.GetSetting(m.campaign.id).settings;
+            var campaignSettings = MonetizrInstance.Instance.localSettings.GetSetting(m.campaign.id).settings;
 
             currentSurvey.activeQuestionsAmount = 0;
 
@@ -557,7 +557,7 @@ namespace Monetizr.SDK.UI
 
         public void OnSkipButton()
         {
-            MonetizrManager.ShowMessage((bool _isSkipped) =>
+            MonetizrInstance.Instance.ShowMessage((bool _isSkipped) =>
             {
                 if (!_isSkipped)
                 {
@@ -584,7 +584,7 @@ namespace Monetizr.SDK.UI
         internal void SubmitResponses()
         {
             var campaign = currentMission.campaign;
-            var campaignSettings = MonetizrManager.Instance.localSettings.GetSetting(campaign.id).settings;
+            var campaignSettings = MonetizrInstance.Instance.localSettings.GetSetting(campaign.id).settings;
 
             currentSurvey.questions.ForEach(q =>
             {
@@ -610,14 +610,14 @@ namespace Monetizr.SDK.UI
                     p.Add("answer_response", a.response);
                     p.Add("answer_text", a.text);
                     p.Add("question_text", q.text);
-                    MonetizrManager.Analytics._TrackEvent("Survey answer", campaign, false, p);
+                    MonetizrInstance.Instance.Analytics._TrackEvent("Survey answer", campaign, false, p);
 
                     campaignSettings[variableName] = a.response;
                 });
             });
 
 
-            MonetizrManager.Instance.localSettings.SaveData();
+            MonetizrInstance.Instance.localSettings.SaveData();
         }
 
         internal override void FinalizePanel(PanelId id)

@@ -34,7 +34,7 @@ namespace Monetizr.SDK.Prebid
                 if (string.IsNullOrEmpty(url)) continue;
 
                 MonetizrLogger.Print("Firing tracker: " + url);
-                MonetizrManager.Instance.StartCoroutine(Fire(url));
+                MonetizrInstance.Instance.StartCoroutine(Fire(url));
             }
         }
 

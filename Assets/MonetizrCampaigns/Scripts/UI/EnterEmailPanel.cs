@@ -286,7 +286,7 @@ namespace Monetizr.SDK.UI
 
         public void OnNoThanksPress()
         {
-            MonetizrManager.ShowMessage((bool _isSkipped) =>
+            MonetizrInstance.Instance.ShowMessage((bool _isSkipped) =>
                 {
                     if(!_isSkipped)
                     {

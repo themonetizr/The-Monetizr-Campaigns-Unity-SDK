@@ -106,7 +106,7 @@ namespace Monetizr.SDK.UI
 
         public void OnClosePress()
         {
-            MonetizrManager.ShowMessage((bool _isSkipped) =>
+            MonetizrInstance.Instance.ShowMessage((bool _isSkipped) =>
                 {
                     if (!_isSkipped)
                     {

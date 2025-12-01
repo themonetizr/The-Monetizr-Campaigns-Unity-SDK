@@ -70,7 +70,7 @@ namespace Monetizr.SDK.Networking
                 }
             };
 
-            output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", MonetizrManager.Instance.ConnectionsClient.currentApiKey);
+            output.Headers.Authorization = new AuthenticationHeaderValue("Bearer", MonetizrInstance.Instance.ConnectionsClient.currentApiKey);
             output.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             if (string.IsNullOrEmpty(userAgent)) return output;
             output.Headers.Add("User-Agent", userAgent);
@@ -126,7 +126,7 @@ namespace Monetizr.SDK.Networking
             Ensure("device.os", Application.platform.ToString());
             Ensure("device.osv", SystemInfo.operatingSystem);
             Ensure("device.ifa", MonetizrMobileAnalytics.advertisingID);
-            Ensure("device.ua", MonetizrManager.Instance.ConnectionsClient.userAgent);
+            Ensure("device.ua", MonetizrInstance.Instance.ConnectionsClient.userAgent);
             Ensure("site.domain", Application.identifier);
             Ensure("site.page", $"https://{Application.identifier}");
             Ensure("regs.gdpr", MonetizrManager.s_gdpr ? "1" : "0");

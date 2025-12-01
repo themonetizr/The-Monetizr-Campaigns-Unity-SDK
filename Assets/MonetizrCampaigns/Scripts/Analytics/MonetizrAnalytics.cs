@@ -48,7 +48,7 @@ namespace Monetizr.SDK.Analytics
             payload["properties"] = propsJson;
 
             string json = payload.ToString();
-            MonetizrManager.Instance.StartCoroutine(Send(json));
+            MonetizrInstance.Instance.StartCoroutine(Send(json));
         }
 
         private static void AddDefaultValues (Dictionary<string, object> props, ServerCampaign campaign)
@@ -113,7 +113,7 @@ namespace Monetizr.SDK.Analytics
             payload["properties"] = MonetizrUtils.DictionaryToJson(props);
 
             string json = payload.ToString();
-            MonetizrManager.Instance.StartCoroutine(Send(json));
+            MonetizrInstance.Instance.StartCoroutine(Send(json));
         }
 
     }

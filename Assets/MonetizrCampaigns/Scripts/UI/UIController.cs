@@ -71,12 +71,12 @@ namespace Monetizr.SDK.UI
 
                 if (panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser))
                 {
-                    MonetizrManager.Instance?.onUIVisible?.Invoke(false);
+                    MonetizrInstance.Instance?.onUIVisible?.Invoke(false);
                 }
             };
 
             if ((panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser)) || panels.Count == 0)
-                MonetizrManager.Instance?.onUIVisible?.Invoke(true);
+                MonetizrInstance.Instance?.onUIVisible?.Invoke(true);
 
             if (panels.ContainsKey(id))
             {
@@ -117,7 +117,7 @@ namespace Monetizr.SDK.UI
                 ctrlPanel.PreparePanel(id, complete, m);
 
                 if(!ctrlPanel.SendImpressionEventManually())
-                    MonetizrManager.Analytics.TrackEvent(m, ctrlPanel, EventType.Impression);
+                    MonetizrInstance.Instance.Analytics.TrackEvent(m, ctrlPanel, EventType.Impression);
 
                 panels.Add(id, ctrlPanel);
             }
@@ -191,7 +191,7 @@ namespace Monetizr.SDK.UI
 
             if (teaser.IsVisible()) return;
             
-            var missionsList = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(campaign,false);
+            var missionsList = MonetizrInstance.Instance.missionsManager.GetMissionsForRewardCenter(campaign,false);
 
             var m = missionsList[0];
 
@@ -202,7 +202,7 @@ namespace Monetizr.SDK.UI
 
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
 
-            MonetizrManager.Analytics.TrackEvent(m, teaser, EventType.Impression);
+            MonetizrInstance.Instance.Analytics.TrackEvent(m, teaser, EventType.Impression);
 
             if(root == null) teaser.rectTransform.SetAsFirstSibling();
 

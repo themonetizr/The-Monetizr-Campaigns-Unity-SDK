@@ -230,7 +230,7 @@ namespace Monetizr.SDK.Analytics
             props["impressions"] = "1";
             props["ab_segment"] = MonetizrManager.abTestSegment;
             props["device_size"] = deviceSizeGroupNames[deviceSizeGroup];
-            props["api_key"] = MonetizrManager.Instance.GetCurrentAPIkey();
+            props["api_key"] = MonetizrInstance.Instance.GetCurrentAPIkey();
             props["sdk_version"] = MonetizrSettings.SDKVersion;
             props["ad_id"] = MonetizrMobileAnalytics.advertisingID;
             props["screen_width"] = Screen.width.ToString();
@@ -344,7 +344,7 @@ namespace Monetizr.SDK.Analytics
         {
             UnityEngine.Debug.Assert(currentCampaign != null);
             string placementName = GetPlacementName(adPlacement);
-            MonetizrManager._CallUserDefinedEvent(currentCampaign.id, placementName, eventType);
+            MonetizrInstance.Instance._CallUserDefinedEvent(currentCampaign.id, placementName, eventType);
 
             if (additionalValues == null) additionalValues = new Dictionary<string, string>();
             if (currentMission != null) additionalValues["mission_id"] = currentMission.serverId.ToString();

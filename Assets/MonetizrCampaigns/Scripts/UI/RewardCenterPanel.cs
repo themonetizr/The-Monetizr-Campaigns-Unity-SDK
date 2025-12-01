@@ -57,7 +57,7 @@ namespace Monetizr.SDK.UI
 
             CleanListView();
 
-            if (MonetizrManager.Instance.HasActiveCampaign())
+            if (MonetizrInstance.Instance.HasActiveCampaign())
             {
                 AddSponsoredChallenges();
             }
@@ -66,13 +66,13 @@ namespace Monetizr.SDK.UI
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
         {
             currentMission = m;
-            currentCampaign = MonetizrManager.Instance.GetActiveCampaign();
+            currentCampaign = MonetizrInstance.Instance.GetActiveCampaign();
 
             string uiItemPrefab = "MonetizrRewardedItem2";
 
             itemUI = (Resources.Load(uiItemPrefab) as GameObject).GetComponent<MonetizrRewardedItem>();
 
-            MonetizrManager.HideTeaser();
+            MonetizrInstance.Instance.HideTeaser();
 
             this._onComplete = onComplete;
 
@@ -81,7 +81,7 @@ namespace Monetizr.SDK.UI
 
         private void AddSponsoredChallenges()
         {
-            var campaign = MonetizrManager.Instance.GetActiveCampaign();
+            var campaign = MonetizrInstance.Instance.GetActiveCampaign();
 
             if (campaign == null)
             {
@@ -97,8 +97,8 @@ namespace Monetizr.SDK.UI
             }
 
             showNotClaimedDisabled = campaign.serverSettings.GetBoolParam("RewardCenter.show_disabled_missions", true);
-            var activeCampaign = MonetizrManager.Instance.GetActiveCampaign();
-            missionsForRewardCenter = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign, true);
+            var activeCampaign = MonetizrInstance.Instance.GetActiveCampaign();
+            missionsForRewardCenter = MonetizrInstance.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign, true);
 
             if (missionsForRewardCenter.Count == 0)
             {
@@ -179,13 +179,13 @@ namespace Monetizr.SDK.UI
 
         private void UpdateStatusBar()
         {
-            var camp = MonetizrManager.Instance.GetActiveCampaign();
+            var camp = MonetizrInstance.Instance.GetActiveCampaign();
 
             if (camp == null) return;
 
             var statusText = camp.serverSettings.GetParam("RewardCenter.missions_num_text", "%claimed_missions%/%total_missions%");
             int claimed = 0;
-            var missions = MonetizrManager.Instance.missionsManager.GetAllMissions(camp);
+            var missions = MonetizrInstance.Instance.missionsManager.GetAllMissions(camp);
 
             double totalRewardsValue = 0;
             double claimedRewardsValue = 0;
@@ -247,7 +247,7 @@ namespace Monetizr.SDK.UI
             m.progress = 1;
             m.brandName = brandName;
             m.claimButtonText = "Watch video";
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrInstance.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
         }
 
         private void AddMultiplyCoinsChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -268,7 +268,7 @@ namespace Monetizr.SDK.UI
             m.progress = ((float)(getCurrencyFunc() - m.startMoney)) / (float)m.reward;
             m.brandName = brandName;
             m.claimButtonText = "Claim reward";
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrInstance.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
 
             item.currectProgress = getCurrencyFunc() - m.startMoney;
             item.maxProgress = m.reward;
@@ -295,7 +295,7 @@ namespace Monetizr.SDK.UI
             m.progress = 1.0f;
             m.brandName = brandName;
             m.claimButtonText = "Start survey";
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrInstance.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
         }
 
         private void AddVideoGiveawayChallenge(MonetizrRewardedItem item, Mission m, int missionId)
@@ -330,7 +330,7 @@ namespace Monetizr.SDK.UI
             m.progress = 1;
             m.brandName = brandName;
             m.claimButtonText = needToPlayVideo ? "Watch video!" : "Claim reward!";
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrInstance.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
 
             item.showGift = true;
             item.currectProgress = getCurrencyFunc() - m.startMoney;
@@ -359,7 +359,7 @@ namespace Monetizr.SDK.UI
             m.progress = 1;
             m.brandName = brandName;
             m.claimButtonText = "Play!";
-            m.onClaimButtonPress = MonetizrManager.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
+            m.onClaimButtonPress = MonetizrInstance.Instance.missionsManager.ClaimAction(m, null, AddNewUIMissions);
         }
 
         private void AddSponsoredChallenge(Mission m, int missionId)
@@ -407,20 +407,20 @@ namespace Monetizr.SDK.UI
 
         public void OnDebugMenuPress()
         {
-            MonetizrManager.ShowDebug();
+            MonetizrInstance.Instance.ShowDebug();
         }
 
         internal void ButtonPressed(ButtonController buttonController, Mission missionDescription)
         {
-            if (!missionDescription.isSponsored) MonetizrManager.CleanUserDefinedMissions();
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
+            if (!missionDescription.isSponsored) MonetizrInstance.Instance.CleanUserDefinedMissions();
+            MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
             missionDescription.onClaimButtonPress.Invoke();
             if (!missionDescription.isSponsored) UpdateUI();
         }
 
         public void OnClaimRewardComplete(Mission mission, bool isSkipped, Action updateUIDelegate)
         {
-            MonetizrManager.Instance.OnClaimRewardComplete(mission, isSkipped, null, updateUIDelegate);
+            MonetizrInstance.Instance.OnClaimRewardComplete(mission, isSkipped, null, updateUIDelegate);
         }
 
         public void AddNewUIMissions()
@@ -431,8 +431,8 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            var activeCampaign = MonetizrManager.Instance.GetActiveCampaign();
-            var ml = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign, true);
+            var activeCampaign = MonetizrInstance.Instance.GetActiveCampaign();
+            var ml = MonetizrInstance.Instance.missionsManager.GetMissionsForRewardCenter(activeCampaign, true);
 
             foreach (var m in ml)
             {
@@ -460,12 +460,12 @@ namespace Monetizr.SDK.UI
 
         public void OnVideoPlayPress(Mission m, Action<bool> onComplete)
         {
-            MonetizrManager.Instance.missionsManager.OnVideoPlayPress(m, onComplete);
+            MonetizrInstance.Instance.missionsManager.OnVideoPlayPress(m, onComplete);
         }
 
         internal override void FinalizePanel(PanelId id)
         {
-            if (MonetizrManager.canTeaserBeVisible) MonetizrManager.ShowTeaser(null);
+            if (MonetizrManager.canTeaserBeVisible) MonetizrInstance.Instance.ShowTeaser(null);
         }
 
         void UpdateList()

@@ -25,14 +25,14 @@ namespace Monetizr.SDK.Missions
                 float rewardAmount = _m.GetRewardAmount() / 100.0f;
                 RewardType currency = _m.GetRewardType();
 
-                GameReward gameReward = MonetizrManager.GetGameReward(currency);
+                GameReward gameReward = MonetizrInstance.Instance.GetGameReward(currency);
 
                 if (gameReward == null)
                 {
                     if (serverSettings.GetBoolParam("use_default_reward", true))
                     {
                         currency = RewardType.Coins;
-                        gameReward = MonetizrManager.GetGameReward(currency);
+                        gameReward = MonetizrInstance.Instance.GetGameReward(currency);
                     }
                     else
                     {

@@ -131,7 +131,7 @@ namespace Monetizr.SDK.Campaigns
                 MonetizrLogger.PrintWarning($"An item {t} already exist in the campaign {id}");
             }
 
-            MonetizrManager.HoldResource(asset);
+            MonetizrInstance.Instance.HoldResource(asset);
             assetsDict[t] = asset;
         }
 
@@ -636,13 +636,13 @@ namespace Monetizr.SDK.Campaigns
 
         internal bool IsCampaignActivate()
         {
-            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(this) == 0) return false;
+            if (MonetizrInstance.Instance.missionsManager.GetActiveMissionsNum(this) == 0) return false;
 
             var serverMaxAmount = serverSettings.GetIntParam("amount_of_teasers");
-            var currentAmount = MonetizrManager.Instance.localSettings.GetSetting(id).amountTeasersShown;
+            var currentAmount = MonetizrInstance.Instance.localSettings.GetSetting(id).amountTeasersShown;
             bool hasNoTeasers = currentAmount > serverMaxAmount;
             var serverMaxNotificationsAmount = serverSettings.GetIntParam("amount_of_notifications");
-            var currentNotificationsAmount = MonetizrManager.Instance.localSettings.GetSetting(id).amountNotificationsShown;
+            var currentNotificationsAmount = MonetizrInstance.Instance.localSettings.GetSetting(id).amountNotificationsShown;
             bool hasNoNotifications = currentNotificationsAmount > serverMaxNotificationsAmount;
 
             if (hasNoNotifications && hasNoTeasers) return false;
@@ -651,7 +651,7 @@ namespace Monetizr.SDK.Campaigns
 
         public bool AreConditionsTrue(Dictionary<string, string> mConditions)
         {
-            var settings = MonetizrManager.Instance.localSettings.GetSetting(id).settings;
+            var settings = MonetizrInstance.Instance.localSettings.GetSetting(id).settings;
             if (settings == null || settings.dictionary.Count == 0) return false;
             return mConditions.All(c => settings[c.Key] == c.Value);
         }

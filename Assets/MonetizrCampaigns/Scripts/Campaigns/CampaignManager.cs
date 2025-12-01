@@ -268,13 +268,13 @@ namespace Monetizr.SDK.Campaigns
             {
                 try
                 {
-                    MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
+                    MonetizrInstance.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
                     await campaign.LoadCampaignAssets();
 
                     if (campaign.isLoaded)
                     {
                         MonetizrLogger.Print($"CampaignID: {campaign.id} successfully loaded", true);
-                        MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
+                        MonetizrInstance.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
                     }
                     else
                     {
@@ -285,7 +285,7 @@ namespace Monetizr.SDK.Campaigns
                 {
                     campaign.isLoaded = false;
                     MonetizrLogger.PrintError("CampaignID: " + campaign.id + " failed loading assets.", true);
-                    MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
+                    MonetizrInstance.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
                 }
             }
 

@@ -54,10 +54,10 @@ namespace Monetizr.SDK.Debug
                 List<string> k = new List<string>(DebugSettings.campaignKeyNames.Values);
                 apiKeysList.value = k.FindIndex(0, (string v) =>
                 {
-                    if (!DebugSettings.campaignKeyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
+                    if (!DebugSettings.campaignKeyNames.ContainsKey(MonetizrInstance.Instance.GetCurrentAPIkey()))
                         return false;
 
-                    return v == DebugSettings.campaignKeyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
+                    return v == DebugSettings.campaignKeyNames[MonetizrInstance.Instance.GetCurrentAPIkey()];
                 });
             }
             else
@@ -67,10 +67,10 @@ namespace Monetizr.SDK.Debug
                 List<string> k = new List<string>(DebugSettings.devKeyNames.Values);
                 apiKeysList.value = k.FindIndex(0, (string v) =>
                 {
-                    if (!DebugSettings.devKeyNames.ContainsKey(MonetizrManager.Instance.GetCurrentAPIkey()))
+                    if (!DebugSettings.devKeyNames.ContainsKey(MonetizrInstance.Instance.GetCurrentAPIkey()))
                         return false;
 
-                    return v == DebugSettings.devKeyNames[MonetizrManager.Instance.GetCurrentAPIkey()];
+                    return v == DebugSettings.devKeyNames[MonetizrInstance.Instance.GetCurrentAPIkey()];
                 });
             }
         }
@@ -81,9 +81,9 @@ namespace Monetizr.SDK.Debug
              $"OS: {MonetizrMobileAnalytics.osVersion} " +
              $"SDK: {MonetizrSettings.SDKVersion}\n" +
              $"ADID: {MonetizrMobileAnalytics.advertisingID}\n" +
-             $"UserId: {MonetizrManager.Instance.ConnectionsClient.Analytics.GetUserId()}\n" +
+             $"UserId: {MonetizrInstance.Instance.ConnectionsClient.Analytics.GetUserId()}\n" +
              $"Limit ad tracking: {MonetizrMobileAnalytics.limitAdvertising}\n" +
-             $"Active campaign: {MonetizrManager.Instance.GetActiveCampaign()?.id}";
+             $"Active campaign: {MonetizrInstance.Instance.GetActiveCampaign()?.id}";
         }
 
         public void OnToggleChanged(bool _)
@@ -101,17 +101,17 @@ namespace Monetizr.SDK.Debug
 
         public void ResetLocalClaimData()
         {
-            MonetizrManager.Instance.CleanRewardsClaims();
+            MonetizrInstance.Instance.CleanRewardsClaims();
         }
 
         public void ResetCampaigns()
         {
-            MonetizrManager.ResetCampaign();
+            MonetizrInstance.Instance.ResetCampaign();
         }
 
         public void ResetId()
         {
-            MonetizrManager.Instance.ConnectionsClient.Analytics.RandomizeUserId();
+            MonetizrInstance.Instance.ConnectionsClient.Analytics.RandomizeUserId();
             UpdateVersionText();
         }
 
@@ -153,8 +153,8 @@ namespace Monetizr.SDK.Debug
                     MonetizrManager.bundleId = "com.monetizr.landslice";
                 }
 
-                bool changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.campaignKeys[apiKeysList.value]);
-                MonetizrManager.Instance.RestartClient();
+                bool changed = MonetizrInstance.Instance.ChangeAPIKey(DebugSettings.campaignKeys[apiKeysList.value]);
+                MonetizrInstance.Instance.RestartClient();
             }
             else
             {
@@ -171,8 +171,8 @@ namespace Monetizr.SDK.Debug
                     MonetizrManager.bundleId = "com.monetizr.landslice";
                 }
 
-                bool changed = MonetizrManager.Instance.ChangeAPIKey(DebugSettings.devKeys[apiKeysList.value]);
-                MonetizrManager.Instance.RestartClient();
+                bool changed = MonetizrInstance.Instance.ChangeAPIKey(DebugSettings.devKeys[apiKeysList.value]);
+                MonetizrInstance.Instance.RestartClient();
             }
         }
 

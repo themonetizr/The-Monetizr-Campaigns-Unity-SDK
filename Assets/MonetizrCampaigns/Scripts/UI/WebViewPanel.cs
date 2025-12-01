@@ -141,35 +141,35 @@ namespace Monetizr.SDK.UI
                 case PanelId.SurveyWebView:
                     MonetizrLogger.Print("Preparing Survey.");
                     PrepareSurveyPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.HtmlWebPageView:
                     MonetizrLogger.Print("Preparing HTML.");
                     PrepareWebViewPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.ActionHtmlPanelView:
                     MonetizrLogger.Print("Preparing Action/ENDCARD.");
                     PrepareActionPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.StartNotification:
                     MonetizrLogger.Print("Preparing StartNotification.");
                     PrepareStartNotificationPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.CongratsNotification:
                     MonetizrLogger.Print("Preparing CongratsNotification.");
                     PrepareCongratsNotificationPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
             }
@@ -201,7 +201,7 @@ namespace Monetizr.SDK.UI
 
             UniWebView.SetJavaScriptEnabled(true);
             UniWebView.SetAllowUniversalAccessFromFileURLs(true);
-            MonetizrManager.Instance.SoundSwitch(false);
+            MonetizrInstance.Instance.SoundSwitch(false);
 
             UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
             UniWebView.SetForwardWebConsoleToNativeOutput(true);
@@ -331,7 +331,7 @@ namespace Monetizr.SDK.UI
 
         internal void OnStartNotificationConfirmButton ()
         {
-            MonetizrManager.OnEngagedUserActionComplete();
+            MonetizrInstance.Instance.OnEngagedUserActionComplete();
             isSkipped = false;
             closeButton.gameObject.SetActive(false);
             additionalEventValues.Clear();
@@ -456,7 +456,7 @@ namespace Monetizr.SDK.UI
                 _webView.Load(_webUrl);
                 _webView.Show();
                 MonetizrLogger.Print($"Url to show {_webUrl}");
-                MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
                 impressionStarts = true;
             }
             else
@@ -507,7 +507,7 @@ namespace Monetizr.SDK.UI
             _webUrl = "file://" + indexPath;
             _webView.Load(_webUrl);
             _webView.Show();
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+            MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
             TrackingUtils.FireTrackers(campaign.trackingURLs);
             impressionStarts = true;
         }
@@ -705,7 +705,7 @@ namespace Monetizr.SDK.UI
             if (impressionStarts)
             {
                 triggersButtonEventsOnDeactivate = true;
-                MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.ImpressionEnds);
+                MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.ImpressionEnds);
                 impressionStarts = false;
             }
         }
@@ -728,7 +728,7 @@ namespace Monetizr.SDK.UI
 
             _webView.Hide(true, UniWebViewTransitionEdge.Top, 0.4f, () =>
             {
-                MonetizrManager.ShowMessage((bool _isSkipped) =>
+                MonetizrInstance.Instance.ShowMessage((bool _isSkipped) =>
                 {
                     if (!_isSkipped)
                     {
@@ -758,7 +758,7 @@ namespace Monetizr.SDK.UI
             Dictionary<string, string> p = new Dictionary<string, string>();
             p.Add("url", _webUrl);
             if (statusCode > 0) p.Add("url_status_code", statusCode.ToString());
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Error, p);
+            MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Error, p);
         }
 
         internal override bool SendImpressionEventManually ()
@@ -773,7 +773,7 @@ namespace Monetizr.SDK.UI
 
         internal override void FinalizePanel (PanelId id)
         {
-            MonetizrManager.Instance.SoundSwitch(true);
+            MonetizrInstance.Instance.SoundSwitch(true);
         }
 
         private bool IsExternalURL (string url)

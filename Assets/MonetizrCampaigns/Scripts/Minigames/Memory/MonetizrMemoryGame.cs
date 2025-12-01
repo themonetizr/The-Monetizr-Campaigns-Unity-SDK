@@ -39,7 +39,7 @@ namespace Monetizr.SDK.Minigames
 
             if (currentMission.campaignServerSettings.GetBoolParam("more_memory_stats", false))
             {
-                MonetizrManager.Analytics._TrackEvent("Minigame stats", currentMission.campaign, false, stats.GetDictionary());
+                MonetizrInstance.Instance.Analytics._TrackEvent("Minigame stats", currentMission.campaign, false, stats.GetDictionary());
             }
         }
 

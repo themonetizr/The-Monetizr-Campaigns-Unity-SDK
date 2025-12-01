@@ -16,7 +16,7 @@ namespace Monetizr.SDK.Utils
         {
             if (campaign == null) campaign = new ServerCampaign("", "", new SettingsDictionary<string, string>());
 
-            string ua = MonetizrManager.Instance.ConnectionsClient.userAgent ?? campaign.serverSettings.GetParam("app.clientua", campaign.serverSettings.GetParam("app.deviceua", "UnityPlayer"));
+            string ua = MonetizrInstance.Instance.ConnectionsClient.userAgent ?? campaign.serverSettings.GetParam("app.clientua", campaign.serverSettings.GetParam("app.deviceua", "UnityPlayer"));
             string storeUrl = campaign.serverSettings.GetParam("app.storeurl", "");
             string sitePage = campaign.serverSettings.GetParam("site.page", string.IsNullOrEmpty(storeUrl) ? "https://unity3d.com" : storeUrl);
             string siteDomain = campaign.serverSettings.GetParam("site.domain", "");

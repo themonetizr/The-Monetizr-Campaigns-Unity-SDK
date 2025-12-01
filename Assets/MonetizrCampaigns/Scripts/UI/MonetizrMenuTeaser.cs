@@ -41,8 +41,8 @@ namespace Monetizr.SDK.UI
         }
         public void OnButtonClick()
         {
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
-            MonetizrManager.ShowRewardCenter(null);
+            MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
+            MonetizrInstance.Instance.ShowRewardCenter(null);
         }
 
         internal override void PreparePanel(PanelId id, Action<bool> onComplete, Mission m)
@@ -51,7 +51,7 @@ namespace Monetizr.SDK.UI
             currentMission = m;
             var noVideo = !m.hasVideo;
             if (!noVideo && m.isVideoShown) noVideo = true;
-            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(m.campaign) > 1) noVideo = true;
+            if (MonetizrInstance.Instance.missionsManager.GetActiveMissionsNum(m.campaign) > 1) noVideo = true;
             var isSinglePicture = m.campaignServerSettings.GetBoolParam("teaser.single_picture", false);
             UpdateTransform(m);
 
@@ -78,7 +78,7 @@ namespace Monetizr.SDK.UI
                 buttonTextRect.anchoredPosition = new Vector2(0, 0);
             }
 
-            var missions = MonetizrManager.Instance.missionsManager.GetMissionsForRewardCenter(m.campaign, true);
+            var missions = MonetizrInstance.Instance.missionsManager.GetMissionsForRewardCenter(m.campaign, true);
             var numText = currentMission.campaignServerSettings.GetParam("teaser.num_text", "%total_missions%");
             numText = numText.Replace("%total_missions%", $"{missions.Count}");
             UpdateMissionAmountText();
@@ -114,7 +114,7 @@ namespace Monetizr.SDK.UI
 
         private void UpdateMissionAmountText()
         {
-            List<Mission> missions = MonetizrManager.Instance.missionsManager.GetAllMissions();
+            List<Mission> missions = MonetizrInstance.Instance.missionsManager.GetAllMissions();
             int totalMissionCount = missions.Count;
             int claimed = 0;
 

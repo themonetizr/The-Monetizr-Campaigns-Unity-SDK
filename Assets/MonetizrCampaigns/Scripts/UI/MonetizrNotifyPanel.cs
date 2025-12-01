@@ -245,7 +245,7 @@ namespace Monetizr.SDK.UI
 
         public void OnButtonPress()
         {
-            MonetizrManager.OnEngagedUserActionComplete();
+            MonetizrInstance.Instance.OnEngagedUserActionComplete();
             isSkipped = false;
             SetActive(false);
         }
