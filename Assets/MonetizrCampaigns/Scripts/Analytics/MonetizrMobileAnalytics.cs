@@ -344,7 +344,7 @@ namespace Monetizr.SDK.Analytics
         {
             UnityEngine.Debug.Assert(currentCampaign != null);
             string placementName = GetPlacementName(adPlacement);
-            MonetizrInstance.Instance._CallUserDefinedEvent(currentCampaign.id, placementName, eventType);
+            MonetizrInstance.Instance.CallUserDefinedEvent(currentCampaign.id, placementName, eventType);
 
             if (additionalValues == null) additionalValues = new Dictionary<string, string>();
             if (currentMission != null) additionalValues["mission_id"] = currentMission.serverId.ToString();

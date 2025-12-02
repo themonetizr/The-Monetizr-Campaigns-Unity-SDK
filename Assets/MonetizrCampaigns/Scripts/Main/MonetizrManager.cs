@@ -162,7 +162,7 @@ namespace Monetizr.SDK.Core
         public static Canvas GetMainCanvas ()
         {
             Assert.IsNotNull(MonetizrInstance.Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
-            return MonetizrInstance.Instance?._uiController?.GetMainCanvas();
+            return MonetizrInstance.Instance?.uiController?.GetMainCanvas();
         }
 
         public static void SetTeaserPosition (Vector2 position)
