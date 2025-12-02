@@ -25,9 +25,9 @@ namespace Monetizr.SDK.Debug
             this._onComplete = onComplete;
             panelId = id;
 
-            keepLocalData.isOn = MonetizrManager.keepLocalClaimData;
-            serverClaims.isOn = MonetizrManager.serverClaimForCampaigns;
-            claimIfSkipped.isOn = MonetizrManager.claimForSkippedCampaigns;
+            keepLocalData.isOn = MonetizrInstance.Instance.keepLocalClaimData;
+            serverClaims.isOn = MonetizrInstance.Instance.serverClaimForCampaigns;
+            claimIfSkipped.isOn = MonetizrInstance.Instance.claimForSkippedCampaigns;
 
             keepLocalData.onValueChanged.AddListener(OnToggleChanged);
             serverClaims.onValueChanged.AddListener(OnToggleChanged);
@@ -88,9 +88,9 @@ namespace Monetizr.SDK.Debug
 
         public void OnToggleChanged(bool _)
         {
-            MonetizrManager.keepLocalClaimData = keepLocalData.isOn;
-            MonetizrManager.serverClaimForCampaigns = serverClaims.isOn;
-            MonetizrManager.claimForSkippedCampaigns = claimIfSkipped.isOn;
+            MonetizrInstance.Instance.keepLocalClaimData = keepLocalData.isOn;
+            MonetizrInstance.Instance.serverClaimForCampaigns = serverClaims.isOn;
+            MonetizrInstance.Instance.claimForSkippedCampaigns = claimIfSkipped.isOn;
         }
 
         public void DropdownValueChanged()

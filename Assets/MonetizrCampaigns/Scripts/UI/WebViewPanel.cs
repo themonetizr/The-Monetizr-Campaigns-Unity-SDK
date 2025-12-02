@@ -5,6 +5,7 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
@@ -549,7 +550,7 @@ namespace Monetizr.SDK.UI
             MonetizrLogger.Print($"OnPageStarted: { url} ");
 
             isInExternalWebpage = false;
-            if (IsExternalURL(url))
+            if (NetworkingUtils.IsExternalURL(url))
             {
                 isInExternalWebpage = true;
                 MonetizrLogger.Print("URL outside MonetizrSDK - Will not set it to fullscreen.");
@@ -597,7 +598,7 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            if (IsExternalURL(url))
+            if (NetworkingUtils.IsExternalURL(url))
             {
                 isInExternalWebpage = true;
                 MonetizrLogger.Print("URL outside MonetizrSDK - Will enable native button.");
@@ -774,19 +775,6 @@ namespace Monetizr.SDK.UI
         internal override void FinalizePanel (PanelId id)
         {
             MonetizrInstance.Instance.SoundSwitch(true);
-        }
-
-        private bool IsExternalURL (string url)
-        {
-            if (string.IsNullOrEmpty(url)) return false;
-
-            if (url.StartsWith("file://", StringComparison.OrdinalIgnoreCase)) return false;
-            if (url.StartsWith("about:", StringComparison.OrdinalIgnoreCase)) return false;
-            if (url.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return false;
-            if (url.StartsWith("uniwebview://", StringComparison.OrdinalIgnoreCase)) return false;
-            if (url.Contains("monetizr") || url.Contains("mntzr")) return false;
-
-            return true;
         }
 
     }

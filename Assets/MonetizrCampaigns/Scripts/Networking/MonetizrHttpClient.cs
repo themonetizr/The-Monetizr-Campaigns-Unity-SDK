@@ -185,7 +185,7 @@ namespace Monetizr.SDK.Networking
 
             if (MonetizrManager.temporaryEmail != null && MonetizrManager.temporaryEmail.Length > 0)
             {
-                bool ingame = MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Product ? false : true;
+                bool ingame = MonetizrInstance.Instance.temporaryRewardTypeSelection == RewardSelectionType.Product ? false : true;
                 Reward reward = challenge.rewards.Find((Reward r) => { return r.in_game_only == ingame; });
 
                 if (reward == null)

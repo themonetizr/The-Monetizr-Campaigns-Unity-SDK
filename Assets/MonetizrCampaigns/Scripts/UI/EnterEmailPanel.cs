@@ -129,7 +129,7 @@ namespace Monetizr.SDK.UI
             if (result == "aa@aa.aa") result = "asdfqe qe qefqwe";
 
             MonetizrManager.temporaryEmail = result;
-            MonetizrManager.temporaryRewardTypeSelection = selection;
+            MonetizrInstance.Instance.temporaryRewardTypeSelection = selection;
         }
 
         internal static EnterEmailType GetPanelType(Mission m)

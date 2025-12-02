@@ -271,7 +271,7 @@ namespace Monetizr.SDK.Analytics
 
             if (camp.serverSettings.GetBoolParam("mixpanel_fast_flush", false)) Mixpanel.Flush();
 
-            if (MonetizrManager.ExternalAnalytics != null)
+            if (MonetizrInstance.Instance.ExternalAnalytics != null)
             {
                 Dictionary<string, string> eventProps = new Dictionary<string, string>();
                 foreach (KeyValuePair<string, Value> v in props.GetFieldValue<Dictionary<string, Value>>("_container"))
@@ -279,7 +279,7 @@ namespace Monetizr.SDK.Analytics
                     string value = v.Value.GetFieldValue<string>("_string");
                     eventProps.Add(v.Key, value);
                 }
-                MonetizrManager.ExternalAnalytics(eventName, eventProps);
+                MonetizrInstance.Instance.ExternalAnalytics(eventName, eventProps);
             }
         }
 
@@ -442,7 +442,7 @@ namespace Monetizr.SDK.Analytics
                     break;
 
                 case AdPlacement.EmailEnterSelectionRewardScreen:
-                    additionalValues.Add("reward_type", MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Ingame ? "ingame" : "product");
+                    additionalValues.Add("reward_type", MonetizrInstance.Instance.temporaryRewardTypeSelection == RewardSelectionType.Ingame ? "ingame" : "product");
                     break;
 
                 default: break;

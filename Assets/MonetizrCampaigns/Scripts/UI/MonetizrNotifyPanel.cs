@@ -52,7 +52,7 @@ namespace Monetizr.SDK.UI
                 case PanelId.CongratsNotification:
                     if (m.type == MissionType.VideoWithEmailGiveaway)
                     {
-                        if(MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Product)
+                        if(MonetizrInstance.Instance.temporaryRewardTypeSelection == RewardSelectionType.Product)
                             PrepareGiveawayCongratsPanel(m);
                         else
                             PrepareCongratsPanel(m);
@@ -145,7 +145,7 @@ namespace Monetizr.SDK.UI
 
             rewardImage.sprite = _rewardIcon;
 
-            if (MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Ingame)
+            if (MonetizrInstance.Instance.temporaryRewardTypeSelection == RewardSelectionType.Ingame)
             {
                 if (m.campaignServerSettings.ContainsKey("CongratsNotification.content_text2"))
                 {

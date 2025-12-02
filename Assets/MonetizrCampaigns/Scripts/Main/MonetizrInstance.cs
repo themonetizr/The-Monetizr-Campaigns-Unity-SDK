@@ -1,7 +1,6 @@
 using mixpanel;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
-using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
@@ -16,50 +15,38 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace Monetizr.SDK
+namespace Monetizr.SDK.Core
 {
     public class MonetizrInstance : MonoBehaviour
     {
         public static MonetizrInstance Instance;
 
-        internal MonetizrMobileAnalytics Analytics;
-        internal bool keepLocalClaimData;
-        internal bool serverClaimForCampaigns;
-        internal bool canTeaserBeVisible;
-        internal RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
-        internal Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
-        private int debugAttempt = 0;
-        private Vector2? teaserPosition = null;
-        private Transform teaserRoot;
-        private bool isUsingEngagedUserAction = false;
-        private bool hasCompletedEngagedUserAction = false;
-        public List<MissionDescription> sponsoredMissions { get; private set; }
-        public delegate void OnComplete(OnCompleteStatus isSkipped);
-        private ServerCampaign _activeCampaignId = null;
-        private bool _isActive = false;
-        private bool _isMissionsIsOutdated = true;
-        public Action<string, Dictionary<string, string>> ExternalAnalytics { internal get; set; } = null;
-        public string temporaryEmail = "";
-        public bool claimForSkippedCampaigns;
-        public bool closeRewardCenterAfterEveryMission = false;
-        public string bundleId = null;
-        public int abTestSegment = 0;
-        public bool shouldAutoReconect = false;
-
-        // Verified - Necessary and being used.
+        public List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
 
         internal MonetizrHttpClient ConnectionsClient { get; private set; }
+        internal RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
+        internal Action<string, Dictionary<string, string>> ExternalAnalytics = null;
         internal MissionsManager missionsManager = null;
         internal LocalSettingsManager localSettings = null;
         internal UIController uiController = null;
-        public List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
+        internal MonetizrMobileAnalytics Analytics;
+        internal Action<bool> onUIVisible = null;
+        internal Vector2? teaserPosition = null;
+        internal Transform teaserRoot;
+        internal bool claimForSkippedCampaigns;
+        internal bool serverClaimForCampaigns;
+        internal bool canTeaserBeVisible;
+        internal bool keepLocalClaimData;
+
         private List<ServerCampaign> campaigns = new List<ServerCampaign>();
         private MonetizrManager.UserDefinedEvent userEvent = null;
-        internal Action<bool> onUIVisible = null;
+        private ServerCampaign _activeCampaignId = null;
         private Action<bool> soundSwitch = null;
         private Action onRequestComplete = null;
+        private bool _isActive = false;
+        private bool _isMissionsIsOutdated = true;
         private float statusCheckTime = 30f;
-
+        private int debugAttempt = 0;
 
         private void Awake ()
         {
@@ -69,7 +56,7 @@ namespace Monetizr.SDK
 
         private void Start ()
         {
-            if (!shouldAutoReconect) return;
+            if (!MonetizrManager.shouldAutoReconect) return;
             InvokeRepeating(nameof(VerifySDKStatus), statusCheckTime, statusCheckTime);
         }
 
@@ -284,8 +271,8 @@ namespace Monetizr.SDK
 
         public void OnEngagedUserActionComplete()
         {
-            if (!isUsingEngagedUserAction) return;
-            hasCompletedEngagedUserAction = true;
+            if (!MonetizrManager.isUsingEngagedUserAction) return;
+            MonetizrManager.hasCompletedEngagedUserAction = true;
         }
 
         public void ShowRewardCenter(Action UpdateGameUI, Action<bool> onComplete = null)
@@ -362,7 +349,7 @@ namespace Monetizr.SDK
 
         public void ShowTeaser(Action UpdateGameUI = null)
         {
-            if (!MonetizrManager.canTeaserBeVisible) return;
+            if (!canTeaserBeVisible) return;
             if (Instance == null) return;
             var campaign = Instance?.FindBestCampaignToActivate();
 
@@ -518,7 +505,7 @@ namespace Monetizr.SDK
                 onSuccess.Invoke();
             }
 
-            temporaryEmail = null;
+            MonetizrManager.temporaryEmail = null;
             lscreen.SetActive(false);
         }
 
@@ -720,7 +707,7 @@ namespace Monetizr.SDK
 
         internal void ClaimMissionData(Mission m)
         {
-            gameRewards[m.rewardType].AddCurrencyAction(m.reward);
+            MonetizrManager.gameRewards[m.rewardType].AddCurrencyAction(m.reward);
             if (keepLocalClaimData) Instance.SaveClaimedReward(m);
         }
 
@@ -847,7 +834,7 @@ namespace Monetizr.SDK
             if (campaign == _activeCampaignId) return;
             if (campaign != _activeCampaignId) _isMissionsIsOutdated = true;
             _activeCampaignId = campaign;
-            closeRewardCenterAfterEveryMission = campaign.serverSettings.GetBoolParam("RewardCenter.close_after_mission_completion", closeRewardCenterAfterEveryMission);
+            MonetizrManager.closeRewardCenterAfterEveryMission = campaign.serverSettings.GetBoolParam("RewardCenter.close_after_mission_completion", MonetizrManager.closeRewardCenterAfterEveryMission);
             MonetizrLogger.Print($"Active campaign: {_activeCampaignId.id}");
         }
 
@@ -892,9 +879,9 @@ namespace Monetizr.SDK
 
         internal GameReward GetGameReward(RewardType rt)
         {
-            if (gameRewards.ContainsKey(rt))
+            if (MonetizrManager.gameRewards.ContainsKey(rt))
             {
-                return gameRewards[rt];
+                return MonetizrManager.gameRewards[rt];
             }
 
             return null;

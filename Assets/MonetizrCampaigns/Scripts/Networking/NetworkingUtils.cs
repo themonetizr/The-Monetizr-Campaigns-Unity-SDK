@@ -149,6 +149,18 @@ namespace Monetizr.SDK.Networking
             MonetizrLogger.Print($"Endpoint - Built URL: {finalUrl}");
             return finalUrl;
         }
+        public static bool IsExternalURL (string url)
+        {
+            if (string.IsNullOrEmpty(url)) return false;
+
+            if (url.StartsWith("file://", StringComparison.OrdinalIgnoreCase)) return false;
+            if (url.StartsWith("about:", StringComparison.OrdinalIgnoreCase)) return false;
+            if (url.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return false;
+            if (url.StartsWith("uniwebview://", StringComparison.OrdinalIgnoreCase)) return false;
+            if (url.Contains("monetizr") || url.Contains("mntzr")) return false;
+
+            return true;
+        }
 
     }
 }

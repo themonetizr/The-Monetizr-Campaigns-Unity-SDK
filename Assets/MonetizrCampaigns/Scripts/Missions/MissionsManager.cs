@@ -308,7 +308,7 @@ namespace Monetizr.SDK.Missions
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
         {
-            MonetizrManager.temporaryRewardTypeSelection = RewardSelectionType.Product;
+            MonetizrInstance.Instance.temporaryRewardTypeSelection = RewardSelectionType.Product;
 
             bool needToPlayVideo = m.hasVideo;
 
@@ -320,7 +320,7 @@ namespace Monetizr.SDK.Missions
 
             Action<bool> onVideoComplete = (bool isVideoSkipped) =>
             {
-                if (MonetizrManager.claimForSkippedCampaigns) isVideoSkipped = false;
+                if (MonetizrInstance.Instance.claimForSkippedCampaigns) isVideoSkipped = false;
 
                 if (isVideoSkipped)
                 {
@@ -424,13 +424,13 @@ namespace Monetizr.SDK.Missions
             return null;
         }
 
-        internal void CreateMissionsFromCampaign(ServerCampaign campaign)
+        internal void CreateMissionsFromCampaign (ServerCampaign campaign)
         {
-            var predefinedSponsoredMissions = MonetizrInstance.Instance.sponsoredMissions;
-            if (campaign == null && predefinedSponsoredMissions == null) return;
+            if (campaign == null) return;
             string serverMissionsJson = campaign.serverSettings.GetParam("custom_missions");
             MonetizrLogger.Print($"Predefined missions from settings: {serverMissionsJson}");
             ServerMissionsHelper ic = null;
+            List<MissionDescription> predefinedSponsoredMissions = new List<MissionDescription>();
 
             try
             {

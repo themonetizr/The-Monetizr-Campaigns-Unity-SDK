@@ -11,33 +11,24 @@ namespace Monetizr.SDK.Core
 {
     public static class MonetizrManager
     {
-        public static Action<string, Dictionary<string, string>> ExternalAnalytics { internal get; set; } = null;
-        public static string temporaryEmail = "";
-        public static bool claimForSkippedCampaigns;
-        public static bool closeRewardCenterAfterEveryMission = false;
         public static string bundleId = null;
+        public static string temporaryEmail = "";
+        public static bool closeRewardCenterAfterEveryMission = false;
         public static int abTestSegment = 0;
         public static bool shouldAutoReconect = false;
 
-        internal static bool keepLocalClaimData;
-        internal static bool serverClaimForCampaigns;
-        internal static RewardSelectionType temporaryRewardTypeSelection = RewardSelectionType.Product;
-
-        private static Vector2? teaserPosition = null;
-        private static Transform teaserRoot;
-        private static bool isUsingEngagedUserAction = false;
-        private static bool hasCompletedEngagedUserAction = false;
+        public static UserDefinedEvent userDefinedEvent = null;
+        public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
+        public delegate void OnComplete(OnCompleteStatus isSkipped);
 
         internal static bool s_coppa = false;
         internal static bool s_gdpr = false;
         internal static bool s_us_privacy = false;
         internal static bool s_uoo = true;
         internal static string s_consent = "";
-        internal static bool canTeaserBeVisible;
+        internal static bool isUsingEngagedUserAction = false;
+        internal static bool hasCompletedEngagedUserAction = false;
         internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
-        public static UserDefinedEvent userDefinedEvent = null;
-        public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
-        public delegate void OnComplete(OnCompleteStatus isSkipped);
 
         public static void SetUserConsentParameters (bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
         {
@@ -162,24 +153,25 @@ namespace Monetizr.SDK.Core
         public static Canvas GetMainCanvas ()
         {
             Assert.IsNotNull(MonetizrInstance.Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
-            return MonetizrInstance.Instance?.uiController?.GetMainCanvas();
+            return MonetizrInstance.Instance.uiController.GetMainCanvas();
         }
 
         public static void SetTeaserPosition (Vector2 position)
         {
-            teaserPosition = position;
+            Assert.IsNotNull(MonetizrInstance.Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
+            MonetizrInstance.Instance.teaserPosition = position;
         }
 
         public static void SetTeaserRoot (Transform root)
         {
-            teaserRoot = root;
+            Assert.IsNotNull(MonetizrInstance.Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
+            MonetizrInstance.Instance.teaserRoot = root;
         }
 
         public static void EngagedUserAction (OnComplete onComplete)
         {
             isUsingEngagedUserAction = true;
             MonetizrLogger.Print("Started EngageUserAction");
-
             Assert.IsNotNull(MonetizrInstance.Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             List<Mission> missions = MonetizrInstance.Instance.missionsManager.GetMissionsForRewardCenter(MonetizrInstance.Instance?.GetActiveCampaign());
 
@@ -206,8 +198,7 @@ namespace Monetizr.SDK.Core
 
             MonetizrInstance.Instance.ShowRewardCenter(null, (Action<bool>)((bool p) =>
             {
-                MonetizrLogger.Print((object)"ShowRewardCenter OnComplete!");
-
+                MonetizrLogger.Print("ShowRewardCenter OnComplete!");
                 onComplete(hasCompletedEngagedUserAction ? OnCompleteStatus.Completed : OnCompleteStatus.Skipped);
                 hasCompletedEngagedUserAction = false;
             }));
@@ -222,7 +213,6 @@ namespace Monetizr.SDK.Core
             }
 
             MonetizrInstance.Instance.InitializeBuiltinMissionsForAllCampaigns();
-
             ServerCampaign campaign = MonetizrInstance.Instance?.GetActiveCampaign();
 
             if (campaign == null)

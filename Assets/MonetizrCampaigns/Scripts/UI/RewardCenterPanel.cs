@@ -465,7 +465,7 @@ namespace Monetizr.SDK.UI
 
         internal override void FinalizePanel(PanelId id)
         {
-            if (MonetizrManager.canTeaserBeVisible) MonetizrInstance.Instance.ShowTeaser(null);
+            if (MonetizrInstance.Instance.canTeaserBeVisible) MonetizrInstance.Instance.ShowTeaser(null);
         }
 
         void UpdateList()
