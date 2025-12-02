@@ -37,12 +37,10 @@ namespace Monetizr.SDK
         private Action s_onRequestComplete = null;
         private Action<bool> s_soundSwitch = null;
         private Action<bool> s_onUIVisible = null;
-        private UserDefinedEvent s_userEvent = null;
+
 
         public List<MissionDescription> sponsoredMissions { get; private set; }
-        public delegate void UserDefinedEvent(string campaignId, string placement, Core.EventType eventType);
         public delegate void OnComplete(OnCompleteStatus isSkipped);
-        public UserDefinedEvent userDefinedEvent = null;
         public List<UnityEngine.Object> holdResources = new List<UnityEngine.Object>();
 
         internal MonetizrHttpClient ConnectionsClient { get; private set; }
@@ -71,6 +69,7 @@ namespace Monetizr.SDK
         internal bool s_us_privacy = false;
         internal bool s_uoo = true;
         internal string s_consent = "";
+        private MonetizrManager.UserDefinedEvent s_userEvent = null;
 
         private void Awake ()
         {
@@ -78,16 +77,113 @@ namespace Monetizr.SDK
             DontDestroyOnLoad(Instance);
         }
 
-        private void Start()
+        private void Start ()
         {
             if (!shouldAutoReconect) return;
             InvokeRepeating(nameof(VerifySDKStatus), statusCheckTime, statusCheckTime);
         }
 
-        private void OnApplicationQuit()
+        private void OnApplicationQuit ()
         {
             MonetizrLogger.Print("SDK application ended.", true);
             Analytics?.OnApplicationQuit();
+        }
+
+        public void InitializeSDK (Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, MonetizrManager.UserDefinedEvent userEvent)
+        {
+
+#if UNITY_EDITOR
+            keepLocalClaimData = true;
+            serverClaimForCampaigns = false;
+            claimForSkippedCampaigns = true;
+#else
+            keepLocalClaimData = true;
+            serverClaimForCampaigns = true;
+            claimForSkippedCampaigns = false;
+#endif
+
+            if (soundSwitch == null)
+            {
+                soundSwitch = (bool isOn) =>
+                {
+                    MonetizrLogger.Print($"AudioListener pause state: {!isOn}");
+                    AudioListener.pause = !isOn;
+                };
+            }
+
+            MonetizrLogger.Print($"Initializing Monetizr SDK with: {MonetizrSettings.apiKey} // {MonetizrSettings.bundleID} // {MonetizrSettings.SDKVersion}");
+            
+        }
+
+        private async Task Initialize (Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrHttpClient connectionClient)
+        {
+            string consent = PrebidManager.GetIabConsentString();
+            if (!string.IsNullOrEmpty(consent))
+            {
+                s_consent = consent;
+                MonetizrLogger.Print($"Loaded GDPR_CONSENT: {consent}");
+            }
+
+            localSettings = new LocalSettingsManager();
+            missionsManager = new MissionsManager();
+            this._soundSwitch = soundSwitch;
+            ConnectionsClient = connectionClient ?? new MonetizrHttpClient(MonetizrSettings.apiKey);
+            ConnectionsClient.Initialize();
+            _uiController = new UIController();
+
+            _onRequestComplete = (bool isOk) =>
+            {
+                gameOnInitSuccess?.Invoke();
+                gameOnInitSuccess = null;
+
+                if (canTeaserBeVisible)
+                {
+                    OnMainMenuShow(false);
+                }
+            };
+
+            if (MonetizrSettings.apiKey == "LOCAL_TESTING")
+            {
+                MonetizrLogger.Print("Initializing Local Testing Campaign.");
+                await SetupLocalTestingCampaign(_onRequestComplete);
+                return;
+            }
+
+            RequestCampaigns(_onRequestComplete);
+
+            if (MonetizrSettings.requestCampaignTime > 0)
+            {
+                StartCoroutine(TryRequestCampaignsLater(MonetizrSettings.requestCampaignTime));
+            }
+        }
+
+        private async void RequestCampaigns (Action<bool> onRequestComplete)
+        {
+            await ConnectionsClient.GetGlobalSettings();
+            bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
+            //CheckMixpanelProxy();
+            CheckCGPLogging();
+
+            campaigns = new List<ServerCampaign>();
+            campaigns = await ConnectionsClient.GetList();
+            campaigns = await CampaignManager.Instance.ProcessCampaigns(campaigns);
+
+            if (campaigns == null || campaigns.Count <= 0)
+            {
+                MonetizrLogger.PrintWarning("No Campaigns available or error obtaining them.", true);
+                ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
+                onRequestComplete?.Invoke(false);
+                return;
+            }
+
+            MonetizrLogger.Print("Campaigns succesfully downloaded.", true);
+            ConnectionsClient.SetTestMode(campaigns[0].testmode);
+            ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
+            localSettings.LoadOldAndUpdateNew(campaigns);
+
+            MonetizrLogger.Print($"Monetizr SDK initialized with {campaigns.Count} campaigns.");
+            _isActive = true;
+            onRequestComplete?.Invoke(true);
         }
 
         public void ShowDebug ()
@@ -327,66 +423,17 @@ namespace Monetizr.SDK
             Instance._uiController.HidePanel(PanelId.TinyMenuTeaser);
         }
 
-        public bool IsInitialized()
-        {
-            return Instance != null;
-        }
-
-        /*
-        internal MonetizrManager _Initialize(Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, UserDefinedEvent userEvent, MonetizrHttpClient connectionClient)
-        {
-            if (Instance != null) return Instance;
-
-#if UNITY_EDITOR
-            keepLocalClaimData = true;
-            serverClaimForCampaigns = false;
-            claimForSkippedCampaigns = true;
-#else
-            keepLocalClaimData = true;
-            serverClaimForCampaigns = true;
-            claimForSkippedCampaigns = false;
-#endif
-            if (soundSwitch == null)
-            {
-                soundSwitch = (bool isOn) =>
-                {
-                    MonetizrLogger.Print($"Audio listener pause state {!isOn}");
-                    AudioListener.pause = !isOn;
-                };
-            }
-
-            if (!IsInitializationSetupComplete())
-            {
-                MonetizrLogger.Print("SDK Setup Incomplete - Please, verify and provide the missing parameters.");
-                return null;
-            }
-
-            MonetizrLogger.Print($"Initializing MonetizrManager with: {MonetizrSettings.apiKey} {MonetizrSettings.bundleID} {MonetizrSettings.SDKVersion}");
-            MonetizrManager monetizrManager = CreateMonetizrManagerInstance(onUIVisible, userEvent);
-            monetizrManager.Initialize(onRequestComplete, soundSwitch, connectionClient);
-
-            return Instance;
-        }
-        */
-
         internal void _CallUserDefinedEvent(string campaignId, string placement, Core.EventType eventType)
         {
             try
             {
-                Instance?.userDefinedEvent?.Invoke(campaignId, placement, eventType);
+                s_userEvent?.Invoke(campaignId, placement, eventType);
             }
             catch (Exception ex)
             {
                 MonetizrLogger.PrintError($"Exception in _CallUserDefinedEvent\n{ex}");
             }
         }
-
-        /*
-        internal MonetizrManager InitializeForTests(Action onRequestComplete = null, Action<bool> soundSwitch = null, Action<bool> onUIVisible = null, UserDefinedEvent userEvent = null, MonetizrHttpClient connectionClient = null)
-        {
-            return _Initialize(onRequestComplete, soundSwitch, onUIVisible, userEvent, connectionClient);
-        }
-        */
 
         internal void ShowMessage(Action<bool> onComplete, Mission m, PanelId panelId)
         {
@@ -570,7 +617,7 @@ namespace Monetizr.SDK
 
         private void VerifySDKStatus()
         {
-            if (IsInitialized())
+            if (Instance != null)
             {
                 if (!NetworkingUtils.IsInternetReachable())
                 {
@@ -583,87 +630,11 @@ namespace Monetizr.SDK
             }
         }
 
-        private async Task Initialize(Action gameOnInitSuccess, Action<bool> soundSwitch, MonetizrHttpClient connectionClient)
-        {
-
-#if USING_WEBVIEW
-            if (!UniWebView.IsWebViewSupported) MonetizrLogger.Print("WebView isn't supported on current platform!");
-#endif
-
-            string consent = PrebidManager.GetIabConsentString();
-            if (!string.IsNullOrEmpty(consent))
-            {
-                MonetizrManager.s_consent = consent;
-                MonetizrLogger.Print($"Loaded GDPR_CONSENT: {consent}");
-            }
-
-            localSettings = new LocalSettingsManager();
-            missionsManager = new MissionsManager();
-            this._soundSwitch = soundSwitch;
-            ConnectionsClient = connectionClient ?? new MonetizrHttpClient(MonetizrSettings.apiKey);
-            ConnectionsClient.Initialize();
-            _uiController = new UIController();
-
-            _onRequestComplete = (bool isOk) =>
-            {
-                gameOnInitSuccess?.Invoke();
-                gameOnInitSuccess = null;
-
-                if (canTeaserBeVisible)
-                {
-                    OnMainMenuShow(false);
-                }
-            };
-
-            if (MonetizrSettings.apiKey == "LOCAL_TESTING")
-            {
-                MonetizrLogger.Print("Initializing Local Testing Campaign.");
-                await SetupLocalTestingCampaign(_onRequestComplete);
-                return;
-            }
-
-            RequestCampaigns(_onRequestComplete);
-
-            if (MonetizrSettings.requestCampaignTime > 0)
-            {
-                StartCoroutine(TryRequestCampaignsLater(MonetizrSettings.requestCampaignTime));
-            }
-        }
-
         private async Task SetupLocalTestingCampaign(Action<bool> onRequestComplete)
         {
             ConnectionsClient.GlobalSettings = LocalTestCampaignManager.GetGlobalSettings();
             campaigns = await LocalTestCampaignManager.GetCampaigns();
             localSettings.LoadOldAndUpdateNew(campaigns);
-            _isActive = true;
-            onRequestComplete?.Invoke(true);
-        }
-
-        private async void RequestCampaigns(Action<bool> onRequestComplete)
-        {
-            await ConnectionsClient.GetGlobalSettings();
-            bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
-            //CheckMixpanelProxy();
-            CheckCGPLogging();
-
-            campaigns = new List<ServerCampaign>();
-            campaigns = await ConnectionsClient.GetList();
-            campaigns = await CampaignManager.Instance.ProcessCampaigns(campaigns);
-
-            if (campaigns == null || campaigns.Count <= 0)
-            {
-                MonetizrLogger.PrintWarning("No Campaigns available or error obtaining them.", true);
-                ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
-                onRequestComplete?.Invoke(false);
-                return;
-            }
-
-            MonetizrLogger.Print("Campaigns succesfully downloaded.", true);
-            ConnectionsClient.SetTestMode(campaigns[0].testmode);
-            ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
-            localSettings.LoadOldAndUpdateNew(campaigns);
-
-            MonetizrLogger.Print($"MonetizrManager initialized with {campaigns.Count} campaigns.");
             _isActive = true;
             onRequestComplete?.Invoke(true);
         }
@@ -925,7 +896,7 @@ namespace Monetizr.SDK
             return missionsManager.GetActiveMissionsNum(campaign) > 0;
         }
 
-        public void HoldResource(object o)
+        public void HoldResource (object o)
         {
             if (o is UnityEngine.Object)
             {
