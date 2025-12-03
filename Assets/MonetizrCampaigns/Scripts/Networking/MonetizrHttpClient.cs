@@ -6,16 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using System.Net;
-using Monetizr.Raygun4Unity;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
-using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
-using Monetizr.SDK.VAST;
 using UnityEngine.Networking;
-using System.Linq;
 using Monetizr.SDK.Rewards;
 
 namespace Monetizr.SDK.Networking
@@ -125,7 +121,6 @@ namespace Monetizr.SDK.Networking
         {
             GlobalSettings = await DownloadGlobalSettings();
             ParameterChecker.CheckForMissingParameters(true, GlobalSettings);
-            RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint", "");
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
             MonetizrLogger.Print($"Api endpoint: {_baseApiUrl}");
         }
