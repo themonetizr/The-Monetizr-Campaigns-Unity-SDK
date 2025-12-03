@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace Monetizr.SDK.Core
+namespace Monetizr.SDK.Utils
 {
     internal static class ExtensionMethods
     {

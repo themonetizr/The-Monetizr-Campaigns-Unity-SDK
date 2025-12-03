@@ -2,6 +2,7 @@ using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Rewards;
 using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
 using System;

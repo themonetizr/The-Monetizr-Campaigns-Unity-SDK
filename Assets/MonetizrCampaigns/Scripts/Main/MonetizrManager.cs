@@ -1,13 +1,16 @@
 ﻿using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
+using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.Rewards;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using EventType = Monetizr.SDK.Core.EventType;
 
-namespace Monetizr.SDK.Core
+namespace Monetizr.SDK
 {
     public static class MonetizrManager
     {
@@ -29,6 +32,11 @@ namespace Monetizr.SDK.Core
         internal static bool isUsingEngagedUserAction = false;
         internal static bool hasCompletedEngagedUserAction = false;
         internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
+
+        public static void EnableLogger ()
+        {
+            MonetizrLogger.isEnabled = true;
+        }
 
         public static void SetUserConsentParameters (bool coppa, bool gdpr, bool us_privacy, bool uoo, string consent)
         {

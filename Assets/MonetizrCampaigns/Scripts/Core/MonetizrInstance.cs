@@ -4,6 +4,7 @@ using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
+using Monetizr.SDK.Rewards;
 using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
 using System;

@@ -2,6 +2,7 @@
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.Rewards;
 using System;
 using UnityEngine;
 using UnityEngine.UI;

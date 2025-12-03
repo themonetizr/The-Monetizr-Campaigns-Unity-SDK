@@ -2,6 +2,7 @@
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
+using Monetizr.SDK.Rewards;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
 using System;

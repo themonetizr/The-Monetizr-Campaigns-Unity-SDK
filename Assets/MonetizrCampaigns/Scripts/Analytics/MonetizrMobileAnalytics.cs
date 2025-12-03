@@ -12,6 +12,8 @@ using Monetizr.SDK.Utils;
 using UnityEngine.Networking;
 using System.Text;
 using SimpleJSON;
+using Monetizr.SDK.Rewards;
+
 
 #if UNITY_IOS
 using UnityEngine.iOS;

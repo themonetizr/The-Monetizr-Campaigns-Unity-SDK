@@ -16,6 +16,7 @@ using Monetizr.SDK.Core;
 using Monetizr.SDK.VAST;
 using UnityEngine.Networking;
 using System.Linq;
+using Monetizr.SDK.Rewards;
 
 namespace Monetizr.SDK.Networking
 {

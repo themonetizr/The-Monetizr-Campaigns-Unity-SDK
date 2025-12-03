@@ -2,7 +2,7 @@
 using UnityEngine;
 using Monetizr.SDK.Debug;
 
-namespace Monetizr.SDK.Core
+namespace Monetizr.SDK
 {
     internal class GameReward
     {
