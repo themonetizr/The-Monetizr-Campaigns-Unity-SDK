@@ -610,7 +610,7 @@ namespace Monetizr.SDK.UI
                     p.Add("answer_response", a.response);
                     p.Add("answer_text", a.text);
                     p.Add("question_text", q.text);
-                    MonetizrInstance.Instance.Analytics._TrackEvent("Survey answer", campaign, false, p);
+                    MonetizrMobileAnalytics._TrackEvent("Survey answer", campaign, false, p);
 
                     campaignSettings[variableName] = a.response;
                 });

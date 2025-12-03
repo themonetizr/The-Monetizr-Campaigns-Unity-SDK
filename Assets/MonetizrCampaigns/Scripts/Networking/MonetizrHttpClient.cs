@@ -24,7 +24,6 @@ namespace Monetizr.SDK.Networking
         public string userAgent;
 
         internal string currentApiKey;
-        internal MonetizrMobileAnalytics Analytics { get; set; } = null;
         internal SettingsDictionary<string, string> GlobalSettings { get; set; } = new SettingsDictionary<string, string>();
 
         private string _baseApiUrl = "https://api.themonetizr.com";
@@ -43,11 +42,6 @@ namespace Monetizr.SDK.Networking
         internal void SetUserAgent (string _userAgent) 
         { 
             this.userAgent = _userAgent; 
-        }
-
-        internal void Initialize()
-        {
-            Analytics = new MonetizrMobileAnalytics();
         }
 
         internal void SetTestMode(bool testEnvironment)

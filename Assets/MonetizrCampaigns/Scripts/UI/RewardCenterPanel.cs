@@ -413,7 +413,7 @@ namespace Monetizr.SDK.UI
         internal void ButtonPressed(ButtonController buttonController, Mission missionDescription)
         {
             if (!missionDescription.isSponsored) MonetizrInstance.Instance.CleanUserDefinedMissions();
-            MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
+            MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
             missionDescription.onClaimButtonPress.Invoke();
             if (!missionDescription.isSponsored) UpdateUI();
         }

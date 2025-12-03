@@ -1,4 +1,5 @@
-﻿using Monetizr.SDK.Campaigns;
+﻿using Monetizr.SDK.Analytics;
+using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Utils;
@@ -117,7 +118,7 @@ namespace Monetizr.SDK.UI
                 ctrlPanel.PreparePanel(id, complete, m);
 
                 if(!ctrlPanel.SendImpressionEventManually())
-                    MonetizrInstance.Instance.Analytics.TrackEvent(m, ctrlPanel, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(m, ctrlPanel, EventType.Impression);
 
                 panels.Add(id, ctrlPanel);
             }
@@ -202,7 +203,7 @@ namespace Monetizr.SDK.UI
 
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
 
-            MonetizrInstance.Instance.Analytics.TrackEvent(m, teaser, EventType.Impression);
+            MonetizrMobileAnalytics.TrackEvent(m, teaser, EventType.Impression);
 
             if(root == null) teaser.rectTransform.SetAsFirstSibling();
 

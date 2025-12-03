@@ -81,7 +81,7 @@ namespace Monetizr.SDK.Debug
              $"OS: {MonetizrMobileAnalytics.osVersion} " +
              $"SDK: {MonetizrSettings.SDKVersion}\n" +
              $"ADID: {MonetizrMobileAnalytics.advertisingID}\n" +
-             $"UserId: {MonetizrInstance.Instance.ConnectionsClient.Analytics.GetUserId()}\n" +
+             $"UserId: {MonetizrMobileAnalytics.GetUserId()}\n" +
              $"Limit ad tracking: {MonetizrMobileAnalytics.limitAdvertising}\n" +
              $"Active campaign: {MonetizrInstance.Instance.GetActiveCampaign()?.id}";
         }
@@ -111,7 +111,7 @@ namespace Monetizr.SDK.Debug
 
         public void ResetId()
         {
-            MonetizrInstance.Instance.ConnectionsClient.Analytics.RandomizeUserId();
+            MonetizrMobileAnalytics.RandomizeUserId();
             UpdateVersionText();
         }
 

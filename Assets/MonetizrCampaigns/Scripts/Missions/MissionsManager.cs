@@ -1,3 +1,4 @@
+using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
@@ -335,7 +336,7 @@ namespace Monetizr.SDK.Missions
                     {
                         if (isMailSkipped)
                         {
-                            MonetizrInstance.Instance.Analytics.TrackEvent(m, m.adPlacement, EventType.ButtonPressSkip);
+                            MonetizrMobileAnalytics.TrackEvent(m, m.adPlacement, EventType.ButtonPressSkip);
                             onComplete?.Invoke(isMailSkipped);
                             return;
                         }

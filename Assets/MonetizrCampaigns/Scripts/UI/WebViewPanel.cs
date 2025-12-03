@@ -142,35 +142,35 @@ namespace Monetizr.SDK.UI
                 case PanelId.SurveyWebView:
                     MonetizrLogger.Print("Preparing Survey.");
                     PrepareSurveyPanel(m);
-                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.HtmlWebPageView:
                     MonetizrLogger.Print("Preparing HTML.");
                     PrepareWebViewPanel(m);
-                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.ActionHtmlPanelView:
                     MonetizrLogger.Print("Preparing Action/ENDCARD.");
                     PrepareActionPanel(m);
-                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.StartNotification:
                     MonetizrLogger.Print("Preparing StartNotification.");
                     PrepareStartNotificationPanel(m);
-                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.CongratsNotification:
                     MonetizrLogger.Print("Preparing CongratsNotification.");
                     PrepareCongratsNotificationPanel(m);
-                    MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
             }
@@ -457,7 +457,7 @@ namespace Monetizr.SDK.UI
                 _webView.Load(_webUrl);
                 _webView.Show();
                 MonetizrLogger.Print($"Url to show {_webUrl}");
-                MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                 impressionStarts = true;
             }
             else
@@ -508,7 +508,7 @@ namespace Monetizr.SDK.UI
             _webUrl = "file://" + indexPath;
             _webView.Load(_webUrl);
             _webView.Show();
-            MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+            MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
             TrackingUtils.FireTrackers(campaign.trackingURLs);
             impressionStarts = true;
         }
@@ -706,7 +706,7 @@ namespace Monetizr.SDK.UI
             if (impressionStarts)
             {
                 triggersButtonEventsOnDeactivate = true;
-                MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.ImpressionEnds);
+                MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.ImpressionEnds);
                 impressionStarts = false;
             }
         }
@@ -759,7 +759,7 @@ namespace Monetizr.SDK.UI
             Dictionary<string, string> p = new Dictionary<string, string>();
             p.Add("url", _webUrl);
             if (statusCode > 0) p.Add("url_status_code", statusCode.ToString());
-            MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.Error, p);
+            MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Error, p);
         }
 
         internal override bool SendImpressionEventManually ()

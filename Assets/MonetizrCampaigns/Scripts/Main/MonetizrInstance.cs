@@ -1,4 +1,3 @@
-using mixpanel;
 using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Debug;
@@ -29,7 +28,6 @@ namespace Monetizr.SDK.Core
         internal MissionsManager missionsManager = null;
         internal LocalSettingsManager localSettings = null;
         internal UIController uiController = null;
-        internal MonetizrMobileAnalytics Analytics;
         internal Action<bool> onUIVisible = null;
         internal Vector2? teaserPosition = null;
         internal Transform teaserRoot;
@@ -63,7 +61,7 @@ namespace Monetizr.SDK.Core
         private void OnApplicationQuit ()
         {
             MonetizrLogger.Print("SDK application ended.", true);
-            Analytics?.OnApplicationQuit();
+            MonetizrMobileAnalytics.OnApplicationQuit();
         }
 
         public void InitializeSDK (Action onRequestCompleteAction, Action<bool> soundSwitch, Action<bool> onUIVisible, MonetizrManager.UserDefinedEvent userEvent)
@@ -87,8 +85,7 @@ namespace Monetizr.SDK.Core
             missionsManager = new MissionsManager();
             uiController = new UIController();
             ConnectionsClient = new MonetizrHttpClient(MonetizrSettings.apiKey);
-            ConnectionsClient.Initialize();
-            Analytics = ConnectionsClient.Analytics;
+            MonetizrMobileAnalytics.SetupAnalytics();
 
             if (soundSwitch == null)
             {
@@ -146,14 +143,12 @@ namespace Monetizr.SDK.Core
             if (campaigns == null || campaigns.Count <= 0)
             {
                 MonetizrLogger.PrintWarning("No Campaigns available or error obtaining them.", true);
-                ConnectionsClient.Analytics.Initialize(false, null, logConnectionErrors);
                 onRequestComplete?.Invoke();
                 return;
             }
 
             MonetizrLogger.Print("Campaigns succesfully downloaded.", true);
             ConnectionsClient.SetTestMode(campaigns[0].testmode);
-            ConnectionsClient.Analytics.Initialize(campaigns[0].testmode, campaigns[0].panel_key, logConnectionErrors);
             localSettings.LoadOldAndUpdateNew(campaigns);
 
             MonetizrLogger.Print($"Monetizr SDK initialized with {campaigns.Count} campaigns.");
@@ -470,14 +465,14 @@ namespace Monetizr.SDK.Core
             Action onSuccess = () =>
             {
                 MonetizrLogger.Print("SUCCESS!");
-                Analytics.TrackEvent(m, m.adPlacement, Core.EventType.ButtonPressOk);
+                MonetizrMobileAnalytics.TrackEvent(m, m.adPlacement, Core.EventType.ButtonPressOk);
                 OnClaimRewardComplete(m, false, onComplete, updateUIDelegate);
             };
 
             Action onFail = () =>
             {
                 MonetizrLogger.Print("FAIL!"); ;
-                Analytics.TrackEvent(m, m.adPlacement, Core.EventType.Error);
+                MonetizrMobileAnalytics.TrackEvent(m, m.adPlacement, Core.EventType.Error);
                 ShowMessage((bool _) => { onComplete?.Invoke(false); }, m, PanelId.BadEmailMessageNotification);
             };
 
@@ -615,7 +610,7 @@ namespace Monetizr.SDK.Core
                 if (!String.IsNullOrEmpty(mixpanelProxy))
                 {
                     MonetizrLogger.Print("Mixpanel Proxy set to: " + mixpanelProxy);
-                    MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
+                    //MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
                 }
             }
         }
@@ -672,7 +667,6 @@ namespace Monetizr.SDK.Core
 
             ConnectionsClient.Close();
             ConnectionsClient = new MonetizrHttpClient(ConnectionsClient.currentApiKey);
-            ConnectionsClient.Initialize();
             RequestCampaigns();
         }
 

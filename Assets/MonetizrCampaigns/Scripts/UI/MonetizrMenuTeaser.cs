@@ -41,7 +41,7 @@ namespace Monetizr.SDK.UI
         }
         public void OnButtonClick()
         {
-            MonetizrInstance.Instance.Analytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
+            MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.ButtonPressOk);
             MonetizrInstance.Instance.ShowRewardCenter(null);
         }
 
