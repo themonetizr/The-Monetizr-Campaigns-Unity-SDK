@@ -66,7 +66,7 @@ namespace Monetizr.SDK.Core
             Analytics?.OnApplicationQuit();
         }
 
-        public void InitializeSDK (Action onRequestComplete, Action<bool> soundSwitch, Action<bool> onUIVisible, MonetizrManager.UserDefinedEvent userEvent)
+        public void InitializeSDK (Action onRequestCompleteAction, Action<bool> soundSwitch, Action<bool> onUIVisible, MonetizrManager.UserDefinedEvent userEvent)
         {
             MonetizrLogger.Print($"Initializing Monetizr SDK with: {MonetizrSettings.apiKey} // {MonetizrSettings.bundleID} // {MonetizrSettings.SDKVersion}");
 
@@ -79,7 +79,6 @@ namespace Monetizr.SDK.Core
 #endif
 
             keepLocalClaimData = true;
-            this.onRequestComplete = onRequestComplete;
             this.soundSwitch = soundSwitch;
             this.onUIVisible = onUIVisible;
             this.userEvent = userEvent;
@@ -89,6 +88,7 @@ namespace Monetizr.SDK.Core
             uiController = new UIController();
             ConnectionsClient = new MonetizrHttpClient(MonetizrSettings.apiKey);
             ConnectionsClient.Initialize();
+            Analytics = ConnectionsClient.Analytics;
 
             if (soundSwitch == null)
             {
@@ -109,7 +109,7 @@ namespace Monetizr.SDK.Core
 
             onRequestComplete = () =>
             {
-                onRequestComplete?.Invoke();
+                onRequestCompleteAction?.Invoke();
 
                 if (canTeaserBeVisible)
                 {
