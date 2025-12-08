@@ -63,6 +63,7 @@ namespace Monetizr.SDK.Core
         {
             MonetizrLogger.Print("SDK application ended.", true);
             MonetizrMobileAnalytics.OnApplicationQuit();
+            ConnectionsClient.Close();
         }
 
         public void InitializeSDK (Action onRequestCompleteAction, Action<bool> soundSwitch, Action<bool> onUIVisible, MonetizrManager.UserDefinedEvent userEvent)
@@ -133,8 +134,7 @@ namespace Monetizr.SDK.Core
         private async void RequestCampaigns (Action onRequestComplete)
         {
             await ConnectionsClient.GetGlobalSettings();
-            bool logConnectionErrors = ConnectionsClient.GlobalSettings.GetBoolParam("mixpanel.log_connection_errors", true);
-            //CheckMixpanelProxy();
+            CheckAnalyticsProxy();
             CheckCGPLogging();
 
             campaigns = new List<ServerCampaign>();
@@ -590,7 +590,7 @@ namespace Monetizr.SDK.Core
         {
             if (!NetworkingUtils.IsInternetReachable())
             {
-                Instance.InitializeSDK(onRequestComplete, soundSwitch, onUIVisible, userEvent);
+                InitializeSDK(onRequestComplete, soundSwitch, onUIVisible, userEvent);
             }
         }
 
@@ -603,15 +603,15 @@ namespace Monetizr.SDK.Core
             onRequestComplete?.Invoke();
         }
 
-        private void CheckMixpanelProxy()
+        private void CheckAnalyticsProxy()
         {
-            string mixpanelProxy = "";
-            if (ConnectionsClient.GlobalSettings.TryGetValue("mixpanel_proxy_endpoint", out mixpanelProxy))
+            string analyticsProxy = "";
+            if (ConnectionsClient.GlobalSettings.TryGetValue("mixpanel_proxy_endpoint", out analyticsProxy))
             {
-                if (!String.IsNullOrEmpty(mixpanelProxy))
+                if (!String.IsNullOrEmpty(analyticsProxy))
                 {
-                    MonetizrLogger.Print("Mixpanel Proxy set to: " + mixpanelProxy);
-                    //MixpanelSettings.Instance.APIHostAddress = mixpanelProxy;
+                    MonetizrLogger.Print("Analytics Proxy set to: " + analyticsProxy);
+                    MonetizrMobileAnalytics.SetProxyEndpoint(analyticsProxy);
                 }
             }
         }

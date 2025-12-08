@@ -3,7 +3,6 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
-using Monetizr.SDK.Rewards;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -83,7 +82,7 @@ namespace Monetizr.SDK
                 return;
             }
 
-            CreateMonetizrManagerInstance();
+            CreateMonetizrInstance();
             MonetizrInstance.Instance.InitializeSDK(onRequestComplete, soundSwitch, onUIVisible, userEvent);
         }
 
@@ -133,7 +132,7 @@ namespace Monetizr.SDK
             return true;
         }
 
-        private static void CreateMonetizrManagerInstance ()
+        private static void CreateMonetizrInstance ()
         {
             GameObject monetizrObject = new GameObject("MonetizrInstance");
             MonetizrInstance monetizrManager = monetizrObject.AddComponent<MonetizrInstance>();

@@ -35,11 +35,13 @@ namespace Monetizr.SDK.Analytics
         internal static bool isAdvertisingIDDefined = false;
         internal static string deviceIdentifier = "";
 
-        private static string endpointUrl = "https://mixpanel-retirement-func-1074977689117.us-central1.run.app/";
+        private static string defaultEndpointURL = "https://mixpanel-retirement-func-1074977689117.us-central1.run.app/";
+        private static string currentEndpointURL = "";
+
         private static HashSet<AdElement> adNewElements = new HashSet<AdElement>();
         private static HashSet<AdElement> visibleAdAsset = new HashSet<AdElement>();
 
-        internal static void SetupAnalytics ()
+        public static void SetupAnalytics ()
         {
             LoadUserId();
             MonetizrLogger.Print($"MonetizrMobileAnalytics initialized with user id: {GetUserId()}");
@@ -56,6 +58,12 @@ namespace Monetizr.SDK.Analytics
 #endif
             deviceSizeGroup = AnalyticsUtils.GetDeviceGroup();
             MonetizrLogger.Print($"OS Version {osVersion} Ad id: {advertisingID} Limit ads: {limitAdvertising} Device group: {deviceSizeGroup}");
+            currentEndpointURL = defaultEndpointURL;
+        }
+
+        public static void SetProxyEndpoint (string proxyEndpoint)
+        {
+            currentEndpointURL = proxyEndpoint;
         }
 
         internal static void OnApplicationQuit ()
@@ -401,9 +409,9 @@ namespace Monetizr.SDK.Analytics
             props["os"] = AnalyticsUtils.GetOsGroup();
         }
 
-        private static IEnumerator Send(string json)
+        private static IEnumerator Send (string json)
         {
-            using (UnityWebRequest request = new UnityWebRequest(endpointUrl, "POST"))
+            using (UnityWebRequest request = new UnityWebRequest(currentEndpointURL, "POST"))
             {
                 byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
                 request.uploadHandler = new UploadHandlerRaw(bodyRaw);
