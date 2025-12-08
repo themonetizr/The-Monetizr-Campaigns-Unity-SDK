@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UIElements;
 using EventType = Monetizr.SDK.Core.EventType;
 
 namespace Monetizr.SDK
@@ -31,6 +32,8 @@ namespace Monetizr.SDK
         internal static bool isUsingEngagedUserAction = false;
         internal static bool hasCompletedEngagedUserAction = false;
         internal static Dictionary<RewardType, GameReward> gameRewards = new Dictionary<RewardType, GameReward>();
+        internal static Vector2? teaserPosition;
+        internal static Transform teaserRoot;
 
         public static void EnableLogger ()
         {
@@ -138,6 +141,16 @@ namespace Monetizr.SDK
             MonetizrInstance monetizrManager = monetizrObject.AddComponent<MonetizrInstance>();
             GCPManager gcpManager = monetizrObject.AddComponent<GCPManager>();
             CampaignManager campaignManager = monetizrObject.AddComponent<CampaignManager>();
+
+            if (teaserRoot != null)
+            {
+                MonetizrInstance.Instance.teaserRoot = teaserRoot;
+            }
+
+            if (teaserPosition.HasValue)
+            {
+                MonetizrInstance.Instance.teaserPosition = teaserPosition;
+            }
         }
 
         public static bool IsActiveAndEnabled ()
@@ -165,14 +178,26 @@ namespace Monetizr.SDK
 
         public static void SetTeaserPosition (Vector2 position)
         {
-            Assert.IsNotNull(MonetizrInstance.Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
-            MonetizrInstance.Instance.teaserPosition = position;
+            if (MonetizrInstance.Instance)
+            {
+                MonetizrInstance.Instance.teaserPosition = position;
+            }
+            else
+            {
+                teaserPosition = position;
+            }
         }
 
         public static void SetTeaserRoot (Transform root)
         {
-            Assert.IsNotNull(MonetizrInstance.Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
-            MonetizrInstance.Instance.teaserRoot = root;
+            if (MonetizrInstance.Instance)
+            {
+                MonetizrInstance.Instance.teaserRoot = root;
+            }
+            else
+            {
+                teaserRoot = root;
+            }
         }
 
         public static void EngagedUserAction (OnComplete onComplete)
