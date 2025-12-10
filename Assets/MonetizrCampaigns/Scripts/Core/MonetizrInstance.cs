@@ -665,18 +665,17 @@ namespace Monetizr.SDK.Core
         internal void RestartClient()
         {
             MonetizrLogger.Print("Restarting Client.");
-
             ConnectionsClient.Close();
             ConnectionsClient = new MonetizrHttpClient(ConnectionsClient.currentApiKey);
             RequestCampaigns();
         }
 
-        internal bool ChangeAPIKey(string apiKey)
+        internal void ChangeAPIKey (string apiKey)
         {
-            if (apiKey == ConnectionsClient.currentApiKey) return false;
+            if (apiKey == ConnectionsClient.currentApiKey) return;
             MonetizrLogger.Print($"Changing api key to {apiKey}");
             ConnectionsClient.currentApiKey = apiKey;
-            return true;
+            RestartClient();
         }
 
         internal void RequestCampaigns (bool callRequestComplete = true)

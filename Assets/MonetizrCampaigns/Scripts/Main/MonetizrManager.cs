@@ -93,10 +93,16 @@ namespace Monetizr.SDK
         {
             MonetizrSettingsMenu.LoadSettings();
 
-            string manualDebugKey = PlayerPrefs.GetString("MonetizrAPIKey");
-            if (!String.IsNullOrEmpty(manualDebugKey))
+            string debugAPIKey = PlayerPrefs.GetString("Debug_MonetizrAPIKey");
+            if (!String.IsNullOrEmpty(debugAPIKey))
             {
-                MonetizrSettings.apiKey = manualDebugKey;
+                MonetizrSettings.apiKey = debugAPIKey;
+            }
+
+            string debugBundleID = PlayerPrefs.GetString("Debug_MonetizrBundleID");
+            if (!String.IsNullOrEmpty(debugBundleID))
+            {
+                MonetizrSettings.bundleID = debugBundleID;
             }
 
             if (string.IsNullOrEmpty(MonetizrSettings.apiKey))
