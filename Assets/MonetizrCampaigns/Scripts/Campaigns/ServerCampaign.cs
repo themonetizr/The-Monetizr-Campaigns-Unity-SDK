@@ -428,38 +428,52 @@ namespace Monetizr.SDK.Campaigns
             }
         }
 
-        internal async Task PreloadVideoPlayer(Asset asset)
+        internal async Task PreloadVideoPlayer (Asset asset = null)
         {
             string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
             string campPath = Application.persistentDataPath + "/" + id;
-            string zipFolder = campPath + "/" + asset.fpath;
+            string zipFolder = campPath;
+            if (asset != null) zipFolder = campPath + "/" + asset.fpath;
             string indexPath = $"{zipFolder}/index.html";
-            MonetizrLogger.Print($"{campPath} {zipFolder}");
-            
+            MonetizrLogger.Print($"Preparing VideoPlayer at {zipFolder}");
+
             if (!Directory.Exists(zipFolder))
             {
-                this.isLoaded = false;
-                this.loadingError = $"Folder for video player {zipFolder} doesn't exist";
+                if (asset != null)
+                {
+                    isLoaded = false;
+                    loadingError = $"Folder for video player {zipFolder} doesn't exist";
+                    return;
+                }
+                else
+                {
+                    Directory.CreateDirectory(zipFolder);
+                }
             }
 
             byte[] data = await MonetizrHttpClient.DownloadAssetData(videoPlayerURL);
 
             if (data == null)
             {
-                this.isLoaded = false;
-                this.loadingError = $"Can't download video player";
+                isLoaded = false;
+                loadingError = $"Can't download video player for campaign {id}";
                 return;
             }
 
-            File.WriteAllBytes(zipFolder + "/html.zip", data);
-            MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-            File.Delete(zipFolder + "/html.zip");
-            
+            string zipPath = zipFolder + "/html.zip";
+            File.WriteAllBytes(zipPath, data);
+            MonetizrUtils.ExtractAllToDirectory(zipPath, zipFolder);
+            File.Delete(zipPath);
+
             if (!File.Exists(indexPath))
             {
-                this.isLoaded = false;
-                this.loadingError = $"Main html for video player {indexPath} doesn't exist";
+                isLoaded = false;
+                loadingError = $"index.html not found for {id}";
+                MonetizrLogger.PrintError(loadingError);
+                return;
             }
+
+            MonetizrLogger.Print($"VideoPlayer ready for campaign {id}");
         }
 
         internal void EmbedVastParametersIntoVideoPlayer (Asset asset)
@@ -490,46 +504,6 @@ namespace Monetizr.SDK.Campaigns
             MonetizrLogger.Print("Final HTML: " + str);
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
             File.WriteAllText(indexPath, str);
-        }
-
-        internal async Task PreloadVideoPlayerForFallback ()
-        {
-            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
-            string campPath = Application.persistentDataPath + "/" + id;
-            string zipFolder = campPath; // fallback: put player directly under campaign folder
-            string indexPath = $"{zipFolder}/index.html";
-
-            MonetizrLogger.Print($"[Fallback] Preparing VideoPlayer at {zipFolder}");
-
-            if (!Directory.Exists(zipFolder))
-            {
-                Directory.CreateDirectory(zipFolder);
-            }
-
-            byte[] data = await MonetizrHttpClient.DownloadAssetData(videoPlayerURL);
-
-            if (data == null)
-            {
-                isLoaded = false;
-                loadingError = $"Can't download video player for fallback campaign {id}";
-                return;
-            }
-
-            // Unpack HTML5 player
-            string zipPath = $"{zipFolder}/html.zip";
-            File.WriteAllBytes(zipPath, data);
-            MonetizrUtils.ExtractAllToDirectory(zipPath, zipFolder);
-            File.Delete(zipPath);
-
-            if (!File.Exists(indexPath))
-            {
-                isLoaded = false;
-                loadingError = $"[Fallback] index.html not found for {id}";
-                MonetizrLogger.PrintError(loadingError);
-                return;
-            }
-
-            MonetizrLogger.Print($"[Fallback] VideoPlayer ready for campaign {id}");
         }
 
         internal void DirectVASTInjectionIntoVideoPlayer()
