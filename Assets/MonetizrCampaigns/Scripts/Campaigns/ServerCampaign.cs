@@ -68,7 +68,6 @@ namespace Monetizr.SDK.Campaigns
         public string end_date;
         public string adm;
         public string verifications_vast_node;
-
         public CampaignType campaignType = CampaignType.None;
         public float campaignTimeoutStart;
         public List<string> trackingURLs = new List<string>();
@@ -84,7 +83,8 @@ namespace Monetizr.SDK.Campaigns
 
         public bool HasTimeoutPassed ()
         {
-            if (Time.time >= campaignTimeoutStart + 120f) return true;
+            int timeoutDuration = serverSettings.GetIntParam("campaign.timeout_duration", 120);
+            if (Time.time >= campaignTimeoutStart + timeoutDuration) return true;
             return false;
         }
 
@@ -609,15 +609,16 @@ namespace Monetizr.SDK.Campaigns
             return $"{{{result}}}";
         }
 
-        internal bool IsCampaignActivate()
+        internal bool CanCampaignBeActivated ()
         {
             if (MonetizrInstance.Instance.missionsManager.GetActiveMissionsNum(this) == 0) return false;
+            if (campaignType == CampaignType.Fallback && HasTimeoutPassed()) return false;
 
-            var serverMaxAmount = serverSettings.GetIntParam("amount_of_teasers");
-            var currentAmount = MonetizrInstance.Instance.localSettings.GetSetting(id).amountTeasersShown;
+            int serverMaxAmount = serverSettings.GetIntParam("amount_of_teasers");
+            int currentAmount = MonetizrInstance.Instance.localSettings.GetSetting(id).amountTeasersShown;
             bool hasNoTeasers = currentAmount > serverMaxAmount;
-            var serverMaxNotificationsAmount = serverSettings.GetIntParam("amount_of_notifications");
-            var currentNotificationsAmount = MonetizrInstance.Instance.localSettings.GetSetting(id).amountNotificationsShown;
+            int serverMaxNotificationsAmount = serverSettings.GetIntParam("amount_of_notifications");
+            int currentNotificationsAmount = MonetizrInstance.Instance.localSettings.GetSetting(id).amountNotificationsShown;
             bool hasNoNotifications = currentNotificationsAmount > serverMaxNotificationsAmount;
 
             if (hasNoNotifications && hasNoTeasers) return false;

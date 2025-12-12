@@ -1,5 +1,4 @@
 using Monetizr.SDK.Analytics;
-using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
@@ -120,6 +119,7 @@ namespace Monetizr.SDK.Campaigns
             await campaign.PreloadVideoPlayer();
             MonetizrLogger.Print("CampaignID " + campaign.id + " - Marked for direct VAST injection.");
             campaign.campaignType = CampaignType.Fallback;
+            campaign.campaignTimeoutStart = Time.time;
             return campaign;
         }
 

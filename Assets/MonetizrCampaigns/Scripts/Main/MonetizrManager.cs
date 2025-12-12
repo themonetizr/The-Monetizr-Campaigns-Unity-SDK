@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.UIElements;
 using EventType = Monetizr.SDK.Core.EventType;
 
 namespace Monetizr.SDK
@@ -18,7 +17,6 @@ namespace Monetizr.SDK
         public static string temporaryEmail = "";
         public static bool closeRewardCenterAfterEveryMission = false;
         public static int abTestSegment = 0;
-        public static bool shouldAutoReconect = false;
 
         public static UserDefinedEvent userDefinedEvent = null;
         public delegate void UserDefinedEvent(string campaignId, string placement, EventType eventType);
@@ -161,7 +159,7 @@ namespace Monetizr.SDK
 
         public static bool IsActiveAndEnabled ()
         {
-            return MonetizrInstance.Instance != null && MonetizrInstance.Instance.HasCampaignsAndActive();
+            return MonetizrInstance.Instance != null && MonetizrInstance.Instance.IsSDKActiveAndHasCampaigns();
         }
 
         public static void SetGameCoinMaximumReward (RewardType rewardType, ulong maxAmount)
@@ -244,7 +242,7 @@ namespace Monetizr.SDK
 
         public static void ShowCampaignNotificationAndEngage (OnComplete onComplete = null)
         {
-            if (MonetizrInstance.Instance == null || !MonetizrInstance.Instance.HasCampaignsAndActive())
+            if (MonetizrInstance.Instance == null || !MonetizrInstance.Instance.IsSDKActiveAndHasCampaigns())
             {
                 onComplete?.Invoke(OnCompleteStatus.Skipped);
                 return;
