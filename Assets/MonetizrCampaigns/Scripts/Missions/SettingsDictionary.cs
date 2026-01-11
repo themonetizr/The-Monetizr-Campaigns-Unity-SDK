@@ -10,15 +10,6 @@ namespace Monetizr.SDK.Missions
 
         public SettingsDictionary(Dictionary<TKey, TValue> d) : base(d) { }
 
-        public void MergeSettingsFrom(SettingsDictionary<TKey, TValue> addDictionary)
-        {
-            if (Count == 0)
-                return;
-
-            addDictionary?.ToList().ForEach(
-                x => this[x.Key] = x.Value);
-        }
-
         public TValue GetParam(TKey p, TValue def = default(TValue))
         {
             if (p == null)

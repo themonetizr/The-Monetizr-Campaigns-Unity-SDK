@@ -57,7 +57,10 @@ namespace Monetizr.SDK.Campaigns
                             break;
                     }
 
+                    campaign.serverSettings = ParameterChecker.TEMPORARY_ConvertNewParameters(campaign.serverSettings);                   
+                    ParameterChecker.CheckForMissingParameters(campaign.serverSettings);
                     campaigns[i] = campaign;
+
                 }
                 catch (Exception ex)
                 {
@@ -72,14 +75,12 @@ namespace Monetizr.SDK.Campaigns
         private ServerCampaign ProcessBackendCampaign (ServerCampaign campaign)
         {
             campaign.ParseContentStringIntoSettingsDictionary();
-            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
             return campaign;
         }
 
         private async Task<ServerCampaign> ProcessFallbackCampaign (ServerCampaign campaign)
         {
             campaign.ParseContentStringIntoSettingsDictionary();
-            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
 
             bool allowPrebid = campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false);
             bool allowEndpoint = campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false);
