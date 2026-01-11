@@ -98,7 +98,7 @@ namespace Monetizr.SDK.Campaigns
 
         public static void SetupCampaignType (ServerCampaign campaign)
         {
-            if (GetBoolParameter(campaign, "is_fallback_campaign"))
+            if (GetBoolParameter(campaign, "is_fallback_campaign") || GetBoolParameter(campaign, "campaign.isFallback"))
             {
                 campaign.campaignType = CampaignType.Fallback;
                 return;

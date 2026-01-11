@@ -120,6 +120,7 @@ namespace Monetizr.SDK.Networking
         internal async Task GetGlobalSettings ()
         {
             GlobalSettings = await DownloadGlobalSettings();
+            GlobalSettings = ParameterChecker.TEMPORARY_ConvertNewParameters(GlobalSettings);
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
             MonetizrLogger.Print($"Api endpoint: {_baseApiUrl}");
         }
