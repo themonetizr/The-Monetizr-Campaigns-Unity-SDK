@@ -73,22 +73,17 @@ namespace Monetizr.SDK.UI
         private void Update ()
         {
             bool panelForCheckUrl = (panelId == PanelId.SurveyWebView) || (panelId == PanelId.ActionHtmlPanelView) || (panelId == PanelId.Html5WebView);
-
             if (_webView == null || !panelForCheckUrl || string.IsNullOrEmpty(_webUrl)) return;
-
             string currentUrl = _webView.Url;
-
             if (string.IsNullOrEmpty(currentUrl) || _webUrl.Equals(currentUrl)) return;
 
             _webUrl = currentUrl;
             _pagesSwitchesAmount--;
-
             MonetizrLogger.Print($"Update: [{_webUrl}] [{currentUrl}] [{_pagesSwitchesAmount}]");
 
             if (_pagesSwitchesAmount == 0)
             {
                 successReason = "page_switch";
-
                 ShowClaimButton();
             }
 
@@ -195,23 +190,18 @@ namespace Monetizr.SDK.UI
             if (MonetizrLogger.isEnabled) UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
-
 #if UNITY_EDITOR
             UniWebView.SetWebContentsDebuggingEnabled(true);
 #endif
-
             UniWebView.SetJavaScriptEnabled(true);
             UniWebView.SetAllowUniversalAccessFromFileURLs(true);
             MonetizrInstance.Instance.SoundSwitch(false);
-
             UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
             UniWebView.SetForwardWebConsoleToNativeOutput(true);
 
             _webView = gameObject.AddComponent<UniWebView>();
-            //_webView.ReferenceRectTransform = safeArea;
-
+            _webView.ReferenceRectTransform = safeArea;
             SetWebviewFrame(fullScreen, useSafeFrame);
-
             MonetizrLogger.Print($"frame: {fullScreen} {_webView.Frame}");
 
             _webView.OnMessageReceived += OnMessageReceived;
@@ -228,13 +218,10 @@ namespace Monetizr.SDK.UI
             {
                 case PanelId.SurveyWebView:
                     return AdPlacement.Survey;
-
                 case PanelId.Html5WebView:
                     return AdPlacement.Html5;
-
                 case PanelId.HtmlWebPageView:
                     return AdPlacement.HtmlPage;
-
                 case PanelId.ActionHtmlPanelView:
                     return AdPlacement.ActionScreen;
             }
@@ -244,48 +231,22 @@ namespace Monetizr.SDK.UI
 
         internal void SetWebviewFrame (bool fullScreen, bool useSafeFrame)
         {
-            Rect frame = new Rect(0, 0, 0, 0);
-
-            var w = Screen.width;
-            var h = Screen.width * 1.5f;
-            var x = 0;
-            var y = (Screen.height - h) / 2;
-
-            float aspect = (float)Screen.height / (float)Screen.width;
-
-            //if (aspect < 1.777)
+            if (fullScreen)
             {
-                h = Screen.height * 0.8f;
-                y = (Screen.height - h) / 2;
+                _webView.ReferenceRectTransform = safeArea;
+                return;
             }
+
+            _webView.ReferenceRectTransform = null;
+            float w = Screen.width;
+            float h = Screen.height * 0.8f;
+            float x = 0;
+            float y = (Screen.height - h) / 2;
+            Rect frame = new Rect(x, y, w, h);
 
 #if UNITY_EDITOR
-            if (fullScreen)
-            {
-                frame = new Rect(0, 0, 600, 1200);
-            }
-            else
-            {
-                frame = new Rect(0, 0, 600, 800);
-            }
-#else
-            if (fullScreen)
-            {
-                frame = new Rect(0, 0, Screen.width, Screen.height);
-            }
-            else
-            {
-                frame = new Rect(x, y, w, h);
-            }
+            frame = new Rect(0, 0, 600, 800);
 #endif
-
-            _webView.Frame = frame;
-            StartCoroutine(SetFrameWithDelay(frame));
-        }
-
-        private IEnumerator SetFrameWithDelay(Rect frame)
-        {
-            yield return new WaitForEndOfFrame();
             _webView.Frame = frame;
         }
 
@@ -378,10 +339,7 @@ namespace Monetizr.SDK.UI
 
         internal void ShowClaimButton()
         {
-            if (!claimButton.activeSelf)
-            {
-                claimButton.SetActive(true);
-            }
+            if (!claimButton.activeSelf) claimButton.SetActive(true);
         }
 
         private async void PrepareHtml5Panel ()
@@ -482,7 +440,6 @@ namespace Monetizr.SDK.UI
         private IEnumerator ShowCloseButton(float time)
         {
             yield return new WaitForSeconds(time);
-
             crossButtonAnimator.enabled = true;
         }
 
@@ -548,7 +505,6 @@ namespace Monetizr.SDK.UI
         private void OnPageStarted (UniWebView webView, string url)
         {
             MonetizrLogger.Print($"OnPageStarted: { url} ");
-
             isInExternalWebpage = false;
             if (NetworkingUtils.IsExternalURL(url))
             {
