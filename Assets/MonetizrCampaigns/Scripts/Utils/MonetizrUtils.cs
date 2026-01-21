@@ -1,9 +1,6 @@
-﻿using mixpanel;
-using Monetizr.SDK.Campaigns;
+﻿using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
-using Monetizr.SDK.Missions;
-using Monetizr.SDK.UI;
 using Monetizr.SDK.VAST;
 using SimpleJSON;
 using System;
@@ -12,9 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace Monetizr.SDK.Utils

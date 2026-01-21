@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6387d76dbd86d374bb3205e279ef9d58, type: 3}
   m_Name: MonetizrSettings
   m_EditorClassIdentifier: 
-  shouldUnityUseAndroidSettings: 1
+  shouldUnityUseAndroidSettings: 0
   shouldBundleIDBeApplicationIdentifier: 0
   androidBundleID: 
   androidAPIKey: 

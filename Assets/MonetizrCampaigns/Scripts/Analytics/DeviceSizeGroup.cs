@@ -1,6 +1,6 @@
 ﻿namespace Monetizr.SDK.Analytics
 {
-    internal enum DeviceSizeGroup
+    public enum DeviceSizeGroup
     {
         Phone,
         Tablet,

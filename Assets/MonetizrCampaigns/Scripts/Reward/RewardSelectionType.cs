@@ -1,4 +1,4 @@
-﻿namespace Monetizr.SDK.Core
+﻿namespace Monetizr.SDK.Rewards
 {
     internal enum RewardSelectionType
     {

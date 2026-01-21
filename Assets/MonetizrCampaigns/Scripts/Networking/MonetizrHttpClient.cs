@@ -6,16 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using System.Net;
-using Monetizr.Raygun4Unity;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.Debug;
-using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
-using Monetizr.SDK.VAST;
 using UnityEngine.Networking;
-using System.Linq;
+using Monetizr.SDK.Rewards;
 
 namespace Monetizr.SDK.Networking
 {
@@ -24,7 +21,6 @@ namespace Monetizr.SDK.Networking
         public string userAgent;
 
         internal string currentApiKey;
-        internal MonetizrMobileAnalytics Analytics { get; set; } = null;
         internal SettingsDictionary<string, string> GlobalSettings { get; set; } = new SettingsDictionary<string, string>();
 
         private string _baseApiUrl = "https://api.themonetizr.com";
@@ -32,7 +28,6 @@ namespace Monetizr.SDK.Networking
         private string SettingsApiUrl => _baseApiUrl + "/settings";
         private readonly string _baseTestApiUrl = "https://api-test.themonetizr.com";
         private static readonly HttpClient Client = new HttpClient();
-        private CancellationTokenSource downloadCancellationTokenSource;
 
         public MonetizrHttpClient (string apiKey, int timeout = 30)
         {
@@ -44,11 +39,6 @@ namespace Monetizr.SDK.Networking
         internal void SetUserAgent (string _userAgent) 
         { 
             this.userAgent = _userAgent; 
-        }
-
-        internal void Initialize()
-        {
-            Analytics = new MonetizrMobileAnalytics();
         }
 
         internal void SetTestMode(bool testEnvironment)
@@ -130,8 +120,7 @@ namespace Monetizr.SDK.Networking
         internal async Task GetGlobalSettings ()
         {
             GlobalSettings = await DownloadGlobalSettings();
-            ParameterChecker.CheckForMissingParameters(true, GlobalSettings);
-            RaygunCrashReportingPostService.defaultApiEndPointForCr = GlobalSettings.GetParam("crash_reports.endpoint", "");
+            GlobalSettings = ParameterChecker.TEMPORARY_ConvertNewParameters(GlobalSettings);
             _baseApiUrl = GlobalSettings.GetParam("base_api_endpoint",_baseApiUrl);
             MonetizrLogger.Print($"Api endpoint: {_baseApiUrl}");
         }
@@ -186,7 +175,7 @@ namespace Monetizr.SDK.Networking
 
             if (MonetizrManager.temporaryEmail != null && MonetizrManager.temporaryEmail.Length > 0)
             {
-                bool ingame = MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Product ? false : true;
+                bool ingame = MonetizrInstance.Instance.temporaryRewardTypeSelection == RewardSelectionType.Product ? false : true;
                 Reward reward = challenge.rewards.Find((Reward r) => { return r.in_game_only == ingame; });
 
                 if (reward == null)

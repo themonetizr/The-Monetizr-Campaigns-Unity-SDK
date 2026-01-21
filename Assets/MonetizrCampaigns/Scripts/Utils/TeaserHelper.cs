@@ -7,12 +7,12 @@ namespace Monetizr.SDK.Utils
     {
         void OnEnable()
         {
-            MonetizrManager.OnMainMenuShow();
+            MonetizrInstance.Instance.OnMainMenuShow();
         }
 
         void OnDisable()
         {
-            MonetizrManager.OnMainMenuHide();
+            MonetizrInstance.Instance.OnMainMenuHide();
         }
     }
 }

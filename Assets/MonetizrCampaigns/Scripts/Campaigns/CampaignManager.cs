@@ -1,10 +1,8 @@
 using Monetizr.SDK.Analytics;
-using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
-using Monetizr.SDK.VAST;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,14 +48,6 @@ namespace Monetizr.SDK.Campaigns
                             campaign = ProcessBackendCampaign(campaign);
                             break;
 
-                        case CampaignType.ADM:
-                            campaign = await ProcessADMCampaign(campaign);
-                            break;
-
-                        case CampaignType.Programmatic:
-                            campaign = await ProcessProgrammaticCampaign(campaign);
-                            break;
-
                         case CampaignType.Fallback:
                             campaign = await ProcessFallbackCampaign(campaign);
                             break;
@@ -67,7 +57,10 @@ namespace Monetizr.SDK.Campaigns
                             break;
                     }
 
+                    campaign.serverSettings = ParameterChecker.TEMPORARY_ConvertNewParameters(campaign.serverSettings);                   
+                    ParameterChecker.CheckForMissingParameters(campaign.serverSettings);
                     campaigns[i] = campaign;
+
                 }
                 catch (Exception ex)
                 {
@@ -82,40 +75,12 @@ namespace Monetizr.SDK.Campaigns
         private ServerCampaign ProcessBackendCampaign (ServerCampaign campaign)
         {
             campaign.ParseContentStringIntoSettingsDictionary();
-            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
-            return campaign;
-        }
-
-        private async Task<ServerCampaign> ProcessADMCampaign (ServerCampaign campaign)
-        {
-            campaign = await RecreateCampaignFromADM(campaign);
-            if (campaign == null) return null;
-
-            campaign.ParseContentStringIntoSettingsDictionary();
-            campaign.campaignTimeoutStart = Time.time;
-            campaign.hasMadeEarlyBidRequest = true;
-            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
-
-            return campaign;
-        }
-
-        private async Task<ServerCampaign> ProcessProgrammaticCampaign (ServerCampaign campaign)
-        {
-            campaign.ParseContentStringIntoSettingsDictionary();
-            campaign = await MakeEarlyProgrammaticBidRequest(campaign);
-            if (campaign == null || !campaign.hasMadeEarlyBidRequest) return null;
-
-            campaign.campaignTimeoutStart = Time.time;
-            campaign = await RecreateCampaignFromADM(campaign);
-            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
-
             return campaign;
         }
 
         private async Task<ServerCampaign> ProcessFallbackCampaign (ServerCampaign campaign)
         {
             campaign.ParseContentStringIntoSettingsDictionary();
-            ParameterChecker.CheckForMissingParameters(false, campaign.serverSettings);
 
             bool allowPrebid = campaign.serverSettings.GetBoolParam("allow_fallback_prebid", false);
             bool allowEndpoint = campaign.serverSettings.GetBoolParam("allow_fallback_endpoint", false);
@@ -152,9 +117,10 @@ namespace Monetizr.SDK.Campaigns
             if (campaign == null) return null;
 
             campaign.isDirectVASTinjection = true;
-            await campaign.PreloadVideoPlayerForFallback();
+            await campaign.PreloadVideoPlayer();
             MonetizrLogger.Print("CampaignID " + campaign.id + " - Marked for direct VAST injection.");
             campaign.campaignType = CampaignType.Fallback;
+            campaign.campaignTimeoutStart = Time.time;
             return campaign;
         }
 
@@ -273,41 +239,6 @@ namespace Monetizr.SDK.Campaigns
             return null;
         }
 
-        private async Task<ServerCampaign> RecreateCampaignFromADM (ServerCampaign campaign)
-        {
-            string originalContent = campaign.content;
-            PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
-            campaign = await pubmaticHelper.PrepareServerCampaign(campaign.id, campaign.adm, false);
-
-            if (string.IsNullOrEmpty(campaign.content))
-            {
-                MonetizrLogger.Print("VAST did not provide content. Restoring the original string.");
-                campaign.content = originalContent;
-            }
-
-            return campaign;
-        }
-
-        private async Task<ServerCampaign> MakeEarlyProgrammaticBidRequest (ServerCampaign campaign)
-        {
-            PubmaticHelper pubmaticHelper = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, "");
-            bool isProgrammaticOK = false;
-
-            try
-            {
-                isProgrammaticOK = await pubmaticHelper.GetOpenRTBResponseForCampaign(campaign);
-            }
-            catch (Exception e)
-            {
-                MonetizrLogger.PrintError($"EarlyBidRequest - CampaignID: " + campaign.id + " / Exception " + e);
-                isProgrammaticOK = false;
-            }
-
-            MonetizrLogger.Print(isProgrammaticOK ? "EarlyBidRequest - COMPLETED" : "EarlyBidRequest - FAILED");
-            campaign.hasMadeEarlyBidRequest = isProgrammaticOK;
-            return campaign;
-        }
-
         private async Task<string> FetchPrebid (string prebidData, string prebidHost, int timeoutMs = 3000)
         {
             MonetizrLogger.PrintWarning("Prebid - Fetching with: " + prebidData);
@@ -338,13 +269,13 @@ namespace Monetizr.SDK.Campaigns
             {
                 try
                 {
-                    MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
+                    MonetizrMobileAnalytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingStarts, EventType.Notification);
                     await campaign.LoadCampaignAssets();
 
                     if (campaign.isLoaded)
                     {
                         MonetizrLogger.Print($"CampaignID: {campaign.id} successfully loaded", true);
-                        MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
+                        MonetizrMobileAnalytics.TrackEvent(campaign, null, AdPlacement.AssetsLoadingEnds, EventType.Notification);
                     }
                     else
                     {
@@ -355,7 +286,7 @@ namespace Monetizr.SDK.Campaigns
                 {
                     campaign.isLoaded = false;
                     MonetizrLogger.PrintError("CampaignID: " + campaign.id + " failed loading assets.", true);
-                    MonetizrManager.Instance.ConnectionsClient.Analytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
+                    MonetizrMobileAnalytics.TrackEvent(campaign, null, AdPlacement.AssetsLoading, EventType.Error, new Dictionary<string, string> { { "loading_error", campaign.loadingError } });
                 }
             }
 

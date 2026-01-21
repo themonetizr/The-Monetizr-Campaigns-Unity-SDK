@@ -1,6 +1,6 @@
 ﻿namespace Monetizr.SDK.Analytics
 {
-    internal enum AdPlacement
+    public enum AdPlacement
     {
         TinyTeaser,
         Html5,

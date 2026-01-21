@@ -92,7 +92,7 @@ namespace Monetizr.SDK.UI
         {
             if (!active && !immediately && triggersButtonEventsOnDeactivate)
             {
-                MonetizrManager.Analytics.TrackEvent(currentMission,
+                MonetizrMobileAnalytics.TrackEvent(currentMission,
                     this,
                     isSkipped ? EventType.ButtonPressSkip : EventType.ButtonPressOk,
                     additionalEventValues);
@@ -167,7 +167,7 @@ namespace Monetizr.SDK.UI
         {
             state = State.Hidden;
             FinalizePanel(panelId);
-            if (!SendImpressionEventManually()) MonetizrManager.Analytics?.TrackEvent(currentMission, this, EventType.ImpressionEnds);
+            if (!SendImpressionEventManually()) MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.ImpressionEnds);
             gameObject.SetActive(false);
             _onComplete?.Invoke(isSkipped);
         }

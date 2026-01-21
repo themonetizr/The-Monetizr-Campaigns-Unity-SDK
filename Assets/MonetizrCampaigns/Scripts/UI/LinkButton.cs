@@ -9,7 +9,7 @@ namespace Monetizr.SDK.UI {
 
         public void OnClick()
         {
-            var campaign = MonetizrManager.Instance.GetActiveCampaign();
+            var campaign = MonetizrInstance.Instance.GetActiveCampaign();
             string url = null;
 
             if (campaign == null)
@@ -17,7 +17,7 @@ namespace Monetizr.SDK.UI {
 
             url = campaign.serverSettings.GetParam("GiveawayEmailEnterNotification.terms_url_text");
 
-            MonetizrManager.ShowWebPage(null, new Mission
+            MonetizrInstance.Instance.ShowWebPage(null, new Mission
             {
                 campaignId = campaign.id,
                 campaign = campaign,

@@ -4,12 +4,9 @@ using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
-using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
-using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 
 namespace Monetizr.SDK.Campaigns
 {
@@ -101,21 +98,9 @@ namespace Monetizr.SDK.Campaigns
 
         public static void SetupCampaignType (ServerCampaign campaign)
         {
-            if (GetBoolParameter(campaign, "is_fallback_campaign"))
+            if (GetBoolParameter(campaign, "is_fallback_campaign") || GetBoolParameter(campaign, "campaign.isFallback"))
             {
                 campaign.campaignType = CampaignType.Fallback;
-                return;
-            }
-
-            if (GetBoolParameter(campaign, "programmatic"))
-            {
-                campaign.campaignType = CampaignType.Programmatic;
-                return;
-            }
-
-            if (GetBoolParameter(campaign, "campaign.use_adm"))
-            {
-                campaign.campaignType = CampaignType.ADM;
                 return;
             }
 

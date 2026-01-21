@@ -5,6 +5,7 @@ using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.Networking;
 using Monetizr.SDK.Prebid;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
@@ -72,22 +73,17 @@ namespace Monetizr.SDK.UI
         private void Update ()
         {
             bool panelForCheckUrl = (panelId == PanelId.SurveyWebView) || (panelId == PanelId.ActionHtmlPanelView) || (panelId == PanelId.Html5WebView);
-
             if (_webView == null || !panelForCheckUrl || string.IsNullOrEmpty(_webUrl)) return;
-
             string currentUrl = _webView.Url;
-
             if (string.IsNullOrEmpty(currentUrl) || _webUrl.Equals(currentUrl)) return;
 
             _webUrl = currentUrl;
             _pagesSwitchesAmount--;
-
             MonetizrLogger.Print($"Update: [{_webUrl}] [{currentUrl}] [{_pagesSwitchesAmount}]");
 
             if (_pagesSwitchesAmount == 0)
             {
                 successReason = "page_switch";
-
                 ShowClaimButton();
             }
 
@@ -141,35 +137,35 @@ namespace Monetizr.SDK.UI
                 case PanelId.SurveyWebView:
                     MonetizrLogger.Print("Preparing Survey.");
                     PrepareSurveyPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.HtmlWebPageView:
                     MonetizrLogger.Print("Preparing HTML.");
                     PrepareWebViewPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.ActionHtmlPanelView:
                     MonetizrLogger.Print("Preparing Action/ENDCARD.");
                     PrepareActionPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.StartNotification:
                     MonetizrLogger.Print("Preparing StartNotification.");
                     PrepareStartNotificationPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
 
                 case PanelId.CongratsNotification:
                     MonetizrLogger.Print("Preparing CongratsNotification.");
                     PrepareCongratsNotificationPanel(m);
-                    MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                     impressionStarts = true;
                     break;
             }
@@ -194,23 +190,18 @@ namespace Monetizr.SDK.UI
             if (MonetizrLogger.isEnabled) UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
             UniWebView.SetAllowAutoPlay(true);
             UniWebView.SetAllowInlinePlay(true);
-
 #if UNITY_EDITOR
             UniWebView.SetWebContentsDebuggingEnabled(true);
 #endif
-
             UniWebView.SetJavaScriptEnabled(true);
             UniWebView.SetAllowUniversalAccessFromFileURLs(true);
-            MonetizrManager.Instance.SoundSwitch(false);
-
+            MonetizrInstance.Instance.SoundSwitch(false);
             UniWebViewLogger.Instance.LogLevel = UniWebViewLogger.Level.Verbose;
             UniWebView.SetForwardWebConsoleToNativeOutput(true);
 
             _webView = gameObject.AddComponent<UniWebView>();
-            //_webView.ReferenceRectTransform = safeArea;
-
+            _webView.ReferenceRectTransform = safeArea;
             SetWebviewFrame(fullScreen, useSafeFrame);
-
             MonetizrLogger.Print($"frame: {fullScreen} {_webView.Frame}");
 
             _webView.OnMessageReceived += OnMessageReceived;
@@ -227,13 +218,10 @@ namespace Monetizr.SDK.UI
             {
                 case PanelId.SurveyWebView:
                     return AdPlacement.Survey;
-
                 case PanelId.Html5WebView:
                     return AdPlacement.Html5;
-
                 case PanelId.HtmlWebPageView:
                     return AdPlacement.HtmlPage;
-
                 case PanelId.ActionHtmlPanelView:
                     return AdPlacement.ActionScreen;
             }
@@ -243,48 +231,22 @@ namespace Monetizr.SDK.UI
 
         internal void SetWebviewFrame (bool fullScreen, bool useSafeFrame)
         {
-            Rect frame = new Rect(0, 0, 0, 0);
-
-            var w = Screen.width;
-            var h = Screen.width * 1.5f;
-            var x = 0;
-            var y = (Screen.height - h) / 2;
-
-            float aspect = (float)Screen.height / (float)Screen.width;
-
-            //if (aspect < 1.777)
+            if (fullScreen)
             {
-                h = Screen.height * 0.8f;
-                y = (Screen.height - h) / 2;
+                _webView.ReferenceRectTransform = safeArea;
+                return;
             }
+
+            _webView.ReferenceRectTransform = null;
+            float w = Screen.width;
+            float h = Screen.height * 0.8f;
+            float x = 0;
+            float y = (Screen.height - h) / 2;
+            Rect frame = new Rect(x, y, w, h);
 
 #if UNITY_EDITOR
-            if (fullScreen)
-            {
-                frame = new Rect(0, 0, 600, 1200);
-            }
-            else
-            {
-                frame = new Rect(0, 0, 600, 800);
-            }
-#else
-            if (fullScreen)
-            {
-                frame = new Rect(0, 0, Screen.width, Screen.height);
-            }
-            else
-            {
-                frame = new Rect(x, y, w, h);
-            }
+            frame = new Rect(0, 0, 600, 800);
 #endif
-
-            _webView.Frame = frame;
-            StartCoroutine(SetFrameWithDelay(frame));
-        }
-
-        private IEnumerator SetFrameWithDelay(Rect frame)
-        {
-            yield return new WaitForEndOfFrame();
             _webView.Frame = frame;
         }
 
@@ -331,7 +293,7 @@ namespace Monetizr.SDK.UI
 
         internal void OnStartNotificationConfirmButton ()
         {
-            MonetizrManager.OnEngagedUserActionComplete();
+            MonetizrInstance.Instance.OnEngagedUserActionComplete();
             isSkipped = false;
             closeButton.gameObject.SetActive(false);
             additionalEventValues.Clear();
@@ -377,16 +339,12 @@ namespace Monetizr.SDK.UI
 
         internal void ShowClaimButton()
         {
-            if (!claimButton.activeSelf)
-            {
-                claimButton.SetActive(true);
-            }
+            if (!claimButton.activeSelf) claimButton.SetActive(true);
         }
 
         private async void PrepareHtml5Panel ()
         {
             MonetizrLogger.Print("Preparing HTML/VIDEO.");
-
             ServerCampaign campaign = currentMission.campaign;
 
             if (campaign.campaignType == CampaignType.Fallback && campaign.isDirectVASTinjection)
@@ -402,57 +360,39 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            bool hasProgrammaticVideo = campaign.TryGetAssetInList(new List<string>() {"programmatic_video" }, out Asset programmaticVideoAsset);
             bool hasVideo = campaign.TryGetAssetInList(new List<string>() { "video", "html" }, out Asset videoAsset);
-            MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo + " / hasProgrammaticVideo: " + hasProgrammaticVideo);
-
-            if (!hasVideo && !hasProgrammaticVideo)
+            MonetizrLogger.Print("CampaignID: " + campaign.id + " / hasVideo: " + hasVideo);
+            
+            if (!hasVideo)
             {
                 MonetizrLogger.PrintError("No video asset loaded for CampaignID: " + campaign.id);
-                if (campaign.campaignType == CampaignType.Programmatic)
-                {
-                    HandleProgrammaticFailure(campaign);
-                }
-                else
-                {
-                    OnSkipPress();
-                }
+                OnSkipPress();
                 return;
             }
 
             bool showWebview = true;
-            VastHelper.VastSettings oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
-            string userAgent = _webView.GetUserAgent();
-            PubmaticHelper ph = new PubmaticHelper(MonetizrManager.Instance.ConnectionsClient, userAgent);
-
-            if (hasProgrammaticVideo)
-            {
-                showWebview = AssignProgrammaticVideoAssetPath(campaign, programmaticVideoAsset);
-            }
-            else
-            {
-                _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
-                campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
-            }
-
-            bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
             bool hasDownloaded = false;
+            VastHelper.VastSettings oldVastSettings = new VastHelper.VastSettings(campaign.vastSettings);
+            _webUrl = "file://" + campaign.GetAsset<string>(AssetsType.Html5PathString);
+            campaign.vastSettings.videoSettings.videoUrl = videoAsset.url;
 
             if (!campaign.vastSettings.IsEmpty() && showWebview)
             {
                 MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will embed VAST into VideoPlayer.");
+                string userAgent = _webView.GetUserAgent();
 
                 VastTagsReplacer replacer = new VastTagsReplacer(campaign, videoAsset, userAgent);
                 campaign.vastSettings.ReplaceVastTags(replacer);
                 campaign.vastAdParameters = campaign.DumpsVastSettings(replacer);
                 campaign.EmbedVastParametersIntoVideoPlayer(videoAsset);
+                bool verifyWithOMSDK = campaign.serverSettings.GetBoolParam("omsdk.verify_videos", true);
 
                 if (verifyWithOMSDK)
                 {
-                    hasDownloaded = await ph.DownloadOMSDKServiceContent();
+                    hasDownloaded = await OMSDKHelper.DownloadOMSDKServiceContent();
                     if (hasDownloaded)
                     {
-                        ph.InitializeOMSDK(campaign.vastAdParameters);
+                        OMSDKHelper.InitializeOMSDK(campaign.vastAdParameters);
                         isOMSDKactive = true;
                     }
                 }
@@ -475,7 +415,7 @@ namespace Monetizr.SDK.UI
                 _webView.Load(_webUrl);
                 _webView.Show();
                 MonetizrLogger.Print($"Url to show {_webUrl}");
-                MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+                MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
                 impressionStarts = true;
             }
             else
@@ -497,30 +437,9 @@ namespace Monetizr.SDK.UI
             }
         }
 
-        private bool AssignProgrammaticVideoAssetPath (ServerCampaign campaign, Asset videoAsset)
-        {
-            Asset programmaticVideoAsset = null;
-            bool showWebview = false;
-            campaign.vastSettings = new VastHelper.VastSettings();
-
-            if (campaign.TryGetAssetInList("programmatic_video", out programmaticVideoAsset))
-            {
-                _webUrl = $"file://{campaign.GetCampaignPath($"{programmaticVideoAsset.fpath}/index.html")}";
-                videoAsset = programmaticVideoAsset;
-                showWebview = true;
-            }
-            else
-            {
-                MonetizrLogger.PrintError("No video asset in campaign.");
-            }
-
-            return showWebview;
-        }
-
         private IEnumerator ShowCloseButton(float time)
         {
             yield return new WaitForSeconds(time);
-
             crossButtonAnimator.enabled = true;
         }
 
@@ -534,12 +453,11 @@ namespace Monetizr.SDK.UI
             if (verifyWithOMSDK)
             {
                 MonetizrLogger.Print("CampaignID: " + campaign.id + " / Will verify with OMSDK.");
-                VastHelper vastHelper = new VastHelper(MonetizrManager.Instance.ConnectionsClient, _webView.GetUserAgent());
-                bool hasDownloaded = await vastHelper.DownloadOMSDKServiceContent();
+                bool hasDownloaded = await OMSDKHelper.DownloadOMSDKServiceContent();
                 if (hasDownloaded)
                 {
                     string omidJson = MonetizrUtils.BuildFromRaw(campaign);
-                    vastHelper.InitializeOMSDK(omidJson);
+                    OMSDKHelper.InitializeOMSDK(omidJson);
                     isOMSDKactive = true;
                 }
             }
@@ -547,7 +465,7 @@ namespace Monetizr.SDK.UI
             _webUrl = "file://" + indexPath;
             _webView.Load(_webUrl);
             _webView.Show();
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Impression);
+            MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
             TrackingUtils.FireTrackers(campaign.trackingURLs);
             impressionStarts = true;
         }
@@ -587,9 +505,8 @@ namespace Monetizr.SDK.UI
         private void OnPageStarted (UniWebView webView, string url)
         {
             MonetizrLogger.Print($"OnPageStarted: { url} ");
-
             isInExternalWebpage = false;
-            if (IsExternalURL(url))
+            if (NetworkingUtils.IsExternalURL(url))
             {
                 isInExternalWebpage = true;
                 MonetizrLogger.Print("URL outside MonetizrSDK - Will not set it to fullscreen.");
@@ -637,7 +554,7 @@ namespace Monetizr.SDK.UI
                 return;
             }
 
-            if (IsExternalURL(url))
+            if (NetworkingUtils.IsExternalURL(url))
             {
                 isInExternalWebpage = true;
                 MonetizrLogger.Print("URL outside MonetizrSDK - Will enable native button.");
@@ -666,7 +583,7 @@ namespace Monetizr.SDK.UI
             string defaultButton = "(function(){var e=document.createElement('a');e.href='uniwebview://action?key=skip';e.innerText='×';e.style='position:fixed;top:16px;right:16px;width:40px;height:40px;line-height:40px;text-align:center;text-decoration:none;background:rgba(0,0,0,0.5);color:white;font-size:24px;border-radius:50%;font-weight:bold;z-index:10000;pointer-events:auto;';document.body.appendChild(e);})();";
             string js = defaultButton;
 
-            if (currentMission.campaign.serverSettings.ContainsKey("close_button_html"))
+            if (currentMission.campaign.serverSettings.ContainsKey("close_button_html") && !string.IsNullOrEmpty(currentMission.campaign.serverSettings.GetParam("close_button_html")))
             {
                 string paramHTML = currentMission.campaign.serverSettings.GetParam("close_button_html");
                 if (!string.IsNullOrEmpty(paramHTML)) js = paramHTML;
@@ -682,7 +599,7 @@ namespace Monetizr.SDK.UI
             string defaultButton = "(function(){var e=document.createElement('a');e.href='uniwebview://action?key=close';e.innerText='Claim';e.style='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:10000;text-decoration:none;background:#28a745;color:white;padding:12px 24px;border-radius:8px;font-size:16px;font-weight:bold;pointer-events:auto;';document.body.appendChild(e);})();";
             string js = defaultButton;
 
-            if (currentMission.campaign.serverSettings.ContainsKey("claim_button_html"))
+            if (currentMission.campaign.serverSettings.ContainsKey("claim_button_html") && !string.IsNullOrEmpty(currentMission.campaign.serverSettings.GetParam("claim_button_html")))
             {
                 string paramHTML = currentMission.campaign.serverSettings.GetParam("claim_button_html");
                 if (!string.IsNullOrEmpty(paramHTML)) js = paramHTML;
@@ -745,7 +662,7 @@ namespace Monetizr.SDK.UI
             if (impressionStarts)
             {
                 triggersButtonEventsOnDeactivate = true;
-                MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.ImpressionEnds);
+                MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.ImpressionEnds);
                 impressionStarts = false;
             }
         }
@@ -768,7 +685,7 @@ namespace Monetizr.SDK.UI
 
             _webView.Hide(true, UniWebViewTransitionEdge.Top, 0.4f, () =>
             {
-                MonetizrManager.ShowMessage((bool _isSkipped) =>
+                MonetizrInstance.Instance.ShowMessage((bool _isSkipped) =>
                 {
                     if (!_isSkipped)
                     {
@@ -798,7 +715,7 @@ namespace Monetizr.SDK.UI
             Dictionary<string, string> p = new Dictionary<string, string>();
             p.Add("url", _webUrl);
             if (statusCode > 0) p.Add("url_status_code", statusCode.ToString());
-            MonetizrManager.Analytics.TrackEvent(currentMission, this, EventType.Error, p);
+            MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Error, p);
         }
 
         internal override bool SendImpressionEventManually ()
@@ -813,20 +730,7 @@ namespace Monetizr.SDK.UI
 
         internal override void FinalizePanel (PanelId id)
         {
-            MonetizrManager.Instance.SoundSwitch(true);
-        }
-
-        private bool IsExternalURL (string url)
-        {
-            if (string.IsNullOrEmpty(url)) return false;
-
-            if (url.StartsWith("file://", StringComparison.OrdinalIgnoreCase)) return false;
-            if (url.StartsWith("about:", StringComparison.OrdinalIgnoreCase)) return false;
-            if (url.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return false;
-            if (url.StartsWith("uniwebview://", StringComparison.OrdinalIgnoreCase)) return false;
-            if (url.Contains("monetizr") || url.Contains("mntzr")) return false;
-
-            return true;
+            MonetizrInstance.Instance.SoundSwitch(true);
         }
 
     }

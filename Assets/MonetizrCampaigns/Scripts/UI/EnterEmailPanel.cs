@@ -2,6 +2,7 @@
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.Rewards;
 using System;
 using System.Collections;
 using System.Net.Mail;
@@ -129,7 +130,7 @@ namespace Monetizr.SDK.UI
             if (result == "aa@aa.aa") result = "asdfqe qe qefqwe";
 
             MonetizrManager.temporaryEmail = result;
-            MonetizrManager.temporaryRewardTypeSelection = selection;
+            MonetizrInstance.Instance.temporaryRewardTypeSelection = selection;
         }
 
         internal static EnterEmailType GetPanelType(Mission m)
@@ -286,7 +287,7 @@ namespace Monetizr.SDK.UI
 
         public void OnNoThanksPress()
         {
-            MonetizrManager.ShowMessage((bool _isSkipped) =>
+            MonetizrInstance.Instance.ShowMessage((bool _isSkipped) =>
                 {
                     if(!_isSkipped)
                     {

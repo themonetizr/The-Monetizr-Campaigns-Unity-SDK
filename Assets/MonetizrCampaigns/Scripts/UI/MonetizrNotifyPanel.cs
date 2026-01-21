@@ -2,6 +2,7 @@
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Missions;
+using Monetizr.SDK.Rewards;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -52,7 +53,7 @@ namespace Monetizr.SDK.UI
                 case PanelId.CongratsNotification:
                     if (m.type == MissionType.VideoWithEmailGiveaway)
                     {
-                        if(MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Product)
+                        if(MonetizrInstance.Instance.temporaryRewardTypeSelection == RewardSelectionType.Product)
                             PrepareGiveawayCongratsPanel(m);
                         else
                             PrepareCongratsPanel(m);
@@ -145,7 +146,7 @@ namespace Monetizr.SDK.UI
 
             rewardImage.sprite = _rewardIcon;
 
-            if (MonetizrManager.temporaryRewardTypeSelection == RewardSelectionType.Ingame)
+            if (MonetizrInstance.Instance.temporaryRewardTypeSelection == RewardSelectionType.Ingame)
             {
                 if (m.campaignServerSettings.ContainsKey("CongratsNotification.content_text2"))
                 {
@@ -245,7 +246,7 @@ namespace Monetizr.SDK.UI
 
         public void OnButtonPress()
         {
-            MonetizrManager.OnEngagedUserActionComplete();
+            MonetizrInstance.Instance.OnEngagedUserActionComplete();
             isSkipped = false;
             SetActive(false);
         }

@@ -1,4 +1,4 @@
-﻿namespace Monetizr.SDK.Campaigns
+﻿namespace Monetizr.SDK.Rewards
 {
     [System.Serializable]
     public class Reward

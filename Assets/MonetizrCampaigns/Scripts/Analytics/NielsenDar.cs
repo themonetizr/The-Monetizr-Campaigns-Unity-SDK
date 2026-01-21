@@ -98,7 +98,7 @@ namespace Monetizr.SDK.Analytics
                 DARPlacementTags = arr[1].Split(',').Select(v => v.Split(':')).ToDictionary(v => v.First(), v => v.Last());
             }
 
-            var adStr = MonetizrMobileAnalytics.GetPlacementName(t);
+            var adStr = AnalyticsUtils.GetPlacementName(t);
 
             if (!DARPlacementTags.ContainsKey(adStr))
                 return empty_res;

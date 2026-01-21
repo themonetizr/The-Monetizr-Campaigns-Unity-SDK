@@ -1,4 +1,4 @@
-using Monetizr.SDK.Core;
+using Monetizr.SDK.Rewards;
 using System.Collections.Generic;
 
 namespace Monetizr.SDK.Missions

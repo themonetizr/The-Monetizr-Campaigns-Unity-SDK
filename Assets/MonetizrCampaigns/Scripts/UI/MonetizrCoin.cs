@@ -12,7 +12,7 @@ namespace Monetizr.SDK.UI
 
         private bool UpdateCoinToCustom()
         {
-            var campaign = MonetizrManager.Instance?.GetActiveCampaign();
+            var campaign = MonetizrInstance.Instance?.GetActiveCampaign();
 
             if (campaign == null)
                 return false;

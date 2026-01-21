@@ -1,6 +1,8 @@
+using Monetizr.SDK.Analytics;
 using Monetizr.SDK.Campaigns;
 using Monetizr.SDK.Core;
 using Monetizr.SDK.Debug;
+using Monetizr.SDK.Rewards;
 using Monetizr.SDK.UI;
 using Monetizr.SDK.Utils;
 using System;
@@ -42,7 +44,7 @@ namespace Monetizr.SDK.Missions
                 if (m.type == mt &&
                     m.campaignId == ch &&
                     m.id == id &&
-                    m.apiKey == MonetizrManager.Instance.GetCurrentAPIkey() &&
+                    m.apiKey == MonetizrInstance.Instance.GetCurrentAPIkey() &&
                     m.reward == reward)
                     return m;
             }
@@ -182,7 +184,7 @@ namespace Monetizr.SDK.Missions
             m.isSponsored = true;
             m.isClaimed = ClaimState.NotClaimed;
             m.campaignId = campaign.id;
-            m.apiKey = MonetizrManager.Instance.GetCurrentAPIkey();
+            m.apiKey = MonetizrInstance.Instance.GetCurrentAPIkey();
             m.sdkVersion = MonetizrSettings.SDKVersion;
             if (!md.hasUnitySurvey) m.surveyUrl = md.surveyUrl;
             m.surveyId = md.surveyId;
@@ -227,7 +229,7 @@ namespace Monetizr.SDK.Missions
         {
             return () =>
             {
-                MonetizrManager.Instance.OnClaimRewardComplete(m, false, onComplete, updateUIDelegate);
+                MonetizrInstance.Instance.OnClaimRewardComplete(m, false, onComplete, updateUIDelegate);
             };
         }
 
@@ -235,7 +237,7 @@ namespace Monetizr.SDK.Missions
         {
             Action<bool> onVideoComplete = (bool isSkipped) =>
             {
-                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
+                MonetizrInstance.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
             return () =>
@@ -248,12 +250,12 @@ namespace Monetizr.SDK.Missions
         {
             Action<bool> onMinigameComplete = (bool isSkipped) =>
             {
-                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
+                MonetizrInstance.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
             return () =>
             {
-                MonetizrManager.ShowMinigame(onMinigameComplete, m);
+                MonetizrInstance.Instance.ShowMinigame(onMinigameComplete, m);
             };
         }
 
@@ -261,12 +263,12 @@ namespace Monetizr.SDK.Missions
         {
             Action<bool> onActionComplete = (bool isSkipped) =>
             {
-                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
+                MonetizrInstance.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
             return () =>
             {
-                MonetizrManager.ShowActionView(onActionComplete, m);
+                MonetizrInstance.Instance.ShowActionView(onActionComplete, m);
             };
         }
 
@@ -274,12 +276,12 @@ namespace Monetizr.SDK.Missions
         {
             Action<bool> onCodeComplete = (bool isSkipped) =>
             {
-                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
+                MonetizrInstance.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
             return () =>
             {
-                MonetizrManager.ShowCodeView(onCodeComplete, m);
+                MonetizrInstance.Instance.ShowCodeView(onCodeComplete, m);
             };
         }
 
@@ -287,7 +289,7 @@ namespace Monetizr.SDK.Missions
         {
             Action<bool> onSurveyComplete = (bool isSkipped) =>
             {
-                MonetizrManager.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
+                MonetizrInstance.Instance.OnClaimRewardComplete(m, isSkipped, onComplete, updateUIDelegate);
             };
 
             return () =>
@@ -299,16 +301,16 @@ namespace Monetizr.SDK.Missions
                     onSurveyComplete.Invoke(false);
                 }
 #else
-                    MonetizrManager.ShowSurvey(onSurveyComplete, m);
+                    MonetizrInstance.Instance.ShowSurvey(onSurveyComplete, m);
 #endif
                 else
-                    MonetizrManager.ShowUnitySurvey(onSurveyComplete, m);
+                    MonetizrInstance.Instance.ShowUnitySurvey(onSurveyComplete, m);
             };
         }
 
         internal Action GetEmailGiveawayClaimAction(Mission m, Action<bool> onComplete, Action updateUIDelegate)
         {
-            MonetizrManager.temporaryRewardTypeSelection = RewardSelectionType.Product;
+            MonetizrInstance.Instance.temporaryRewardTypeSelection = RewardSelectionType.Product;
 
             bool needToPlayVideo = m.hasVideo;
 
@@ -320,7 +322,7 @@ namespace Monetizr.SDK.Missions
 
             Action<bool> onVideoComplete = (bool isVideoSkipped) =>
             {
-                if (MonetizrManager.claimForSkippedCampaigns) isVideoSkipped = false;
+                if (MonetizrInstance.Instance.claimForSkippedCampaigns) isVideoSkipped = false;
 
                 if (isVideoSkipped)
                 {
@@ -330,17 +332,17 @@ namespace Monetizr.SDK.Missions
 
                 if (m.campaignServerSettings.GetParam("watch_video_only_once") == "true") m.isVideoShown = true;
 
-                MonetizrManager.ShowEnterEmailPanel(
+                MonetizrInstance.Instance.ShowEnterEmailPanel(
                     (bool isMailSkipped) =>
                     {
                         if (isMailSkipped)
                         {
-                            MonetizrManager.Analytics.TrackEvent(m, m.adPlacement, EventType.ButtonPressSkip);
+                            MonetizrMobileAnalytics.TrackEvent(m, m.adPlacement, EventType.ButtonPressSkip);
                             onComplete?.Invoke(isMailSkipped);
                             return;
                         }
 
-                        MonetizrManager.WaitForEndRequestAndNotify(onComplete, m, updateUIDelegate);
+                        MonetizrInstance.Instance.WaitForEndRequestAndNotify(onComplete, m, updateUIDelegate);
                     },
                     m,
                     PanelId.GiveawayEmailEnterNotification);
@@ -362,7 +364,7 @@ namespace Monetizr.SDK.Missions
 
         internal void OnVideoPlayPress(Mission m, Action<bool> onComplete)
         {
-            MonetizrManager.ShowHTML5((bool isSkipped) => { onComplete(isSkipped); }, m);
+            MonetizrInstance.Instance.ShowHTML5((bool isSkipped) => { onComplete(isSkipped); }, m);
         }
 
         internal void UpdateMissionsRewards(RewardType rt, GameReward reward)
@@ -424,13 +426,13 @@ namespace Monetizr.SDK.Missions
             return null;
         }
 
-        internal void CreateMissionsFromCampaign(ServerCampaign campaign)
+        internal void CreateMissionsFromCampaign (ServerCampaign campaign)
         {
-            var predefinedSponsoredMissions = MonetizrManager.Instance.sponsoredMissions;
-            if (campaign == null && predefinedSponsoredMissions == null) return;
+            if (campaign == null) return;
             string serverMissionsJson = campaign.serverSettings.GetParam("custom_missions");
             MonetizrLogger.Print($"Predefined missions from settings: {serverMissionsJson}");
             ServerMissionsHelper ic = null;
+            List<MissionDescription> predefinedSponsoredMissions = new List<MissionDescription>();
 
             try
             {
@@ -523,7 +525,7 @@ namespace Monetizr.SDK.Missions
 
             foreach (var m in missions)
             {
-                m.isServerCampaignActive = MonetizrManager.Instance.HasCampaign(m.campaignId);
+                m.isServerCampaignActive = MonetizrInstance.Instance.HasCampaign(m.campaignId);
                 m.isToBeRemoved = true;
             }
         }

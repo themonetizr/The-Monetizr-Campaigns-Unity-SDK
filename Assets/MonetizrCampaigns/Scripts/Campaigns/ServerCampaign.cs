@@ -2,6 +2,7 @@
 using Monetizr.SDK.Debug;
 using Monetizr.SDK.Missions;
 using Monetizr.SDK.Networking;
+using Monetizr.SDK.Rewards;
 using Monetizr.SDK.Utils;
 using Monetizr.SDK.VAST;
 using System;
@@ -67,8 +68,6 @@ namespace Monetizr.SDK.Campaigns
         public string end_date;
         public string adm;
         public string verifications_vast_node;
-
-        public bool hasMadeEarlyBidRequest = false;
         public CampaignType campaignType = CampaignType.None;
         public float campaignTimeoutStart;
         public List<string> trackingURLs = new List<string>();
@@ -84,7 +83,8 @@ namespace Monetizr.SDK.Campaigns
 
         public bool HasTimeoutPassed ()
         {
-            if (Time.time >= campaignTimeoutStart + 120f) return true;
+            int timeoutDuration = serverSettings.GetIntParam("campaign.timeout_duration", 120);
+            if (Time.time >= campaignTimeoutStart + timeoutDuration) return true;
             return false;
         }
 
@@ -132,7 +132,7 @@ namespace Monetizr.SDK.Campaigns
                 MonetizrLogger.PrintWarning($"An item {t} already exist in the campaign {id}");
             }
 
-            MonetizrManager.HoldResource(asset);
+            MonetizrInstance.Instance.HoldResource(asset);
             assetsDict[t] = asset;
         }
 
@@ -428,69 +428,52 @@ namespace Monetizr.SDK.Campaigns
             }
         }
 
-        internal async Task PreloadVideoPlayerForProgrammatic(Asset asset)
-        {
-            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
-            string zipFolder = GetCampaignPath($"{asset.fpath}");
-            string indexPath = $"{zipFolder}/index.html";
-            MonetizrLogger.Print($"{zipFolder}");
-            
-            if (!Directory.Exists(zipFolder))
-            {
-                Directory.CreateDirectory(zipFolder);
-            }
-
-            string playerUrl = serverSettings.GetParam("openrtb.player_url", videoPlayerURL);
-            byte[] data = await MonetizrHttpClient.DownloadAssetData(playerUrl);
-
-            if (data == null)
-            {
-                MonetizrLogger.PrintError("Can't download video player for programmatic");
-                return;
-            }
-
-            File.WriteAllBytes(zipFolder + "/html.zip", data);
-            MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-            File.Delete(zipFolder + "/html.zip");
-
-            if (!File.Exists(indexPath))
-            {
-                MonetizrLogger.PrintError($"Main html for video player {indexPath} doesn't exist");
-            }
-        }
-
-        internal async Task PreloadVideoPlayer(Asset asset)
+        internal async Task PreloadVideoPlayer (Asset asset = null)
         {
             string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
             string campPath = Application.persistentDataPath + "/" + id;
-            string zipFolder = campPath + "/" + asset.fpath;
+            string zipFolder = campPath;
+            if (asset != null) zipFolder = campPath + "/" + asset.fpath;
             string indexPath = $"{zipFolder}/index.html";
-            MonetizrLogger.Print($"{campPath} {zipFolder}");
-            
+            MonetizrLogger.Print($"Preparing VideoPlayer at {zipFolder}");
+
             if (!Directory.Exists(zipFolder))
             {
-                this.isLoaded = false;
-                this.loadingError = $"Folder for video player {zipFolder} doesn't exist";
+                if (asset != null)
+                {
+                    isLoaded = false;
+                    loadingError = $"Folder for video player {zipFolder} doesn't exist";
+                    return;
+                }
+                else
+                {
+                    Directory.CreateDirectory(zipFolder);
+                }
             }
 
             byte[] data = await MonetizrHttpClient.DownloadAssetData(videoPlayerURL);
 
             if (data == null)
             {
-                this.isLoaded = false;
-                this.loadingError = $"Can't download video player";
+                isLoaded = false;
+                loadingError = $"Can't download video player for campaign {id}";
                 return;
             }
 
-            File.WriteAllBytes(zipFolder + "/html.zip", data);
-            MonetizrUtils.ExtractAllToDirectory(zipFolder + "/html.zip", zipFolder);
-            File.Delete(zipFolder + "/html.zip");
-            
+            string zipPath = zipFolder + "/html.zip";
+            File.WriteAllBytes(zipPath, data);
+            MonetizrUtils.ExtractAllToDirectory(zipPath, zipFolder);
+            File.Delete(zipPath);
+
             if (!File.Exists(indexPath))
             {
-                this.isLoaded = false;
-                this.loadingError = $"Main html for video player {indexPath} doesn't exist";
+                isLoaded = false;
+                loadingError = $"index.html not found for {id}";
+                MonetizrLogger.PrintError(loadingError);
+                return;
             }
+
+            MonetizrLogger.Print($"VideoPlayer ready for campaign {id}");
         }
 
         internal void EmbedVastParametersIntoVideoPlayer (Asset asset)
@@ -521,46 +504,6 @@ namespace Monetizr.SDK.Campaigns
             MonetizrLogger.Print("Final HTML: " + str);
             if (!File.Exists(videoPath)) str = str.Replace("video.mp4", asset.url);
             File.WriteAllText(indexPath, str);
-        }
-
-        internal async Task PreloadVideoPlayerForFallback ()
-        {
-            string videoPlayerURL = MonetizrUtils.GetVideoPlayerURL(this);
-            string campPath = Application.persistentDataPath + "/" + id;
-            string zipFolder = campPath; // fallback: put player directly under campaign folder
-            string indexPath = $"{zipFolder}/index.html";
-
-            MonetizrLogger.Print($"[Fallback] Preparing VideoPlayer at {zipFolder}");
-
-            if (!Directory.Exists(zipFolder))
-            {
-                Directory.CreateDirectory(zipFolder);
-            }
-
-            byte[] data = await MonetizrHttpClient.DownloadAssetData(videoPlayerURL);
-
-            if (data == null)
-            {
-                isLoaded = false;
-                loadingError = $"Can't download video player for fallback campaign {id}";
-                return;
-            }
-
-            // Unpack HTML5 player
-            string zipPath = $"{zipFolder}/html.zip";
-            File.WriteAllBytes(zipPath, data);
-            MonetizrUtils.ExtractAllToDirectory(zipPath, zipFolder);
-            File.Delete(zipPath);
-
-            if (!File.Exists(indexPath))
-            {
-                isLoaded = false;
-                loadingError = $"[Fallback] index.html not found for {id}";
-                MonetizrLogger.PrintError(loadingError);
-                return;
-            }
-
-            MonetizrLogger.Print($"[Fallback] VideoPlayer ready for campaign {id}");
         }
 
         internal void DirectVASTInjectionIntoVideoPlayer()
@@ -646,7 +589,6 @@ namespace Monetizr.SDK.Campaigns
             return replaced;
         }
 
-
         internal string DumpsVastSettings (TagsReplacer vastTagsReplacer)
         {
             string res = JsonUtility.ToJson(vastSettings);
@@ -667,15 +609,16 @@ namespace Monetizr.SDK.Campaigns
             return $"{{{result}}}";
         }
 
-        internal bool IsCampaignActivate()
+        internal bool CanCampaignBeActivated ()
         {
-            if (MonetizrManager.Instance.missionsManager.GetActiveMissionsNum(this) == 0) return false;
+            if (MonetizrInstance.Instance.missionsManager.GetActiveMissionsNum(this) == 0) return false;
+            if (campaignType == CampaignType.Fallback && HasTimeoutPassed()) return false;
 
-            var serverMaxAmount = serverSettings.GetIntParam("amount_of_teasers");
-            var currentAmount = MonetizrManager.Instance.localSettings.GetSetting(id).amountTeasersShown;
+            int serverMaxAmount = serverSettings.GetIntParam("amount_of_teasers");
+            int currentAmount = MonetizrInstance.Instance.localSettings.GetSetting(id).amountTeasersShown;
             bool hasNoTeasers = currentAmount > serverMaxAmount;
-            var serverMaxNotificationsAmount = serverSettings.GetIntParam("amount_of_notifications");
-            var currentNotificationsAmount = MonetizrManager.Instance.localSettings.GetSetting(id).amountNotificationsShown;
+            int serverMaxNotificationsAmount = serverSettings.GetIntParam("amount_of_notifications");
+            int currentNotificationsAmount = MonetizrInstance.Instance.localSettings.GetSetting(id).amountNotificationsShown;
             bool hasNoNotifications = currentNotificationsAmount > serverMaxNotificationsAmount;
 
             if (hasNoNotifications && hasNoTeasers) return false;
@@ -684,7 +627,7 @@ namespace Monetizr.SDK.Campaigns
 
         public bool AreConditionsTrue(Dictionary<string, string> mConditions)
         {
-            var settings = MonetizrManager.Instance.localSettings.GetSetting(id).settings;
+            var settings = MonetizrInstance.Instance.localSettings.GetSetting(id).settings;
             if (settings == null || settings.dictionary.Count == 0) return false;
             return mConditions.All(c => settings[c.Key] == c.Value);
         }
