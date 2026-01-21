@@ -583,7 +583,7 @@ namespace Monetizr.SDK.UI
             string defaultButton = "(function(){var e=document.createElement('a');e.href='uniwebview://action?key=skip';e.innerText='×';e.style='position:fixed;top:16px;right:16px;width:40px;height:40px;line-height:40px;text-align:center;text-decoration:none;background:rgba(0,0,0,0.5);color:white;font-size:24px;border-radius:50%;font-weight:bold;z-index:10000;pointer-events:auto;';document.body.appendChild(e);})();";
             string js = defaultButton;
 
-            if (currentMission.campaign.serverSettings.ContainsKey("close_button_html"))
+            if (currentMission.campaign.serverSettings.ContainsKey("close_button_html") && !string.IsNullOrEmpty(currentMission.campaign.serverSettings.GetParam("close_button_html")))
             {
                 string paramHTML = currentMission.campaign.serverSettings.GetParam("close_button_html");
                 if (!string.IsNullOrEmpty(paramHTML)) js = paramHTML;
@@ -599,7 +599,7 @@ namespace Monetizr.SDK.UI
             string defaultButton = "(function(){var e=document.createElement('a');e.href='uniwebview://action?key=close';e.innerText='Claim';e.style='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:10000;text-decoration:none;background:#28a745;color:white;padding:12px 24px;border-radius:8px;font-size:16px;font-weight:bold;pointer-events:auto;';document.body.appendChild(e);})();";
             string js = defaultButton;
 
-            if (currentMission.campaign.serverSettings.ContainsKey("claim_button_html"))
+            if (currentMission.campaign.serverSettings.ContainsKey("claim_button_html") && !string.IsNullOrEmpty(currentMission.campaign.serverSettings.GetParam("claim_button_html")))
             {
                 string paramHTML = currentMission.campaign.serverSettings.GetParam("claim_button_html");
                 if (!string.IsNullOrEmpty(paramHTML)) js = paramHTML;

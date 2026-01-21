@@ -870,8 +870,7 @@ namespace Monetizr.SDK.Core
 
         internal void ChangeAPIKey(string apiKey)
         {
-            if (apiKey == ConnectionsClient.currentApiKey) return;
-            MonetizrLogger.Print($"Changing api key to {apiKey}");
+            MonetizrLogger.Print($"Changing API key to: {apiKey}");
             ConnectionsClient.currentApiKey = apiKey;
             RestartClient();
         }
