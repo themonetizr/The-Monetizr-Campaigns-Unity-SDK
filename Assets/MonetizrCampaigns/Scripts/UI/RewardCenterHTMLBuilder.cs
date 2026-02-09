@@ -1,7 +1,9 @@
+using Monetizr.SDK.Campaigns;
+
 public static class RewardCenterHTMLBuilder
 {
-    public static void BuildHTML ()
+    public static string BuildHTML (ServerCampaign campaign, string htmlTemplate)
     {
-
+        return "";
     }
 }

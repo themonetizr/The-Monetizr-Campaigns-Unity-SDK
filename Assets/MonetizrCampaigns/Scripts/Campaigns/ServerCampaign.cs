@@ -41,6 +41,7 @@ namespace Monetizr.SDK.Campaigns
             { AssetsType.MinigameSprite2, typeof(Sprite) },
             { AssetsType.MinigameSprite3, typeof(Sprite) },
             { AssetsType.LeaderboardBannerSprite, typeof(Sprite) },
+            { AssetsType.RewardCenterPathString, typeof(String) },
         };
 
         [System.NonSerialized] internal string vastAdParameters = "";
@@ -402,6 +403,14 @@ namespace Monetizr.SDK.Campaigns
                         asset.fext = MonetizrUtils.ConvertCreativeToExt("", asset.url);
                         asset.mainAssetName = $"index.html";
                         await PreloadAssetToCache(asset, AssetsType.Html5PathString, true);
+                        break;
+
+                    case "reward_center":
+                        asset.fpath = MonetizrUtils.ConvertCreativeToFname(asset.url);
+                        asset.fname = "reward_center";
+                        asset.fext = "zip";
+                        asset.mainAssetName = "index.html";
+                        await PreloadAssetToCache(asset, AssetsType.RewardCenterPathString, true);
                         break;
 
                     case "tiny_teaser_gif":

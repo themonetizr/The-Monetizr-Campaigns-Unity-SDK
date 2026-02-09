@@ -24,7 +24,8 @@
         MinigameSprite1,
         MinigameSprite2,
         MinigameSprite3,
-        LeaderboardBannerSprite
+        LeaderboardBannerSprite,
+        RewardCenterPathString
     }
 
 }

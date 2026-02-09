@@ -12,6 +12,7 @@ using Monetizr.SDK.VAST;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -250,9 +251,26 @@ namespace Monetizr.SDK.UI
 
         internal void PrepareRewardCenterPanel (Mission mission)
         {
-            // Grab the template from the campaign
-            // Send template and campaign data to RewardCenterHTMLBuilder
-            // Grab built file and display it in webview
+            ServerCampaign campaign = mission.campaign;
+
+            string templateIndexPath = campaign.GetAsset<string>(AssetsType.RewardCenterPathString);
+            if (string.IsNullOrEmpty(templateIndexPath) || !File.Exists(templateIndexPath))
+            {
+                MonetizrLogger.PrintError($"RewardCenter template missing. Path: {templateIndexPath}");
+                _OnSkipPress();
+                return;
+            }
+
+            string runtimeIndexPath = RewardCenterHTMLBuilder.BuildHTML(campaign, templateIndexPath);
+            if (string.IsNullOrEmpty(runtimeIndexPath) || !File.Exists(runtimeIndexPath))
+            {
+                MonetizrLogger.PrintError($"RewardCenter runtime build failed. Path: {runtimeIndexPath}");
+                _OnSkipPress();
+                return;
+            }
+
+            _webUrl = "file://" + runtimeIndexPath;
+            _webView.Load(_webUrl);
         }
 
         internal void PrepareSurveyPanel(Mission m)
