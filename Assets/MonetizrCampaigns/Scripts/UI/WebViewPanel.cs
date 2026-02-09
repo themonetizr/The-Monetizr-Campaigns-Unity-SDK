@@ -137,38 +137,36 @@ namespace Monetizr.SDK.UI
                 case PanelId.SurveyWebView:
                     MonetizrLogger.Print("Preparing Survey.");
                     PrepareSurveyPanel(m);
-                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
-                    impressionStarts = true;
                     break;
 
                 case PanelId.HtmlWebPageView:
                     MonetizrLogger.Print("Preparing HTML.");
                     PrepareWebViewPanel(m);
-                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
-                    impressionStarts = true;
                     break;
 
                 case PanelId.ActionHtmlPanelView:
                     MonetizrLogger.Print("Preparing Action/ENDCARD.");
                     PrepareActionPanel(m);
-                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
-                    impressionStarts = true;
                     break;
 
                 case PanelId.StartNotification:
                     MonetizrLogger.Print("Preparing StartNotification.");
                     PrepareStartNotificationPanel(m);
-                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
-                    impressionStarts = true;
                     break;
 
                 case PanelId.CongratsNotification:
                     MonetizrLogger.Print("Preparing CongratsNotification.");
                     PrepareCongratsNotificationPanel(m);
-                    MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
-                    impressionStarts = true;
+                    break;
+
+                case PanelId.RewardCenter:
+                    MonetizrLogger.Print("Preparing RewardCenter.");
+                    PrepareRewardCenterPanel(m);
                     break;
             }
+
+            MonetizrMobileAnalytics.TrackEvent(currentMission, this, EventType.Impression);
+            impressionStarts = true;
 
             if (!string.IsNullOrEmpty(_webUrl))
             {
@@ -248,6 +246,13 @@ namespace Monetizr.SDK.UI
             frame = new Rect(0, 0, 600, 800);
 #endif
             _webView.Frame = frame;
+        }
+
+        internal void PrepareRewardCenterPanel (Mission mission)
+        {
+            // Grab the template from the campaign
+            // Send template and campaign data to RewardCenterHTMLBuilder
+            // Grab built file and display it in webview
         }
 
         internal void PrepareSurveyPanel(Mission m)

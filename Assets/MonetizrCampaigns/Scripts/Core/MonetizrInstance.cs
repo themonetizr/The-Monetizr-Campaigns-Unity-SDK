@@ -578,38 +578,45 @@ namespace Monetizr.SDK.Core
         {
             Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             UpdateGameUI?.Invoke();
-            var campaign = Instance?.FindBestCampaignToActivate();
+            ServerCampaign campaign = Instance?.FindBestCampaignToActivate();
 
             if (campaign == null)
             {
-                MonetizrLogger.Print("SKIPPED - No campaigns.");
+                MonetizrLogger.Print("RC Skipped - No campaigns.");
                 onComplete?.Invoke(true);
                 return;
             }
 
             Instance?.SetActiveCampaign(campaign);
-            var missions = Instance.missionsManager.GetMissionsForRewardCenter(campaign);
+            List<Mission> missions = Instance.missionsManager.GetMissionsForRewardCenter(campaign);
 
             if (missions.Count == 0)
             {
-                MonetizrLogger.Print("SKIPPED - No missions.");
+                MonetizrLogger.Print("RC Skipped - No missions.");
                 onComplete?.Invoke(true);
                 return;
             }
 
-            var m = missions[0];
+            Mission mission = missions[0];
             bool showRewardCenterForOneMission = missions[0].campaignServerSettings.GetBoolParam("RewardCenter.show_for_one_mission", false);
 
             if (missions.Count == 1 && !showRewardCenterForOneMission)
             {
                 MonetizrLogger.Print($"Only one mission available and RewardCenter.show_for_one_mission is false");
-                Instance._PressSingleMission(onComplete, m);
+                Instance._PressSingleMission(onComplete, mission);
                 return;
             }
 
-            MonetizrLogger.Print($"ShowRewardCenter from campaign: {m?.campaignId}");
-            string uiItemPrefab = "MonetizrRewardCenterPanel2";
-            Instance.uiController.ShowPanelFromPrefab(uiItemPrefab, PanelId.RewardCenter, onComplete, true, m);
+            MonetizrLogger.Print($"ShowRewardCenter from campaign: {mission?.campaignId}");
+
+            if (CampaignUtils.IsCampaignHTML(mission)) {
+                ShowWebView(onComplete, PanelId.RewardCenter, mission);
+            }
+            else
+            {
+                string uiItemPrefab = "MonetizrRewardCenterPanel2";
+                Instance.uiController.ShowPanelFromPrefab(uiItemPrefab, PanelId.RewardCenter, onComplete, true, mission);
+            }
         }
 
         public void ShowTeaser(Action UpdateGameUI = null)
@@ -669,12 +676,18 @@ namespace Monetizr.SDK.Core
             Instance.uiController.ShowPanelFromPrefab("MonetizrMessagePanel2", panelId, onComplete, true, m);
         }
 
-        internal void ShowNotification(Action<bool> onComplete, Mission m, PanelId panelId)
+        private void ShowNotification(Action<bool> onComplete, Mission m, PanelId panelId)
         {
             Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
 
-            // TODO: add IsCampaignHTML check next
-            Instance.uiController.ShowPanelFromPrefab("MonetizrNotifyPanel2", panelId, onComplete, true, m);
+            if (CampaignUtils.IsCampaignHTML(m))
+            {
+                ShowWebView(onComplete, PanelId.Html5WebView, m);
+            }
+            else
+            {
+                Instance.uiController.ShowPanelFromPrefab("MonetizrNotifyPanel2", panelId, onComplete, true, m);
+            }
         }
 
         internal void ShowEnterEmailPanel(Action<bool> onComplete, Mission m, PanelId panelId)
@@ -722,7 +735,7 @@ namespace Monetizr.SDK.Core
             Instance.uiController.ShowPanelFromPrefab("MonetizrUnitySurveyPanel", PanelId.SurveyUnityView, onComplete, false, m);
         }
 
-        internal void ShowWebView(Action<bool> onComplete, PanelId id, Mission m = null)
+        private void ShowWebView(Action<bool> onComplete, PanelId id, Mission m = null)
         {
             Assert.IsNotNull(Instance, "Monetizr SDK has not been initialized. Call MonetizrManager.Initalize first.");
             if (!Instance._isActive) return;

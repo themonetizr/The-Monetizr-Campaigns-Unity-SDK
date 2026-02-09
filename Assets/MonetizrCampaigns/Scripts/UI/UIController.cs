@@ -22,19 +22,12 @@ namespace Monetizr.SDK.UI
         internal UIController()
         {
             var resCanvas = Resources.Load("MonetizrCanvas");
-
             Assert.IsNotNull(resCanvas);
-
             rootUIObject = GameObject.Instantiate<GameObject>(resCanvas as GameObject);
-
             mainCanvas = rootUIObject.GetComponent<Canvas>();
-
             GameObject.DontDestroyOnLoad(rootUIObject);
-
             Assert.IsNotNull(rootUIObject);
-
             previousPanel = PanelId.Unknown;
-
             panels = new Dictionary<PanelId, PanelController>();
         }
 
@@ -50,12 +43,9 @@ namespace Monetizr.SDK.UI
 
         internal PanelController ShowLoadingScreen()
         {
-            var go = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrLoadingScreen") as GameObject, rootUIObject.transform);
-
-            var ctrlPanel = go.GetComponent<PanelController>();
-
+            GameObject go = GameObject.Instantiate<GameObject>(Resources.Load("MonetizrLoadingScreen") as GameObject, rootUIObject.transform);
+            PanelController ctrlPanel = go.GetComponent<PanelController>();
             ctrlPanel.SetActive(true);
-
             return ctrlPanel;      
         }
 
@@ -76,8 +66,7 @@ namespace Monetizr.SDK.UI
                 }
             };
 
-            if ((panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser)) || panels.Count == 0)
-                MonetizrInstance.Instance?.onUIVisible?.Invoke(true);
+            if ((panels.Count == 1 && panels.ContainsKey(PanelId.TinyMenuTeaser)) || panels.Count == 0) MonetizrInstance.Instance?.onUIVisible?.Invoke(true);
 
             if (panels.ContainsKey(id))
             {
@@ -89,37 +78,24 @@ namespace Monetizr.SDK.UI
                 string prefabLandscape = prefab + "_landscape";
                 GameObject asset = null;
                              
-                if (MobileUtils.IsInLandscapeMode())
-                {       
-                    asset = Resources.Load(prefabLandscape) as GameObject;
-                }
-
-                if (asset == null)
-                {
-                    asset = Resources.Load(prefab) as GameObject;
-                }
+                if (MobileUtils.IsInLandscapeMode()) asset = Resources.Load(prefabLandscape) as GameObject;
+                if (asset == null) asset = Resources.Load(prefab) as GameObject;
 
                 panel = GameObject.Instantiate<GameObject>(asset, rootUIObject.transform);
                 ctrlPanel = panel.GetComponent<PanelController>();
 
-
-                if(id != PanelId.DebugPanel && m != null)
-                    PrepareCustomColors(ctrlPanel.backgroundImage,
-                    ctrlPanel.backgroundBorderImage,
-                    m.campaignServerSettings,
-                    id);
+                if(id != PanelId.DebugPanel && m != null) PrepareCustomColors(ctrlPanel.backgroundImage, ctrlPanel.backgroundBorderImage, m.campaignServerSettings, id);
                 
                 ctrlPanel.uiController = this;
                 ctrlPanel.uiVersion = 0;
 
-                foreach (var t in ctrlPanel.gameObject.GetComponents<PanelTextItem>())
+                foreach (PanelTextItem t in ctrlPanel.gameObject.GetComponents<PanelTextItem>())
+                {
                     t.InitializeByParent(id, m);
+                }
 
                 ctrlPanel.PreparePanel(id, complete, m);
-
-                if(!ctrlPanel.SendImpressionEventManually())
-                    MonetizrMobileAnalytics.TrackEvent(m, ctrlPanel, EventType.Impression);
-
+                if(!ctrlPanel.SendImpressionEventManually()) MonetizrMobileAnalytics.TrackEvent(m, ctrlPanel, EventType.Impression);
                 panels.Add(id, ctrlPanel);
             }
 
@@ -131,8 +107,7 @@ namespace Monetizr.SDK.UI
 
         internal static void SetColorForElement(Graphic i, Dictionary<string, string> additionalParams, string param)
         {
-            if (i == null || additionalParams.Count == 0)
-                return;
+            if (i == null || additionalParams.Count == 0) return;
 
             if (additionalParams.ContainsKey(param) && ColorUtility.TryParseHtmlString(additionalParams[param], out var c))
             {
@@ -140,11 +115,7 @@ namespace Monetizr.SDK.UI
             }
         }
 
-        internal static void PrepareCustomColors(
-            Image background,
-            Image border,
-            Dictionary<string,string> additionalParams,
-            PanelId id)
+        internal static void PrepareCustomColors(Image background, Image border, Dictionary<string,string> additionalParams, PanelId id)
         {
             SetColorForElement(background, additionalParams, "bg_color");
             SetColorForElement(border, additionalParams, "bg_border_color");
@@ -171,19 +142,13 @@ namespace Monetizr.SDK.UI
                 {
                     teaserPrefab = $"MonetizrMenuTeaser{designVersion}";
                 }
-                
-                var obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject,
-                    root != null ? root : rootUIObject.transform);
 
+                GameObject obj = GameObject.Instantiate<GameObject>(Resources.Load(teaserPrefab) as GameObject, root != null ? root : rootUIObject.transform);
                 teaser = obj.GetComponent<MonetizrMenuTeaser>();
-
                 PrepareCustomColors(teaser.backgroundImage, teaser.backgroundBorderImage, campaign.serverSettings, PanelId.TinyMenuTeaser);
-
                 teaser.uiVersion = designVersion;
                 teaser.triggersButtonEventsOnDeactivate = false;
-
                 panels.Add(PanelId.TinyMenuTeaser, teaser);
-                  
             }
             else
             {
@@ -191,26 +156,21 @@ namespace Monetizr.SDK.UI
             }
 
             if (teaser.IsVisible()) return;
-            
-            var missionsList = MonetizrInstance.Instance.missionsManager.GetMissionsForRewardCenter(campaign,false);
 
-            var m = missionsList[0];
+            List<Mission> missionsList = MonetizrInstance.Instance.missionsManager.GetMissionsForRewardCenter(campaign,false);
+            Mission m = missionsList[0];
 
-            foreach (var t in teaser.gameObject.GetComponents<PanelTextItem>())
+            foreach (PanelTextItem t in teaser.gameObject.GetComponents<PanelTextItem>())
+            {
                 t.InitializeByParent(PanelId.TinyMenuTeaser, m);
+            }
 
             teaser.SetActive(true);
-
             teaser.PreparePanel(PanelId.TinyMenuTeaser, null, m);
-
             MonetizrMobileAnalytics.TrackEvent(m, teaser, EventType.Impression);
 
-            if(root == null) teaser.rectTransform.SetAsFirstSibling();
-
-            if (screenPos != null)
-            {
-                teaser.rectTransform.anchoredPosition = screenPos.Value;
-            }
+            if (root == null) teaser.rectTransform.SetAsFirstSibling();
+            if (screenPos != null) teaser.rectTransform.anchoredPosition = screenPos.Value;
         }
 
         internal void HidePanel(PanelId id = PanelId.Unknown)

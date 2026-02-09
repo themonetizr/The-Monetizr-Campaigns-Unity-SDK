@@ -145,9 +145,8 @@ namespace Monetizr.SDK.Campaigns
             return result.ToString();
         }
 
-        public static bool IsCampaignHTML(Mission mission, PanelId panelId)
+        public static bool IsCampaignHTML (Mission mission)
         {
-            if (panelId != PanelId.StartNotification) return false;
             if (mission.campaign.serverSettings.TryGetValue("is_campaign_html", out string value) && bool.TryParse(value, out bool isHtml) && isHtml)
             {
                 return true;
