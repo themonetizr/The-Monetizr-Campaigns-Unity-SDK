@@ -21,6 +21,8 @@ namespace Monetizr.SDK.Debug
         public Button developmentButton;
 
         private bool isCampaignsList = true;
+        private int devButtonTapCount = 0;
+        private bool isDevButtonUnlocked = false;
 
         private new void Awake ()
         {
@@ -47,6 +49,7 @@ namespace Monetizr.SDK.Debug
                 isCampaignsList = campaignContainsKey;
                 campaignButton.interactable = !campaignContainsKey;
                 developmentButton.interactable = campaignContainsKey;
+                if (!campaignContainsKey) isDevButtonUnlocked = true;
             }
 
             UpdateAPIKeyList();
@@ -55,6 +58,16 @@ namespace Monetizr.SDK.Debug
 
         public void OnAPIKeyButtonClick (bool isCampaignsList)
         {
+            if (!isCampaignsList)
+            {
+                if (!isDevButtonUnlocked)
+                {
+                    devButtonTapCount++;
+                    if (devButtonTapCount < 10) return;
+                    isDevButtonUnlocked = true;
+                }
+            }
+
             this.isCampaignsList = isCampaignsList;
             campaignButton.interactable = !isCampaignsList;
             developmentButton.interactable = isCampaignsList;
