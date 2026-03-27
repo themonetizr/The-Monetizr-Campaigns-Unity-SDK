@@ -47,8 +47,8 @@ namespace Monetizr.SDK.Debug
             {
                 bool campaignContainsKey = DebugSettings.campaignKeys.Contains(debugAPIKey);
                 isCampaignsList = campaignContainsKey;
-                campaignButton.interactable = !campaignContainsKey;
-                developmentButton.interactable = campaignContainsKey;
+                campaignButton.interactable = campaignContainsKey;
+                developmentButton.interactable = !campaignContainsKey;
                 if (!campaignContainsKey) isDevButtonUnlocked = true;
             }
 
@@ -56,9 +56,11 @@ namespace Monetizr.SDK.Debug
             UpdateVersionText();
         }
 
-        public void OnAPIKeyButtonClick (bool isCampaignsList)
+        public void OnAPIKeyButtonClick (bool incomingIsCampaignsList)
         {
-            if (!isCampaignsList)
+            bool targetList = !incomingIsCampaignsList;
+
+            if (!targetList)
             {
                 if (!isDevButtonUnlocked)
                 {
@@ -68,9 +70,9 @@ namespace Monetizr.SDK.Debug
                 }
             }
 
-            this.isCampaignsList = isCampaignsList;
-            campaignButton.interactable = !isCampaignsList;
-            developmentButton.interactable = isCampaignsList;
+            this.isCampaignsList = targetList;
+            campaignButton.interactable = targetList;
+            developmentButton.interactable = !targetList;
             UpdateAPIKeyList();
         }
 
